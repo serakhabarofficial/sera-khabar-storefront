@@ -10,6 +10,7 @@ import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
 import brandLogo from "@assets/sera-khabar-logo.webp";
+import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
 import {
   fetchStorefrontProducts,
   getProductImageSet,
@@ -246,7 +247,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <Link href="/">
               <a className="hidden items-center text-black md:flex">
-                <img src={brandLogo} alt="Sera Khabar" className="h-10 w-auto" />
+                <img src={headerLogo} alt="Sera Khabar" className="h-16 w-auto" />
               </a>
             </Link>
           </div>
@@ -255,9 +256,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <a className="flex items-center text-black">
                 <img
-                  src={brandLogo}
+                  src={headerLogo}
                   alt="Sera Khabar"
-                  className="h-7 w-auto md:h-11"
+                  className="h-12 w-auto md:h-11"
                 />
               </a>
             </Link>
