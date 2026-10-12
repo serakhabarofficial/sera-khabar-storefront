@@ -3,7 +3,7 @@
 > **For the AI agent:** this repo is a **copy of the Mango Lover BD storefront**
 > being set up for a new, separate merchant: **Sera Khabar**. The full step-by-step
 > plan covering both repos is in
-> `~/merchant-b/sera-khabar-commerceos/SERA_KHABAR_SETUP.md`. Read that first,
+> `/Users/noorkarimmehedi/Sera Khabar - সেরা খাবার/sera-khabar-commerceos/SERA_KHABAR_SETUP.md` (Phase 7 there). Read that first,
 > including its safety rules. This file lists only the storefront-specific work.
 > It overrides any Mango Lover text in `CLAUDE.md` / `README.md`.
 
@@ -13,7 +13,8 @@ Mango Lover commit `5c06ac6` with `--no-verify` (the build needs
 
 ## Safety
 
-- Never touch `mangoloverbd/mangoloverbd_storefront` or the Mango Lover folder.
+- Never touch `mangoloverbd/mangoloverbd_storefront`, the Mango Lover folder, or `~/merchant-b` (old temp copy).
+- Work only in `/Users/noorkarimmehedi/Sera Khabar - সেরা খাবার/sera-khabar-storefront` (quote the path, it has spaces).
 - Before pushing: `gh auth status` must show active `serakhabarofficial`, and
   `git remote -v` must show only `serakhabarofficial/sera-khabar-storefront`.
 - The MCP configs (`.mcp.json`, `.codex/config.toml`) are set to the placeholder
@@ -71,3 +72,20 @@ match the Sera Khabar Suite), `VITE_TURNSTILE_SITE_KEY` (optional), `DATABASE_UR
 - [ ] Deployed via the Suite's **Provision Storefront**, on the new Vercel account
 - [ ] Shows only Sera Khabar products; a test order lands in the Sera Khabar Suite
 - [ ] `www` domain is DNS-only (grey cloud) in the new Cloudflare account
+
+## Step-by-step order (Phase 7 of the main guide)
+
+1. Confirm the prerequisites above are filled in the main guide's **Key facts** table. If not, finish Phases 3–6 first.
+2. `cd "/Users/noorkarimmehedi/Sera Khabar - সেরা খাবার/sera-khabar-storefront"`, `npm ci` if `node_modules` is missing, then `git checkout -b chore/sera-khabar-rebrand`.
+3. Replace the Supabase placeholder `SERA_KHABAR_SUPABASE_REF` in `.mcp.json` and `.codex/config.toml` with Sera Khabar's ref.
+4. Fix the **critical runtime values** first (`script/build.ts`, `middleware.ts`, `server/order-service.ts`, `server/abandoned-cart-service.ts`, `server/campaign-*.ts`, `vercel.json` image host). Prefer reading the Suite URL and handle from env vars (`MERCHANT_SUITE_URL`, `STOREFRONT_HANDLE`, `VITE_STOREFRONT_ID`) instead of new hardcoded literals, but keep changes small.
+5. Remove Mango Lover's GTM from `client/index.html` (or replace it with Sera Khabar's ID), and fix the title/OG/meta tags.
+6. Replace the brand name and logos in the client (`App.tsx`, `layout.tsx`, `api/legacy-gone.ts`, `public/` assets from `$BASE/brand-assets/`).
+7. Handle `client/src/lib/generated-storefront-products.ts`: regenerate it from the Sera Khabar Suite (see how `script/build.ts` writes it) or reset it to an empty snapshot.
+8. Remove or replace Mango-Lover-specific product, landing and feature pages (`client/src/features/*`, curated product content). Ask the user what Sera Khabar needs.
+9. Ask the user about the design (colors, fonts, homepage sections) and apply it.
+10. Rewrite `CLAUDE.md` and `README.md` for Sera Khabar (keep the top banner until go-live). Update `.env.example`.
+11. Update the tests listed above, then run the sweep grep. Only `docs/` may match.
+12. Create a local `.env` (never commit it) with `VITE_MERCHANT_SUITE_URL` and `MERCHANT_SUITE_URL` = the Sera Khabar Suite URL, `VITE_STOREFRONT_ID` = Sera Khabar org_id, `STOREFRONT_HANDLE` / `VITE_STOREFRONT_HANDLE` = the handle. Then `npm run build` and `npm test` must pass.
+13. Commit `chore: rebrand storefront for Sera Khabar`. Do the GitHub account check (`gh auth status` → `serakhabarofficial`; `git remote -v`), then push **with** the pre-push hook (no `--no-verify`) and merge to `main`.
+14. Go back to the main guide, **Phase 8** (Provision Storefront).
