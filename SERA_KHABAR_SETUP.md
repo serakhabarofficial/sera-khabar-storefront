@@ -20,7 +20,7 @@ The latest status and to-do list for both repos are in the Suite's `handoff.md`.
 - **Pre-launch gate ON:** `server/site-access.ts`, `server/coming-soon-page.ts`, `middleware.ts`. While the env var `SITE_ACCESS_PASSWORD` is set, visitors see the founder's letter (503 + noindex) and the team password unlocks the shop for 30 days. **Delete that env var and redeploy to launch.**
 
 **Left**
-- **Design:** colours/layout are still Mango Lover's (yellow), some Mango Lover homepage/category images remain, and the `/step/*` campaign pages need removing or reworking.
+- **Design:** colours/layout are still Mango Lover's (yellow), some Mango Lover homepage/category images remain, and the `/step/*` campaign pages need removing or reworking. **The homepage redesign is approved but not built (2026-10-13):** read `docs/design/2026-10-13-homepage/README.md` and open its `homepage-mockup.html` (palette তেঁতুল + হলুদ, Noto Serif Bengali titles, Atma digits, coloured-card categories for ফ্রেশ আম/হোমমেড/গুড় only, cash-memo footer with the Arc Labs credit).
 - **Domain (Phase 9):** move the hardcoded Suite URL `https://sera-khabar-commerceos.vercel.app` to `https://admin.serakhabar.com` (files listed in the Suite's `handoff.md`).
 - **Test order:** place one through the shop.
 
