@@ -9,7 +9,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
-import mangoLoverLogo from "@assets/mango-lover-logo.avif";
+import brandLogo from "@assets/sera-khabar-logo.webp";
 import {
   fetchStorefrontProducts,
   getProductImageSet,
@@ -91,7 +91,7 @@ const INFORMATION_LINKS = [
   ["About Us", "/about-us"],
   ["Contact", "/contact-us"],
   ["Company Information", "/about-us"],
-  ["The Mango Lover Story", "/about-us"],
+  ["The Sera Khabar Story", "/about-us"],
   ["Terms & Conditions", "/terms-and-conditions"],
   ["Privacy Policy", "/privacy-policy"],
   ["Careers", "/contact-us"],
@@ -246,7 +246,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <Link href="/">
               <a className="hidden items-center text-black md:flex">
-                <img src={mangoLoverLogo} alt="Mango Lover" className="h-10 w-auto" />
+                <img src={brandLogo} alt="Sera Khabar" className="h-10 w-auto" />
               </a>
             </Link>
           </div>
@@ -255,8 +255,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <a className="flex items-center text-black">
                 <img
-                  src={mangoLoverLogo}
-                  alt="Mango Lover"
+                  src={brandLogo}
+                  alt="Sera Khabar"
                   className="h-7 w-auto md:h-11"
                 />
               </a>
@@ -477,10 +477,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 )}
                   {mobileMenuPage === "main" && (
                   <div className="mt-auto grid grid-cols-1 gap-y-4 pb-2 text-base">
-                    <a href="https://www.facebook.com/WeAreMangoLover" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">Facebook</a>
-                    <a href="https://www.instagram.com/wearemangolover" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">Instagram</a>
-                    <a href="https://api.whatsapp.com/send/?phone=8801301636461" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">WhatsApp</a>
-                    <a href="tel:+8801301636461" className="transition-opacity hover:opacity-60">Call Mango Lover Team</a>
+                    <a href="https://www.facebook.com/profile.php?id=100068711778004" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">Facebook</a>
+                    <a href="https://api.whatsapp.com/send/?phone=8801303103540" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">WhatsApp</a>
+                    <a href="tel:+8801310980289" className="transition-opacity hover:opacity-60">Call Sera Khabar Team</a>
                   </div>
                 )}
                   </motion.div>
@@ -529,7 +528,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </span>
                   </div>
                   <div className="text-white/60 text-sm">
-                    © 2026 ম্যাংগো লাভার - Mango Lover
+                    © 2026 সেরা খাবার - Sera Khabar
                   </div>
                 </div>
               </div>
@@ -589,22 +588,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Brand Col */}
           <div className="md:col-span-4 space-y-8">
             <img
-              src={mangoLoverLogo}
-              alt="Mango Lover"
+              src={brandLogo}
+              alt="Sera Khabar"
               className="h-9 w-auto md:hidden"
             />
             <p className="text-[13px] font-bold leading-[2] text-black/60 md:max-w-md">
               সাধ্যের মধ্যে সেরা মানের পন্য আপনার ও আপনার পরিবারের জন্য, যা আমরা পাঠাই একদম মাঠ পর্যায় থেকে, তাই পাচ্ছেন সাশ্রয়ী দামে সেরা মানের পন্যের নিশ্চয়তা।
             </p>
             <div className="flex gap-6 items-center">
-              <a href="https://www.facebook.com/WeAreMangoLover" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:opacity-80 transition-opacity">
+              <a href="https://www.facebook.com/profile.php?id=100068711778004" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:opacity-80 transition-opacity">
                 <img src="https://cdn.reicon.dev/logos/facebook/original.svg" alt="Facebook" width={20} height={20} className="w-5 h-5" />
-              </a>
-              <a href="https://www.instagram.com/wearemangolover" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:opacity-80 transition-opacity">
-                <img src="https://cdn.reicon.dev/logos/instagram/original.svg" alt="Instagram" width={20} height={20} className="w-5 h-5" />
-              </a>
-              <a href="https://www.youtube.com/@mango.lover.11" target="_blank" rel="noopener noreferrer" aria-label="Youtube" className="hover:opacity-80 transition-opacity">
-                <img src="https://cdn.reicon.dev/logos/youtube/original.svg" alt="Youtube" width={24} height={72} className="w-6 h-6" />
               </a>
             </div>
             <div className="space-y-6 pt-2">
@@ -669,7 +662,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="text-center text-[54px] md:text-[58px] font-bold text-[#FBBB14] mb-8 tracking-wide"
             style={{ fontFamily: "'IhtishamDeshlipi', serif" }}
           >
-            ম্যাংগো লাভার
+            সেরা খাবার
           </p>
           {/* Trust Badges */}
           <div className="flex flex-wrap justify-center gap-6 md:gap-10">
@@ -715,7 +708,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 />
               </a>
               <span className="mt-3 block text-[8px] tracking-normal text-black/40">
-                © 2026 ম্যাংগো লাভার - Mango Lover
+                © 2026 সেরা খাবার - Sera Khabar
               </span>
             </div>
             <div className="flex gap-8 text-[9px] uppercase tracking-[0.4em] text-black/40">

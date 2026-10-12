@@ -11,7 +11,7 @@ const checkoutSource = read("../features/kalojira-mixed/kalojira-checkout.tsx");
 
 test("bori WhatsApp href uses the exact Bengali order message", () => {
   assert.match(contentSource, /হোমমেড কুমড়ো বড়ি \| Homemade Pumpkin Bori অর্ডার করতে চাই/);
-  assert.match(contentSource, /https:\/\/wa\.me\/8801301636461\?text=\$\{encodeURIComponent\(BORI_CAMPAIGN_WHATSAPP_MESSAGE\)\}/);
+  assert.match(contentSource, /https:\/\/wa\.me\/8801303103540\?text=\$\{encodeURIComponent\(BORI_CAMPAIGN_WHATSAPP_MESSAGE\)\}/);
 });
 
 test("bori image slots are named constants", () => {
@@ -31,7 +31,7 @@ const appSource = read("../App.tsx");
 
 test("bori route and title are registered", () => {
   assert.match(appSource, /import HomemadePumpkinBoriPage from "@\/pages\/homemade-pumpkin-bori";/);
-  assert.match(appSource, /"\/step\/homemade-pumpkin-bori": "কুমড়ো বড়ি \| ম্যাংগো লাভার"/);
+  assert.match(appSource, /"\/step\/homemade-pumpkin-bori": "কুমড়ো বড়ি \| সেরা খাবার"/);
   assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori">\s*<PageTransition><HomemadePumpkinBoriPage \/><\/PageTransition>/);
 });
 
@@ -68,7 +68,7 @@ test("bori order CTAs scroll to checkout", () => {
 
 test("bori WhatsApp href encodes the exact message", async () => {
   const { BORI_CAMPAIGN_WHATSAPP_HREF } = await import("../features/kalojira-mixed/bori-content.ts");
-  assert.equal(BORI_CAMPAIGN_WHATSAPP_HREF, `https://wa.me/8801301636461?text=${encodeURIComponent("হোমমেড কুমড়ো বড়ি | Homemade Pumpkin Bori অর্ডার করতে চাই")}`);
+  assert.equal(BORI_CAMPAIGN_WHATSAPP_HREF, `https://wa.me/8801303103540?text=${encodeURIComponent("হোমমেড কুমড়ো বড়ি | Homemade Pumpkin Bori অর্ডার করতে চাই")}`);
 });
 
 test("bori cooking timeline replaces the bottom banner", () => {
@@ -163,7 +163,7 @@ test("bori orders land on the bori thank-you page", () => {
   assert.match(checkoutSource, /const thankYouPath = product\?\.slug === "homemade-pumpkin-bori" \? "\/step\/homemade-pumpkin-bori\/thank-you" : "\/step\/kalojira-mixed\/thank-you";/);
   assert.match(checkoutSource, /setLocation\(thankYouPath\)/);
   assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori\/thank-you">\s*<PageTransition><KalojiraMixedThankYouPage backHref="\/step\/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref=\{BORI_CAMPAIGN_WHATSAPP_HREF\} \/><\/PageTransition>\s*<\/Route>\s*<Route path="\/step\/homemade-pumpkin-bori">/);
-  assert.match(appSource, /"\/step\/homemade-pumpkin-bori\/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ \| ম্যাংগো লাভার"/);
+  assert.match(appSource, /"\/step\/homemade-pumpkin-bori\/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ \| সেরা খাবার"/);
   assert.match(thankYouSource, /<Link href=\{backHref\}/);
   assert.match(thankYouSource, /href=\{whatsappHref\}/);
 });

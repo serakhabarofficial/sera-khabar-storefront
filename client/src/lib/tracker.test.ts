@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { getMerchantSuiteTrackerUrl } from "./tracker.ts";
 
-const storefrontId = "3cd26e57-85ef-4970-94a4-cd99c0f1b554";
+const storefrontId = "690aa8b3-6657-46c4-8df5-addcc1f96035";
 
 test("does not inject a tracker from a free ngrok tunnel", () => {
   assert.equal(
@@ -16,8 +16,8 @@ test("does not inject a tracker from a free ngrok tunnel", () => {
 
 test("builds the tracker URL for a stable Merchant Suite origin", () => {
   assert.equal(
-    getMerchantSuiteTrackerUrl("https://suite.mangoloverbd.com/", storefrontId),
-    `https://suite.mangoloverbd.com/api/tracker.js?org=${storefrontId}`,
+    getMerchantSuiteTrackerUrl("https://sera-khabar-commerceos.vercel.app/", storefrontId),
+    `https://sera-khabar-commerceos.vercel.app/api/tracker.js?org=${storefrontId}`,
   );
 });
 

@@ -32,7 +32,7 @@ const validEnglishOrder = { ...validOrder, phone: "01712345678" };
 
 const dependencies = {
   merchantSuiteUrl: "https://suite.invalid",
-  storefrontHandle: "mangoloverbd",
+  storefrontHandle: "serakhabar",
   timeoutSignal: () => new AbortController().signal,
 };
 
@@ -77,7 +77,7 @@ test("trims whitespace around an otherwise valid phone number", () => {
 
 test("preserves upstream rate limiting as a retryable checkout response", async () => {
   await assert.rejects(() => processOrder(orderRequestSchema.parse(validEnglishOrder), {
-    merchantSuiteUrl: "https://suite.invalid", storefrontHandle: "mangoloverbd",
+    merchantSuiteUrl: "https://suite.invalid", storefrontHandle: "serakhabar",
     fetchImpl: async () => new Response(JSON.stringify({ message: "Slow down" }), { status: 429 }),
   }), (error: unknown) => error instanceof OrderUpstreamError && error.statusCode === 429);
 });
@@ -213,7 +213,7 @@ test("uses the public storefront handle endpoint and forwards protection signals
       return new Response(JSON.stringify({ orderRef: "ML-150002", decision: "allow" }), { status: 201 });
     },
   });
-  assert.equal(outboundUrl, "https://suite.invalid/api/public/v1/mangoloverbd/orders");
+  assert.equal(outboundUrl, "https://suite.invalid/api/public/v1/serakhabar/orders");
   assert.deepEqual(outboundHeaders, { "Content-Type": "application/json" });
   assert.deepEqual(result, { orderRef: "ML-150002", decision: "allow" });
   assert.equal(outboundBody?.customerName, "Test Customer");

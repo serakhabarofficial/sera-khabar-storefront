@@ -11,8 +11,8 @@ export default function middleware(request: Request, context: { waitUntil(promis
     waitUntil: promise => context.waitUntil(promise),
     next: () => next(),
     clientIp: req => ipAddress(req),
-    merchantSuiteUrl: 'https://admin.mangolover.com.bd',
-    storefrontHandle: 'mangoloverbd',
+    merchantSuiteUrl: 'https://sera-khabar-commerceos.vercel.app',
+    storefrontHandle: 'serakhabar',
     secret: process.env.CAMPAIGN_EDGE_SECRET,
   })(request);
 }

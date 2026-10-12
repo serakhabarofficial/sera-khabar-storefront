@@ -689,14 +689,14 @@ export default function OrderDialog({
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       <a
-                        href="tel:+8801301636461"
+                        href="tel:+8801310980289"
                         className="flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#f26b4f] px-2 text-[12px] font-semibold text-white transition-colors hover:bg-[#d9573d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f26b4f]/40"
                       >
                         <Phone className="h-4 w-4 stroke-[1.75px]" aria-hidden="true" />
                         ফোনে অর্ডার
                       </a>
                       <a
-                        href={`https://wa.me/8801301636461?text=${encodeURIComponent(whatsappOrderText)}`}
+                        href={`https://wa.me/8801303103540?text=${encodeURIComponent(whatsappOrderText)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#25d366] px-2 text-[12px] font-semibold text-white transition-colors hover:bg-[#1da851] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/40"

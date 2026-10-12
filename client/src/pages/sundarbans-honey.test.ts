@@ -120,7 +120,7 @@ test("reference-inspired narrative renders the centered conversion sections in o
     "বনের গল্প, বাস্তব ভিডিওতে",
     "কেন সুন্দরবনের চাকের মধু বিশেষ?",
     "অর্ডারের আগে যা জানা দরকার",
-     "Mango Lover vs অন্যান্য Brands",
+     "Sera Khabar vs অন্যান্য Brands",
      "আপনার প্রশ্নের উত্তর",
     "এক বছরের কম বয়সী শিশুকে মধু দেওয়া যাবে না।",
   ];
@@ -146,12 +146,11 @@ test("approved content data uses strong source, handling, and responsible copy",
   assert.match(contentSource, /মৌচাক থেকে বোতল পর্যন্ত/);
 });
 
-test("why Mango Lover section renders the supplied comparison artwork", () => {
-  assert.match(sectionsSource, /mango-lover-vs-other-brands-v1\.webp/);
-  assert.match(sectionsSource, /alt="Mango Lover vs অন্যান্য Brands — পার্থক্যটা নিজেই দেখুন"/);
+test("why Sera Khabar section ships no other brand's comparison artwork", () => {
+  assert.doesNotMatch(sectionsSource, /mango-lover-vs-other-brands/);
   assert.doesNotMatch(sectionsSource, /ComparisonMatrix|honey-comparison-matrix/);
   assert.match(sectionsSource, /placement="content_bottom"/);
-  assert.match(contentSource, /Mango Lover vs অন্যান্য Brands/);
+  assert.match(contentSource, /Sera Khabar vs অন্যান্য Brands/);
 });
 
 test("family and everyday-use points use an editorial mobile rail", () => {
@@ -206,7 +205,7 @@ test("honest media policy: no fabricated proof, no autoplay, only approved nativ
   assert.doesNotMatch(sectionsSource, /review-section|honey-review|ReviewCard|review-card/i);
   assert.doesNotMatch(sectionsSource, /unsplash|picsum|placeholder/i);
   assert.match(sectionsSource, /fetchpriority="high"/i);
-  assert.equal(sectionsSource.match(/<img/g)?.length ?? 0, 9);
+  assert.equal(sectionsSource.match(/<img/g)?.length ?? 0, 8);
 });
 
 test("bundle showcase replaces the founder placeholder with supplied pack artwork", () => {
@@ -253,9 +252,9 @@ test("trust ribbon uses the reusable reduced-motion marquee", () => {
 });
 
 test("minimal campaign chrome links phone and WhatsApp without full layout", () => {
-  assert.match(contentSource, /tel:\+8801301636461/);
-  assert.match(contentSource, /https:\/\/wa\.me\/8801301636461/);
-  assert.match(layoutSource, /@assets\/mango-lover-logo\.avif/);
+  assert.match(contentSource, /tel:\+8801310980289/);
+  assert.match(contentSource, /https:\/\/wa\.me\/8801303103540/);
+  assert.match(layoutSource, /@assets\/sera-khabar-logo\.webp/);
   assert.match(layoutSource, /কোনো কিছু জানতে কিংবা/);
   assert.match(layoutSource, / সরাসরি অর্ডার করতে যোগাযোগ করুন/);
   assert.match(layoutSource, /fontFamily: "'KaiumSimanto', serif"/);

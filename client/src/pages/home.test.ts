@@ -267,8 +267,8 @@ test("prioritizes the first category images with lightweight thumbnails", () => 
   assert.match(homeSource, /fetchPriority=\{index < 4 \? "high" : "auto"\}/);
 });
 
-test("uses the Mango Lover hero poster", () => {
-  assert.match(homeSource, /src="\/hero-mango-lover\.webp"/);
+test("uses the Sera Khabar hero poster", () => {
+  assert.match(homeSource, /src="\/hero-sera-khabar\.webp"/);
   assert.doesNotMatch(homeSource, /hero1\.webp/);
 });
 

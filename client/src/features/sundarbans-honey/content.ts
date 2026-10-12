@@ -1,7 +1,7 @@
-export const HONEY_CAMPAIGN_PHONE_NUMBER = "01301636461";
-export const HONEY_CAMPAIGN_PHONE_HREF = "tel:+8801301636461";
+export const HONEY_CAMPAIGN_PHONE_NUMBER = "01310980289";
+export const HONEY_CAMPAIGN_PHONE_HREF = "tel:+8801310980289";
 export const HONEY_CAMPAIGN_WHATSAPP_HREF =
-  `https://wa.me/8801301636461?text=${encodeURIComponent("সুন্দরবনের প্রাকৃতিক মধু অর্ডার করতে চাই।")}`;
+  `https://wa.me/8801303103540?text=${encodeURIComponent("সুন্দরবনের প্রাকৃতিক মধু অর্ডার করতে চাই।")}`;
 
 export const heroHeadline = "সুন্দরবনের চাকের মধু—প্রকৃতির আসল স্বাদ";
 export const heroSubcopy =
@@ -114,8 +114,8 @@ export const nutritionistName = "মুরাদ পারভেজ";
 export const nutritionistStatement =
   "মধু কোনো রোগের ওষুধ নয়। তবে সুষম খাদ্যাভ্যাসের অংশ হিসেবে পরিমিত মধু প্রাকৃতিক শক্তির একটি সহজ উৎস হতে পারে। এতে বিভিন্ন প্রাকৃতিক অ্যান্টিঅক্সিডেন্ট যৌগও পাওয়া যায়। শিশু, কর্মজীবী মানুষ ও বয়স্ক ব্যক্তি সবাই বয়স ও শারীরিক অবস্থা অনুযায়ী পরিমিত পরিমাণে মধু গ্রহণ করতে পারেন। পণ্য বিক্রির পাশাপাশি গ্রাহককে সঠিক তথ্য জানানোও আমাদের দায়িত্ব।";
 
-export const whyMangoLoverHeading = "Mango Lover vs অন্যান্য Brands";
-export const whyMangoLoverPoints: HoneyNarrativePoint[] = [
+export const whySeraKhabarHeading = "Sera Khabar vs অন্যান্য Brands";
+export const whySeraKhabarPoints: HoneyNarrativePoint[] = [
   {
     title: "উৎস সম্পর্কে স্বচ্ছ তথ্য",
     text: "কোন বনের কোন প্রক্রিয়ায় মধু এলো—লুকোছাপা ছাড়াই জানিয়ে দিই।",

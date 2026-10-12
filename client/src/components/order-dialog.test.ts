@@ -51,8 +51,8 @@ test("cart checkout passes each cart item as its own line", () => {
 test("phone and WhatsApp order options sit below the Place Order button", () => {
   const submitIndex = dialogSource.indexOf('type="submit"');
   const helpIndex = dialogSource.indexOf("আমরা সবসময় আপনাকে সাহায্য করতে প্রস্তুত");
-  const phoneIndex = dialogSource.indexOf('href="tel:+8801301636461"');
-  const whatsappIndex = dialogSource.indexOf("https://wa.me/8801301636461");
+  const phoneIndex = dialogSource.indexOf('href="tel:+8801310980289"');
+  const whatsappIndex = dialogSource.indexOf("https://wa.me/8801303103540");
   assert.ok(submitIndex > 0 && helpIndex > submitIndex, "help message follows the submit button");
   assert.ok(phoneIndex > helpIndex && whatsappIndex > phoneIndex, "phone then WhatsApp follow the message");
   assert.match(dialogSource, /অর্ডার করতে সমস্যা হচ্ছে\?/);
@@ -64,7 +64,7 @@ test("phone and WhatsApp order options sit below the Place Order button", () => 
 });
 
 test("checkout ends with a short summary of the store policies and links to them", () => {
-  const whatsappIndex = dialogSource.indexOf("https://wa.me/8801301636461");
+  const whatsappIndex = dialogSource.indexOf("https://wa.me/8801303103540");
   const termsIndex = dialogSource.indexOf("অর্ডার করার আগে জেনে নিন");
   assert.ok(termsIndex > whatsappIndex, "policy summary follows the phone/WhatsApp buttons");
   // Every point restates the published policy pages in site-pages.ts.

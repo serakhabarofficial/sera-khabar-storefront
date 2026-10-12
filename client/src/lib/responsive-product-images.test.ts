@@ -91,8 +91,9 @@ test("reports which products still need the image variant backfill", () => {
     console.log(`  ℹ ${needsBackfill.length} product(s) awaiting variant backfill: ${needsBackfill.join(", ")}`);
   }
 
+  // An empty snapshot (fresh Sera Khabar catalog) has nothing to backfill.
   assert.ok(
-    needsBackfill.length < generatedStorefrontProducts.length,
+    generatedStorefrontProducts.length === 0 || needsBackfill.length < generatedStorefrontProducts.length,
     "no product has image variants — the backfill never ran",
   );
 });

@@ -8,7 +8,7 @@ const indexSource = readFileSync(new URL("../index.css", import.meta.url), "utf8
 test("uses distinct vibrant channel colors for phone and WhatsApp order actions", () => {
   assert.match(
     productSource,
-    /href="tel:\+8801301636461"[\s\S]*?bg-\[#f26b4f\][\s\S]*?text-white[\s\S]*?hover:bg-\[#d9573d\]/,
+    /href="tel:\+8801310980289"[\s\S]*?bg-\[#f26b4f\][\s\S]*?text-white[\s\S]*?hover:bg-\[#d9573d\]/,
   );
   assert.match(
     productSource,
@@ -142,8 +142,8 @@ test("renders product reels as a left-aligned horizontal snap carousel", () => {
   assert.match(productSource, /basis-\[64vw\][^"`]*md:basis-\[220px\]/);
   // The active reel is outlined in brand yellow; the rest keep a transparent border so nothing shifts.
   assert.match(productSource, /border-2 p-\[3px\][^`]*\$\{i === currentReel \? "border-\[#FBBB14\]" : "border-transparent"\}/);
-  assert.match(productSource, /REEL_MEDIA = \[/);
-  assert.match(productSource, /src: `https:\/\/media\.mangolover\.com\.bd\/\$\{id\}\.mp4`/);
+  assert.match(productSource, /REEL_MEDIA: readonly \{ src: string; poster: string \}\[\] = \[\];/);
+  assert.match(productSource, /\{reelCount > 0 && \(/);
   assert.match(productSource, /from "@videojs\/react\/video"/);
   assert.match(productSource, /import "@videojs\/react\/video\/skin\.css"/);
   assert.match(productSource, /<VideoPlayer poster=\{poster\}>[\s\S]*?<VideoSkin[\s\S]*?<Video\b/);
@@ -153,16 +153,6 @@ test("renders product reels as a left-aligned horizontal snap carousel", () => {
   assert.match(productSource, /preload="metadata"/);
   // The sound player never autoplays; only the muted preview does.
   assert.doesNotMatch(productSource, /<Video\b[^>]*autoPlay/);
-  assert.match(productSource, /poster: `\/reels\/\$\{id\}\.webp`/);
-  // Re-encoded ~1 Mbps reels (content-hash names, cached for a year on R2).
-  for (const id of [
-    "b328c1cfc46fbf658f31b2e704a5c073",
-    "27700732d0455ef49af15e3bcc6521b1",
-    "040e4943d719f5809860c48e5583352d",
-  ]) {
-    assert.match(productSource, new RegExp(`"${id}"`));
-    assert.ok(existsSync(new URL(`../../public/reels/${id}.webp`, import.meta.url)), `${id}.webp poster missing`);
-  }
   assert.match(productSource, /Play className/);
   assert.match(productSource, /activeReelVideoRef/);
   assert.match(productSource, /src=\{poster\}[\s\S]*?pointer-events-none/);

@@ -31,11 +31,11 @@ function setup(fetchImpl: typeof fetch, overrides: Partial<Parameters<typeof cre
   const handler = createCampaignMiddleware({
     cache: memory.cache, waitUntil: promise => { pending.push(promise); },
     next: () => new Response(null, { headers: { [NEXT]: '1' } }), clientIp: () => '203.0.113.9',
-    merchantSuiteUrl: 'https://suite.invalid', storefrontHandle: 'mangoloverbd', secret: SECRET, fetchImpl, ...overrides,
+    merchantSuiteUrl: 'https://suite.invalid', storefrontHandle: 'serakhabar', secret: SECRET, fetchImpl, ...overrides,
   });
   return { handler, pending, ...memory };
 }
-const get = (path: string, init: RequestInit = {}) => new Request(`https://www.mangolover.com.bd${path}`, init);
+const get = (path: string, init: RequestInit = {}) => new Request(`https://www.serakhabar.com${path}`, init);
 function cookieHeader(response: Response) {
   return response.headers.getSetCookie().map(cookie => cookie.split(';', 1)[0]).join('; ');
 }
@@ -60,7 +60,7 @@ test('redirects immediately with campaign defaults, unique signed cookies, and b
   const second = await handler(get('/go/bori-campaign-1', { headers: { 'user-agent': 'Mozilla/5.0 (iPhone)' } }));
   assert.equal(first.status, 302);
   assert.equal(first.headers.get('cache-control'), 'no-store');
-  const location = new URL(first.headers.get('location')!, 'https://www.mangolover.com.bd');
+  const location = new URL(first.headers.get('location')!, 'https://www.serakhabar.com');
   assert.equal(location.pathname, '/product/homemade-pumpkin-bori');
   assert.equal(location.hash, '#buy');
   assert.equal(location.searchParams.get('utm_campaign'), 'manual');
@@ -150,7 +150,7 @@ test('falls through to the existing Vercel handler when routing is unavailable',
   const invalid = setup((async () => routeResponse()) as typeof fetch);
   assert.equal((await invalid.handler(get('/go/..%2Fadmin'))).headers.get(NEXT), '1');
   assert.equal((await invalid.handler(get('/go/bori-campaign-1', { method: 'POST' }))).headers.get(NEXT), '1');
-  const apex = await invalid.handler(new Request('https://mangolover.com.bd/go/bori-campaign-1'));
+  const apex = await invalid.handler(new Request('https://serakhabar.com/go/bori-campaign-1'));
   assert.equal(apex.headers.get(NEXT), '1');
 });
 

@@ -11,7 +11,7 @@ export function collectFingerprintTraits(): Record<string, unknown> {
     const context = canvas.getContext("2d");
     if (!context) return null;
     context.font = "14px sans-serif";
-    context.fillText("Mango Lover BD 123", 2, 16);
+    context.fillText("Sera Khabar 123", 2, 16);
     return canvas.toDataURL();
   });
   const webgl = safe(() => {

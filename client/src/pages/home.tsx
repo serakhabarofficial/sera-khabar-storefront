@@ -257,13 +257,13 @@ export default function Home() {
           >
             <Link href="/products" className="absolute inset-0 block">
               <img
-                src="/hero-mango-lover.webp?v=2"
-                alt="ম্যাংগো লাভার — বাংলার সেরা সকল মৌসুমি আম, সরাসরি বাগান থেকে আপনার ঘরে"
+                src="/hero-sera-khabar.webp"
+                alt="সেরা খাবার — বাংলার সেরা সকল মৌসুমি আম, সরাসরি বাগান থেকে আপনার ঘরে"
                 className="h-full w-full object-cover object-top md:hidden"
               />
               <img
                 src="/hero-desktop.webp"
-                alt="ম্যাংগো লাভার — বাংলার সেরা সকল মৌসুমি আম, সরাসরি বাগান থেকে আপনার ঘরে"
+                alt="সেরা খাবার — বাংলার সেরা সকল মৌসুমি আম, সরাসরি বাগান থেকে আপনার ঘরে"
                 className="hidden md:block h-full w-full object-cover object-top"
               />
             </Link>

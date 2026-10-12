@@ -7,10 +7,10 @@ export function createGoHandler(options: CampaignRedirectOptions = {}) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.setHeader('Allow', 'GET, HEAD'); res.statusCode = 405; res.end(); return;
     }
-    const url = new URL(req.url || '/', 'https://www.mangolover.com.bd');
+    const url = new URL(req.url || '/', 'https://www.serakhabar.com');
     const local = options.local ?? process.env.NODE_ENV !== 'production';
-    if (!local && req.headers.host === 'mangolover.com.bd') {
-      res.statusCode = 302; res.setHeader('Location', `https://www.mangolover.com.bd${url.pathname}${url.search}`); res.end(); return;
+    if (!local && req.headers.host === 'serakhabar.com') {
+      res.statusCode = 302; res.setHeader('Location', `https://www.serakhabar.com${url.pathname}${url.search}`); res.end(); return;
     }
     let slug: string | undefined;
     if (url.pathname.startsWith('/go/')) {

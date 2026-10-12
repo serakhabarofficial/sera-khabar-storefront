@@ -13,7 +13,7 @@ test("registers Honey Nut landing and thank-you routes in specific-first order",
   assert.ok(landingRoute >= 0);
   assert.ok(thankYouRoute < landingRoute);
   assert.ok(landingRoute < productRoute);
-  assert.match(app, /হানি নাট \| ম্যাংগো লাভার/);
-  assert.match(app, /হানি নাট অর্ডারের জন্য ধন্যবাদ \| ম্যাংগো লাভার/);
+  assert.match(app, /হানি নাট \| সেরা খাবার/);
+  assert.match(app, /হানি নাট অর্ডারের জন্য ধন্যবাদ \| সেরা খাবার/);
   assert.match(build, /"honey-nut"/);
 });

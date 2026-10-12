@@ -9,10 +9,10 @@ import {
   type BuildProduct,
 } from "./storefront-seo-artifacts";
 
-const storefrontId = process.env.VITE_STOREFRONT_ID ?? "2a155750-b11a-4ff2-a7ff-4e26daac46ef";
+const storefrontId = process.env.VITE_STOREFRONT_ID ?? "690aa8b3-6657-46c4-8df5-addcc1f96035";
 const configuredMerchantSuiteUrl = (process.env.VITE_MERCHANT_SUITE_URL ?? "").replace(/\/$/, "");
 const MERCHANT_SUITE_URL = process.env.NODE_ENV === "production"
-  ? "https://admin.mangolover.com.bd"
+  ? "https://sera-khabar-commerceos.vercel.app"
   : configuredMerchantSuiteUrl;
 if (!MERCHANT_SUITE_URL) {
   throw new Error("VITE_MERCHANT_SUITE_URL environment variable is not set");

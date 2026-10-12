@@ -101,7 +101,7 @@ export function createCampaignMiddleware(deps: CampaignMiddlewareDeps) {
     const secret = deps.secret;
     if (!secret || secret.length < 32) return deps.next();
     if (url.pathname === '/go/_refresh') return refresh(request, secret);
-    if ((request.method !== 'GET' && request.method !== 'HEAD') || url.hostname === 'mangolover.com.bd') return deps.next();
+    if ((request.method !== 'GET' && request.method !== 'HEAD') || url.hostname === 'serakhabar.com') return deps.next();
 
     let slug: string | undefined;
     try { slug = normalizeSlug(decodeURIComponent(url.pathname.slice('/go/'.length))); } catch { /* Fall through. */ }

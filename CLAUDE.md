@@ -1,4 +1,4 @@
-> **⚠️ SERA KHABAR PROJECT — READ `SERA_KHABAR_SETUP.md` FIRST.** This repo is a copy of the Mango Lover BD codebase being set up for a new merchant, **Sera Khabar** (GitHub `serakhabarofficial`). Mango Lover text below is historical until the rebrand step. Never touch Mango Lover repos, folders, or Supabase project `ldiktvcavyabivpxfwpn`.
+> **⚠️ SERA KHABAR PROJECT — READ `SERA_KHABAR_SETUP.md` FIRST.** This repo is a copy of the Mango Lover BD codebase being set up for a new merchant, **Sera Khabar** (GitHub `serakhabarofficial`). The storefront code and this guide are rebranded for Sera Khabar. Never touch Mango Lover repos, folders, or Supabase project `ldiktvcavyabivpxfwpn`.
 >
 > **Sera Khabar has two separate repos, in two separate folders on this Mac:**
 > | Part | GitHub repo | Folder on this Mac |
@@ -6,9 +6,9 @@
 > | Merchant Suite | `serakhabarofficial/sera-khabar-commerceos` | `/Users/noorkarimmehedi/Sera Khabar - সেরা খাবার/sera-khabar-commerceos` |
 > | Storefront (this repo) | `serakhabarofficial/sera-khabar-storefront` | `/Users/noorkarimmehedi/Sera Khabar - সেরা খাবার/sera-khabar-storefront` |
 >
-> The Merchant Suite (dashboard, API, database migrations) lives in the other folder; its `SERA_KHABAR_SETUP.md` holds the full step-by-step plan. Any mention below of `admin.mangolover.com.bd` / Mango Lover's Suite means **the Sera Khabar Suite above**. The folder path has spaces and Bangla characters, so always quote it in shell commands.
+> The Merchant Suite (dashboard, API, database migrations) lives in the other folder; its `SERA_KHABAR_SETUP.md` holds the full step-by-step plan. The folder path has spaces and Bangla characters, so always quote it in shell commands.
 
-# CLAUDE.md — Mango Lover BD Storefront Agent Guide
+# CLAUDE.md — Sera Khabar Storefront Agent Guide
 
 Authoritative guide for AI agents working in this repository. Read it fully before changing anything.
 The **Hard Rules** are non-negotiable.
@@ -19,11 +19,11 @@ The **Hard Rules** are non-negotiable.
 
 ## 1. What this repo is
 
-The **public storefront for Mango Lover BD** (`ম্যাংগো লাভার`) — the site customers shop on.
+The **public storefront for Sera Khabar** (`সেরা খাবার`) — the site customers shop on.
 React 19 + Vite + Tailwind + wouter, with a small Express server for local dev and a Vercel
 serverless function for checkout.
 
-- Live: https://mangoloverbd.vercel.app (Vercel project `mangoloverbd`)
+- Live: https://www.serakhabar.com (Vercel project created by the Suite's Provision Storefront)
 - Deploys automatically from `main`
 
 This is **not** the dashboard. The Merchant Suite / commerceos dashboard is a separate repository
@@ -65,14 +65,14 @@ the committed template.
 | Variable | Scope | Purpose |
 |---|---|---|
 | `VITE_MERCHANT_SUITE_URL` | client | Suite base URL for catalog reads. **Baked into the bundle at build time.** |
-| `VITE_STOREFRONT_ID` | client | Fixed workspace id `3cd26e57-85ef-4970-94a4-cd99c0f1b554` |
+| `VITE_STOREFRONT_ID` | client | Fixed workspace id `690aa8b3-6657-46c4-8df5-addcc1f96035` |
 | `MERCHANT_SUITE_URL` | server | Same URL, for the checkout POST |
 | `CUSTOM_ORDERS_API_KEY` | server, **secret** | Order webhook auth; matches `<orgId>:custom_store_api_key` in the Suite's `app_settings` |
 
 `VITE_`-prefixed values are compiled into public JavaScript and readable by anyone. Never move a
 secret behind a `VITE_` prefix, and never read `CUSTOM_ORDERS_API_KEY` from client code.
 
-GTM `GTM-5KKTRHFD` owns GA4 `G-Q7J7KV6ZVC`, Meta Pixel `337187585388165`, and Meta CAPI. The
+No Google Tag Manager, GA4 or Meta Pixel is installed yet (Sera Khabar has none; the copied Mango Lover tags were removed). When added, the
 storefront emits only safe ecommerce `dataLayer` events; do not add direct analytics, Pixel, or CAPI
 configuration to this application.
 
@@ -119,7 +119,7 @@ build-time config or from the API key, never from user input.
 
 ## 4. Supabase and product data
 
-Products live in the **Mango Lover BD Supabase project** (`ldiktvcavyabivpxfwpn`), which the dashboard
+Products live in the **Sera Khabar Supabase project** (`xnuiaxygeoydtopvcmli`), which the dashboard
 and this storefront share. But they reach it very differently.
 
 ### You cannot add products from this repo
@@ -207,7 +207,7 @@ returned empty, what a column is actually named:
 | `.mcp.json` | Claude Code (HTTP transport) |
 | `.codex/config.toml` | Codex / OpenCode |
 
-Both point at project `ldiktvcavyabivpxfwpn` with `read_only=true` and
+Both point at project `xnuiaxygeoydtopvcmli` with `read_only=true` and
 `features=docs,database,debugging,development`. Claude Code needs a one-time OAuth: run `/mcp`, select
 `supabase`, authenticate. If you change the project ref or flags, update both files so the runtimes
 stay in sync.
@@ -265,11 +265,11 @@ what this codebase already does.
 
 | Asset | File | Wired into |
 |---|---|---|
-| Nav logo | `attached_assets/mango-lover-logo.avif` | `client/src/components/layout.tsx` |
-| Hero poster | `client/public/hero-mango-lover.webp` | `client/src/pages/home.tsx` (~line 289) |
+| Nav logo | `attached_assets/sera-khabar-logo.webp` | `client/src/components/layout.tsx` |
+| Hero poster | `client/public/hero-sera-khabar.webp` | `client/src/pages/home.tsx` (~line 289) |
 | Brand yellow | `#FBBB14` | hero background |
 | Brand ink | `#163B33` | hero CTA |
-| Wordmark | `ম্যাংগো লাভার - Mango Lover` | `layout.tsx` footer, `client/index.html` |
+| Wordmark | `সেরা খাবার - Sera Khabar` | `layout.tsx` footer, `client/index.html` |
 
 **The homepage hero is inline in `client/src/pages/home.tsx`.**
 `client/src/components/hero.tsx` is **dead code** — nothing imports it. Editing it changes nothing on
@@ -287,8 +287,8 @@ Stepprs/template cleanup is done: the hardcoded `stepprs-massage-insoles` fallba
 (`bundle-section`, `booking-section`, `customer-reviews`, `categories`, `video-reel`)
 and their orphaned media (`hero-insoles.png`, `insoles.png`, `peptide-lip-benefits.png`,
 `vid_0*.mp4`, unreferenced `AQP*.mp4`, `makeup_pen_4_in_1.png`, `peptide_lip_tint_*.png`)
-were removed, and `client/index.html` now uses canonical Mango Lover meta with
-`https://www.mangolover.com.bd/` OG URLs.
+were removed, and `client/index.html` now uses canonical Sera Khabar meta with
+`https://www.serakhabar.com/` OG URLs.
 No loaded webfont has Bengali glyphs, so the Bangla wordmark falls back
 to a system font — Hind Siliguri or Anek Bangla would fix it.
 

@@ -2,7 +2,7 @@ import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import type { IncomingHttpHeaders } from 'node:http';
 import { CLIENT_CONTEXT_HEADER, createSignedClientContext } from './client-context.js';
 
-const ORIGIN = 'https://www.mangolover.com.bd';
+const ORIGIN = 'https://www.serakhabar.com';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const UNSAFE = /[\\\u0000-\u001f\u007f]/;
 export const CAMPAIGN_CLICK_HEADER = 'x-mlbd-campaign-click-id';
@@ -83,7 +83,7 @@ export function readCampaignReceipt(req: Pick<CampaignRequest, 'headers'>, secre
   try {
     const event = JSON.parse(Buffer.from(payload, 'base64url').toString()) as Record<string, unknown>;
     const age = Date.now() - Date.parse(String(event.clickedAt || ''));
-    if (event.v !== 1 || event.handle !== 'mangoloverbd' || typeof event.clickId !== 'string' || !UUID.test(event.clickId)
+    if (event.v !== 1 || event.handle !== 'serakhabar' || typeof event.clickId !== 'string' || !UUID.test(event.clickId)
       || typeof event.linkId !== 'string' || !UUID.test(event.linkId) || event.isBot !== false
       || !Number.isFinite(age) || age < -60_000 || age > 30 * 86400000
       || readCampaignClickCookie(req, contextSecret, secret) !== event.clickId) return undefined;
@@ -96,7 +96,7 @@ export async function resolveCampaignRedirect(req: CampaignRequest, value: unkno
   const incoming = new URL(req.url || '/', ORIGIN).search;
   const fallback = { location: mergeCampaignDestination('/', incoming, slug ? { utm_campaign: slug } : {}) };
   if (!slug) return fallback;
-  const suite = (options.merchantSuiteUrl ?? (process.env.NODE_ENV === 'production' ? 'https://admin.mangolover.com.bd' : process.env.MERCHANT_SUITE_URL) ?? '').replace(/\/$/, '');
+  const suite = (options.merchantSuiteUrl ?? (process.env.NODE_ENV === 'production' ? 'https://sera-khabar-commerceos.vercel.app' : process.env.MERCHANT_SUITE_URL) ?? '').replace(/\/$/, '');
   const handle = options.storefrontHandle ?? process.env.STOREFRONT_HANDLE;
   const secret = options.secret ?? process.env.STOREFRONT_CONTEXT_SECRET;
   const local = options.local ?? process.env.NODE_ENV !== 'production';

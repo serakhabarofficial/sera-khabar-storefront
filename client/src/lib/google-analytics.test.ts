@@ -21,7 +21,7 @@ test("normalizes storefront items into the merchant team's GA4 item shape", () =
     {
       item_id: "mango-himsagar",
       item_name: "Himsagar Mango — 10kg",
-      item_brand: "Mango Lover BD",
+      item_brand: "Sera Khabar",
       item_category: "",
       item_variant: "10kg",
       item_list_name: "",
@@ -38,8 +38,8 @@ test("builds a GTM ecommerce event with nested ecommerce parameters", () => {
   const payload = buildGoogleEcommercePayload({
     event: "view_item",
     pageType: "product",
-    title: "Himsagar Mango | Mango Lover BD",
-    url: "https://mangoloverbd.vercel.app/product/himsagar-mango?utm=1",
+    title: "Himsagar Mango | Sera Khabar",
+    url: "https://www.serakhabar.com/product/himsagar-mango?utm=1",
     language: "en",
     value: 1850,
     items: [
@@ -56,8 +56,8 @@ test("builds a GTM ecommerce event with nested ecommerce parameters", () => {
   assert.deepEqual(payload, {
     event: "view_item",
     page_type: "product",
-    page_title: "Himsagar Mango | Mango Lover BD",
-    page_url: "https://mangoloverbd.vercel.app/product/himsagar-mango",
+    page_title: "Himsagar Mango | Sera Khabar",
+    page_url: "https://www.serakhabar.com/product/himsagar-mango",
     page_path: "/product/himsagar-mango",
     page_language: "en",
     logged_in: false,
@@ -74,7 +74,7 @@ test("builds a GTM ecommerce event with nested ecommerce parameters", () => {
         {
           item_id: "mango-himsagar",
           item_name: "Himsagar Mango — 10kg",
-          item_brand: "Mango Lover BD",
+          item_brand: "Sera Khabar",
           item_category: "",
           item_variant: "10kg",
           item_list_name: "",
@@ -93,20 +93,20 @@ test("omits query and hash values from GTM page URLs", () => {
   const payload = buildGoogleEcommercePayload({
     event: "view_item",
     pageType: "product",
-    url: "https://mangoloverbd.vercel.app/product/himsagar-mango?contact=private-value#delivery",
+    url: "https://www.serakhabar.com/product/himsagar-mango?contact=private-value#delivery",
     value: 1850,
     items: [],
   });
 
-  assert.equal(payload.page_url, "https://mangoloverbd.vercel.app/product/himsagar-mango");
+  assert.equal(payload.page_url, "https://www.serakhabar.com/product/himsagar-mango");
   assert.equal(payload.page_path, "/product/himsagar-mango");
 });
 
 test("pushes one GTM ecommerce event with ecommerce.value and ecommerce.currency", () => {
   const target: GoogleAnalyticsWindow = {
     dataLayer: [],
-    location: new URL("https://mangoloverbd.vercel.app/checkout"),
-    document: { title: "Checkout | Mango Lover BD", documentElement: { lang: "en" } },
+    location: new URL("https://www.serakhabar.com/checkout"),
+    document: { title: "Checkout | Sera Khabar", documentElement: { lang: "en" } },
   };
 
   trackGoogleEcommerceEvent(
@@ -123,8 +123,8 @@ test("pushes one GTM ecommerce event with ecommerce.value and ecommerce.currency
     {
       event: "begin_checkout",
       page_type: "checkout",
-      page_title: "Checkout | Mango Lover BD",
-      page_url: "https://mangoloverbd.vercel.app/checkout",
+      page_title: "Checkout | Sera Khabar",
+      page_url: "https://www.serakhabar.com/checkout",
       page_path: "/checkout",
       page_language: "en",
       logged_in: false,
@@ -141,7 +141,7 @@ test("pushes one GTM ecommerce event with ecommerce.value and ecommerce.currency
           {
             item_id: "mango-himsagar",
             item_name: "Himsagar Mango",
-            item_brand: "Mango Lover BD",
+            item_brand: "Sera Khabar",
             item_category: "",
             item_variant: "",
             item_list_name: "",
@@ -161,7 +161,7 @@ test("uses the GA4 select_item ecommerce shape for a selected live pack", () => 
   const event: GoogleEcommerceEventName = "select_item";
   const target: GoogleAnalyticsWindow = {
     dataLayer: [],
-    location: new URL("https://mangoloverbd.vercel.app/step/sundarbans-natural-honey"),
+    location: new URL("https://www.serakhabar.com/step/sundarbans-natural-honey"),
     document: { title: "Sundarbans Honey", documentElement: { lang: "bn" } },
   };
 
@@ -180,7 +180,7 @@ test("uses the GA4 select_item ecommerce shape for a selected live pack", () => 
   assert.deepEqual(payload?.ecommerce.items, [{
     item_id: "honey-1kg",
     item_name: "Sundarbans Natural Honey — 1KG",
-    item_brand: "Mango Lover BD",
+    item_brand: "Sera Khabar",
     item_category: "",
     item_variant: "1KG",
     item_list_name: "",
@@ -233,7 +233,7 @@ test("builds the merchant purchase shape with transaction, shipping, and custome
     items: [{
       item_id: "honey-1kg",
       item_name: "Sundarbans Natural Honey — 1KG",
-      item_brand: "Mango Lover BD",
+      item_brand: "Sera Khabar",
       item_category: "",
       item_variant: "1KG",
       item_list_name: "",

@@ -39,10 +39,10 @@ test("keeps published policy facts aligned with checkout", () => {
   assert.equal(POLICY_FACTS.paymentMethod, "Cash on Delivery");
 });
 
-test("uses Mango Lover's phone number for customer WhatsApp support", () => {
-  assert.equal(CONTACT_DETAILS.phone, "01301-636461");
-  assert.equal(CONTACT_DETAILS.whatsapp, "+8801301636461");
-  assert.equal(CONTACT_DETAILS.whatsappHref, "https://wa.me/8801301636461");
+test("uses Sera Khabar's phone number for customer WhatsApp support", () => {
+  assert.equal(CONTACT_DETAILS.phone, "01310-980289");
+  assert.equal(CONTACT_DETAILS.whatsapp, "+8801303103540");
+  assert.equal(CONTACT_DETAILS.whatsappHref, "https://wa.me/8801303103540");
 });
 
 test("explains incomplete-checkout support and its fixed 30-day retention", () => {

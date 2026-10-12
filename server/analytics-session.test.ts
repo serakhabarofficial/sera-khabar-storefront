@@ -45,7 +45,7 @@ for (const [label, service, body] of [
   ['local', localOrder, orderRequestSchema.parse(order)],
 ] as const) test(`${label} order service sends the visit as a header, never in the order body`, async () => {
   let headers = new Headers(); let payload: Record<string, unknown> = {};
-  await service(body as never, { merchantSuiteUrl: 'https://suite.invalid', storefrontHandle: 'mangoloverbd', analyticsSessionId: visit,
+  await service(body as never, { merchantSuiteUrl: 'https://suite.invalid', storefrontHandle: 'serakhabar', analyticsSessionId: visit,
     fetchImpl: async (_target, init) => { headers = new Headers(init?.headers); payload = JSON.parse(String(init?.body)); return new Response(JSON.stringify({ orderRef: 'ML-1' }), { status: 201 }); } });
   assert.equal(headers.get('x-mlbd-analytics-session-id'), visit);
   assert.equal(JSON.stringify(payload).includes(visit), false);

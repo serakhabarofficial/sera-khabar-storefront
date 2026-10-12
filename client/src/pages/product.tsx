@@ -115,18 +115,9 @@ function ProductSkeleton() {
   );
 }
 
-// Reels are served from the Cloudflare R2 media bucket; poster stills are small
-// WebP frames bundled with the storefront so phones never download video for a preview.
-// Each reel is re-encoded to ~1 Mbps 720p H.264 (mono 64 kbps audio, faststart) and
-// named by the MD5 of that file, so R2 can cache it for a year without going stale.
-const REEL_MEDIA = [
-  "b328c1cfc46fbf658f31b2e704a5c073",
-  "27700732d0455ef49af15e3bcc6521b1",
-  "040e4943d719f5809860c48e5583352d",
-].map((id) => ({
-  src: `https://media.mangolover.com.bd/${id}.mp4`,
-  poster: `/reels/${id}.webp`,
-}));
+// Sera Khabar has no product reels yet; the reels section stays hidden until
+// entries are added here (src = MP4 URL, poster = small WebP still in /public/reels).
+const REEL_MEDIA: readonly { src: string; poster: string }[] = [];
 
 // Public Video.js skin settings: match the reel card corners and the brand yellow.
 // The skin's frosted-glass blur is switched off: re-blurring the video under the
@@ -483,7 +474,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   // products. Unknown slugs get noindex instead of a fake Stepprs fallback.
   useEffect(() => {
     if (isLoading) return;
-    const siteUrl = "https://www.mangolover.com.bd";
+    const siteUrl = "https://www.serakhabar.com";
     const setMeta = (selector: string, attr: string, value: string) => {
       let el = document.head.querySelector(selector) as HTMLMetaElement | null;
       if (!el) {
@@ -501,13 +492,13 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
     document.head.querySelectorAll('script[data-seo="product"]').forEach((n) => n.remove());
     document.head.querySelectorAll('link[data-seo="canonical"]').forEach((n) => n.remove());
     if (!product) {
-      document.title = "Product not found | ম্যাংগো লাভার - Mango Lover";
+      document.title = "Product not found | সেরা খাবার - Sera Khabar";
       setMeta('meta[name="robots"]', "content", "noindex, follow");
       return;
     }
     const price = Number(selectedBundle.amount) || Number(product.price) || 0;
-    const desc = (product.description || "ম্যাংগো লাভার — Mango Lover BD. Fresh, authentic products delivered across Bangladesh.").slice(0, 160);
-    const title = `${product.name} | ম্যাংগো লাভার - Mango Lover`;
+    const desc = (product.description || "সেরা খাবার — Sera Khabar. Fresh, authentic products delivered across Bangladesh.").slice(0, 160);
+    const title = `${product.name} | সেরা খাবার - Sera Khabar`;
     const url = `${siteUrl}/product/${product.slug}`;
     document.title = title;
     setMeta('meta[name="description"]', "content", desc);
@@ -537,7 +528,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
       description: desc,
       image: displayGallery.length ? displayGallery : undefined,
       url,
-      brand: { "@type": "Brand", name: "Mango Lover" },
+      brand: { "@type": "Brand", name: "Sera Khabar" },
       offers: {
         "@type": "Offer",
         priceCurrency: "BDT",
@@ -881,14 +872,14 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <a
-                      href="tel:+8801301636461"
+                      href="tel:+8801310980289"
                       className="group flex h-11 items-center justify-center gap-2 rounded-[8px] border border-white/20 bg-[#f26b4f] px-2 text-[11px] font-medium tracking-[0.02em] text-white shadow-none transition-all hover:-translate-y-0.5 hover:border-white/30 hover:bg-[#d9573d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f26b4f]/40"
                     >
                       <Phone className="h-4 w-4 stroke-[1.5px]" />
                       ফোনে অর্ডার
                     </a>
                     <a
-                      href={`https://wa.me/8801301636461?text=${encodeURIComponent(
+                      href={`https://wa.me/8801303103540?text=${encodeURIComponent(
                         `Hello, I'd like to order: ${product.name} (${selectedBundle.title})`,
                       )}`}
                       target="_blank"
@@ -1048,6 +1039,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                 </div>
 
                 {/* Reels Section — left-aligned card row, arrows in the header */}
+                {reelCount > 0 && (
                 <div className="-mx-4 pt-4 mt-4 pb-5 overflow-hidden bg-brand-ivory md:mx-0 md:mt-0 md:pt-0">
                   <div className="mx-auto w-full max-w-none px-4 md:max-w-[480px] md:px-0">
                     <div className="mb-4 flex items-center justify-between gap-4">
@@ -1112,7 +1104,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                                   <VideoSkin className="absolute inset-0 h-full w-full" style={REEL_SKIN_STYLE}>
                                     <Video
                                       src={src}
-                                      title={`Mango Lover BD reel ${i + 1}`}
+                                      title={`Sera Khabar reel ${i + 1}`}
                                       playsInline
                                       preload="metadata"
                                       ref={(video) => {
@@ -1198,6 +1190,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             </div>
           </div>

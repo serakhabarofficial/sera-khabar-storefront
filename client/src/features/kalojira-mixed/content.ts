@@ -1,7 +1,7 @@
-export const KALOJIRA_CAMPAIGN_PHONE_NUMBER = "01301636461";
-export const KALOJIRA_CAMPAIGN_PHONE_HREF = "tel:+8801301636461";
+export const KALOJIRA_CAMPAIGN_PHONE_NUMBER = "01310980289";
+export const KALOJIRA_CAMPAIGN_PHONE_HREF = "tel:+8801310980289";
 export const KALOJIRA_CAMPAIGN_WHATSAPP_HREF =
-  `https://wa.me/8801301636461?text=${encodeURIComponent("কালোজিরা মিক্সড অর্ডার করতে চাই।")}`;
+  `https://wa.me/8801303103540?text=${encodeURIComponent("কালোজিরা মিক্সড অর্ডার করতে চাই।")}`;
 
 export const heroEyebrow = "প্রকৃতির পরিচিত ৮টি উপাদান — এখন এক বয়ামে";
 export const heroHeadline = "কালোজিরা মিক্সড";

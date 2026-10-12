@@ -5,7 +5,7 @@ import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
   useEffect(() => {
-    document.title = "Page not found | ম্যাংগো লাভার - Mango Lover";
+    document.title = "Page not found | সেরা খাবার - Sera Khabar";
     let meta = document.head.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement("meta");

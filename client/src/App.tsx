@@ -25,15 +25,15 @@ import { SITE_PAGES } from "@/lib/site-pages";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 const CAMPAIGN_PAGE_TITLES: Record<string, string> = {
-  "/step/sundarbans-natural-honey": "সুন্দরবনের প্রাকৃতিক মধু | ম্যাংগো লাভার",
-  "/step/sundarbans-natural-honey/thank-you": "অর্ডারের জন্য ধন্যবাদ | ম্যাংগো লাভার",
-  "/step/kalojira-mixed": "কালোজিরা মিক্সড | ম্যাংগো লাভার",
-  "/step/kalojira-mixed/thank-you": "কালোজিরা মিক্সড অর্ডারের জন্য ধন্যবাদ | ম্যাংগো লাভার",
-  "/step/honey-nut": "হানি নাট | ম্যাংগো লাভার",
-  "/step/honey-nut/thank-you": "হানি নাট অর্ডারের জন্য ধন্যবাদ | ম্যাংগো লাভার",
-  "/step/katimon-mango": "কাটিমন আম | ম্যাংগো লাভার",
-  "/step/homemade-pumpkin-bori": "কুমড়ো বড়ি | ম্যাংগো লাভার",
-  "/step/homemade-pumpkin-bori/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ | ম্যাংগো লাভার",
+  "/step/sundarbans-natural-honey": "সুন্দরবনের প্রাকৃতিক মধু | সেরা খাবার",
+  "/step/sundarbans-natural-honey/thank-you": "অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
+  "/step/kalojira-mixed": "কালোজিরা মিক্সড | সেরা খাবার",
+  "/step/kalojira-mixed/thank-you": "কালোজিরা মিক্সড অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
+  "/step/honey-nut": "হানি নাট | সেরা খাবার",
+  "/step/honey-nut/thank-you": "হানি নাট অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
+  "/step/katimon-mango": "কাটিমন আম | সেরা খাবার",
+  "/step/homemade-pumpkin-bori": "কুমড়ো বড়ি | সেরা খাবার",
+  "/step/homemade-pumpkin-bori/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
 };
 
 function CampaignMetadata({ location }: { location: string }) {
