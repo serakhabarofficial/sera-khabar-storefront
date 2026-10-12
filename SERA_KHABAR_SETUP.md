@@ -7,9 +7,24 @@
 > including its safety rules. This file lists only the storefront-specific work.
 > It overrides any Mango Lover text in `CLAUDE.md` / `README.md`.
 
-Written 2026-10-12. Pushed to `serakhabarofficial/sera-khabar-storefront` from
-Mango Lover commit `5c06ac6` with `--no-verify` (the build needs
-`VITE_MERCHANT_SUITE_URL`, which doesn't exist yet). Nothing has been rebranded yet.
+Written 2026-10-12. First pushed to `serakhabarofficial/sera-khabar-storefront` from
+Mango Lover commit `5c06ac6` with `--no-verify`; later pushes pass the hook normally.
+
+## Status (updated 2026-10-12)
+
+The latest status and to-do list for both repos are in the Suite's `handoff.md`.
+
+**Done**
+- **Safety rebrand:** Suite URL, handle (`serakhabar`), workspace id, contact details, logo, icons and hero changed to Sera Khabar. Mango Lover GTM/Pixel, reels, product snapshot and comparison art removed.
+- **Live:** deployed via the Suite's Provision Storefront to https://serakhabar-storefront.vercel.app (Vercel project `storefront-690aa8b3`).
+- **Pre-launch gate ON:** `server/site-access.ts`, `server/coming-soon-page.ts`, `middleware.ts`. While the env var `SITE_ACCESS_PASSWORD` is set, visitors see the founder's letter (503 + noindex) and the team password unlocks the shop for 30 days. **Delete that env var and redeploy to launch.**
+
+**Left**
+- **Design:** colours/layout are still Mango Lover's (yellow), some Mango Lover homepage/category images remain, and the `/step/*` campaign pages need removing or reworking.
+- **Domain (Phase 9):** move the hardcoded Suite URL `https://sera-khabar-commerceos.vercel.app` to `https://admin.serakhabar.com` (files listed in the Suite's `handoff.md`).
+- **Test order:** place one through the shop.
+
+Run storefront tests with `npx tsx --test <file>`; plain `node --test` can't resolve this repo's `.js` import specifiers (45 old tests fail that way).
 
 ## Safety
 
@@ -17,9 +32,8 @@ Mango Lover commit `5c06ac6` with `--no-verify` (the build needs
 - Work only in `/Users/noorkarimmehedi/Sera Khabar - সেরা খাবার/sera-khabar-storefront` (quote the path, it has spaces).
 - Before pushing: `gh auth status` must show active `serakhabarofficial`, and
   `git remote -v` must show only `serakhabarofficial/sera-khabar-storefront`.
-- The MCP configs (`.mcp.json`, `.codex/config.toml`) are set to the placeholder
-  `SERA_KHABAR_SUPABASE_REF`. Replace it with Sera Khabar's Supabase ref once that
-  project exists. Never point them at `ldiktvcavyabivpxfwpn` (Mango Lover).
+- The MCP configs (`.mcp.json`, `.codex/config.toml`) point at Sera Khabar's Supabase
+  `xnuiaxygeoydtopvcmli`. Never point them at `ldiktvcavyabivpxfwpn` (Mango Lover).
 
 ## Prerequisites (from the Suite handoff)
 
@@ -68,9 +82,9 @@ match the Sera Khabar Suite), `VITE_TURNSTILE_SITE_KEY` (optional), `DATABASE_UR
 
 ## Done when
 
-- [ ] `npm run build` passes with Sera Khabar env vars; the hook passes on push (no `--no-verify`)
-- [ ] Deployed via the Suite's **Provision Storefront**, on the new Vercel account
-- [ ] Shows only Sera Khabar products; a test order lands in the Sera Khabar Suite
+- [x] `npm run build` passes with Sera Khabar env vars; the hook passes on push (no `--no-verify`)
+- [x] Deployed via the Suite's **Provision Storefront**, on the new Vercel account
+- [ ] Shows only Sera Khabar products ✅; a test order lands in the Sera Khabar Suite (still to do)
 - [ ] `www` domain is DNS-only (grey cloud) in the new Cloudflare account
 
 ## Step-by-step order (Phase 7 of the main guide)
