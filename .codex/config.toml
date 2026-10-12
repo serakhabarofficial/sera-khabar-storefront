@@ -6,4 +6,10 @@
 #
 # Keep in sync with .mcp.json (Claude Code) — same project, same flags.
 [mcp_servers.supabase]
-url = "https://mcp.supabase.com/mcp?project_ref=SERA_KHABAR_SUPABASE_REF&read_only=true&features=docs%2Cdatabase%2Cdebugging%2Cdevelopment"
+url = "https://mcp.supabase.com/mcp?project_ref=xnuiaxygeoydtopvcmli&read_only=true&features=docs%2Cdatabase%2Cdebugging%2Cdevelopment"
+
+[mcp_servers.sera-vercel]
+url = "https://mcp.vercel.com"
+
+[mcp_servers.sera-cloudflare]
+url = "https://mcp.cloudflare.com/mcp"

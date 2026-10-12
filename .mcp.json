@@ -2,7 +2,15 @@
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=SERA_KHABAR_SUPABASE_REF&read_only=true&features=docs%2Cdatabase%2Cdebugging%2Cdevelopment"
+      "url": "https://mcp.supabase.com/mcp?project_ref=xnuiaxygeoydtopvcmli&read_only=true&features=docs%2Cdatabase%2Cdebugging%2Cdevelopment"
+    },
+    "sera-vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    },
+    "sera-cloudflare": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp"
     }
   }
 }
