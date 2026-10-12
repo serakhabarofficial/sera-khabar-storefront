@@ -196,12 +196,19 @@ test('cache refresh requires a fresh Suite signature and expires only campaign t
   assert.equal((await handler(get('/go/_refresh'))).status, 405);
 });
 
-test('the deployed middleware only matches campaign links and defers without its secret', async () => {
-  assert.deepEqual(config, { runtime: 'nodejs', matcher: ['/go/:path*'] });
+test('the deployed middleware covers the site for the pre-launch gate and defers without its secrets', async () => {
+  assert.deepEqual(config, { runtime: 'nodejs', matcher: ['/:path*'] });
   const previous = process.env.CAMPAIGN_EDGE_SECRET;
+  const previousGate = process.env.SITE_ACCESS_PASSWORD;
   delete process.env.CAMPAIGN_EDGE_SECRET;
+  delete process.env.SITE_ACCESS_PASSWORD;
   try {
     const response = await middleware(get('/go/bori-campaign-1'), { waitUntil: () => undefined });
     assert.equal(response.headers.get('x-middleware-next'), '1');
-  } finally { if (previous !== undefined) process.env.CAMPAIGN_EDGE_SECRET = previous; }
+    const page = await middleware(get('/products'), { waitUntil: () => undefined });
+    assert.equal(page.headers.get('x-middleware-next'), '1');
+  } finally {
+    if (previous !== undefined) process.env.CAMPAIGN_EDGE_SECRET = previous;
+    if (previousGate !== undefined) process.env.SITE_ACCESS_PASSWORD = previousGate;
+  }
 });
