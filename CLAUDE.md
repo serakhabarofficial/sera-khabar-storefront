@@ -1,3 +1,5 @@
+> **⚠️ SERA KHABAR PROJECT — READ `SERA_KHABAR_SETUP.md` FIRST.** This repo is a copy of the Mango Lover BD codebase being set up for a new merchant, **Sera Khabar** (GitHub `serakhabarofficial`). Mango Lover text below is historical until the rebrand step. Never touch Mango Lover repos, folders, or Supabase project `ldiktvcavyabivpxfwpn`.
+
 # CLAUDE.md — Mango Lover BD Storefront Agent Guide
 
 Authoritative guide for AI agents working in this repository. Read it fully before changing anything.
