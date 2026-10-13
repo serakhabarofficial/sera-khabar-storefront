@@ -87,8 +87,6 @@ const MENU_ITEMS = [
   { label: "Contact Us", href: "/contact-us" },
 ] as const;
 
-const ANNOUNCEMENT_CLOSED_KEY = "sk-announcement-closed";
-
 const MEMO_SHOP_LINKS = [
   ["ফ্রেশ আম", "/collection/fresh-mango"],
   ["হোমমেড", "/collection/homemade"],
@@ -152,24 +150,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     ...MENU_ITEMS.slice(2),
   ];
 
-  // Closing the announcement lasts for this browser session.
-  const [isAnnouncementClosed, setIsAnnouncementClosed] = useState(false);
-  useEffect(() => {
-    try {
-      setIsAnnouncementClosed(window.sessionStorage.getItem(ANNOUNCEMENT_CLOSED_KEY) === "1");
-    } catch {
-      // Storage can be blocked (private mode); the bar simply shows again.
-    }
-  }, []);
-  const closeAnnouncement = () => {
-    setIsAnnouncementClosed(true);
-    try {
-      window.sessionStorage.setItem(ANNOUNCEMENT_CLOSED_KEY, "1");
-    } catch {
-      // Ignore: closing still works for this page view.
-    }
-  };
-
   const activeDockKey = isOpen
     ? "menu"
     : isSearchOpen
@@ -206,24 +186,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col md:bg-brand-ivory text-black selection:bg-brand-gold selection:text-white">
-      {/* Announcement Bar: turmeric "Poster" sign (approved 2026-10-13); one row on desktop, two lines on phones */}
-      {!isAnnouncementClosed && (
-        <div className="sk-announce" role="region" aria-label="ঘোষণা">
-          <div className="sk-announce-text">
-            <span className="sk-announce-script">শীতের নতুন গুড়</span>
-            <b>
-              <span className="num">৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}</span>+ অর্ডারে ডেলিভারি ফ্রি
-            </b>
-          </div>
-          <span className="sk-announce-stamp">ক্যাশ অন ডেলিভারি</span>
-          <Link href="/collection/jaggery" className="sk-announce-cta">
-            কিনুন <i aria-hidden="true" />
-          </Link>
-          <button type="button" className="sk-announce-close" aria-label="ঘোষণা বন্ধ করুন" onClick={closeAnnouncement}>
-            <X size={16} strokeWidth={1.75} />
-          </button>
+      {/* Announcement Bar: turmeric "Poster" sign (approved 2026-10-13); one row on desktop, two centred lines on phones */}
+      <div className="sk-announce" role="region" aria-label="ঘোষণা">
+        <div className="sk-announce-text">
+          <span className="sk-announce-script">শীতের নতুন গুড়</span>
+          <b>
+            <span className="num">৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}</span>+ অর্ডারে ডেলিভারি ফ্রি
+          </b>
         </div>
-      )}
+        <span className="sk-announce-stamp">ক্যাশ অন ডেলিভারি</span>
+        <Link href="/collection/jaggery" className="sk-announce-cta">
+          কিনুন <i aria-hidden="true" />
+        </Link>
+      </div>
       {/* Navigation */}
       <div className="sk sk-header">
         <div className="wrap">
@@ -316,7 +291,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             onAnimationEnd={() => { if (cartPulseKey > 0) consumeCartPulse(); }}
             className={`sk-dock-cart${cartPulseKey > 0 ? " cart-dock-pulse" : ""}`}
           >
-            <BagIcon className="!h-7 !w-7" />
+            <BagIcon className="!h-6 !w-6" />
             {itemCount > 0 && (
               <span aria-hidden="true" className="sk-dock-badge">
                 {toBanglaDigits(itemCount > 99 ? "99+" : itemCount)}

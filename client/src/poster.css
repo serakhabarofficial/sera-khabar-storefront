@@ -244,7 +244,7 @@
 @media (hover: hover) and (pointer: fine) { .sk .f-pol a:hover, .sk .memo-row:hover { color: var(--pink); } }
 
 /* Announcement bar: turmeric "Poster" sign. One row on desktop; on phones the text stacks into two lines. */
-.sk-announce { position: relative; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 16px; padding: 10px 48px 10px 16px; background: #f6b826; color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
+.sk-announce { position: relative; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 16px; padding: 10px 16px; background: #f6b826; color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
 .sk-announce-text { display: flex; align-items: center; gap: 4px 16px; min-width: 0; }
 .sk-announce-script { font-family: "Galada", cursive; color: #e2547a; font-size: 20px; line-height: 1.1; transform: rotate(-3deg); white-space: nowrap; }
 .sk-announce b { font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 15px; line-height: 1.35; color: #5b2d17; }
@@ -253,41 +253,39 @@
 .sk-announce-cta { flex: none; height: 32px; padding: 0 15px; border-radius: 999px; background: #5b2d17; color: #faf4ea; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
   touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
 .sk-announce-cta i { width: 6px; height: 6px; border-radius: 50%; background: #f6b826; }
-.sk-announce-close { position: absolute; right: 8px; top: 50%; translate: 0 -50%; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: #5b2d17; opacity: 0.7; display: grid; place-items: center; cursor: pointer;
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), opacity 160ms ease; }
-.sk-announce-cta:active, .sk-announce-close:active { transform: scale(0.97); }
-@media (hover: hover) and (pointer: fine) { .sk-announce-close:hover { opacity: 1; } }
+.sk-announce-cta:active { transform: scale(0.97); }
 @media (max-width: 767px) {
-  .sk-announce { justify-content: space-between; gap: 10px; padding: 8px 44px 8px 16px; }
-  .sk-announce-text { flex-direction: column; align-items: flex-start; gap: 0; }
-  .sk-announce-script { font-size: 17px; }
-  .sk-announce b { font-size: 13.5px; }
+  .sk-announce { gap: 10px; padding: 6px 16px; }
+  .sk-announce-text { flex: 1; flex-direction: column; align-items: center; gap: 0; text-align: center; }
+  .sk-announce-script { font-size: 15px; line-height: 1.05; }
+  .sk-announce b { font-size: 13px; line-height: 1.25; }
+  .sk-announce-cta { height: 28px; padding: 0 12px; font-size: 12.5px; }
   .sk-announce .num { font-size: 15px; }
   .sk-announce-stamp { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .sk-announce-cta:active, .sk-announce-close:active { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sk-announce-cta:active { transform: none; } }
 
 /* Mobile dock: compact white pill, always fixed at the bottom (phones only). */
 .sk-dock { position: fixed; z-index: 80; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; pointer-events: none; }
-.sk-dock-pill { pointer-events: auto; width: 100%; max-width: 440px; display: flex; align-items: center; gap: 4px; padding: 7px; border-radius: 999px; background: #fffdf8;
+.sk-dock-pill { pointer-events: auto; width: 100%; max-width: 440px; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; background: #fffdf8;
   box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 1px 2px rgba(58, 29, 15, 0.04), 0 4px 8px -2px rgba(58, 29, 15, 0.05), 0 14px 28px -8px rgba(58, 29, 15, 0.14); }
-.sk-dock-item, .sk-dock-cart { position: relative; display: flex; align-items: center; justify-content: center; height: 58px; border-radius: 999px; border: 0; background: none; cursor: pointer;
+.sk-dock-item, .sk-dock-cart { position: relative; display: flex; align-items: center; justify-content: center; height: 50px; border-radius: 999px; border: 0; background: none; cursor: pointer;
   touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), color 160ms ease; }
 .sk-dock-item { flex: 1 1 0; min-width: 0; padding: 0 10px; gap: 7px; color: #7a6050; }
 .sk-dock-item.is-active { flex: 1.9 1 0; }
-.sk-dock-ic svg { width: 26px !important; height: 26px !important; }
+.sk-dock-ic svg { width: 24px !important; height: 24px !important; }
 .sk-dock-item.is-active { color: #5b2d17; }
 .sk-dock-item:active, .sk-dock-cart:active { transform: scale(0.97); }
 .sk-dock-hl { position: absolute; inset: 0; border-radius: 999px; background: #f1e5d3; }
 .sk-dock-ic, .sk-dock-lbl { position: relative; display: flex; }
 .sk-dock-lbl { font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; white-space: nowrap; }
-.sk-dock-cart { flex: none; width: 58px; margin-left: 2px; background: #f6b826; color: #3a1d0f; }
+.sk-dock-cart { flex: none; width: 50px; margin-left: 2px; background: #f6b826; color: #3a1d0f; }
 .sk-dock-badge { position: absolute; top: -2px; right: -2px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #e2547a; color: #fff; display: grid; place-items: center;
   font-family: "Atma", sans-serif; font-weight: 700; font-size: 13.5px; line-height: 1; box-shadow: 0 0 0 2px #fffdf8; }
 /* Phones only: unlayered CSS beats Tailwind's md:hidden, so hide it here explicitly. */
 @media (min-width: 768px) { .sk-dock { display: none; } }
 /* Keep the end of every page clear of the dock on phones. */
-@media (max-width: 767px) { footer.sk { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 767px) { footer.sk { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
 
 @media (prefers-reduced-motion: reduce) {
   .sk .stagger > *, .sk .reveal, .sk .fr, .sk .bub, .sk .bub.typing i { animation: none !important; }

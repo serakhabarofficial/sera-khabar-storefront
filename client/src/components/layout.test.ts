@@ -4,11 +4,11 @@ import { test } from "node:test";
 
 const layoutSource = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
 
-test("uses the turmeric Poster announcement, closable for the session", () => {
+test("uses the turmeric Poster announcement with no close button", () => {
   // Approved 2026-10-13; the free-delivery amount comes from the same POLICY_FACTS checkout uses.
   assert.match(layoutSource, /<div className="sk-announce" role="region" aria-label="ঘোষণা">/);
   assert.match(layoutSource, /toBanglaDigits\(POLICY_FACTS\.freeDeliveryThreshold\)/);
-  assert.match(layoutSource, /window\.sessionStorage\.setItem\(ANNOUNCEMENT_CLOSED_KEY, "1"\)/);
+  assert.doesNotMatch(layoutSource, /sk-announce-close/);
   assert.doesNotMatch(layoutSource, /Free shipping on orders over/);
 });
 
@@ -36,7 +36,7 @@ test("uses the Solar cart icon in both desktop and mobile navigation", () => {
 
 test("keeps header cart icons balanced without changing the mobile dock", () => {
   assert.match(layoutSource, /<BagIcon className="h-5 w-5" \/>/);
-  assert.match(layoutSource, /<BagIcon className="!h-7 !w-7" \/>/);
+  assert.match(layoutSource, /<BagIcon className="!h-6 !w-6" \/>/);
   assert.match(layoutSource, /<SearchIcon className="h-5 w-5" \/>/);
 });
 
