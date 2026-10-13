@@ -1,0 +1,324 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Footer — grey shadow variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atma:wght@600;700&family=Galada&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+Bengali:wght@400;700;900&display=swap">
+<style>
+/* Review desk. Variant switcher on top, then the same footer seam in a desktop frame and a phone frame, then the exact CSS for the chosen variant. */
+:root{
+  --bg:#F3F3F0; --panel:#FFFFFF; --fg:#1A1B18; --muted:#62655C; --line:#DCDDD5; --accent:#0F5B2E; --frame:#22231F;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:28px 64px}
+.desk{max-width:1440px;margin-inline:auto;display:flex;flex-direction:column;gap:22px}
+.desk-head{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:end;justify-content:space-between}
+.desk-head h1{margin:0;font-size:clamp(22px,3vw,30px);font-weight:600;letter-spacing:-0.01em;text-wrap:balance}
+.desk-head p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+
+.switch{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (max-width:1100px){.switch{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.switch{grid-template-columns:1fr}}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:8px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);transition:transform 160ms var(--ease-out),border-color 160ms ease}
+.opt:active{transform:scale(0.97)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt[aria-selected="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.opt-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.opt-name{font-weight:600}
+.opt-ref{font-size:12px;color:var(--muted)}
+.opt small{color:var(--muted);font-size:12.5px;line-height:1.4}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:20px;align-items:start}
+@media (max-width:1100px){.stage{grid-template-columns:minmax(0,1fr)}.phone{justify-self:center;width:100%;max-width:390px}}
+.frame{background:var(--frame);border-radius:16px;padding:8px;min-width:0}
+.frame-bar{display:flex;align-items:center;gap:6px;padding:4px 6px 10px;color:#A9AB9F;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--f-mono)}
+.frame-bar i{width:9px;height:9px;border-radius:50%;background:#3A3B36}
+.frame-bar span{margin-left:auto}
+.screen{border-radius:10px;overflow:hidden;container-type:inline-size;container-name:site;background:#fff}
+.phone .screen{border-radius:22px}
+.phone .frame{border-radius:30px;padding:10px}
+
+.notes{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+@media (max-width:900px){.notes{grid-template-columns:1fr}}
+.notes h2{margin:0 0 10px;font-size:13px;font-weight:600}
+.notes h3{margin:16px 0 8px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+pre{margin:0;background:#F6F6F3;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;font-family:var(--f-mono);font-size:12px;line-height:1.6;color:#33352F}
+.fine{font-size:12.5px;color:var(--muted);margin:0}
+.fine + .fine{margin-top:10px}
+ul.reasons{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+ul.reasons li{padding-left:15px;position:relative}
+ul.reasons li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:1px;background:var(--muted)}
+ul.reasons b{font-weight:600}
+.tag{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.ok{color:#0F5B2E;border-color:#0F5B2E}
+
+/* ================= Scene: the page tail above the footer + the real footer ================= */
+/* Palette and rules copied from client/src/poster.css (Market Poster look). */
+.scene{--rice:#faf4ea;--royal:#5b2d17;--sun:#f6b826;--pink:#e2547a;--card-c:#f1e5d3;--ink-c:#3a1d0f;--sub-c:#7a6050;
+  --f-disp:"Noto Serif Bengali",serif;--ease-out:cubic-bezier(0.23,1,0.32,1);
+  background:var(--rice);color:var(--ink-c);font-family:"Noto Serif Bengali",serif;-webkit-font-smoothing:antialiased}
+.scene *{box-sizing:border-box}
+.scene img{display:block;max-width:100%}
+.scene a{color:inherit;text-decoration:none}
+
+/* --- page tail: a strip of the poster homepage so the seam has something to sit against --- */
+.tail{position:relative;padding:26px 18px 30px}
+.tail .c-tabs{display:flex;gap:6px;overflow:hidden;margin-bottom:18px}
+.tail .c-tabs .chip{flex:none;height:34px;padding:0 14px;border-radius:999px;border:1.5px solid var(--ink-c);font-size:13px;font-weight:600;background:var(--rice);font-family:inherit}
+.tail .c-tabs .chip.on{background:var(--royal);border-color:var(--royal);color:#fff}
+.tail .c-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@container site (min-width:720px){.tail .c-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}}
+.tail .c-card{position:relative;background:var(--card-c);border-radius:22px;padding:14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;min-width:0}
+.tail .c-blob{width:70%;aspect-ratio:1;flex:none;border-radius:50%;background:linear-gradient(160deg,#f6d9a4,#e9a23b)}
+.tail .c-blob.s2{background:linear-gradient(160deg,#f0d3b0,#c8802f)}
+.tail .c-blob.s3{background:linear-gradient(160deg,#f7e2bd,#d99a35)}
+.tail .c-blob.s4{background:linear-gradient(160deg,#e9dcc4,#a9713a)}
+.tail .c-info h3{margin:0;font-family:var(--f-disp);font-weight:700;font-size:15px;color:var(--ink-c)}
+.tail .c-info small{color:var(--sub-c);font-size:12px}
+.tail .c-buy{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:4px}
+.tail .c-price{font-family:Atma,sans-serif;font-weight:700;font-size:20px;color:var(--royal)}
+.tail .c-plus{width:36px;height:36px;border-radius:50%;background:var(--royal);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center}
+
+/* --- footer: verbatim structure of client/src/components/layout.tsx --- */
+.site{background:var(--rice)}
+.fa{padding:30px 18px 26px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.tack{position:absolute;z-index:5;top:-8px;left:50%;width:clamp(15px,2.5cqi,22px);aspect-ratio:1;transform:translateX(-50%);border-radius:50%;--pc:#d2342a;
+  background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,0) 26%),radial-gradient(circle at 50% 50%,var(--pc) 0 58%,color-mix(in srgb,var(--pc) 62%,#000) 100%);
+  box-shadow:inset -1.5px -2px 2px rgba(0,0,0,.25),inset 1px 1px 1px rgba(255,255,255,.35),3px 5px 4px -1px rgba(40,20,8,.45)}
+.tack::after{content:"";position:absolute;left:62%;top:78%;width:7px;height:1.6px;border-radius:2px;background:rgba(40,20,8,.35);transform:rotate(38deg);filter:blur(.4px)}
+.memo-w{position:relative;width:100%;max-width:760px;rotate:-0.6deg;filter:drop-shadow(0 .5px .5px rgba(58,29,15,.2)) drop-shadow(0 6px 8px rgba(58,29,15,.08))}
+.memo{position:relative;background-color:#fffdf6;background-image:repeating-linear-gradient(180deg,transparent 0 25px,rgba(70,110,170,.18) 25px 26px);padding:26px clamp(16px,4cqi,40px) 40px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),97.5% 100%,95% calc(100% - 10px),92.5% 100%,90% calc(100% - 10px),87.5% 100%,85% calc(100% - 10px),82.5% 100%,80% calc(100% - 10px),77.5% 100%,75% calc(100% - 10px),72.5% 100%,70% calc(100% - 10px),67.5% 100%,65% calc(100% - 10px),62.5% 100%,60% calc(100% - 10px),57.5% 100%,55% calc(100% - 10px),52.5% 100%,50% calc(100% - 10px),47.5% 100%,45% calc(100% - 10px),42.5% 100%,40% calc(100% - 10px),37.5% 100%,35% calc(100% - 10px),32.5% 100%,30% calc(100% - 10px),27.5% 100%,25% calc(100% - 10px),22.5% 100%,20% calc(100% - 10px),17.5% 100%,15% calc(100% - 10px),12.5% 100%,10% calc(100% - 10px),7.5% 100%,5% calc(100% - 10px),2.5% 100%,0 calc(100% - 10px))}
+.memo-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border-bottom:2px solid var(--royal);padding-bottom:12px}
+.memo-top img{height:48px;width:auto}
+.memo-title{text-align:center;flex:1;min-width:140px}
+.memo-title b{display:block;font-family:var(--f-disp);font-weight:900;font-size:clamp(20px,3.4cqi,30px);color:var(--royal);line-height:1.2}
+.memo-title span{font-size:12px;color:var(--sub-c)}
+.memo-no{font-size:12px;color:var(--sub-c);text-align:right}
+.memo-no .num{font-size:18px;color:var(--pink)}
+.memo-cols{display:grid;grid-template-columns:1fr;gap:4px 34px;margin-top:10px}
+@container site (min-width:720px){.memo-cols{grid-template-columns:1fr 1fr}}
+.memo-h{font-family:var(--f-disp);font-weight:700;font-size:13px;color:var(--pink);margin:10px 0 2px;letter-spacing:.02em}
+.memo-row{display:flex;align-items:baseline;gap:8px;height:26px;line-height:26px;font-family:var(--f-disp);font-weight:700;font-size:15px;color:var(--royal)}
+.memo-row::after{content:"";order:1;flex:1;border-bottom:1.5px dotted color-mix(in srgb,var(--ink-c) 35%,transparent);transform:translateY(-6px)}
+.memo-row em{order:2;font-style:normal;font-size:13px;color:var(--royal)}
+.memo-foot{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:18px;margin-top:18px}
+.memo-foot p{margin:0;max-width:62ch;flex:1 1 320px;font-size:12.5px;line-height:1.6;color:var(--ink-c)}
+.sign{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:170px}
+.sign img{height:30px;width:auto;rotate:-4deg}
+.sign hr{width:100%;border:0;border-top:1px solid var(--ink-c);margin:0}
+.sign small{font-family:"IBM Plex Sans",sans-serif;font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--sub-c)}
+.stampc{position:absolute;right:clamp(18px,34cqi,330px);bottom:44px;width:clamp(96px,15cqi,124px);aspect-ratio:1;border-radius:50%;border:2px solid currentColor;color:var(--pink);opacity:.75;rotate:-14deg;display:grid;place-items:center;text-align:center;font-size:clamp(11px,2cqi,15px);line-height:1.3;padding:8px}
+@container site (max-width:719px){.stampc{bottom:auto;top:96px;right:14px;width:80px;font-size:9px}}
+.f-copy{margin:0;font-size:11.5px;color:var(--sub-c);text-align:center}
+.f-pol{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px;font-size:11px;color:var(--sub-c);max-width:760px}
+
+/* phone dock so the bottom of the footer reads like the real page */
+.dock{position:sticky;bottom:10px;margin:0 auto;width:calc(100% - 24px);max-width:440px;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:#fffdf8;z-index:20;
+  box-shadow:0 -2px 6px rgba(58,58,62,.06),0 8px 22px rgba(58,58,62,.14)}
+.dock i{width:44px;height:44px;border-radius:999px;background:var(--sun);flex:none;margin-left:auto}
+.dock b{font-family:var(--f-disp);font-weight:700;font-size:15px;padding:0 8px;color:var(--royal)}
+@media (min-width:768px){.dock{display:none}}
+
+/* ================= The variants: only the shadow rules change ================= */
+/* 0 · today: warm brown, two layers */
+.v-0 .memo-w{filter:drop-shadow(0 .5px .5px rgba(58,29,15,.2)) drop-shadow(0 6px 8px rgba(58,29,15,.08))}
+
+/* A · grey paper: same two layers, neutral grey */
+.v-a .memo-w{filter:drop-shadow(0 1px 1px rgba(58,58,62,.20)) drop-shadow(0 8px 12px rgba(58,58,62,.10))}
+
+/* B · grey paper + halo: tight contact + mid + wide ambient, all low alpha */
+.v-b .memo-w{filter:drop-shadow(0 1px 1px rgba(58,58,62,.22)) drop-shadow(0 10px 16px rgba(58,58,62,.10)) drop-shadow(0 26px 34px rgba(58,58,62,.07))}
+
+/* C · grey seam: paper keeps its shadow, a soft grey band sits on the footer's top edge */
+.v-c .site{box-shadow:0 -18px 28px -20px rgba(58,58,62,.55)}
+.v-c .memo-w{filter:drop-shadow(0 1px 1px rgba(58,58,62,.20)) drop-shadow(0 8px 12px rgba(58,58,62,.10))}
+
+/* D · lifted footer: the whole footer block becomes a sheet that sits above the page */
+.v-d .site{position:relative;border-radius:clamp(18px,3cqi,28px) clamp(18px,3cqi,28px) 0 0;overflow:hidden;
+  box-shadow:0 -2px 6px rgba(58,58,62,.05),0 -22px 44px -26px rgba(58,58,62,.45)}
+.v-d .memo-w{filter:drop-shadow(0 1px 1px rgba(58,58,62,.18)) drop-shadow(0 6px 10px rgba(58,58,62,.08))}
+
+/* The variant under review drives both frames. */
+.v-0 .memo-w{filter:drop-shadow(0 .5px .5px rgba(58,29,15,.2)) drop-shadow(0 6px 8px rgba(58,29,15,.08))}
+</style>
+
+<div class="desk">
+  <header class="desk-head">
+    <div>
+      <p class="kicker">Sera Khabar storefront · footer</p>
+      <h1>Cash memo footer — grey shadow</h1>
+      <p>Every frame below is the real footer markup with only the shadow rules swapped. Variant 0 is what ships today, so you can judge the grey options against it.</p>
+    </div>
+    <p class="fine" id="verdict"></p>
+  </header>
+
+  <div class="switch" role="tablist" aria-label="Shadow variant">
+    <button class="opt" role="tab" id="b-0" data-v="v-0" aria-selected="true">
+      <span class="opt-top"><span class="opt-name">0 · Today</span><span class="opt-ref">baseline</span></span>
+      <small>Warm brown, two layers. Nothing changed.</small>
+    </button>
+    <button class="opt" role="tab" id="b-a" data-v="v-a" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">A · Grey paper</span><span class="opt-ref">minimal</span></span>
+      <small>Same two layers, neutral grey instead of brown.</small>
+    </button>
+    <button class="opt" role="tab" id="b-b" data-v="v-b" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">B · Grey + halo</span><span class="opt-ref">recommended</span></span>
+      <small>Three grey layers. Reads as paper lifted off the page.</small>
+    </button>
+    <button class="opt" role="tab" id="b-c" data-v="v-c" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">C · Grey seam</span><span class="opt-ref">separation</span></span>
+      <small>Grey band on the footer's top edge so the page ends clearly.</small>
+    </button>
+    <button class="opt" role="tab" id="b-d" data-v="v-d" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">D · Lifted footer</span><span class="opt-ref">boldest</span></span>
+      <small>The whole footer becomes a rounded sheet over the page.</small>
+    </button>
+  </div>
+
+  <div class="stage">
+    <div class="frame">
+      <div class="frame-bar"><i></i><i></i><i></i><span>desktop · 1280</span></div>
+      <div class="screen" id="desk"></div>
+    </div>
+    <div class="frame phone">
+      <div class="frame-bar"><i></i><i></i><i></i><span>phone</span></div>
+      <div class="screen" id="phone"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div>
+      <h2>CSS for the selected variant</h2>
+      <div id="css"></div>
+    </div>
+    <div>
+      <h2>Notes</h2>
+      <p class="fine">Shadow reads as one light source from above: everything offsets downward, and a tight contact layer sits under a wide, low-alpha ambient layer. Two rules do most of the work — keep <code>filter: drop-shadow()</code> on <code>.memo-w</code> (a <code>box-shadow</code> would draw a rectangle and destroy the torn bottom edge), and never lift the paper twice.</p>
+      <h3>Per variant</h3>
+      <div id="reasons"></div>
+    </div>
+  </div>
+</div>
+
+<template id="tpl-scene">
+  <div class="scene">
+    <div class="tail">
+      <div class="c-tabs">
+        <span class="chip on">সব</span><span class="chip">গুড়</span><span class="chip">আম</span><span class="chip">হোমমেড</span>
+      </div>
+      <div class="c-list">
+        <div class="c-card"><div class="c-blob"></div><div class="c-info"><h3>গুড় আম</h3><small>৫০ গ্রাম · ২৫০৳</small></div><div class="c-buy"><span class="c-price">২৫০৳</span><span class="c-plus">+</span></div></div>
+        <div class="c-card"><div class="c-blob s2"></div><div class="c-info"><h3>খাঁটি গুড়</h3><small>১ কেজি · ৬৫০৳</small></div><div class="c-buy"><span class="c-price">৬৫০৳</span><span class="c-plus">+</span></div></div>
+        <div class="c-card"><div class="c-blob s3"></div><div class="c-info"><h3>হোমমেড</h3><small>৫০০ গ্রাম · ৪২০৳</small></div><div class="c-buy"><span class="c-price">৪২০৳</span><span class="c-plus">+</span></div></div>
+        <div class="c-card"><div class="c-blob s4"></div><div class="c-info"><h3>কাঠামালি আম</h3><small>২.৫ কেজি · ৮৫০৳</small></div><div class="c-buy"><span class="c-price">৮৫০৳</span><span class="c-plus">+</span></div></div>
+      </div>
+    </div>
+
+    <footer class="sk site">
+      <div class="fa">
+        <div class="memo-w">
+          <span class="tack"></span>
+          <div class="memo">
+            <div class="memo-top">
+              <img src="../../../attached_assets/sera-khabar-leaf-logo.webp" alt="সেরা খাবার">
+              <div class="memo-title"><b>ক্যাশ মেমো</b><span>প্রকৃতির স্বাদ, যত্নের সঙ্গে পৌঁছে দিই আপনার ঘরে।</span></div>
+              <div class="memo-no">নং <span class="num">২০২৬</span><br>তারিখ: আজ</div>
+            </div>
+            <div class="memo-cols">
+              <div>
+                <div class="memo-h">কেনাকাটা</div>
+                <a class="memo-row" href="#">ফ্রেশ আম<em>→</em></a>
+                <a class="memo-row" href="#">হোমমেড<em>→</em></a>
+                <a class="memo-row" href="#">গুড়<em>→</em></a>
+                <a class="memo-row" href="#">সব পণ্য<em>→</em></a>
+              </div>
+              <div>
+                <div class="memo-h">যোগাযোগ</div>
+                <a class="memo-row" href="#">কল করুন<em>→</em></a>
+                <a class="memo-row" href="#">হোয়াটসঅ্যাপ করুন<em>→</em></a>
+                <a class="memo-row" href="#">আমাদের গল্প<em>→</em></a>
+                <a class="memo-row" href="#">পাইকারি অর্ডার<em>→</em></a>
+              </div>
+            </div>
+            <div class="memo-foot">
+              <p>সাধ্যের মধ্যে সেরা মানের পন্য আপনার ও আপনার পরিবারের জন্য,<br>যা আমরা পাঠাই একদম মাঠ পর্যায় থেকে, তাই পাচ্ছেন সাশ্রয়ী দামে সেরা মানের পন্যের নিশ্চয়তা।</p>
+              <a class="sign" href="#">
+                <img src="../../../client/public/arc-labs-emblem.webp" alt="Arc Labs Corporation" width="173" height="72">
+                <hr>
+                <small>Designed &amp; Engineered by</small>
+              </a>
+            </div>
+            <div class="stampc" aria-hidden="true">ক্যাশ অন<br>ডেলিভারি<br>· সারা দেশে ·</div>
+          </div>
+        </div>
+        <p class="f-copy">© ২০২৬ সেরা খাবার · নওহাটা, পবা, রাজশাহী, বাংলাদেশ, ৬২১৩</p>
+        <nav class="f-pol" aria-label="Policies">
+          <a href="#">• Privacy Policy</a><a href="#">• Refund &amp; Return</a><a href="#">• Terms &amp; Conditions</a>
+          <a href="#">• Shipping Policy</a><a href="#">• Payment Policy</a><a href="#">• How to Order</a><a href="#">• FAQ</a>
+        </nav>
+      </div>
+    </footer>
+    <div class="dock"><b>হোম</b><i></i></div>
+  </div>
+</template>
+
+<script>
+const COPY = {
+  "v-0": {
+    verdict: "Baseline — no change. Ship it and nothing moves.",
+    css: "/* nothing to change */\n/* client/src/poster.css:216 */\n.sk .memo-w {\n  filter: drop-shadow(0 0.5px 0.5px rgba(58, 29, 15, 0.2))\n          drop-shadow(0 6px 8px rgba(58, 29, 15, 0.08));\n}",
+    reasons: "<b>Warm brown.</b> Reads as the memo's own ink bleeding onto the page rather than as air under the paper. Two layers already, so the shape is right — only the colour is warm."
+  },
+  "v-a": {
+    verdict: "Minimal grey. One line changed, nothing else moves.",
+    css: "/* client/src/poster.css:216 */\n.sk .memo-w {\n  filter: drop-shadow(0 1px 1px rgba(58, 58, 62, 0.2))\n          drop-shadow(0 8px 12px rgba(58, 58, 62, 0.1));\n}",
+    reasons: "<b>Neutral grey, two layers.</b> The tight 1px layer is the contact edge where paper meets page; the 8px layer is the near ambient. Because both are low alpha, cream stays cream instead of going muddy."
+  },
+  "v-b": {
+    verdict: "Recommended. Grey, layered, still quiet.",
+    css: "/* client/src/poster.css:216 — replaces both existing layers */\n.sk .memo-w {\n  filter: drop-shadow(0 1px 1px rgba(58, 58, 62, 0.22))    /* contact */\n          drop-shadow(0 10px 16px rgba(58, 58, 62, 0.1))  /* near  */\n          drop-shadow(0 26px 34px rgba(58, 58, 62, 0.07)); /* ambient */\n}\n\n/* Optional: phones get less spread, not the same shadow. */\n@container site (max-width: 719px) {\n  .sk .memo-w {\n    filter: drop-shadow(0 1px 1px rgba(58, 58, 62, 0.2))\n            drop-shadow(0 8px 12px rgba(58, 58, 62, 0.09));\n  }\n}",
+    reasons: "<b>Three layers is what real light does.</b> Contact, near, ambient — each one a fraction of the last. The wide 7% ambient is what sells “this sheet is above the page” without anyone consciously seeing it.<br><b>Kept as <code>filter: drop-shadow()</code></b> so the shadow follows the torn bottom edge. <code>box-shadow</code> would print a rectangle under the zigzag and the paper would stop looking like paper.<br><b>Spread shrinks on phones</b> — a 26px ambient on a 390px screen is the same apparent distance as 60px on desktop, and it reads as dirt."
+  },
+  "v-c": {
+    verdict: "Separation, not lift. Paper shadow also goes grey.",
+    css: "/* client/src/poster.css — footer block (layout.tsx renders <footer class=\"sk\">) */\n.sk-footer-edge,\nfooter.sk {\n  box-shadow: 0 -18px 28px -20px rgba(58, 58, 62, 0.55);\n}\n\n/* plus the grey paper from variant A */\n.sk .memo-w {\n  filter: drop-shadow(0 1px 1px rgba(58, 58, 62, 0.2))\n          drop-shadow(0 8px 12px rgba(58, 58, 62, 0.1));\n}",
+    reasons: "<b>Answers “where does the page end?”</b> instead of “is the memo floating?”. The negative spread keeps the band's own edge invisible — it fades to nothing well above the footer.<br><b>Use when the seam is the problem.</b> If the memo shadow was never the complaint, this is the smaller fix.<br><b>Full-bleed to the viewport edges</b>, so on desktop you cannot see where it starts horizontally."
+  },
+  "v-d": {
+    verdict: "Boldest. The footer becomes a sheet laid over the page.",
+    css: "/* client/src/poster.css — footer block */\nfooter.sk {\n  position: relative;\n  border-radius: clamp(18px, 3cqi, 28px) clamp(18px, 3cqi, 28px) 0 0;\n  overflow: hidden;\n  box-shadow: 0 -2px 6px rgba(58, 58, 62, 0.05),\n              0 -22px 44px -26px rgba(58, 58, 62, 0.45);\n}\n\n/* paper shadow pulled back so nothing is lifted twice */\n.sk .memo-w {\n  filter: drop-shadow(0 1px 1px rgba(58, 58, 62, 0.18))\n          drop-shadow(0 6px 10px rgba(58, 58, 62, 0.08));\n}",
+    reasons: "<b>Strongest read of “the footer is a separate object”.</b> Corners plus a shadow above the edge means the page content visibly slides under the footer.<br><b>Risk:</b> rounded corners fight the poster language — every other edge in this design is hard-cut. It also needs the shadow pulled back on the memo, or the paper floats inside a floating sheet and the whole footer looks soft.<br><b>Use only if you want the footer to feel like a drawer.</b>"
+  }
+};
+
+const tpl = document.getElementById("tpl-scene");
+const desk = document.getElementById("desk");
+const phone = document.getElementById("phone");
+
+function render(v) {
+  for (const el of [desk, phone]) {
+    el.innerHTML = "";
+    const node = tpl.content.cloneNode(true);
+    const scene = node.querySelector(".scene");
+    scene.classList.add(v);
+    el.appendChild(node);
+  }
+  document.getElementById("css").innerHTML = "<pre>" + COPY[v].css.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])) + "</pre>";
+  document.getElementById("reasons").innerHTML = '<ul class="reasons"><li>' + COPY[v].reasons + "</li></ul>";
+  document.getElementById("verdict").textContent = COPY[v].verdict;
+}
+
+document.querySelectorAll(".opt").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".opt").forEach((b) => b.setAttribute("aria-selected", "false"));
+    btn.setAttribute("aria-selected", "true");
+    render(btn.dataset.v);
+  });
+});
+
+render("v-0");
+</script>

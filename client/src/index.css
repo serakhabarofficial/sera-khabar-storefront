@@ -34,14 +34,6 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Inter28ptSemibold';
-  src: url('/fonts/inter-28pt-semibold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -50,10 +42,12 @@
   --color-border: hsl(var(--border));
   --color-brand-gold: #c5a059;
   --color-brand-ivory: #f6f6f6;
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Cormorant Garamond', serif;
-  --font-modern: 'Space Grotesk', sans-serif;
-  --font-garet: 'Garet', 'Space Grotesk', 'Inter', sans-serif;
+  /* Geist is the single Latin/English face across the storefront. Each stack below
+     keeps the exact fallback chain it had before, so Bangla glyphs are unchanged. */
+  --font-sans: 'Geist', sans-serif;
+  --font-display: 'Geist', serif;
+  --font-modern: 'Geist', sans-serif;
+  --font-garet: 'Geist', sans-serif;
   --font-garet-book: 'GaretBook', sans-serif;
 }
 
@@ -241,10 +235,8 @@ section.mx-auto.max-w-4xl.px-5.pb-8.text-center > img[src="/katimon-description-
   @apply uppercase tracking-[0.2em] font-medium;
 }
 
-.font-inter-28pt-semibold {
-  font-family: 'Inter28ptSemibold', sans-serif;
-  font-weight: 600;
-}
+/* `.font-inter-28pt-semibold` and its @font-face were removed on 2026-10-13:
+   Inter is retired as the storefront's Latin face, and the class had no users. */
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -307,11 +299,11 @@ section.mx-auto.max-w-4xl.px-5.pb-8.text-center > img[src="/katimon-description-
   --honey-gold: #f5c456;
   --honey-brown: #654b2f;
   --honey-cream: #fffaf0;
-  font-family: "Noto Serif Bengali", "Inter", system-ui, serif;
+  font-family: "Geist", "Noto Serif Bengali", system-ui, serif;
 }
 
 .sundarbans-honey-page .honey-heading-heavy {
-  font-family: "Noto Serif Bengali", "Inter", system-ui, serif;
+  font-family: "Geist", "Noto Serif Bengali", system-ui, serif;
   font-weight: 700;
   -webkit-text-stroke: 0.45px currentColor;
   paint-order: stroke fill;

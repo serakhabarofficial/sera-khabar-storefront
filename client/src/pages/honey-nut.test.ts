@@ -85,8 +85,9 @@ test("Honey Nut quality section uses a Swiss editorial layout", () => {
   assert.match(sectionsSource, /grid-cols-\[2\.5rem_1fr\]/);
 });
 
-test("Honey Nut titles use the normal Bengali font stack", () => {
-  assert.match(stylesSource, /Noto Serif Bengali.*Inter.*system-ui/);
+test("Honey Nut titles use Geist for Latin and keep the normal Bengali font stack", () => {
+  // Geist leads for English; every Bangla glyph still falls through to Noto Serif Bengali.
+  assert.match(stylesSource, /Geist", "Noto Serif Bengali", system-ui/);
   assert.doesNotMatch(stylesSource, /KaiumSimanto/);
 });
 

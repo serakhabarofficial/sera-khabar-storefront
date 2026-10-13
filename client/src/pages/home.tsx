@@ -20,7 +20,7 @@ import {
   HOMEPAGE_OFFER_PRODUCT_SLUG,
   HOMEPAGE_SHELVES,
 } from "@/lib/featured-collections";
-import { BanglaNumber, toBanglaDigits, withAtmaDigits } from "@/lib/bangla-digits";
+import { BanglaNumber, toBanglaDigits, withNumeralDigits } from "@/lib/bangla-digits";
 import { CONTACT_DETAILS, POLICY_FACTS } from "@/lib/site-pages";
 
 // Approved homepage redesign (2026-10-13): "Market Poster" in tamarind + turmeric.
@@ -188,7 +188,7 @@ function OfferBand({ product }: { product: StorefrontProduct }) {
       {image ? <img className="float f1 reveal" src={image} alt="" loading="lazy" decoding="async" /> : null}
       <img className="float f2 reveal" src="/home/hero-bori.webp" alt="" loading="lazy" decoding="async" />
       <div className="c-big">৳{toBanglaDigits(price)}</div>
-      <span className="c-ribbon">{withAtmaDigits(`${bangla}, ${size ? `${size} ` : ""}থেকে শুরু`)}</span>
+      <span className="c-ribbon">{withNumeralDigits(`${bangla}, ${size ? `${size} ` : ""}থেকে শুরু`)}</span>
     </Link>
   );
 }
@@ -304,7 +304,7 @@ function FaqChat() {
                 <i />
               </div>
             ) : (
-              <div className="bub shop">{withAtmaDigits(answer)}</div>
+              <div className="bub shop">{withNumeralDigits(answer)}</div>
             )}
           </div>
         </div>

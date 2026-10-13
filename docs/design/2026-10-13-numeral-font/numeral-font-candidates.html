@@ -1,0 +1,377 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Numerals — font candidates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300..800&family=Atma:wght@700&family=Baloo+Da+2:wght@400..800&family=Geist:wght@100..900&family=Hind+Siliguri:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Mina:wght@400;700&family=Noto+Sans+Bengali:wght@100..900&family=Noto+Serif+Bengali:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Review desk. Every frame shows the real digit contexts from the poster homepage, cart and memo, with only the numeral face swapped. */
+:root{
+  --bg:#F3F3F0; --panel:#FFFFFF; --fg:#1A1B18; --muted:#62655C; --line:#DCDDD5; --accent:#0F5B2E; --frame:#22231F;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:28px 64px}
+.desk{max-width:1440px;margin-inline:auto;display:flex;flex-direction:column;gap:22px}
+.desk-head h1{margin:0;font-size:clamp(22px,3vw,30px);font-weight:600;letter-spacing:-0.01em;text-wrap:balance}
+.desk-head p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+
+.switch{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:1200px){.switch{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.switch{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);transition:transform 160ms var(--ease-out),border-color 160ms ease}
+.opt:active{transform:scale(0.97)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt[aria-selected="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.opt-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.opt-name{font-weight:600}
+.opt-ref{font-size:11px;color:var(--muted)}
+.opt small{color:var(--muted);font-size:12px;line-height:1.35}
+.opt .glyphs{font-size:21px;line-height:1.1;letter-spacing:.01em}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+@media (max-width:1100px){.stage{grid-template-columns:minmax(0,1fr)}.phone{justify-self:center;width:100%;max-width:400px}}
+.frame{background:var(--frame);border-radius:16px;padding:8px;min-width:0}
+.frame-bar{display:flex;align-items:center;gap:6px;padding:4px 6px 10px;color:#A9AB9F;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--f-mono)}
+.frame-bar i{width:9px;height:9px;border-radius:50%;background:#3A3B36}
+.frame-bar span{margin-left:auto}
+.screen{border-radius:10px;overflow:hidden;container-type:inline-size;container-name:site;background:#fff}
+.phone .screen{border-radius:22px}
+.phone .frame{border-radius:30px;padding:10px}
+
+.notes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+@media (max-width:900px){.notes{grid-template-columns:1fr}}
+.notes h2{margin:0 0 10px;font-size:13px;font-weight:600}
+.notes h3{margin:18px 0 8px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+pre{margin:0;background:#F6F6F3;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;font-family:var(--f-mono);font-size:12px;line-height:1.65;color:#33352F}
+.fine{font-size:12.5px;color:var(--muted);margin:0}
+.fine + .fine{margin-top:10px}
+ul.reasons{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;font-size:13.5px}
+ul.reasons li{padding-left:15px;position:relative}
+ul.reasons li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:1px;background:var(--muted)}
+ul.reasons b{font-weight:600}
+.verdict{font-size:14px;font-weight:600;margin:0 0 12px}
+
+/* ================= Scene: the real poster surfaces that carry numerals ================= */
+.scene{--rice:#faf4ea;--royal:#5b2d17;--sun:#f6b826;--pink:#e2547a;--card-c:#f1e5d3;--ink-c:#3a1d0f;--sub-c:#7a6050;
+  background:var(--rice);color:var(--ink-c);font-family:"Noto Serif Bengali",serif;-webkit-font-smoothing:antialiased}
+.scene *{box-sizing:border-box}
+.scene a{color:inherit;text-decoration:none}
+.wrap{padding:0 18px}
+@container site (min-width:720px){.wrap{padding:0 48px}}
+
+/* numbered category cards — home.tsx:85, digits inside a 22% ring */
+.fr{position:relative;display:block;aspect-ratio:1/1.12;min-width:0;--c:var(--sun)}
+.fr-card{position:absolute;left:16%;top:34%;right:0;bottom:0;background:var(--c);border-radius:clamp(14px,3.4cqi,34px);border-top-left-radius:clamp(26px,6cqi,64px)}
+.fr-name{position:absolute;z-index:3;left:23%;right:38%;bottom:clamp(16px,2.4cqi,24px);font-weight:900;font-size:clamp(14px,2.6cqi,26px);color:var(--ink-c);white-space:nowrap}
+.fr-no{position:absolute;z-index:3;left:-2px;bottom:-2px;width:clamp(42px,8cqi,78px);aspect-ratio:1;border-radius:50%;background:var(--rice);box-shadow:0 0 0 clamp(4px,.9cqi,8px) var(--rice);display:grid;place-items:center}
+.fr-no span{font-weight:700;font-size:clamp(14px,2.6cqi,24px);color:var(--ink-c);width:78%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 30%,var(--rice))}
+.fr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,3cqi,32px);max-width:960px;margin:clamp(24px,4cqi,44px) auto 0}
+@media (max-width:560px){.fr-grid{grid-template-columns:1fr;gap:6px;margin-top:30px}.fr{aspect-ratio:auto;height:132px}.fr-card{left:0;right:0;top:30px;bottom:0;border-radius:26px}.fr-name{left:auto;right:22px;top:54px;bottom:auto;font-size:24px;text-align:right}.fr-no{left:14px;bottom:auto;top:16px;width:52px;box-shadow:0 0 0 5px var(--rice)}}
+
+/* the big signboard price — home.tsx:190 */
+.ad-board{position:relative;margin-top:clamp(26px,4cqi,40px);background:var(--sun);overflow:hidden}
+.ad-b-in{position:relative;display:flex;align-items:center;gap:clamp(14px,3cqi,32px);padding-block:clamp(18px,3cqi,30px)}
+.ad-b-txt{flex:1;min-width:0;color:var(--ink-c)}
+.ad-b-txt .script{display:block;font-family:"Geist","Noto Serif Bengali",serif;font-weight:500;font-size:clamp(15px,2.2cqi,20px);color:var(--royal);transform:rotate(-3deg);width:max-content}
+.ad-b-txt h2{margin:2px 0 4px;font-weight:900;font-size:clamp(19px,3cqi,30px);color:var(--royal);line-height:1.15}
+.ad-b-txt p{margin:0;font-size:clamp(12px,1.6cqi,14px);color:color-mix(in srgb,var(--ink-c) 78%,transparent);line-height:1.5}
+.ad-b-price{display:flex;align-items:baseline;gap:6px;font-weight:700;font-size:clamp(34px,6cqi,54px);color:var(--royal);line-height:1;margin-top:8px}
+.ad-b-price small{font-weight:600;font-size:13px;color:color-mix(in srgb,var(--royal) 70%,transparent)}
+
+/* ribbon with inline digits inside Bangla copy — home.tsx:191 */
+.c-ribbon{display:inline-block;position:relative;margin-top:8px;background:var(--sun);padding:6px 14px;border-radius:999px;font-weight:700;font-size:13px;color:var(--royal);letter-spacing:.02em;transform:rotate(-2deg)}
+
+/* product cards: price + variant weight inline — poster-product-card.tsx */
+.c-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:960px;margin:clamp(20px,3cqi,32px) auto 0}
+@container site (min-width:720px){.c-list{gap:22px}}
+.c-card{position:relative;background:var(--card-c);border-radius:22px;padding:14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;min-width:0}
+.c-blob{width:62%;aspect-ratio:1;flex:none;border-radius:50%;background:linear-gradient(160deg,#f6d9a4,#e9a23b)}
+.c-blob.s2{background:linear-gradient(160deg,#f0d3b0,#c8802f)}
+.c-info h3{margin:0;font-weight:700;font-size:15px;color:var(--ink-c)}
+.c-info small{color:var(--sub-c);font-size:12px}
+.c-buy{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:4px}
+.c-price{font-weight:700;font-size:20px;color:var(--royal)}
+.c-plus{width:36px;height:36px;border-radius:50%;background:var(--royal);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center}
+
+/* cart drawer row + qty pill + subtotal — cart-drawer.tsx */
+.cart{background:#fffdf8;border-radius:26px;padding:22px 24px 20px;margin-top:clamp(22px,3cqi,34px);box-shadow:0 24px 48px -16px rgba(42,28,20,.35)}
+.skc-title{display:block;font-family:"Geist","Noto Serif Bengali",serif;font-weight:900;font-size:24px;line-height:1.2;color:var(--royal)}
+.skc-list{display:flex;flex-direction:column;gap:12px;margin:14px 0}
+.skc-item{display:flex;align-items:center;gap:14px;padding:12px;border-radius:20px;background:var(--rice)}
+.skc-img{flex:none;width:64px;height:64px;border-radius:16px;background:#fff;display:grid;place-items:center}
+.skc-img i{width:38px;height:38px;border-radius:50%;background:linear-gradient(160deg,#f6d9a4,#e9a23b)}
+.skc-info{flex:1;min-width:0}
+.skc-info h3{margin:0;font-family:"Geist","Noto Serif Bengali",serif;font-weight:700;font-size:15px;color:var(--ink-c)}
+.skc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:5px}
+.skc-price{font-weight:700;font-size:18px;color:var(--royal)}
+.skc-qty{display:flex;align-items:center;height:32px;padding:0 2px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(58,29,15,.12)}
+.skc-qty button{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:17px;color:var(--royal);line-height:1}
+.skc-qty span{min-width:24px;text-align:center;font-weight:700;font-size:14px;color:var(--ink-c)}
+.skc-foot{border-top:1.5px dotted rgba(58,29,15,.22);padding-top:12px;margin-top:12px;display:flex;flex-direction:column;gap:9px}
+.skc-subtotal{display:flex;align-items:baseline;justify-content:space-between;font-family:"Geist","Noto Serif Bengali",serif;font-weight:700;font-size:15px;color:var(--royal)}
+.skc-subtotal b{font-size:24px}
+.skc-checkout{height:46px;border-radius:999px;background:var(--sun);color:var(--ink-c);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px}
+.skc-checkout i{width:8px;height:8px;border-radius:50%;background:var(--pink)}
+
+/* memo header — layout.tsx:420, the two-digit year and the 4-digit postcode */
+.memo-w{position:relative;max-width:520px;margin:clamp(26px,4cqi,40px) auto 0;rotate:-.6deg;filter:drop-shadow(0 1px 1px rgba(58,58,62,.22)) drop-shadow(0 10px 16px rgba(58,58,62,.1)) drop-shadow(0 26px 34px rgba(58,58,62,.07))}
+.memo{position:relative;background-color:#fffdf6;background-image:repeating-linear-gradient(180deg,transparent 0 25px,rgba(70,110,170,.18) 25px 26px);padding:22px clamp(16px,4cqi,34px) 30px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),97.5% 100%,95% calc(100% - 10px),92.5% 100%,90% calc(100% - 10px),87.5% 100%,85% calc(100% - 10px),82.5% 100%,80% calc(100% - 10px),77.5% 100%,75% calc(100% - 10px),72.5% 100%,70% calc(100% - 10px),67.5% 100%,65% calc(100% - 10px),62.5% 100%,60% calc(100% - 10px),57.5% 100%,55% calc(100% - 10px),52.5% 100%,50% calc(100% - 10px),47.5% 100%,45% calc(100% - 10px),42.5% 100%,40% calc(100% - 10px),37.5% 100%,35% calc(100% - 10px),32.5% 100%,30% calc(100% - 10px),27.5% 100%,25% calc(100% - 10px),22.5% 100%,20% calc(100% - 10px),17.5% 100%,15% calc(100% - 10px),12.5% 100%,10% calc(100% - 10px),7.5% 100%,5% calc(100% - 10px),2.5% 100%,0 calc(100% - 10px))}
+.memo-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border-bottom:2px solid var(--royal);padding-bottom:11px}
+.memo-title{flex:1;min-width:120px;text-align:center}
+.memo-title b{display:block;font-weight:900;font-size:22px;color:var(--royal);line-height:1.2}
+.memo-title span{font-size:11.5px;color:var(--sub-c)}
+.memo-no{font-size:11.5px;color:var(--sub-c);text-align:right;line-height:1.5}
+.memo-no .num{font-size:17px;color:var(--pink)}
+.memo-foot{margin-top:14px;font-size:11.5px;color:var(--sub-c);text-align:center;line-height:1.6}
+
+/* ================= The candidates: one variable, every .num / numeral span ================= */
+/* 0 · Atma (today) */
+.n-0{--num:"Atma",sans-serif}
+/* A · Geist + Noto Sans Bengali (split, Latin digits in Geist) */
+.n-a{--num:"Geist","Noto Serif Bengali",serif}
+/* B · Noto Sans Bengali */
+.n-b{--num:"Noto Sans Bengali",sans-serif}
+/* C · Hind Siliguri */
+.n-c{--num:"Hind Siliguri",sans-serif}
+/* D · Anek Bangla */
+.n-d{--num:"Anek Bangla",sans-serif}
+/* E · Baloo Da 2 */
+.n-e{--num:"Baloo Da 2",sans-serif}
+/* F · Noto Sans Bengali for Bangla digits, Geist for Latin digits inside one run */
+.n-f{--num:"Geist","Noto Sans Bengali",sans-serif}
+
+.scene [class*="num"],.num,.fr-no span,.c-price,.c-big,.ad-b-price,.skc-price,.skc-qty span,.skc-subtotal b,.c-ribbon{
+  font-family:var(--num);font-weight:700;font-variant-numeric:tabular-nums lining-nums;
+}
+.c-big{font-size:clamp(56px,13cqi,140px);line-height:.9;color:var(--royal);font-weight:700}
+</style>
+
+<div class="desk">
+  <header class="desk-head">
+    <p class="kicker">Sera Khabar storefront · numerals</p>
+    <h1>Digit font — candidates for Atma</h1>
+    <p>Every surface below is a real numeral context from the poster homepage, cart drawer and footer memo. Only the numeral face changes. Bengali digits (০১২৩৪৫৬৭৮৯) and the taka sign (৳) are what the storefront actually sets today.</p>
+  </header>
+
+  <div class="switch" role="tablist" aria-label="Numeral font">
+    <button class="opt" role="tab" data-v="n-0" aria-selected="true">
+      <span class="opt-top"><span class="opt-name">0 · Atma</span><span class="opt-ref">today</span></span>
+      <span class="glyphs" style="font-family:'Atma'">০১২৩৪৫৬৭৮৯</span>
+      <small>Single weight, display personality.</small>
+    </button>
+    <button class="opt" role="tab" data-v="n-a" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">A · Geist</span><span class="opt-ref">split</span></span>
+      <span class="glyphs" style="font-family:'Geist','Noto Serif Bengali',serif">০১২৩৪৫৬৭৮৯</span>
+      <small>Latin digits are Geist; Bangla falls to the body serif.</small>
+    </button>
+    <button class="opt" role="tab" data-v="n-b" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">B · Noto Sans Bengali</span><span class="opt-ref">neutral</span></span>
+      <span class="glyphs" style="font-family:'Noto Sans Bengali'">০১২৩৪৫৬৭৮৯</span>
+      <small>Variable 100–900. Modern, pairs with Geist.</small>
+    </button>
+    <button class="opt" role="tab" data-v="n-c" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">C · Hind Siliguri</span><span class="opt-ref">geometric</span></span>
+      <span class="glyphs" style="font-family:'Hind Siliguri'">০১২৩৪৫৬৭৮৯</span>
+      <small>Clean humanist sans, very legible small.</small>
+    </button>
+    <button class="opt" role="tab" data-v="n-d" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">D · Anek Bangla</span><span class="opt-ref">technical</span></span>
+      <span class="glyphs" style="font-family:'Anek Bangla'">০১২৩৪৫৬৭৮৯</span>
+      <small>Variable, narrow, data-leaning.</small>
+    </button>
+    <button class="opt" role="tab" data-v="n-e" aria-selected="false">
+      <span class="opt-top"><span class="opt-name">E · Baloo Da 2</span><span class="opt-ref">friendly</span></span>
+      <span class="glyphs" style="font-family:'Baloo Da 2'">০১২৩৪৫৬৭৮৯</span>
+      <small>Rounded and warm, softer tone.</small>
+    </button>
+  </div>
+
+  <div class="stage">
+    <div class="frame">
+      <div class="frame-bar"><i></i><i></i><i></i><span>desktop</span></div>
+      <div class="screen" id="desk"></div>
+    </div>
+    <div class="frame phone">
+      <div class="frame-bar"><i></i><i></i><i></i><span>phone</span></div>
+      <div class="screen" id="phone"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div>
+      <p class="verdict" id="verdict"></p>
+      <h2>Specimen</h2>
+      <div id="specimen"></div>
+      <h3>CSS for the selected variant</h3>
+      <pre id="css"></pre>
+    </div>
+    <div>
+      <h2>Notes</h2>
+      <ul class="reasons" id="reasons"></ul>
+      <h3>What changes in the repo</h3>
+      <p class="fine" id="touch"></p>
+    </div>
+  </div>
+</div>
+
+<template id="tpl-scene">
+  <div class="scene">
+    <!-- numbered category cards: home.tsx:85 -->
+    <div class="wrap" style="padding-top:26px">
+      <div class="fr-grid">
+        <div class="fr"><div class="fr-card"></div><span class="fr-name">খাঁটি গুড়</span><span class="fr-no" aria-hidden="true"><span>০১</span></span></div>
+        <div class="fr"><div class="fr-card" style="background:#e2547a"></div><span class="fr-name">আম</span><span class="fr-no" aria-hidden="true"><span>০২</span></span></div>
+        <div class="fr"><div class="fr-card" style="background:#f1e5d3"></div><span class="fr-name">হোমমেড</span><span class="fr-no" aria-hidden="true"><span>০৩</span></span></div>
+      </div>
+    </div>
+
+    <!-- signboard price + inline digits: home.tsx:190 -->
+    <div class="ad-board">
+      <div class="wrap ad-b-in">
+        <div class="ad-b-txt">
+          <span class="script">শীতের নতুন গুড়</span>
+          <h2>খেজুরের পাটালী গুড়</h2>
+          <p>এই শীতের প্রথম রস, মাটির চুলায় জ্বাল দেওয়া। ছোট ব্যাচ।</p>
+          <span class="ad-b-price"><small>শুরু</small>৳৯৮৫০০</span>
+          <span class="c-ribbon">৫০০ গ্রাম থেকে শুরু</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- product cards: poster-product-card.tsx -->
+    <div class="wrap">
+      <div class="c-list">
+        <div class="c-card"><div class="c-blob"></div><div class="c-info"><h3>গুড় আম</h3><small>৫০ গ্রাম · ২৫০৳</small></div><div class="c-buy"><span class="c-price">২৫০৳</span><span class="c-plus">+</span></div></div>
+        <div class="c-card"><div class="c-blob s2"></div><div class="c-info"><h3>খাঁটি গুড়</h3><small>১ কেজি · ৬৫০৳</small></div><div class="c-buy"><span class="c-price">৬৫০৳</span><span class="c-plus">+</span></div></div>
+      </div>
+    </div>
+
+    <!-- cart drawer: cart-drawer.tsx -->
+    <div class="wrap">
+      <div class="cart">
+        <span class="skc-title">আপনার কার্ট</span>
+        <div class="skc-list">
+          <div class="skc-item">
+            <div class="skc-img"><i></i></div>
+            <div class="skc-info">
+              <h3>খেজুরের পাটালী গুড়</h3>
+              <div class="skc-row">
+                <span class="skc-price">৯৮৫০০৳</span>
+                <span class="skc-qty"><button>−</button><span>২</span><button>+</button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="skc-foot">
+          <div class="skc-subtotal"><span>সর্বমোট</span><b>১৯৭০০৳</b></div>
+          <div class="skc-subtotal"><span>ডেলিভারি</span><b>৮০৳</b></div>
+          <div class="skc-checkout">অর্ডার নিশ্চিত করুন<i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer memo: layout.tsx:420 and 465 -->
+    <div class="wrap">
+      <div class="memo-w">
+        <div class="memo">
+          <div class="memo-top">
+            <div class="memo-title"><b>ক্যাশ মেমো</b><span>প্রকৃতির স্বাদ, যত্নের সঙ্গে।</span></div>
+            <div class="memo-no">নং <span class="num">৫১</span><br>তারিখ: <span class="num">০২</span> মার্চ</div>
+          </div>
+          <div class="memo-foot">© <span class="num">২০২৬</span> সেরা খাবার · নওহাটা, পবা, রাজশাহী, <span class="num">৬২১৩</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+const COPY = {
+  "n-0": {
+    verdict: "Atma today: one weight, all personality. Decorative, not neutral.",
+    css: "/* unchanged */",
+    specimen: 'Atma',
+    reasons: "<b>Single weight (700 only).</b> Every numeral in the storefront is weight 700 today, so there is no axis to tune.<br><b>Wide, quirky, display-drawn.</b> Reads charming at ৳৯৮৫০০ on the signboard, but the same shapes at 15px in the qty pill are loose rather than precise.<br><b>Latin digits drift.</b> The ৳ symbol and ০ look related; 1 and 4 in Latin are less settled.",
+    touch: "Nothing. This is the baseline."
+  },
+  "n-a": {
+    verdict: "Geist for Latin digits, Noto Serif Bengali for Bangla. Modern, but not one voice.",
+    css: '/* Geist has no Bengali subset, so Bangla digits must fall back. */\n.num,\n.fr-no span,\n.c-price,\n.c-big,\n.ad-b-price,\n.skc-price,\n.skc-qty span,\n.skc-subtotal b {\n  font-family: "Geist", "Noto Serif Bengali", serif;\n  font-weight: 700;\n}',
+    specimen: 'Geist + Noto Serif Bengali',
+    reasons: "<b>Latin digits become Geist</b>, so they match every other piece of English on the page after the 2026-10-13 swap.<br><b>The catch:</b> Geist ships no Bengali subset, so ০১২৩ fall through to Noto Serif Bengali — a serif. Check the ribbon and memo: Bangla numerals sit in a serif while the poster body is also serif, so the numerals lose their 'figure' quality and start reading as words.<br><b>Two voices in one price.</b> ৳৯৮৫০০ is Bangla-only so it stays coherent, but any Latin digit you add later (phone numbers, order IDs) will visibly differ.",
+    touch: "Reuses the Geist already loaded. Cheapest option, but the mixed serif digits are the trade-off."
+  },
+  "n-b": {
+    verdict: "Noto Sans Bengali: one modern sans voice for every numeral in both scripts.",
+    css: '/* client/index.html — add to the fonts link */\n// family=Noto+Sans+Bengali:wght@100..900\n\n/* client/src/poster.css — replace every "Atma", sans-serif numeral stack */\n.num,\n.fr-no span,\n.c-price,\n.c-big,\n.ad-b-price,\n.skc-price,\n.skc-qty span,\n.skc-subtotal b,\n.sko-item-price,\n.sko-total-row b,\n.sko-total-sum b,\n.skp-price .num,\n.sko-ref b {\n  font-family: "Noto Sans Bengali", sans-serif;\n  font-weight: 700;\n  font-variant-numeric: tabular-nums;\n}',
+    specimen: 'Noto Sans Bengali',
+    reasons: "<b>Both scripts in one family.</b> Bangla and Latin digits are drawn by the same designer at the same rhythm, so ৫ and 5 share proportions and a price never splits into two voices.<br><b>Variable 100–900.</b> Real axis: you can drop the qty pill to 600 and lift the signboard to 800 instead of faking it.<br><b>Modern and neutral.</b> Humanist sans, generous counters, reads clean at 13px and still holds up at 140px. Pairs naturally with Geist because both are contemporary grotesques.<br><b>The trade:</b> it loses Atma's warmth. On a food brand the numerals become more functional and less hand-made.",
+    touch: "One font added to the Google Fonts link, then the Atma stacks in poster.css become Noto Sans Bengali. lib/bangla-digits.tsx needs no change; the helper name withAtmaDigits would just want renaming."
+  },
+  "n-c": {
+    verdict: "Hind Siliguri: geometric, crisp, the most legible at small sizes.",
+    css: '// family=Hind+Siliguri:wght@300;400;500;600;700\n\n.num,\n.c-price,\n.skc-price,\n.skc-qty span,\n.skc-subtotal b {\n  font-family: "Hind Siliguri", sans-serif;\n  font-weight: 600;\n  font-variant-numeric: tabular-nums;\n}',
+    specimen: 'Hind Siliguri',
+    reasons: "<b>Built for small sizes.</b> Short, open, unambiguous digits. If digits live mostly in cart rows and qty pills, this is the sharpest read.<br><b>Geometric skeleton</b> gives it a more mechanical, price-tag feel than B — closer to a receipt than a poster.<br><b>Static weights, not variable</b> (300–700 as separate files), so it costs more requests than a single variable file and you have no fine axis.<br><b>Widely used in Bangladeshi web</b>, which means it reads familiar rather than distinctive.",
+    touch: "Same swap as B. Static weights add a few font requests."
+  },
+  "n-d": {
+    verdict: "Anek Bangla: narrow and technical, best for dense number columns.",
+    css: '// family=Anek+Bangla:wght@300..800\n\n.num,\n.c-price,\n.skc-price,\n.skc-subtotal b {\n  font-family: "Anek Bangla", sans-serif;\n  font-weight: 600;\n  font-stretch: 95%;\n}',
+    specimen: 'Anek Bangla',
+    reasons: "<b>Narrow digits</b> fit more price in the same width — useful if long amounts ever wrap in the cart.<br><b>Variable weight plus a width axis</b>, so it is the only candidate here you can squeeze without going to another family.<br><b>Reads technical.</b> That is a deliberate departure from the poster warmth: it looks like data, not like a signboard. At ৳৯৮৫০০ on the signboard it is the coldest of the set.",
+    touch: "Same swap as B."
+  },
+  "n-e": {
+    verdict: "Baloo Da 2: rounded and friendly, the softest option.",
+    css: '// family=Baloo+Da+2:wght@400..800\n\n.num,\n.c-price,\n.skc-price,\n.skc-subtotal b {\n  font-family: "Baloo Da 2", sans-serif;\n  font-weight: 600;\n}',
+    specimen: 'Baloo Da 2',
+    reasons: "<b>Warm and approachable</b>, closest to Atma's friendly tone while being far more even and systematic.<br><b>Rounded terminals</b> mean ০ and ৩ read soft at large sizes on the signboard.<br><b>The risk:</b> the same roundness makes small digits in the qty pill and cart rows look slightly toy-like, and the weight range tops out at 800 so you cannot get the crispness Atma's heavier numbers have now.<br><b>Best if brand warmth matters more than precision.</b>",
+    touch: "Same swap as B."
+  },
+  "n-f": {
+    verdict: "Geist first, Noto Sans Bengali behind it: Geist Latin digits, sans Bangla digits.",
+    css: '/* One run, two voices — but both are sans, so the mismatch is quiet. */\n.num,\n.c-price,\n.c-big,\n.ad-b-price,\n.skc-price,\n.skc-qty span,\n.skc-subtotal b {\n  font-family: "Geist", "Noto Sans Bengali", sans-serif;\n  font-weight: 700;\n  font-variant-numeric: tabular-nums;\n}',
+    specimen: 'Geist + Noto Sans Bengali',
+    reasons: "<b>Best of both, if you need Latin digits to match English.</b> Latin digits and every other English character on the page are Geist. Bangla digits land on Noto Sans Bengali — sans, like Geist — so the seam is far less visible than variant A's serif fallback.<br><b>Latin digits are genuinely excellent.</b> Geist's numerals are the strongest of any candidate here at small sizes, and tabular by default.<br><b>Still two sources.</b> Compare ১৯৭০০ with 19700 in the cart: the Bangla side is slightly wider. Nobody consciously sees it, but it is there.<br><b>One extra font request</b> versus B alone.",
+    touch: "Needs Geist (already loaded) plus Noto Sans Bengali."
+  }
+};
+
+const tpl = document.getElementById("tpl-scene");
+const desk = document.getElementById("desk");
+const phone = document.getElementById("phone");
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+function render(v) {
+  for (const el of [desk, phone]) {
+    el.innerHTML = "";
+    const node = tpl.content.cloneNode(true);
+    node.querySelector(".scene").classList.add(v);
+    el.appendChild(node);
+  }
+  const d = COPY[v];
+  document.getElementById("verdict").textContent = d.verdict;
+  document.getElementById("css").textContent = d.css;
+  document.getElementById("reasons").innerHTML = "<li>" + d.reasons.split("<br>").join("</li><li>") + "</li>";
+  document.getElementById("touch").textContent = d.touch;
+  document.getElementById("specimen").innerHTML =
+    '<p class="fine" style="font-size:34px;line-height:1.15;color:var(--fg);font-family:' + (d.specimen.indexOf("+") > -1 ? d.specimen.replace(/"/g, "'") : "'" + d.specimen + "'") + '">০১২৩৪৫৬৭৮৯ ৳৯৮৫০০</p>' +
+    '<p class="fine" style="font-family:' + (d.specimen.indexOf("+") > -1 ? d.specimen.replace(/"/g, "'") : "'" + d.specimen + "'") + '">0123456789 98500 2026</p>' +
+    '<p class="fine" style="margin-top:8px">Bangla digits and Latin digits, same weight. Tabular figures are on in every variant so prices align in a column.</p>';
+}
+
+document.querySelectorAll(".opt").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".opt").forEach((b) => b.setAttribute("aria-selected", "false"));
+    btn.setAttribute("aria-selected", "true");
+    render(btn.dataset.v);
+  });
+});
+
+render("n-0");
+</script>

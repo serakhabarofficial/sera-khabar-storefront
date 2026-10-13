@@ -16,7 +16,7 @@ export function splitProductName(name: string) {
 type Variant = NonNullable<StorefrontProduct["variants"]>[number];
 
 // Homepage product card from the approved Market Poster design: photo on top (its white
-// background blends into the card), centred name, big Atma price, round + button.
+// background blends into the card), centred name, big numeral price, round + button.
 // Pass `variant` to sell one specific size; otherwise the card uses the default variant.
 export default function PosterProductCard({ product, variant: fixedVariant }: { product: StorefrontProduct; variant?: Variant }) {
   const { addToCart } = useCart();

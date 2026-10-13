@@ -12,14 +12,14 @@ test("the cart uses Geist for English while retaining Bengali fallback fonts", (
     assert.match(rule, /font-family: "Geist", "Noto Serif Bengali", serif;/);
   }
   const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
-  assert.match(html, /family=Geist:wght@400;500;600;700/);
+  assert.match(html, /family=Geist:wght@100\.\.900/);
   assert.match(html, /family=Noto\+Serif\+Bengali:wght@400;500;600;700;800;900/);
 });
 
-test("cart prices and quantity digits keep the existing Atma font", () => {
+test("cart prices and quantity digits use the Geist numeral face with a Bangla fallback", () => {
   for (const selector of [".skc-price", ".skc-qty span", ".skc-subtotal b"]) {
     const rule = posterSource.slice(posterSource.indexOf(`${selector} {`)).split("}")[0];
-    assert.match(rule, /font-family: "Atma", sans-serif;/);
+    assert.match(rule, /font-family: "Geist", "Noto Serif Bengali", serif;/);
   }
 });
 

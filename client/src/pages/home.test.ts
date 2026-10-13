@@ -42,12 +42,13 @@ test("uses the tamarind and turmeric palette", () => {
   }
 });
 
-test("loads Noto Serif Bengali, Atma and Galada and sets digits in Atma", () => {
+test("loads Noto Serif Bengali and Galada and sets digits in Geist with a Bangla fallback", () => {
   assert.match(indexHtml, /family=Noto\+Serif\+Bengali:wght@400;500;600;700;800;900/);
-  assert.match(indexHtml, /family=Atma:wght@700/);
+  assert.match(indexHtml, /family=Geist:wght@100\.\.900/);
   assert.match(indexHtml, /family=Galada/);
-  assert.match(posterCss, /\.sk \.num \{ font-family: "Atma"/);
-  assert.match(homeSource, /withAtmaDigits|BanglaNumber/);
+  // Geist has no Bengali subset, so Bangla digits fall through to Noto Serif Bengali.
+  assert.match(posterCss, /\.sk \.num \{[^}]*font-family: "Geist", "Noto Serif Bengali", serif;/);
+  assert.match(homeSource, /withNumeralDigits|BanglaNumber/);
 });
 
 test("renders the giant wordmark hero with the hand-lettered accent", () => {

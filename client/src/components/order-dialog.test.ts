@@ -90,7 +90,7 @@ test("checkout ends with a short summary of the store policies and links to them
 
 test("the order form is white and sets English text in Geist (2026-10-13)", () => {
   const htmlSource = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
-  assert.match(htmlSource, /family=Geist:wght@400;500;600;700/);
+  assert.match(htmlSource, /family=Geist:wght@100\.\.900/);
   assert.match(posterSource, /\.sko-sheet, \.sko-panel \{[^}]*background: #ffffff;/);
   // Geist first, so Latin text uses it and Bangla falls back to the Bangla fonts.
   assert.match(posterSource, /\.sko \{[^}]*--sko-body: "Geist", "Noto Serif Bengali", serif;[^}]*--sko-disp: "Geist", "Noto Serif Bengali", serif;/);
