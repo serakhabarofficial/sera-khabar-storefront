@@ -383,7 +383,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               {mobileMenuPage === "main" ? (
-                <>
                   <nav aria-label="Mobile menu" className="sk-menu-list">
                     {[
                       { href: "/", bn: "হোম", en: "Home" },
@@ -400,12 +399,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <i aria-hidden="true"><ArrowRight size={16} /></i>
                     </button>
                   </nav>
-                  <div className="sk-menu-contact">
-                    <a href="tel:+8801310980289">কল করুন</a>
-                    <a href="https://api.whatsapp.com/send/?phone=8801303103540" target="_blank" rel="noopener noreferrer">হোয়াটসঅ্যাপ</a>
-                    <a href="https://www.facebook.com/profile.php?id=100068711778004" target="_blank" rel="noopener noreferrer">ফেসবুক</a>
-                  </div>
-                </>
               ) : (
                 <nav aria-label="Collections" className="sk-menu-list">
                   {visibleCollections.map(({ slug, label }) => {
