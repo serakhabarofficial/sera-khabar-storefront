@@ -32,7 +32,7 @@ const appSource = read("../App.tsx");
 test("bori route and title are registered", () => {
   assert.match(appSource, /import HomemadePumpkinBoriPage from "@\/pages\/homemade-pumpkin-bori";/);
   assert.match(appSource, /"\/step\/homemade-pumpkin-bori": "কুমড়ো বড়ি \| সেরা খাবার"/);
-  assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori">\s*<PageTransition><HomemadePumpkinBoriPage \/><\/PageTransition>/);
+  assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori">\s*<PageTransition standalone><HomemadePumpkinBoriPage \/><\/PageTransition>/);
 });
 
 test("bori page loads the bori product and checks out with ৳100 delivery", () => {
@@ -162,7 +162,7 @@ const thankYouSource = read("./kalojira-mixed-thank-you.tsx");
 test("bori orders land on the bori thank-you page", () => {
   assert.match(checkoutSource, /const thankYouPath = product\?\.slug === "homemade-pumpkin-bori" \? "\/step\/homemade-pumpkin-bori\/thank-you" : "\/step\/kalojira-mixed\/thank-you";/);
   assert.match(checkoutSource, /setLocation\(thankYouPath\)/);
-  assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori\/thank-you">\s*<PageTransition><KalojiraMixedThankYouPage backHref="\/step\/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref=\{BORI_CAMPAIGN_WHATSAPP_HREF\} \/><\/PageTransition>\s*<\/Route>\s*<Route path="\/step\/homemade-pumpkin-bori">/);
+  assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori\/thank-you">\s*<PageTransition standalone><KalojiraMixedThankYouPage backHref="\/step\/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref=\{BORI_CAMPAIGN_WHATSAPP_HREF\} \/><\/PageTransition>\s*<\/Route>\s*<Route path="\/step\/homemade-pumpkin-bori">/);
   assert.match(appSource, /"\/step\/homemade-pumpkin-bori\/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ \| সেরা খাবার"/);
   assert.match(thankYouSource, /<Link href=\{backHref\}/);
   assert.match(thankYouSource, /href=\{whatsappHref\}/);

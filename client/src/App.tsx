@@ -1,5 +1,6 @@
 import { Switch, Route, useLocation } from "wouter";
-import { AnimatePresence, motion, useIsPresent } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "@/components/page-transition";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,7 +23,7 @@ import { BORI_CAMPAIGN_WHATSAPP_HREF } from "@/features/kalojira-mixed/bori-cont
 import CollectionPage from "@/pages/collection";
 import SiteInformationPage from "@/pages/site-information";
 import { SITE_PAGES } from "@/lib/site-pages";
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 const CAMPAIGN_PAGE_TITLES: Record<string, string> = {
   "/step/sundarbans-natural-honey": "সুন্দরবনের প্রাকৃতিক মধু | সেরা খাবার",
@@ -71,39 +72,6 @@ function CampaignMetadata({ location }: { location: string }) {
   return null;
 }
 
-function PageTransition({ children }: { children: ReactNode }) {
-  const isPresent = useIsPresent();
-  const ref = useRef<HTMLDivElement>(null);
-  const [exitStyle, setExitStyle] = useState<CSSProperties | undefined>(undefined);
-
-  useLayoutEffect(() => {
-    if (!isPresent && ref.current) {
-      const r = ref.current.getBoundingClientRect();
-      setExitStyle({
-        position: "fixed",
-        top: r.top,
-        left: r.left,
-        width: r.width,
-        zIndex: 50,
-        opacity: 1,
-      });
-    }
-  }, [isPresent]);
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 1 }}
-      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      style={isPresent ? { zIndex: 60, willChange: "opacity" } : exitStyle}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 function Router() {
   const [location] = useLocation();
   const scrollPositions = useRef(new Map<string, number>());
@@ -111,15 +79,7 @@ function Router() {
   const isHistoryNavigation = useRef(false);
   const isInitialLoad = useRef(true);
 
-  const restoreScrollPosition = (top: number) => {
-    const restoreScroll = () => window.scrollTo({ top, left: 0, behavior: "auto" });
-    window.requestAnimationFrame(restoreScroll);
-    [80, 240, 520, 900, 1300].forEach((delay) => {
-      window.setTimeout(restoreScroll, delay);
-    });
-  };
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
@@ -147,24 +107,20 @@ function Router() {
     const markHistoryNavigation = () => {
       saveCurrentScroll();
       isHistoryNavigation.current = true;
-      const targetLocation = `${window.location.pathname}${window.location.search}`;
-      const savedY = scrollPositions.current.get(targetLocation);
-      if (savedY !== undefined) {
-        restoreScrollPosition(savedY);
-      }
     };
 
     window.addEventListener("scroll", saveCurrentScroll, { passive: true });
     document.addEventListener("click", saveBeforeInternalNavigation, true);
     document.addEventListener("touchstart", saveBeforeInternalNavigation, { capture: true, passive: true });
-    window.addEventListener("popstate", markHistoryNavigation);
+    // Register during layout, before wouter's passive location subscriptions.
+    window.addEventListener("popstate", markHistoryNavigation, true);
     window.addEventListener("beforeunload", saveCurrentScroll);
 
     return () => {
       window.removeEventListener("scroll", saveCurrentScroll);
       document.removeEventListener("click", saveBeforeInternalNavigation, true);
       document.removeEventListener("touchstart", saveBeforeInternalNavigation, true);
-      window.removeEventListener("popstate", markHistoryNavigation);
+      window.removeEventListener("popstate", markHistoryNavigation, true);
       window.removeEventListener("beforeunload", saveCurrentScroll);
     };
   }, []);
@@ -186,16 +142,6 @@ function Router() {
     // Restore synchronously before paint so the entering page is already at its
     // final scroll position when it fades in — avoids mid-fade scrolling jank.
     window.scrollTo({ top: targetY, left: 0, behavior: "auto" });
-    const timeoutIds = [120, 400].map((delay) =>
-      window.setTimeout(
-        () => window.scrollTo({ top: targetY, left: 0, behavior: "auto" }),
-        delay,
-      ),
-    );
-
-    return () => {
-      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
-    };
   }, [location]);
 
   return (
@@ -204,31 +150,31 @@ function Router() {
       <AnimatePresence>
         <Switch location={location} key={location}>
           <Route path="/step/sundarbans-natural-honey/thank-you">
-            <PageTransition><SundarbansHoneyThankYouPage /></PageTransition>
+            <PageTransition standalone><SundarbansHoneyThankYouPage /></PageTransition>
           </Route>
           <Route path="/step/sundarbans-natural-honey">
-            <PageTransition><SundarbansHoneyPage /></PageTransition>
+            <PageTransition standalone><SundarbansHoneyPage /></PageTransition>
           </Route>
           <Route path="/step/kalojira-mixed/thank-you">
-            <PageTransition><KalojiraMixedThankYouPage /></PageTransition>
+            <PageTransition standalone><KalojiraMixedThankYouPage /></PageTransition>
           </Route>
           <Route path="/step/kalojira-mixed">
-            <PageTransition><KalojiraMixedPage /></PageTransition>
+            <PageTransition standalone><KalojiraMixedPage /></PageTransition>
           </Route>
           <Route path="/step/honey-nut/thank-you">
-            <PageTransition><HoneyNutThankYouPage /></PageTransition>
+            <PageTransition standalone><HoneyNutThankYouPage /></PageTransition>
           </Route>
           <Route path="/step/honey-nut">
-            <PageTransition><HoneyNutPage /></PageTransition>
+            <PageTransition standalone><HoneyNutPage /></PageTransition>
           </Route>
           <Route path="/step/katimon-mango">
-            <PageTransition><KatimonMangoPage /></PageTransition>
+            <PageTransition standalone><KatimonMangoPage /></PageTransition>
           </Route>
           <Route path="/step/homemade-pumpkin-bori/thank-you">
-            <PageTransition><KalojiraMixedThankYouPage backHref="/step/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref={BORI_CAMPAIGN_WHATSAPP_HREF} /></PageTransition>
+            <PageTransition standalone><KalojiraMixedThankYouPage backHref="/step/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref={BORI_CAMPAIGN_WHATSAPP_HREF} /></PageTransition>
           </Route>
           <Route path="/step/homemade-pumpkin-bori">
-            <PageTransition><HomemadePumpkinBoriPage /></PageTransition>
+            <PageTransition standalone><HomemadePumpkinBoriPage /></PageTransition>
           </Route>
           <Route path="/">
             <PageTransition>
@@ -267,7 +213,7 @@ function Router() {
             )}
           </Route>
           <Route>
-            <PageTransition>
+            <PageTransition standalone>
               <NotFound />
             </PageTransition>
           </Route>

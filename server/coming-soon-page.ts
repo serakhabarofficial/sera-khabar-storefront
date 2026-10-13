@@ -12,13 +12,13 @@ export const COMING_SOON_HTML = `<!doctype html>
 <link rel="icon" href="/coming-soon/favicon.png" type="image/png" sizes="512x512">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@200;300;400;600&family=Bodoni+Moda:opsz,wght@6..96,400&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@300;400;600&family=Bodoni+Moda:opsz,wght@6..96,400&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <style>
 /* Layout: one centred letter column on warm paper, like a printed note — monogram, salutation, justified body, signature. */
 :root{
   --paper:#fbfaf7; --ink:#1a1a18; --ink-2:#3b3b37; --ink-3:rgba(26,26,24,.45); --hair:rgba(26,26,24,.14); --leaf:#015128;
   --mono:"Bodoni Moda","Didot","Bodoni 72",serif;
-  --text:"Anek Bangla","Hind Siliguri","Noto Sans Bengali",sans-serif;
+  --text:"Noto Serif Bengali",serif;
   --hand:"Mrs Saint Delafield","Snell Roundhand",cursive;
   --ease-out:cubic-bezier(0.23,1,0.32,1);
   color-scheme:light;
@@ -71,7 +71,7 @@ input:focus-visible{outline:none}
 .credit .bar{width:1px;height:16px;background:rgba(26,26,24,.2)}
 .credit img{height:22px;width:auto;transition:transform 300ms var(--ease-out)}
 @media (hover:hover) and (pointer:fine){.credit:hover img{transform:scale(1.05)}}
-.copy{font-family:"Helvetica Neue",Arial,sans-serif;font-size:8px;color:var(--ink-3)}
+.copy{font-family:"Helvetica Neue",Arial,"Noto Serif Bengali",serif;font-size:8px;color:var(--ink-3)}
 
 /* Entrance: one quiet sequence — monogram, salutation, paragraphs, then the signature writes itself */
 .in{opacity:0;filter:blur(8px);transform:translateY(8px);animation:appear 900ms var(--ease-out) forwards}

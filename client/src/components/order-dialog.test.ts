@@ -93,6 +93,6 @@ test("the order form is white and sets English text in Geist (2026-10-13)", () =
   assert.match(htmlSource, /family=Geist:wght@400;500;600;700/);
   assert.match(posterSource, /\.sko-sheet, \.sko-panel \{[^}]*background: #ffffff;/);
   // Geist first, so Latin text uses it and Bangla falls back to the Bangla fonts.
-  assert.match(posterSource, /\.sko \{[^}]*--sko-body: "Geist", "Hind Siliguri", sans-serif;[^}]*--sko-disp: "Geist", "Noto Serif Bengali", serif;/);
-  assert.doesNotMatch(posterSource, /\.sko[^{]*\{[^}]*font-family: "(Hind Siliguri|Noto Serif Bengali)"/);
+  assert.match(posterSource, /\.sko \{[^}]*--sko-body: "Geist", "Noto Serif Bengali", serif;[^}]*--sko-disp: "Geist", "Noto Serif Bengali", serif;/);
+  assert.doesNotMatch(posterSource, /\.sko[^{]*\{[^}]*font-family: "Noto Serif Bengali"/);
 });

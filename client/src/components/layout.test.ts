@@ -163,8 +163,10 @@ test("pulses the dock cart once per toast handoff, then clears the signal", () =
   assert.match(layoutSource, /if \(cartPulseKey > 0\) consumeCartPulse\(\);/);
 });
 
-test("clears the page-transition filter so carousels do not repaint the whole page", () => {
-  assert.match(layoutSource, /animate=\{\{ opacity: 1, y: 0, filter: "blur\(0px\)", transitionEnd: \{ filter: "none" \} \}\}/);
+test("page content uses the shared depth transition without a full-page blur layer", () => {
+  const main = layoutSource.slice(layoutSource.indexOf("<main"), layoutSource.indexOf("</main>") + 7);
+  assert.match(main, /<PageContentTransition>/);
+  assert.doesNotMatch(main, /filter:|blur\(|mode="wait"/);
 });
 
 test("no grey gap above the footer: cream main, dock space lives in the footer", () => {

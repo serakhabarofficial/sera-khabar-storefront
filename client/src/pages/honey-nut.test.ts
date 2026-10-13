@@ -86,7 +86,7 @@ test("Honey Nut quality section uses a Swiss editorial layout", () => {
 });
 
 test("Honey Nut titles use the normal Bengali font stack", () => {
-  assert.match(stylesSource, /Hind Siliguri.*Inter.*system-ui/);
+  assert.match(stylesSource, /Noto Serif Bengali.*Inter.*system-ui/);
   assert.doesNotMatch(stylesSource, /KaiumSimanto/);
 });
 

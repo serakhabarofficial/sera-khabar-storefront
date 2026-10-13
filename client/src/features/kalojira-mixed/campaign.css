@@ -4,11 +4,11 @@
   --kalojira-brown: #3d211a;
   --kalojira-green: #5b793e;
   --kalojira-peach: #f0c5a5;
-  font-family: "Hind Siliguri", "Inter", system-ui, sans-serif;
+  font-family: "Noto Serif Bengali", "Inter", system-ui, serif;
 }
 
 .kalojira-mixed-page .kalojira-heading {
-  font-family: "Hind Siliguri", "Inter", system-ui, sans-serif;
+  font-family: "Noto Serif Bengali", "Inter", system-ui, serif;
   font-weight: 800;
   -webkit-text-stroke: 0.45px currentColor;
   paint-order: stroke fill;
