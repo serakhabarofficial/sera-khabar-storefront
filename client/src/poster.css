@@ -265,6 +265,73 @@
 }
 @media (prefers-reduced-motion: reduce) { .sk-announce-cta:active { transform: none; } }
 
+/* Phone sheets (menu, cart): Vaul drawers rising from the bottom, drag down to close. */
+.sk-sheet-overlay { position: fixed; inset: 0; z-index: 110; background: rgba(42, 28, 20, 0.38); }
+.sk-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 111; display: flex; flex-direction: column; max-height: 88dvh; background: #fffdf8; color: #000;
+  border-radius: 24px 24px 0 0; box-shadow: 0 -12px 32px -12px rgba(42, 28, 20, 0.35); padding-bottom: env(safe-area-inset-bottom, 0px); outline: none; }
+/* The cart sheet fits its content (up to 88dvh) instead of always filling the screen. */
+.sk-cart-sheet { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+/* iOS Safari's floating toolbar sits over the bottom of the page; keep sheet actions above it. */
+@supports (-webkit-touch-callout: none) {
+  .sk-sheet { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+}
+/* Cart (phone sheet and desktop drawer): homepage palette and type. */
+.skc { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; overflow: hidden; color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
+.skc-inner { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.skc-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 20px 14px; border-bottom: 1.5px dotted rgba(58, 29, 15, 0.22); }
+@media (min-width: 768px) { .skc-head { padding: 28px 28px 18px; } }
+.skc-title { display: block; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 26px; line-height: 1.2; color: #5b2d17; }
+.skc-count { display: block; font-size: 13px; color: #7a6050; }
+.skc-close { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; cursor: pointer; }
+.skc-list { min-height: 0; flex: 1 1 auto; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 768px) { .skc-list { padding: 18px 28px; } }
+.skc-item { display: flex; gap: 14px; padding: 12px; border-radius: 20px; background: #faf4ea; }
+.skc-img { flex: none; width: 84px; height: 84px; border-radius: 16px; background: #f1e5d3; display: grid; place-items: center; overflow: hidden; }
+.skc-img img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.skc-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.skc-info h3 { margin: 0; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 16px; line-height: 1.4; color: #3a1d0f; }
+.skc-size { align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: #f1e5d3; color: #5b2d17; font-size: 12px; font-weight: 600; }
+.skc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.skc-price { font-family: "Atma", sans-serif; font-weight: 700; font-size: 19px; color: #5b2d17; }
+.skc-qty { display: flex; align-items: center; height: 36px; padding: 0 4px; border-radius: 999px; background: #fffdf8; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.12); }
+.skc-qty button { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; border: 0; background: none; color: #5b2d17; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease; }
+.skc-qty span { min-width: 24px; text-align: center; font-family: "Atma", sans-serif; font-weight: 700; font-size: 15px; }
+.skc-remove { align-self: flex-start; border: 0; background: none; padding: 2px 0; font-size: 12.5px; color: #7a6050; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.skc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 240px; height: 100%; padding: 32px 20px; text-align: center; }
+.skc-empty h3 { margin: 0; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 22px; color: #5b2d17; }
+.skc-empty p { margin: 0 0 10px; font-size: 14px; color: #7a6050; }
+.skc-foot { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 20px 6px; border-top: 1.5px dotted rgba(58, 29, 15, 0.22); background: #fffdf8; }
+@media (min-width: 768px) { .skc-foot { padding: 20px 28px 28px; } }
+.skc-subtotal { display: flex; align-items: baseline; justify-content: space-between; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 16px; color: #5b2d17; }
+.skc-subtotal b { font-family: "Atma", sans-serif; font-size: 26px; }
+.skc-note { margin: 0; font-size: 12.5px; color: #7a6050; }
+.skc-checkout { height: 52px; width: 100%; border-radius: 999px; border: 0; background: #f6b826; color: #3a1d0f; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.skc-checkout i { width: 8px; height: 8px; border-radius: 50%; background: #e2547a; }
+.skc-continue { border: 0; background: none; padding: 6px 0; font-size: 14px; font-weight: 600; color: #7a6050; cursor: pointer; }
+.skc-close:active, .skc-qty button:active, .skc-checkout:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) { .skc-qty button:hover { background: #f1e5d3; } .skc-remove:hover, .skc-continue:hover { color: #5b2d17; } }
+@media (prefers-reduced-motion: reduce) { .skc-close:active, .skc-qty button:active, .skc-checkout:active { transform: none; } }
+
+/* Phone menu inside the sheet: Bangla-first rows in the homepage's type, dotted like the cash memo. */
+.sk-menu { min-height: 0; overflow-y: auto; padding: 0 20px 24px; color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
+.sk-menu-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 10px; }
+.sk-menu-title { font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 26px; line-height: 1.2; color: #5b2d17; }
+.sk-menu-back { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 10px; border-radius: 999px; background: #f1e5d3; color: #5b2d17; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; border: 0; }
+.sk-menu-close { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; }
+.sk-menu-list { display: flex; flex-direction: column; }
+.sk-menu-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 62px; padding: 8px 0; border: 0; border-bottom: 1.5px dotted rgba(58, 29, 15, 0.25); background: none; text-align: left; color: inherit; text-decoration: none;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.sk-menu-row:active, .sk-menu-back:active, .sk-menu-close:active, .sk-menu-contact a:active { transform: scale(0.97); }
+.sk-menu-row span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sk-menu-row b { font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 20px; line-height: 1.35; color: #5b2d17; }
+.sk-menu-row small { font-size: 12px; color: #7a6050; }
+.sk-menu-row i { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #f6b826; color: #3a1d0f; }
+.sk-menu-contact { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.sk-menu-contact a { height: 40px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; background: #f1e5d3; color: #5b2d17; font-weight: 700; font-size: 14px; text-decoration: none;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+@media (prefers-reduced-motion: reduce) { .sk-menu-row:active, .sk-menu-back:active, .sk-menu-close:active, .sk-menu-contact a:active { transform: none; } }
+.sk-sheet-grab { flex: none; width: 40px; height: 5px; border-radius: 5px; background: rgba(91, 45, 23, 0.25); margin: 8px auto 4px; }
+
 /* Mobile dock: compact white pill, always fixed at the bottom (phones only). */
 .sk-dock { position: fixed; z-index: 80; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; pointer-events: none; }
 .sk-dock-pill { pointer-events: auto; width: 100%; max-width: 440px; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; background: #fffdf8;

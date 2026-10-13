@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Product Transition Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atma:wght@700&family=Galada&family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700;900&display=swap">
+<style>
+/*
+ * Homepage → product page transition (after Emil Kowalski's `prototype` + `animate` skills).
+ * Five directions, one at a time. Tap a product card, then ← to go back.
+ * All motion is transform / opacity / clip-path through the Web Animations API, so it can run
+ * off the main thread while the real product page is still loading.
+ */
+:root{--rice:#FAF4EA;--royal:#5B2D17;--sun:#F6B826;--pink:#E2547A;--card:#F1E5D3;--ink:#3A1D0F;--sub:#7A6050;--paper:#FFFDF8}
+*{box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#E8DFD2;font-family:"Hind Siliguri",sans-serif;color:var(--ink);overscroll-behavior:none}
+.num{font-family:"Atma",sans-serif;font-weight:700}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.press{transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.press:active{transform:scale(.97)}
+
+/* phone-width viewport: two screens stacked, each scrolls on its own */
+.vp{position:relative;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;background:#2A1C14}
+.screen{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;background:var(--rice);scrollbar-width:none}
+.screen[hidden]{display:block;visibility:hidden;pointer-events:none}
+.shade{position:absolute;inset:0;background:#2A1C14;opacity:0;pointer-events:none;z-index:5}
+.pdp{z-index:6}
+.busy{pointer-events:none}
+
+/* home */
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:10px 18px}
+.top img{height:44px;justify-self:center}
+.hero{padding:6px 18px 10px}
+.hero .tag{font-family:"Galada",cursive;color:var(--pink);font-size:24px;display:inline-block;transform:rotate(-6deg)}
+.hero h1{margin:0;font-family:"Noto Serif Bengali",serif;font-weight:900;color:var(--royal);font-size:64px;line-height:.92}
+.sec{padding:18px 18px 120px}
+.sec h2{margin:0 0 14px;font-family:"Noto Serif Bengali",serif;font-weight:700;color:var(--royal);font-size:26px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--card);border-radius:22px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;width:100%;transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.card:active{transform:scale(.97)}
+.card img{width:100%;aspect-ratio:1;object-fit:contain}
+.card b{font-family:"Noto Serif Bengali",serif;font-size:14px;line-height:1.35}
+.card small{color:var(--sub);font-size:12px}
+.card .num{font-size:19px;color:var(--royal)}
+.hint{margin:18px 0 0;font-size:13px;color:var(--sub);text-align:center}
+
+/* product page */
+.pbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--rice)}
+.back{width:40px;height:40px;border-radius:50%;background:var(--paper);display:grid;place-items:center;color:var(--royal);font-size:20px;box-shadow:0 0 0 1px rgba(58,29,15,.08)}
+.pbar img{height:36px}
+.grab{display:none}
+.pimg{margin:4px 14px 0;border-radius:28px;background:var(--card);aspect-ratio:1;display:grid;place-items:center}
+.pimg img{width:84%;aspect-ratio:1;object-fit:contain}
+.pinfo{padding:18px 18px 140px}
+.pinfo .tag{font-family:"Galada",cursive;color:var(--pink);font-size:20px;display:inline-block;transform:rotate(-4deg)}
+.pinfo h1{margin:2px 0 4px;font-family:"Noto Serif Bengali",serif;font-weight:900;color:var(--royal);font-size:30px;line-height:1.25}
+.pinfo .en{color:var(--sub);font-size:13px}
+.sizes{display:flex;gap:8px;margin:16px 0}
+.sizes button{height:40px;padding:0 16px;border-radius:999px;border:1.5px solid var(--ink);font-weight:700;font-size:14px}
+.sizes button[aria-pressed="true"]{background:var(--royal);border-color:var(--royal);color:#fff}
+.price{font-family:"Atma",sans-serif;font-weight:700;font-size:42px;color:var(--royal);line-height:1}
+.buy{margin-top:16px;width:100%;height:52px;border-radius:999px;background:var(--sun);font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+.buy i{width:8px;height:8px;border-radius:50%;background:var(--pink)}
+.desc{margin-top:22px;font-size:14.5px;line-height:1.75}
+.facts{margin-top:16px;display:grid;gap:8px}
+.facts div{display:flex;justify-content:space-between;padding:10px 14px;border-radius:14px;background:var(--paper);font-size:13.5px}
+
+/* sheet variant chrome */
+.pdp.as-sheet{top:28px;border-radius:24px 24px 0 0;box-shadow:0 -10px 30px -10px rgba(0,0,0,.35)}
+.pdp.as-sheet .grab{display:block;width:40px;height:5px;border-radius:5px;background:rgba(91,45,23,.25);margin:8px auto 0}
+.pdp.as-sheet .pbar{border-radius:24px 24px 0 0}
+
+/* ===== Picker (verbatim from emilkowalski/skills prototype/PICKER.md) ===== */
+.proto-picker{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2147483647;display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(10,10,10,0.82);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset,0 8px 24px rgba(0,0,0,0.24),0 2px 6px rgba(0,0,0,0.12);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;line-height:1;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+.proto-picker-highlight{position:absolute;top:4px;left:0;height:28px;border-radius:999px;background:rgba(255,255,255,0.12);will-change:transform}
+.proto-picker[data-ready] .proto-picker-highlight{transition:transform 250ms cubic-bezier(0.23,1,0.32,1),width 250ms cubic-bezier(0.23,1,0.32,1)}
+@media (prefers-reduced-motion:reduce){.proto-picker[data-ready] .proto-picker-highlight{transition:none}}
+.proto-picker-item{position:relative;display:flex;align-items:center;height:28px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:rgba(255,255,255,0.55);font:inherit;cursor:pointer;transition:color 150ms ease-out}
+.proto-picker-item:hover{color:rgba(255,255,255,0.85)}
+.proto-picker-item:active{transform:scale(0.97)}
+.proto-picker-item:focus-visible{outline:2px solid rgba(255,255,255,0.4);outline-offset:2px}
+.proto-picker-item[data-active]{color:#fff}
+.proto-picker-divider{width:1px;height:16px;margin:0 4px;background:rgba(255,255,255,0.12)}
+.proto-picker-replay{padding:0 10px;font-size:14px}
+.proto-picker[data-position="top"]{bottom:auto;top:24px}
+</style>
+</head>
+<body>
+<div class="vp" id="vp">
+  <div class="screen home" id="home"></div>
+  <div class="shade" id="shade"></div>
+  <div class="screen pdp" id="pdp" hidden></div>
+</div>
+
+<nav class="proto-picker" aria-label="Prototype variants" data-position="top">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Fade</button>
+  <button class="proto-picker-item">Photo</button>
+  <button class="proto-picker-item">Expand</button>
+  <button class="proto-picker-item">Push</button>
+  <button class="proto-picker-item">Sheet</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+const EASE_OUT="cubic-bezier(0.23,1,0.32,1)", EASE_DRAWER="cubic-bezier(0.32,0.72,0,1)";
+const reduced=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+const P=[
+ {bn:"খেজুরের পাটালী গুড়",en:"Date Palm Patali",img:"cutouts/g-patali.webp",sizes:[["৫০০ গ্রাম",350],["১ কেজি",650]],tag:"শীতের নতুন গুড়",d:"এই শীতের প্রথম খেজুরের রস, মাটির চুলায় ধীরে জ্বাল দিয়ে জমানো। চায়ে, পায়েসে বা এমনিতেই এক টুকরো।"},
+ {bn:"খেজুরের ঝোলা গুড়",en:"Liquid Date Jaggery",img:"cutouts/g-jhola.webp",sizes:[["৫০০ গ্রাম",380],["১ কেজি",720]],tag:"রুটি আর পিঠার সাথী",d:"পাতলা, সুগন্ধি ঝোলা গুড়। গরম রুটি, চিতই বা ভাপা পিঠার সাথে সবচেয়ে ভালো।"},
+ {bn:"দানাদার গুড়",en:"Granulated Jaggery",img:"cutouts/g-dana.webp",sizes:[["৫০০ গ্রাম",300],["১ কেজি",560]],tag:"চিনির বদলে",d:"ঝরঝরে দানাদার গুড়, চা বা মিষ্টি রান্নায় চিনির জায়গায় সহজে ব্যবহার করুন।"},
+ {bn:"হোমমেড কুমড়ো বড়ি",en:"Homemade Pumpkin Bori",img:"cutouts/homemade-cut.webp",sizes:[["১ কেজি",700],["২ কেজি",1300]],tag:"রোদে শুকানো",d:"মাষকলাইয়ের ডাল আর টাটকা চালকুমড়োয় ঘরে বানানো বড়ি। ঝোলে নরম, ভাজলে মচমচে।"}
+];
+const home=document.getElementById("home"),pdp=document.getElementById("pdp"),shade=document.getElementById("shade"),vp=document.getElementById("vp");
+home.innerHTML=`<header class="top"><span></span><img src="../../../attached_assets/sera-khabar-leaf-logo.webp" alt="সেরা খাবার"><span></span></header>
+ <section class="hero"><span class="tag">রাজশাহী থেকে</span><h1>সেরা খাবার</h1></section>
+ <section class="sec"><h2>আমাদের পণ্য</h2><div class="grid">${P.map((p,i)=>`<button class="card" data-open="${i}" aria-label="${p.bn} দেখুন"><img src="${p.img}" alt=""><b>${p.bn}</b><small>${p.sizes[0][0]}</small><span class="num">৳${bn(p.sizes[0][1])}</span></button>`).join("")}</div>
+ <p class="hint">একটি পণ্যে চাপুন, তারপর ← দিয়ে ফিরে যান</p></section>`;
+function renderPdp(i){const p=P[i];pdp.innerHTML=`<div class="grab" aria-hidden="true"></div>
+ <div class="pbar"><button class="back press" data-back aria-label="ফিরে যান">←</button><img src="../../../attached_assets/sera-khabar-leaf-logo.webp" alt=""><span style="width:40px"></span></div>
+ <div class="pimg"><img src="${p.img}" alt="${p.bn}"></div>
+ <div class="pinfo"><span class="tag">${p.tag}</span><h1>${p.bn}</h1><div class="en">${p.en}</div>
+  <div class="sizes">${p.sizes.map((s,j)=>`<button class="press" data-size="${j}" aria-pressed="${!j}">${s[0]}</button>`).join("")}</div>
+  <div class="price" data-price>৳${bn(p.sizes[0][1])}</div>
+  <button class="buy press">অর্ডার করুন <i></i></button>
+  <p class="desc">${p.d}</p>
+  <div class="facts"><div><span>ডেলিভারি</span><b>সারাদেশে</b></div><div><span>পেমেন্ট</span><b>ক্যাশ অন ডেলিভারি</b></div></div></div>`;pdp.dataset.i=i}
+
+/* helpers */
+const anim=(el,kf,opt)=>el.animate(kf,{fill:"both",...opt});
+let openCard=null,variant=0,running=false;
+function show(){pdp.hidden=false;pdp.scrollTop=0}
+function hide(){pdp.hidden=true;[pdp,home,shade].forEach(el=>el.getAnimations().forEach(a=>a.cancel()));pdp.querySelectorAll("*").forEach(el=>el.getAnimations().forEach(a=>a.cancel()))}
+function rectIn(el){const r=el.getBoundingClientRect(),v=vp.getBoundingClientRect();return{x:r.left-v.left,y:r.top-v.top,w:r.width,h:r.height}}
+async function run(fn){if(running)return;running=true;vp.classList.add("busy");try{await fn()}finally{running=false;vp.classList.remove("busy")}}
+// Wait for an animation; the timer is a safety net so navigation can never get stuck mid-transition.
+const done=a=>Promise.race([a.finished.catch(()=>{}),new Promise(r=>setTimeout(r,(a.effect?.getComputedTiming().endTime||0)+80))]);
+
+/* Each direction = { open(card), close(card) }. Reduced motion: a 120ms crossfade, no movement. */
+const FADE={open:async()=>{show();await done(anim(pdp,[{opacity:0},{opacity:1}],{duration:120}))},close:async()=>{await done(anim(pdp,[{opacity:1},{opacity:0}],{duration:120}));hide()}};
+
+const variants=[
+ // 1 · Fade: the page rises 8px into place. Quiet enough to see many times a day.
+ {open:async()=>{show();await done(anim(pdp,[{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:220,easing:EASE_OUT}))},
+  close:async()=>{await done(anim(pdp,[{opacity:1,transform:"none"},{opacity:0,transform:"translateY(8px)"}],{duration:160,easing:EASE_OUT}));hide()}},
+
+ // 2 · Photo: the product photo travels from the card into the product page (shared element, FLIP).
+ {open:async card=>{show();const from=rectIn(card.querySelector("img")),toEl=pdp.querySelector(".pimg img"),to=rectIn(toEl);
+   toEl.style.transformOrigin="0 0";
+   const fly=toEl.animate([{transform:`translate(${from.x-to.x}px,${from.y-to.y}px) scale(${from.w/to.w})`},{transform:"none"}],{duration:340,easing:EASE_DRAWER,fill:"both"});
+   card.style.visibility="hidden";
+   const bg=anim(pdp,[{backgroundColor:"rgba(250,244,234,0)"},{backgroundColor:"rgba(250,244,234,1)"}],{duration:220,easing:EASE_OUT});
+   const rest=[pdp.querySelector(".pbar"),pdp.querySelector(".pinfo")].map((el,k)=>anim(el,[{opacity:0,transform:"translateY(10px)"},{opacity:1,transform:"none"}],{duration:240,delay:120+k*40,easing:EASE_OUT}));
+   const box=anim(pdp.querySelector(".pimg"),[{backgroundColor:"rgba(241,229,211,0)"},{backgroundColor:"rgba(241,229,211,1)"}],{duration:200,delay:180,easing:EASE_OUT});
+   await Promise.all([fly,bg,box,...rest].map(done))},
+  close:async card=>{const toEl=pdp.querySelector(".pimg img"),to=rectIn(toEl),from=rectIn(card.querySelector("img"));
+   const rest=[pdp.querySelector(".pbar"),pdp.querySelector(".pinfo"),pdp.querySelector(".pimg")].map(el=>anim(el,[{opacity:1},{opacity:0}],{duration:140,easing:EASE_OUT}));
+   const img=toEl.cloneNode();img.style.cssText=`position:absolute;z-index:9;left:${to.x}px;top:${to.y}px;width:${to.w}px;height:${to.h}px;object-fit:contain;transform-origin:0 0`;vp.appendChild(img);
+   const bg=anim(pdp,[{backgroundColor:"rgba(250,244,234,1)"},{backgroundColor:"rgba(250,244,234,0)"}],{duration:200,easing:EASE_OUT});
+   const fly=img.animate([{transform:"none"},{transform:`translate(${from.x-to.x}px,${from.y-to.y}px) scale(${from.w/to.w})`}],{duration:300,easing:EASE_DRAWER,fill:"both"});
+   await Promise.all([fly,bg,...rest].map(done));card.style.visibility="";img.remove();hide()}},
+
+ // 3 · Expand: the card itself grows into the page (clip-path from the card's rectangle).
+ {open:async card=>{show();const r=rectIn(card),W=vp.clientWidth,H=vp.clientHeight;
+   const clip=`inset(${r.y}px ${W-r.x-r.w}px ${H-r.y-r.h}px ${r.x}px round 22px)`;
+   const grow=anim(pdp,[{clipPath:clip},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],{duration:360,easing:EASE_DRAWER});
+   const inner=[...pdp.children].map(el=>anim(el,[{opacity:0},{opacity:1}],{duration:200,delay:120,easing:EASE_OUT}));
+   await Promise.all([grow,...inner].map(done))},
+  close:async card=>{const r=rectIn(card),W=vp.clientWidth,H=vp.clientHeight;
+   const clip=`inset(${r.y}px ${W-r.x-r.w}px ${H-r.y-r.h}px ${r.x}px round 22px)`;
+   const inner=[...pdp.children].map(el=>anim(el,[{opacity:1},{opacity:0}],{duration:120,easing:EASE_OUT}));
+   const shrink=anim(pdp,[{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:clip}],{duration:300,easing:EASE_DRAWER});
+   await Promise.all([shrink,...inner].map(done));hide()}},
+
+ // 4 · Push: like a native app, the page slides in from the right and the home page moves back.
+ {open:async()=>{show();await Promise.all([
+   anim(pdp,[{transform:"translateX(100%)"},{transform:"none"}],{duration:340,easing:EASE_DRAWER}),
+   anim(home,[{transform:"none"},{transform:"translateX(-28%)"}],{duration:340,easing:EASE_DRAWER}),
+   anim(shade,[{opacity:0},{opacity:.18}],{duration:340,easing:EASE_DRAWER})].map(done))},
+  close:async()=>{await Promise.all([
+   anim(pdp,[{transform:"none"},{transform:"translateX(100%)"}],{duration:300,easing:EASE_DRAWER}),
+   anim(home,[{transform:"translateX(-28%)"},{transform:"none"}],{duration:300,easing:EASE_DRAWER}),
+   anim(shade,[{opacity:.18},{opacity:0}],{duration:300,easing:EASE_DRAWER})].map(done));hide()}},
+
+ // 5 · Sheet: the product rises as a sheet over the home page, which sinks back. Drag the sheet down to close.
+ {sheet:true,
+  open:async()=>{show();await Promise.all([
+   anim(pdp,[{transform:"translateY(100%)"},{transform:"none"}],{duration:380,easing:EASE_DRAWER}),
+   anim(home,[{transform:"none",borderRadius:"0px"},{transform:"scale(0.94)",borderRadius:"24px"}],{duration:380,easing:EASE_DRAWER}),
+   anim(shade,[{opacity:0},{opacity:.3}],{duration:380,easing:EASE_DRAWER})].map(done))},
+  close:async(card,fromY=0)=>{await Promise.all([
+   anim(pdp,[{transform:`translateY(${fromY}px)`},{transform:"translateY(100%)"}],{duration:300,easing:EASE_DRAWER}),
+   anim(home,[{transform:"scale(0.94)",borderRadius:"24px"},{transform:"none",borderRadius:"0px"}],{duration:300,easing:EASE_DRAWER}),
+   anim(shade,[{opacity:.3},{opacity:0}],{duration:300,easing:EASE_DRAWER})].map(done));hide()}}
+];
+
+document.addEventListener("click",e=>{
+  const card=e.target.closest("[data-open]");
+  if(card&&pdp.hidden){openCard=card;renderPdp(+card.dataset.open);const v=reduced()?FADE:variants[variant];run(()=>v.open(card));return}
+  if(e.target.closest("[data-back]")&&!pdp.hidden){const v=reduced()?FADE:variants[variant];run(()=>v.close(openCard));return}
+  const sz=e.target.closest("[data-size]");
+  if(sz){const p=P[+pdp.dataset.i],j=+sz.dataset.size;pdp.querySelectorAll("[data-size]").forEach(b=>b.setAttribute("aria-pressed",String(b===sz)));pdp.querySelector("[data-price]").textContent="৳"+bn(p.sizes[j][1])}
+});
+
+/* Sheet: drag down from the top of the sheet to dismiss; fast flicks count even when short. */
+let drag=null;
+pdp.addEventListener("pointerdown",e=>{if(!variants[variant].sheet||running||pdp.scrollTop>0||e.target.closest("button"))return;
+  drag={y:e.clientY,t:performance.now(),dy:0};pdp.setPointerCapture(e.pointerId)});
+pdp.addEventListener("pointermove",e=>{if(!drag)return;drag.dy=Math.max(0,e.clientY-drag.y);
+  // friction past the start instead of a hard stop
+  pdp.getAnimations().forEach(a=>a.cancel());pdp.style.transform=`translateY(${drag.dy}px)`});
+pdp.addEventListener("pointerup",e=>{if(!drag)return;const v=drag.dy/Math.max(1,performance.now()-drag.t),dy=drag.dy;drag=null;pdp.style.transform="";
+  if(dy>140||v>0.5)run(()=>variants[variant].close(openCard,dy));
+  else anim(pdp,[{transform:`translateY(${dy}px)`},{transform:"none"}],{duration:240,easing:EASE_OUT})});
+
+/* ===== Picker wiring (verbatim behaviour from PICKER.md) ===== */
+const picker=document.querySelector('.proto-picker');
+const highlight=picker.querySelector('.proto-picker-highlight');
+const items=[...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+const replay=picker.querySelector('.proto-picker-replay');
+let current=0;
+function moveHighlight(){const el=items[current];highlight.style.width=el.offsetWidth+'px';highlight.style.transform=`translateX(${el.offsetLeft}px)`}
+function mount(i){variant=i;hide();running=false;vp.classList.remove("busy");document.querySelectorAll(".card").forEach(c=>c.style.visibility="");
+  home.getAnimations().forEach(a=>a.cancel());pdp.classList.toggle("as-sheet",!!variants[i].sheet)}
+function setActive(i){if(i<0||i>=variants.length)return;current=i;
+  items.forEach((el,j)=>{el.toggleAttribute('data-active',j===i);if(j===i)el.setAttribute('aria-current','true');else el.removeAttribute('aria-current')});
+  moveHighlight();const url=new URL(location);url.searchParams.set('v',i+1);history.replaceState(null,'',url);mount(i)}
+items.forEach((el,i)=>el.addEventListener('click',()=>setActive(i)));
+// Replay: open the first product with the current direction.
+replay?.addEventListener('click',()=>{mount(current);requestAnimationFrame(()=>home.querySelector("[data-open]").click())});
+window.addEventListener('resize',moveHighlight);
+document.addEventListener('keydown',(e)=>{
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.target.isContentEditable)return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const num=parseInt(e.key,10);
+  if(num>=1&&num<=variants.length)setActive(num-1);
+  else if(e.key==='ArrowRight')setActive((current+1)%variants.length);
+  else if(e.key==='ArrowLeft')setActive((current-1+variants.length)%variants.length);
+  else if(e.key==='r'||e.key==='R'){mount(current);requestAnimationFrame(()=>home.querySelector("[data-open]").click())}
+});
+setActive((parseInt(new URLSearchParams(location.search).get('v'),10)||1)-1);
+requestAnimationFrame(()=>requestAnimationFrame(()=>picker.setAttribute('data-ready','')));
+</script>
+</body>
+</html>

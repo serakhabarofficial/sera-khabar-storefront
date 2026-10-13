@@ -9,6 +9,8 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
+import { Drawer } from "vaul";
+import { useIsMobile } from "@/hooks/use-mobile";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
 import {
   fetchStorefrontProducts,
@@ -129,6 +131,7 @@ function SuggestionThumbnail({ product }: { product: StorefrontProduct }) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
   const [location, setLocation] = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,7 +177,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const suggestions = searchStorefrontProducts(searchableProducts, searchQuery).slice(0, 5);
 
   useEffect(() => {
-    if (isOpen) {
+    // The phone menu is a Vaul sheet, which locks scrolling itself.
+    if (isOpen && !isMobile) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -182,7 +186,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   return (
     <div className="min-h-screen flex flex-col md:bg-brand-ivory text-black selection:bg-brand-gold selection:text-white">
@@ -358,8 +362,71 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
+      {/* Mobile menu: bottom sheet (Vaul) — drag down, tap outside or ✕ to close */}
+      <Drawer.Root open={isMobile && isOpen} onOpenChange={setIsOpen}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="sk-sheet-overlay" />
+          <Drawer.Content className="sk-sheet" aria-describedby={undefined}>
+            <Drawer.Title className="sr-only">Menu</Drawer.Title>
+            <div className="sk-sheet-grab" aria-hidden="true" />
+            <div className="sk-menu">
+              <div className="sk-menu-head">
+                {mobileMenuPage === "main" ? (
+                  <span className="sk-menu-title">মেনু</span>
+                ) : (
+                  <button type="button" onClick={() => setMobileMenuPage("main")} className="sk-menu-back">
+                    <ArrowRight size={16} className="rotate-180" /> মেনু
+                  </button>
+                )}
+                <button type="button" onClick={() => setIsOpen(false)} aria-label="Close menu" className="sk-menu-close">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              {mobileMenuPage === "main" ? (
+                <>
+                  <nav aria-label="Mobile menu" className="sk-menu-list">
+                    {[
+                      { href: "/", bn: "হোম", en: "Home" },
+                      { href: "/products", bn: "সব পণ্য", en: "Products" },
+                      { href: "/collection/top-selling-products", bn: "সেরা বিক্রিত পণ্য", en: "Top Selling Products" },
+                    ].map((row) => (
+                      <Link key={row.href} href={row.href} onClick={() => setIsOpen(false)} className="sk-menu-row">
+                        <span><b>{row.bn}</b><small>{row.en}</small></span>
+                        <i aria-hidden="true"><ArrowRight size={16} /></i>
+                      </Link>
+                    ))}
+                    <button type="button" onClick={() => setMobileMenuPage("collections")} className="sk-menu-row">
+                      <span><b>ক্যাটাগরিসমূহ</b><small>Collections</small></span>
+                      <i aria-hidden="true"><ArrowRight size={16} /></i>
+                    </button>
+                  </nav>
+                  <div className="sk-menu-contact">
+                    <a href="tel:+8801310980289">কল করুন</a>
+                    <a href="https://api.whatsapp.com/send/?phone=8801303103540" target="_blank" rel="noopener noreferrer">হোয়াটসঅ্যাপ</a>
+                    <a href="https://www.facebook.com/profile.php?id=100068711778004" target="_blank" rel="noopener noreferrer">ফেসবুক</a>
+                  </div>
+                </>
+              ) : (
+                <nav aria-label="Collections" className="sk-menu-list">
+                  {visibleCollections.map(({ slug, label }) => {
+                    const [en, bn] = label.split("-");
+                    return (
+                      <Link key={slug} href={`/collection/${slug}`} onClick={() => setIsOpen(false)} className="sk-menu-row">
+                        <span><b>{bn ?? en}</b><small>{en}</small></span>
+                        <i aria-hidden="true"><ArrowRight size={16} /></i>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              )}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+
+      {/* Desktop menu overlay */}
       <AnimatePresence initial={true}>
-        {isOpen && (
+        {isOpen && !isMobile && (
           <motion.div
             className="fixed inset-0 z-[100] w-full h-[100dvh] supports-[height:100dvh]:h-dvh p-3 sm:p-4 pointer-events-none"
           >
@@ -377,57 +444,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] } }}
               className="relative w-full h-full flex flex-col pointer-events-auto rounded-[12px] bg-white text-black shadow-2xl overflow-hidden md:bg-neutral-500/60 md:text-white md:backdrop-blur-md"
             >
-              <div className="flex h-full flex-col px-5 py-5 md:hidden">
-                <div className="flex justify-end">
-                  <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close menu" className="h-10 w-10 rounded-full text-black hover:bg-black/5">
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={mobileMenuPage}
-                    initial={{ opacity: 0, y: 4, scale: 0.99 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -4, scale: 0.99 }}
-                    transition={{ duration: 0.42, ease: [0.25, 0.1, 0.25, 1] }}
-                    className="flex min-h-0 flex-1 flex-col"
-                  >
-                  {mobileMenuPage === "main" ? (
-                  <nav aria-label="Mobile menu" className="mt-[14vh] space-y-5">
-                    <Link href="/" onClick={() => setIsOpen(false)}>
-                      <a className="flex items-center justify-between text-[2rem] font-normal leading-none tracking-[-0.05em]"><span>Home <span className="text-[1.45rem] font-bold text-black/55">/ হোম</span></span><ArrowRight size={27} strokeWidth={1.25} /></a>
-                    </Link>
-                    <Link href="/products" onClick={() => setIsOpen(false)}>
-                      <a className="flex items-center justify-between text-[2rem] font-normal leading-none tracking-[-0.05em]"><span>Products <span className="text-[1.45rem] font-bold text-black/55">/ পণ্যসমূহ</span></span><ArrowRight size={27} strokeWidth={1.25} /></a>
-                    </Link>
-                    <Link href="/collection/top-selling-products" onClick={() => setIsOpen(false)}>
-                      <a className="flex items-center justify-between text-[2rem] font-normal leading-none tracking-[-0.05em]"><span>Top Selling Products <span className="text-[1.45rem] font-bold text-black/55">/ সেরা বিক্রিত পণ্য</span></span><ArrowRight size={27} strokeWidth={1.25} /></a>
-                    </Link>
-                    <button type="button" onClick={() => setMobileMenuPage("collections")} className="flex w-full items-center justify-between text-left text-[2rem] font-normal leading-none tracking-[-0.05em]"><span>Collection <span className="text-[1.45rem] font-bold text-black/55">/ ক্যাটাগরিসমূহ</span></span><ArrowRight size={27} strokeWidth={1.25} /></button>
-                  </nav>
-                ) : (
-                  <div className="mt-8">
-                    <button type="button" onClick={() => setMobileMenuPage("main")} className="mb-10 flex items-center gap-2 text-sm text-black/55"><ArrowRight size={17} className="rotate-180" /> Back</button>
-                    <h2 className="mb-7 text-[2rem] font-normal leading-none tracking-[-0.05em]">Collections</h2>
-                    <nav aria-label="Collections" className="grid grid-cols-1 gap-4 text-lg">
-                      {visibleCollections.map(({ slug, label }) => (
-                        <Link key={slug} href={`/collection/${slug}`} onClick={() => setIsOpen(false)}>
-                          <a className="transition-opacity hover:opacity-60">{label}</a>
-                        </Link>
-                      ))}
-                    </nav>
-                  </div>
-                )}
-                  {mobileMenuPage === "main" && (
-                  <div className="mt-auto grid grid-cols-1 gap-y-4 pb-2 text-base">
-                    <a href="https://www.facebook.com/profile.php?id=100068711778004" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">Facebook</a>
-                    <a href="https://api.whatsapp.com/send/?phone=8801303103540" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-60">WhatsApp</a>
-                    <a href="tel:+8801310980289" className="transition-opacity hover:opacity-60">Call Sera Khabar Team</a>
-                  </div>
-                )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
               <div className="hidden md:flex md:flex-col md:h-full md:px-12 md:py-10 md:justify-between md:overflow-y-auto">
                 {/* Header */}
                 <div className="flex justify-end items-center">
