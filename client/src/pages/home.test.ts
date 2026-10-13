@@ -76,6 +76,15 @@ test("drives every product section from the live catalog", () => {
   assert.doesNotMatch(homeSource, /price: \d|"৳\d/);
 });
 
+test("separates product shelves with a quiet hairline instead of a progress-style bar", () => {
+  const divider = posterCss.match(/\.sk \.c-rule \{([^}]+)\}/)?.[1];
+  assert.ok(divider, "product shelf divider styles should exist");
+  assert.match(divider, /height: 1px;/);
+  assert.match(divider, /background: color-mix\(in srgb, var\(--royal\) 18%, transparent\);/);
+  assert.match(divider, /margin-top: 22px;/);
+  assert.doesNotMatch(divider, /linear-gradient|var\(--pink\)|border-radius/);
+});
+
 test("prices the offer band and the jaggery ad from catalog data", () => {
   assert.match(homeSource, /HOMEPAGE_OFFER_PRODUCT_SLUG/);
   assert.match(homeSource, /offerProduct \? <OfferBand product=\{offerProduct\} \/> : null/);

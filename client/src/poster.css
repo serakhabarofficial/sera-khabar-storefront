@@ -137,7 +137,7 @@
 .sk .c-plus .l2 { font-size: 14px; }
 .sk .c-plus:disabled { opacity: 0.35; cursor: not-allowed; }
 .sk .c-sold { position: absolute; left: 12px; top: 12px; border-radius: 999px; background: var(--ink-c); color: var(--rice); font-size: 11px; font-weight: 700; padding: 3px 10px; }
-.sk .c-rule { height: 3px; background: linear-gradient(90deg, var(--pink) 0 34%, color-mix(in srgb, var(--ink-c) 14%, transparent) 34% 100%); border-radius: 3px; margin-top: 22px; }
+.sk .c-rule { height: 1px; background: color-mix(in srgb, var(--royal) 18%, transparent); margin-top: 22px; }
 
 /* Big ৳ offer band */
 .sk .c-offer { position: relative; display: block; overflow: hidden; padding-block: 56px; text-align: center; }
