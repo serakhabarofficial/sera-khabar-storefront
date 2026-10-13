@@ -637,7 +637,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                 </span>
               </span>
               {displayGallery.length ? (
-                <div ref={galleryRef} className="skp-gallery">
+                <div ref={galleryRef} className="skp-gallery" data-page-settle="">
                   <div className="skp-gallery-track">
                     {displayGallery.map((url, idx) => (
                       <div key={url} className="skp-slide">
@@ -676,7 +676,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
             </div>
 
             {/* Details: homepage shelf chips switch one footer-style cash memo */}
-            <section className="skp-details" aria-label="বিস্তারিত">
+            <section className="skp-details" aria-label="বিস্তারিত" data-reveal="">
               <div className="skp-dh">
                 <h2>বিস্তারিত</h2>
                 <span className="script">জেনে নিন</span>
@@ -736,14 +736,14 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
           </div>
 
           <div className="skp-info">
-            <h1>{titleBn}</h1>
-            <span className="skp-pill">
+            <h1 data-load-step="">{titleBn}</h1>
+            <span className="skp-pill" data-load-step="">
               {[titleEn, bundles.filter((bundle) => bundle.title !== "Default").map((bundle) => bundle.title).join(" / ")]
                 .filter(Boolean)
                 .join(" · ")}
             </span>
-            <span className="skp-tag script">রাজশাহী থেকে</span>
-            {product.description ? <p className="skp-lede">{product.description}</p> : null}
+            <span className="skp-tag script" data-load-step="">রাজশাহী থেকে</span>
+            {product.description ? <p className="skp-lede" data-load-step="">{product.description}</p> : null}
             {highlights.length ? (
               <ul className="skp-ticks">
                 {highlights.map((item) => (
@@ -752,7 +752,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
               </ul>
             ) : null}
 
-            <div className="skp-price">
+            <div className="skp-price" data-load-step="">
               <span className="num">৳{toBanglaDigits(totalAmount.toLocaleString("en-IN"))}</span>
               {quantity > 1 ? <small>প্রতি প্যাক {formatTaka(selectedBundle.amount)}</small> : null}
               {Number.isFinite(compareAtAmount) && compareAtAmount > selectedBundle.amount ? (
@@ -905,7 +905,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
         {/* Reels Section — card row, title and round arrows in one header row */}
         {reelCount > 0 && (
-          <section className="skp-reels skp-w">
+          <section className="skp-reels skp-w" data-reveal="">
             <div className="skp-reels-head">
               <h2>
                 আমরা ও আমাদের <span className="script">সত্যতা</span>
@@ -1023,7 +1023,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
       {/* আরও দেখুন: the homepage product cards */}
       <section className="sk skp-more">
         <div className="wrap">
-          <div className="skp-hh">
+          <div className="skp-hh" data-reveal="">
             <h2>আরও দেখুন</h2>
             <span className="script">যা খুঁজছেন</span>
           </div>

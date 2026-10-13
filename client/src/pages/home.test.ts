@@ -52,8 +52,8 @@ test("loads Noto Serif Bengali and Galada and sets digits in Geist with a Bangla
 });
 
 test("renders the giant wordmark hero with the hand-lettered accent", () => {
-  assert.match(homeSource, /<span className="script tag">রাজশাহী থেকে<\/span>/);
-  assert.match(homeSource, /<h1 className="c-word">/);
+  assert.match(homeSource, /<span className="script tag" data-load-step="">রাজশাহী থেকে<\/span>/);
+  assert.match(homeSource, /<h1 className="c-word" data-load-step="">/);
   assert.match(homeSource, /src="\/home\/hero-bori\.webp"/);
   assert.ok(existsSync(new URL("../../public/home/hero-bori.webp", import.meta.url)));
 });

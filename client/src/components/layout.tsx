@@ -182,7 +182,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Link>
       </div>
       {/* Navigation */}
-      <div className="sk sk-header">
+      <div className="sk sk-header" data-page-header="">
         <div className="wrap">
           <header className="c-head">
             <nav className="menu" aria-label="Main">

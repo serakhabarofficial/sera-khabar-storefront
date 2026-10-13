@@ -51,7 +51,7 @@ function ProductGrid({ products, bySize = false }: { products: StorefrontProduct
     );
   }
   return (
-    <div className="c-list stagger">
+    <div className="c-list">
       {products.flatMap((product) =>
         // Shelves show each size (e.g. ৫০০ গ্রাম and ১ কেজি) as its own card.
         bySize && product.variants?.length
@@ -68,15 +68,16 @@ function CategoryCards() {
   return (
     <section className="cx-sec">
       <div className="wrap">
-        <h2>আমাদের ক্যাটাগরিসমূহ</h2>
-        <span className="script sub">যা খুঁজছেন</span>
+        <h2 data-reveal="">আমাদের ক্যাটাগরিসমূহ</h2>
+        <span className="script sub" data-reveal="">যা খুঁজছেন</span>
         <div className="fr-grid">
           {HOMEPAGE_CATEGORIES.map((category, index) => (
             <Link
               key={category.slug}
               href={`/collection/${category.slug}`}
               className={`fr${category.wide ? " wide" : ""}${category.light ? " light" : ""}`}
-              style={{ "--i": index, "--c": category.color } as CSSProperties}
+              style={{ "--c": category.color } as CSSProperties}
+              data-reveal=""
             >
               <span className="fr-card" />
               <img src={category.image} alt="" loading="eager" decoding="async" />
@@ -108,7 +109,7 @@ function AllProductsSection({ products, failed }: { products: StorefrontProduct[
   return (
     <section className="c-sec">
       <div className="wrap">
-        <div className="c-sec-head">
+        <div className="c-sec-head" data-reveal="">
           <h2>আমাদের পণ্য</h2>
           {chips.length > 2 ? (
             <div className="c-tabs" role="tablist" aria-label="ক্যাটাগরি">
@@ -148,7 +149,7 @@ function CategoryShelf({ title, groups }: { title: string; groups: ReturnType<ty
   return (
     <section className="c-sec">
       <div className="wrap">
-        <div className="c-sec-head">
+        <div className="c-sec-head" data-reveal="">
           <h2>{title}</h2>
           {showTabs ? (
             <div className="c-tabs" role="tablist" aria-label={title}>
@@ -184,9 +185,9 @@ function OfferBand({ product }: { product: StorefrontProduct }) {
   const image = getProductImage(product);
 
   return (
-    <Link href={`/product/${product.slug}`} className="c-offer">
-      {image ? <img className="float f1 reveal" src={image} alt="" loading="lazy" decoding="async" /> : null}
-      <img className="float f2 reveal" src="/home/hero-bori.webp" alt="" loading="lazy" decoding="async" />
+    <Link href={`/product/${product.slug}`} className="c-offer" data-reveal="">
+      {image ? <img className="float f1" src={image} alt="" loading="lazy" decoding="async" /> : null}
+      <img className="float f2" src="/home/hero-bori.webp" alt="" loading="lazy" decoding="async" />
       <div className="c-big">৳{toBanglaDigits(price)}</div>
       <span className="c-ribbon">{withNumeralDigits(`${bangla}, ${size ? `${size} ` : ""}থেকে শুরু`)}</span>
     </Link>
@@ -200,7 +201,7 @@ function JaggeryAdBoard({ products }: { products: StorefrontProduct[] }) {
   const startingPrice = product ? getStartingOption(product).price : null;
 
   return (
-    <section className="ad-board">
+    <section className="ad-board" data-reveal="">
       <div className="wrap ad-b-in">
         <img className="ad-b-img" src="/home/jaggery-ad.webp" alt="খেজুরের পাটালী গুড়" loading="lazy" decoding="async" />
         <div className="ad-b-txt">
@@ -272,7 +273,7 @@ function FaqChat() {
   const [question, answer] = FAQS[activeIndex];
 
   return (
-    <section className="wrap fq">
+    <section className="wrap fq" data-reveal="">
       <div className="fq-ctr">
         <span className="script fq-kick">প্রশ্ন আছে?</span>
         <h2>সাধারণ জিজ্ঞাসা</h2>
@@ -365,15 +366,15 @@ export default function Home() {
         {/* Hero Section */}
         <div className="wrap">
           <section className="c-hero">
-            <span className="script tag">রাজশাহী থেকে</span>
-            <h1 className="c-word">
+            <span className="script tag" data-load-step="">রাজশাহী থেকে</span>
+            <h1 className="c-word" data-load-step="">
               সেরা
               <br />
               খাবার
             </h1>
-            <img className="c-hero-img" src="/home/hero-bori.webp" alt="" fetchPriority="high" decoding="async" />
-            <p>ঘরে বানানো বড়ি, আচার আর গুড়। মায়ের রেসিপি, ছোট ব্যাচ, সারাদেশে ডেলিভারি।</p>
-            <div className="c-ctas">
+            <img className="c-hero-img" src="/home/hero-bori.webp" alt="" fetchPriority="high" decoding="async" data-page-settle="" />
+            <p data-load-step="">ঘরে বানানো বড়ি, আচার আর গুড়। মায়ের রেসিপি, ছোট ব্যাচ, সারাদেশে ডেলিভারি।</p>
+            <div className="c-ctas" data-load-step="">
               <Link href="/products" className="btn-sun press">
                 অর্ডার করুন <i />
               </Link>
@@ -392,7 +393,7 @@ export default function Home() {
 
         {/* Story Section */}
         <div className="wrap">
-          <section className="c-story">
+          <section className="c-story" data-reveal="">
             <h2 className="script">রাজশাহীর রান্নাঘরের গল্প</h2>
             <p>
               <b>সেরা খাবার</b> শুরু হয়েছিল পরিবারের পুরনো রেসিপি থেকে। প্রতিটি বড়ি রোদে শুকানো, প্রতিটি আচার ছোট হাঁড়িতে

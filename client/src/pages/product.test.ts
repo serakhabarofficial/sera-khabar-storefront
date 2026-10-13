@@ -36,7 +36,7 @@ test("renders product reels as a left-aligned horizontal snap carousel", () => {
   assert.match(productSource, /const \[reelRef, reelApi\] = useEmblaCarousel\(\{\s*align: "start"/);
   assert.match(productSource, /loop: true/);
   assert.match(productSource, /duration: 35/);
-  assert.match(productSource, /<section className="skp-reels skp-w">/);
+  assert.match(productSource, /<section className="skp-reels skp-w" data-reveal="">/);
   assert.match(productSource, /mr-5 min-w-0/);
   assert.match(productSource, /basis-\[64vw\][^"`]*md:basis-\[220px\]/);
   // The active reel is outlined in brand yellow; the rest keep a transparent border so nothing shifts.

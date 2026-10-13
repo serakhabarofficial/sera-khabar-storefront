@@ -61,7 +61,7 @@ test("keeps the mobile dock search panel compact", () => {
 
 test("uses the poster header: turmeric menu button, centred logo, turmeric bag", () => {
   // Approved 2026-10-13 homepage redesign (docs/design/2026-10-13-homepage).
-  assert.match(layoutSource, /<div className="sk sk-header">/);
+  assert.match(layoutSource, /<div className="sk sk-header" data-page-header="">/);
   assert.match(layoutSource, /<header className="c-head">/);
   assert.match(layoutSource, /className="menu-btn press" aria-label="Open menu" onClick=\{openMenu\}/);
   assert.match(layoutSource, /<img className="c-logoimg" src=\{headerLogo\}/);
