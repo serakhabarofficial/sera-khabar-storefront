@@ -166,3 +166,22 @@ test("pulses the dock cart once per toast handoff, then clears the signal", () =
 test("clears the page-transition filter so carousels do not repaint the whole page", () => {
   assert.match(layoutSource, /animate=\{\{ opacity: 1, y: 0, filter: "blur\(0px\)", transitionEnd: \{ filter: "none" \} \}\}/);
 });
+
+test("no grey gap above the footer: cream main, dock space lives in the footer", () => {
+  // The old Mango Lover grey (#f6f6f6) and an 80px pb-20 made a strip above the cash memo.
+  assert.match(layoutSource, /<main className="flex-grow overflow-hidden bg-\[#faf4ea\]">/);
+  assert.doesNotMatch(layoutSource, /<main[^>]*pb-20/);
+  const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
+  assert.match(posterSource, /@media \(max-width: 767px\) \{ footer\.sk \.fa \{ padding-bottom: calc\(98px \+ env\(safe-area-inset-bottom, 0px\)\); \} \}/);
+});
+
+test("the dock keeps a tab selected on product and collection pages", () => {
+  // Product, collection and search pages belong to the shop, so the পণ্য tab stays active there.
+  assert.match(layoutSource, /location === "\/products" \|\| location\.startsWith\("\/product\/"\) \|\| location\.startsWith\("\/collection\/"\)/);
+});
+
+test("tapping the logo on the homepage scrolls back to the top", () => {
+  // Already on "/", the link has nowhere to go, so the tap scrolls up instead (instantly with reduced motion).
+  assert.match(layoutSource, /<Link href="\/" aria-label="সেরা খাবার — হোম" onClick=\{goHome\}>/);
+  assert.match(layoutSource, /if \(location === "\/"\) \{[\s\S]*?window\.scrollTo\(\{ top: 0, behavior: shouldReduceMotion \? "auto" : "smooth" \}\)/);
+});

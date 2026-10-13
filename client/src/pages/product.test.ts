@@ -179,3 +179,7 @@ test("related products use the homepage poster card", () => {
   assert.match(productSource, /<PosterProductCard key=\{p\.slug\} product=\{p\} \/>/);
   assert.doesNotMatch(productSource, /HomeProductCard/);
 });
+
+test("the breadcrumb uses the title font", () => {
+  assert.match(posterSource, /\.skp-crumb \{[^}]*font-family: var\(--disp\);/);
+});

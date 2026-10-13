@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ArrowRight, ShieldCheck, X } from "lucide-react";
 import { Box as ReiconBox } from "reicon-react";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -143,12 +143,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       ? "search"
       : location === "/"
         ? "home"
-        : location === "/products"
+        : location === "/products" || location.startsWith("/product/") || location.startsWith("/collection/")
           ? "products"
           : null;
 
   const openSearch = () => setIsSearchOpen(true);
   const openMenu = () => setIsOpen(true);
+  const goHome = (event: MouseEvent<HTMLAnchorElement>) => {
+    setIsOpen(false);
+    setIsSearchOpen(false);
+    if (location === "/") {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: shouldReduceMotion ? "auto" : "smooth" });
+    }
+  };
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const query = searchQuery.trim();
@@ -187,7 +195,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link href="/products" className="link">Shop</Link>
               <Link href="/about-us" className="link">About Us</Link>
             </nav>
-            <Link href="/" aria-label="সেরা খাবার — হোম">
+            <Link href="/" aria-label="সেরা খাবার — হোম" onClick={goHome}>
               <img className="c-logoimg" src={headerLogo} alt="Sera Khabar" />
             </Link>
             <div className="tools">
@@ -391,7 +399,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <CartAddedToast />
 
       {/* Main Content with Transition */}
-      <main className="flex-grow overflow-hidden bg-brand-ivory pb-20 md:pb-0">
+      <main className="flex-grow overflow-hidden bg-[#faf4ea]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location}
