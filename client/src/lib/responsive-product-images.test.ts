@@ -113,5 +113,5 @@ test("card images ship a srcSet and a sizes hint", () => {
 
 test("small fixed-size thumbnails pin sizes so they cannot pull the 960px file", () => {
   assert.match(read("../components/layout.tsx"), /sizes=\{srcSet \? "40px" : undefined\}/);
-  assert.match(read("../pages/product.tsx"), /sizes=\{srcSetFor\[url\] \? "56px" : undefined\}/);
+  assert.match(read("../pages/product.tsx"), /sizes=\{srcSetFor\[displayImage\] \? "44px" : undefined\}/);
 });

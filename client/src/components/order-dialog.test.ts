@@ -4,16 +4,27 @@ import { test } from "node:test";
 
 const dialogSource = readFileSync(new URL("./order-dialog.tsx", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../index.css", import.meta.url), "utf8");
+const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
 
 test("the Place Order button shows a centred one-line label and no arrow", () => {
   assert.match(dialogSource, /<form\s+id="order-dialog-form"/);
   assert.match(dialogSource, /<button\n\s+type="submit"\n\s+disabled=\{orderSubmitting\}/);
-  assert.match(dialogSource, /rounded-\[6px\] bg-\[#FBBB14\]/);
-  assert.match(dialogSource, /flex h-14 w-full items-center justify-center rounded-\[6px\]/);
-  assert.match(dialogSource, /truncate text-center[^"]*">\n\s+\{orderSubmitting \? "Placing Order\.\.\. - অর্ডার হচ্ছে\.\.\." : "Place Order - অর্ডার করুন"\}/);
+  assert.match(dialogSource, /className="sko-submit sko-press"/);
+  assert.match(dialogSource, /className="sko-submit-label">\n\s+\{orderSubmitting \? "Placing Order\.\.\. - অর্ডার হচ্ছে\.\.\." : "Place Order - অর্ডার করুন"\}/);
+  assert.match(posterSource, /\.sko-submit-label \{[^}]*white-space: nowrap; text-align: center;/);
   // The total is shown once, in the summary above; the button repeats no price.
-  assert.doesNotMatch(dialogSource, /tabular-nums">\n\s+৳\{\(bundle\.price \+ deliveryCharge\)\.toLocaleString\(\)\}/);
+  assert.doesNotMatch(dialogSource, /sko-submit-label">\n\s+৳/);
   assert.doesNotMatch(dialogSource, /ArrowRight/);
+});
+
+test("checkout is the cart's Vaul sheet: bottom sheet on phones, right panel on desktop (2026-10-13)", () => {
+  assert.match(dialogSource, /<Drawer\.Root open=\{open\} onOpenChange=\{resetDialog\} direction=\{isMobile \? "bottom" : "right"\}>/);
+  assert.match(dialogSource, /isMobile \? "sk-sheet sko-sheet" : "sk-panel sk-panel-right sko-panel"/);
+  assert.doesNotMatch(dialogSource, /@\/components\/ui\/dialog/);
+  // The cart clears its bundle on close; the sheet keeps the last one for the exit slide.
+  assert.match(dialogSource, /const bundle = bundleProp \?\? lastBundle\.current;/);
+  // Dragging inside the form must not pull the sheet down while typing.
+  assert.match(dialogSource, /className="sko-form"\n\s+data-vaul-no-drag/);
 });
 
 test("there is no separate floating Place Order button", () => {

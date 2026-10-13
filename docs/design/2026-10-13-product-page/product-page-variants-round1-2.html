@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Product page variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atma:wght@700&family=Galada&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@700;900&display=swap" rel="stylesheet">
+<!--
+  Product page prototype (2026-10-13), built with Emil Kowalski's `prototype` skill: one variant at a
+  time in a real page context, picker chrome copied verbatim from PICKER.md. Content is the live
+  হোমমেড কুমড়ো বড়ি product (catalog snapshot + product-details.ts). Keys: 1–5 or ←/→, R to replay.
+  "Phone" / "Full width" toggles the stage width. Nothing here is imported by the storefront.
+-->
+<style>
+  :root {
+    --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a; --card: #f1e5d3;
+    --ink: #3a1d0f; --sub: #7a6050; --paper: #fffdf8; --rose: #e9a9a0;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --disp: "Noto Serif Bengali", serif;
+    --soft: 0 0 0 1px rgba(58,29,15,.06), 0 1px 2px rgba(58,29,15,.04), 0 4px 8px -2px rgba(58,29,15,.05), 0 14px 28px -8px rgba(58,29,15,.08);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: #e9dfd0; font-family: "Hind Siliguri", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  button, a { font: inherit; color: inherit; text-decoration: none; touch-action: manipulation; }
+  button { border: 0; background: none; padding: 0; cursor: pointer; user-select: none; -webkit-user-select: none; }
+  img { display: block; max-width: 100%; }
+  .num { font-family: "Atma", sans-serif; font-weight: 700; }
+  .script { font-family: "Galada", cursive; font-weight: 400; }
+  .press { transition: transform 160ms var(--ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease; }
+  .press:active { transform: scale(0.97); }
+  /* Product photos have white backgrounds: they blend into cream, never onto colour (homepage rule). */
+  .blend { mix-blend-mode: multiply; -webkit-mask-image: radial-gradient(ellipse 66% 66% at 50% 50%, #000 58%, transparent 100%); mask-image: radial-gradient(ellipse 66% 66% at 50% 50%, #000 58%, transparent 100%); }
+
+  /* ── Stage: phone frame (default) or full width; the page scrolls inside .scroller either way ── */
+  .stage-mode { position: fixed; top: 24px; left: 24px; z-index: 2147483646; height: 36px; padding: 0 14px; border-radius: 999px; background: rgba(10,10,10,.82); color: rgba(255,255,255,.85);
+    font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; backdrop-filter: blur(12px); }
+  #stage { min-height: 100dvh; display: grid; place-items: center; padding: 76px 16px 24px; }
+  .scroller { position: relative; width: 390px; height: min(844px, calc(100dvh - 100px)); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+    border-radius: 44px; background: var(--rice); box-shadow: 0 0 0 10px #2a1c14, 0 30px 60px -20px rgba(42,28,20,.5); scrollbar-width: none; }
+  .scroller::-webkit-scrollbar { display: none; }
+  body.full #stage { padding: 0; display: block; }
+  body.full .scroller { width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; }
+  @media (max-width: 440px) { #stage { padding: 0; display: block; } .scroller { width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; } .stage-mode { display: none; } }
+
+  /* ── Shared page chrome (from the homepage) ── */
+  .pg { container: pg / inline-size; min-height: 100%; background: var(--rice); }
+  .ann { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 6px 16px; background: var(--sun); text-align: center; }
+  .ann div { display: flex; flex-direction: column; line-height: 1.2; }
+  .ann .script { color: var(--pink); font-size: 15px; }
+  .ann b { font-size: 12.5px; color: var(--ink); }
+  .ann a { flex: none; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+  .ann a i { width: 6px; height: 6px; border-radius: 50%; background: var(--sun); }
+  .hdr { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 8px 18px; background: var(--rice); }
+  .hdr .mb { width: 34px; height: 34px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; }
+  .hdr .mb span { width: 14px; height: 1.5px; background: #000; box-shadow: 0 -4px 0 #000, 0 4px 0 #000; }
+  .hdr img { height: 46px; }
+  .hdr .tools { justify-self: end; display: flex; align-items: center; gap: 8px; }
+  .hdr .bag { width: 34px; height: 34px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; font-size: 15px; color: var(--royal); }
+  .hdr .bag.pulse { animation: pulse 420ms var(--ease-out); }
+  @keyframes pulse { 40% { transform: scale(1.18); } }
+  .crumb { padding: 2px 18px 0; font-size: 12px; color: var(--sub); }
+  .crumb a { color: var(--royal); font-weight: 600; }
+  @container pg (min-width: 760px) { .hdr { padding: 10px 48px; } .hdr img { height: 58px; } .crumb { padding: 4px 48px 0; } }
+  .dock { position: sticky; bottom: 12px; z-index: 30; margin: 0 auto; width: calc(100% - 32px); height: 60px; display: flex; align-items: center; justify-content: space-around; border-radius: 999px; background: #fff; box-shadow: 0 10px 30px -10px rgba(42,28,20,.35), 0 0 0 1px rgba(58,29,15,.06); }
+  .dock span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: var(--sub); }
+  .dock span i { width: 20px; height: 20px; border-radius: 6px; border: 1.6px solid currentColor; }
+  .dock span.on { color: var(--royal); font-weight: 700; }
+  @container pg (min-width: 760px) { .dock { display: none; } }
+  .foot { margin-top: 40px; padding: 26px 18px 92px; border-top: 1.5px dotted rgba(58,29,15,.25); text-align: center; font-size: 12px; color: var(--sub); }
+  @container pg (min-width: 760px) { .foot { padding-bottom: 32px; } }
+
+  /* Toast for add-to-cart, and a stub for the existing order sheet */
+  .toast { position: sticky; bottom: 204px; z-index: 40; margin: 0 auto; width: max-content; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 999px; background: var(--royal); color: var(--rice); font-size: 13px; font-weight: 600;
+    opacity: 0; transform: translateY(8px); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); pointer-events: none; height: 0; overflow: visible; }
+  .toast.show { opacity: 1; transform: none; }
+  .toast span { display: inline-block; padding: 10px 16px; margin: -10px -16px; border-radius: 999px; background: var(--royal); }
+
+  /* Shared buy controls */
+  .qty { display: inline-flex; align-items: center; height: 48px; padding: 0 5px; border-radius: 999px; background: var(--paper); box-shadow: 0 0 0 1.5px rgba(58,29,15,.14); }
+  .qty button { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; color: var(--royal); }
+  .qty button:disabled { opacity: .35; cursor: not-allowed; }
+  .qty output { min-width: 30px; text-align: center; font-family: "Atma", sans-serif; font-weight: 700; font-size: 18px; }
+  .cod { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 22px; border-radius: 999px; background: var(--sun); color: var(--ink); font-weight: 700; font-size: 16px; }
+  .cod i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+  .addc { display: grid; place-items: center; height: 56px; padding: 0 20px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; font-size: 15px; }
+  .addc > span { grid-area: 1 / 1; transition: opacity 200ms var(--ease-out), filter 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  .addc .l2 { opacity: 0; filter: blur(2px); transform: translateY(4px); }
+  .addc.added .l1 { opacity: 0; filter: blur(2px); transform: translateY(-4px); }
+  .addc.added .l2 { opacity: 1; filter: none; transform: none; }
+  .help { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .help a { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--paper); }
+  .help .call { background: transparent; color: var(--royal); box-shadow: inset 0 0 0 1.5px rgba(91,45,23,.35); }
+  .help .wa { background: #25d366; }
+
+  /* Entrance: one staggered rise on load */
+  .rise > * { animation: rise 380ms var(--ease-out) both; }
+  .rise > *:nth-child(2) { animation-delay: 50ms; } .rise > *:nth-child(3) { animation-delay: 100ms; } .rise > *:nth-child(4) { animation-delay: 150ms; }
+  .rise > *:nth-child(5) { animation-delay: 200ms; } .rise > *:nth-child(n+6) { animation-delay: 250ms; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (hover: hover) and (pointer: fine) { .cod:hover { background: #efad12; } .addc:hover { background: #4a2412; } }
+  @media (prefers-reduced-motion: reduce) { .rise > * { animation: none; } .press:active { transform: none; } .toast { transition: opacity 200ms ease; transform: none; } }
+
+  /* Related products (homepage card) */
+  .rel { padding: 34px 18px 0; }
+  .rel h2 { margin: 0 0 14px; font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--royal); }
+  .rel .row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .rel .c { background: var(--card); border-radius: 22px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+  .rel .c img { width: 100%; max-width: 150px; aspect-ratio: 1; object-fit: contain; }
+  .rel .c b { font-family: var(--disp); font-weight: 700; font-size: 14px; line-height: 1.4; }
+  .rel .c .num { font-size: 18px; color: var(--royal); }
+  @container pg (min-width: 760px) { .rel { padding: 48px 48px 0; } .rel .row { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 20px; } }
+
+  /* ═════════ 1 · Poster — axis: big-type editorial, like the homepage hero; sticky buy bar ═════════ */
+  .v1 .hero { position: relative; padding: 14px 18px 0; }
+  .v1 .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+  .v1 .kicker b { padding: 2px 10px; border-radius: 999px; background: var(--rose); color: var(--ink); letter-spacing: 0; }
+  .v1 h1 { margin: 8px 0 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: clamp(54px, 15cqi, 120px); line-height: .92; letter-spacing: -.02em; position: relative; z-index: 2; }
+  .v1 h1 small { display: block; margin-top: 10px; font-family: "Hind Siliguri", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .02em; color: var(--sub); }
+  .v1 .tag { position: absolute; z-index: 3; right: 18px; top: 52px; color: var(--pink); font-size: clamp(22px, 6cqi, 40px); transform: rotate(-8deg); }
+  .v1 .photo { position: relative; margin: -10px -6% 0 12%; z-index: 1; }
+  .v1 .photo img { width: 100%; transform: rotate(-4deg); }
+  .v1 .photo .stamp { position: absolute; left: -6%; bottom: 14%; padding: 7px 12px; border: 2px solid var(--pink); border-radius: 8px; color: var(--pink); font-weight: 700; font-size: 12px; line-height: 1.25; text-align: center; transform: rotate(-10deg); background: rgba(250,244,234,.6); }
+  .v1 .buy { padding: 4px 18px 0; display: flex; flex-direction: column; gap: 16px; }
+  .v1 .price { display: flex; align-items: baseline; gap: 10px; }
+  .v1 .price .num { font-size: 52px; line-height: 1; color: var(--royal); }
+  .v1 .price small { font-size: 13px; color: var(--sub); }
+  .v1 .lbl { font-family: var(--disp); font-weight: 700; font-size: 15px; color: var(--royal); margin-bottom: 8px; }
+  .v1 .sizes { display: flex; gap: 10px; }
+  .v1 .size { flex: 1; height: 56px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(58,29,15,.2); display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--disp); font-weight: 700; font-size: 17px; color: var(--royal); }
+  .v1 .size .num { font-size: 15px; color: var(--sub); }
+  .v1 .size[aria-pressed="true"] { background: var(--royal); color: var(--rice); box-shadow: none; }
+  .v1 .size[aria-pressed="true"] .num { color: var(--sun); }
+  .v1 .ctas { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+  .v1 .ctas .addc { grid-column: 1 / -1; }
+  .v1 .when { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 18px; background: var(--paper); box-shadow: var(--soft); font-size: 13.5px; }
+  .v1 .when b { font-family: var(--disp); color: var(--royal); }
+  .v1 .when .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: #2fa865; box-shadow: 0 0 0 4px rgba(47,168,101,.18); }
+  .v1 .story { padding: 40px 18px 0; display: flex; flex-direction: column; gap: 30px; }
+  .v1 .sec { display: grid; grid-template-columns: 46px 1fr; gap: 0 12px; }
+  .v1 .sec .n { grid-row: span 3; font-size: 34px; line-height: 1; color: var(--sun); -webkit-text-stroke: 1px var(--royal); }
+  .v1 .sec h2 { margin: 2px 0 6px; font-family: var(--disp); font-weight: 900; font-size: 24px; line-height: 1.25; color: var(--royal); }
+  .v1 .sec p { margin: 0 0 8px; font-size: 15px; line-height: 1.75; color: var(--ink); }
+  .v1 .sec ul { margin: 0; padding: 0; list-style: none; }
+  .v1 .sec li { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1.5px dotted rgba(58,29,15,.22); font-size: 15px; }
+  .v1 .sec li::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--pink); transform: translateY(-2px); }
+  /* Zero-height sticky anchor so the bar floats above the dock without taking space in the page */
+  .v1b { position: sticky; bottom: 148px; z-index: 35; margin: 0 16px; height: 0; color: var(--rice);
+    transform: translateY(12px); opacity: 0; pointer-events: none; transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out); }
+  .v1b > div { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--royal); box-shadow: 0 14px 30px -12px rgba(42,28,20,.55); }
+  .v1b.show { opacity: 1; transform: none; pointer-events: auto; }
+  .v1b .t { flex: 1; min-width: 0; line-height: 1.2; }
+  .v1b .t small { display: block; font-size: 11.5px; opacity: .75; }
+  .v1b .t .num { font-size: 20px; color: var(--sun); }
+  .v1b .cod { height: 46px; padding: 0 18px; font-size: 14px; }
+  @container pg (min-width: 760px) {
+    .v1 .top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; padding: 0 48px; align-items: start; }
+    .v1 .hero { padding: 26px 0 0; }
+    .v1 .tag { right: 0; top: 230px; }
+    .v1 .photo { margin: -30px 0 0 14%; max-width: 520px; }
+    .v1 h1 { font-size: 150px; }
+    .v1 .buy { padding: 40px 0 0; position: sticky; top: 90px; }
+    .v1 .story { padding: 60px 48px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 40px 56px; }
+    .v1b { display: none; }
+  }
+
+  /* ═════════ 2 · Memo — axis: the order as a shop cash memo with a live running total ═════════ */
+  .v3 .wrap { padding: 14px 18px 0; display: flex; flex-direction: column; gap: 18px; }
+  .v3 .intro { display: grid; grid-template-columns: 42% 1fr; gap: 14px; align-items: center; }
+  .v3 .intro .pic { aspect-ratio: 1; border-radius: 50%; background: var(--card); display: grid; place-items: center; overflow: hidden; box-shadow: 0 0 0 6px var(--paper), var(--soft); }
+  .v3 .intro .pic img { width: 92%; }
+  .v3 .intro .script { color: var(--pink); font-size: 19px; display: inline-block; transform: rotate(-5deg); }
+  .v3 .intro h1 { margin: 2px 0 0; font-family: var(--disp); font-weight: 900; font-size: 27px; line-height: 1.2; color: var(--royal); }
+  .v3 .intro small { display: block; margin-top: 4px; font-size: 12.5px; color: var(--sub); }
+  .v3 .lede { margin: 0; font-size: 14.5px; line-height: 1.75; }
+  .v3 .memo { position: relative; padding: 22px 18px 28px; background: var(--paper); border-radius: 6px 6px 0 0; box-shadow: 0 0 0 1px rgba(58,29,15,.06), 0 14px 28px -10px rgba(58,29,15,.18); }
+  .v3 .memo::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 12px; background: radial-gradient(circle at 8px 0, var(--paper) 8px, transparent 8.5px) 0 0 / 16px 12px repeat-x; }
+  .v3 .memo .pin { position: absolute; top: -9px; left: 50%; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--pink); box-shadow: inset -3px -3px 0 rgba(0,0,0,.15), 0 3px 4px rgba(58,29,15,.3); }
+  .v3 .mh { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 10px; border-bottom: 2px solid var(--royal); }
+  .v3 .mh b { font-family: var(--disp); font-weight: 900; font-size: 22px; color: var(--royal); }
+  .v3 .mh span { font-size: 13px; color: var(--sub); }
+  .v3 .mlbl { margin: 14px 0 2px; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--pink); }
+  .v3 .line { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 6px 0; border-bottom: 1.5px dotted rgba(91,45,23,.3); text-align: left; }
+  .v3 .radio { flex: none; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(58,29,15,.35); transition: box-shadow 160ms var(--ease-out), background-color 160ms ease; }
+  .v3 .line[aria-pressed="true"] .radio { background: var(--royal); box-shadow: inset 0 0 0 5px var(--paper), 0 0 0 1.5px var(--royal); }
+  .v3 .line b { font-family: var(--disp); font-weight: 700; font-size: 18px; color: var(--royal); }
+  .v3 .line i { flex: 1; border-bottom: 2px dotted rgba(91,45,23,.3); transform: translateY(4px); }
+  .v3 .line .num { font-size: 18px; color: var(--royal); }
+  .v3 .line .save { font-size: 11px; font-weight: 700; color: var(--pink); }
+  .v3 .qline { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1.5px dotted rgba(91,45,23,.3); }
+  .v3 .qline b { font-family: var(--disp); font-weight: 700; font-size: 18px; color: var(--royal); }
+  .v3 .sum { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 14px; }
+  .v3 .sum span { font-family: var(--disp); font-weight: 900; font-size: 20px; color: var(--royal); }
+  .v3 .sum span small { display: block; font-family: "Hind Siliguri", sans-serif; font-weight: 500; font-size: 11.5px; color: var(--sub); }
+  .v3 .sum .num { font-size: 40px; line-height: 1; color: var(--royal); }
+  .v3 .stamp { position: absolute; right: 16px; top: 64px; padding: 6px 10px; border: 2px solid var(--pink); border-radius: 6px; color: var(--pink); font-weight: 700; font-size: 12px; line-height: 1.25; text-align: center; transform: rotate(-9deg); opacity: .85; }
+  .v3 .acts { display: flex; flex-direction: column; gap: 10px; }
+  .v3 .acts .addc { background: transparent; color: var(--royal); box-shadow: inset 0 0 0 1.5px var(--royal); }
+  .v3 .dates { display: flex; justify-content: space-between; gap: 6px; }
+  .v3 .dates div { flex: 1; text-align: center; padding: 10px 4px; border: 1.5px dashed rgba(91,45,23,.35); border-radius: 14px; }
+  .v3 .dates div:last-child { border-color: var(--pink); color: var(--pink); }
+  .v3 .dates .num { display: block; font-size: 17px; }
+  .v3 .dates small { font-family: var(--disp); font-weight: 700; font-size: 12.5px; }
+  .v3 .acc { border-radius: 22px; background: var(--paper); box-shadow: var(--soft); overflow: hidden; }
+  .v3 .acc > div + div { border-top: 1.5px dotted rgba(58,29,15,.2); }
+  .v3 .acc button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 16px; text-align: left; }
+  .v3 .acc button .num { width: 26px; font-size: 14px; color: var(--sub); }
+  .v3 .acc button b { flex: 1; font-family: var(--disp); font-weight: 700; font-size: 17px; color: var(--royal); }
+  .v3 .acc button em { font-style: normal; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--card); color: var(--royal); font-size: 16px; transition: transform 200ms var(--ease-out); }
+  .v3 .acc [aria-expanded="true"] em { transform: rotate(45deg); background: var(--sun); }
+  .v3 .acc .body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 240ms var(--ease-out); }
+  .v3 .acc .body > div { overflow: hidden; }
+  .v3 .acc [aria-expanded="true"] + .body { grid-template-rows: 1fr; }
+  .v3 .acc .body p { margin: 0 16px 8px 54px; font-size: 14.5px; line-height: 1.75; }
+  .v3 .acc .body ul { margin: 0 16px 16px 54px; padding: 0; list-style: none; }
+  .v3 .acc .body li { padding: 6px 0; border-bottom: 1.5px dotted rgba(58,29,15,.18); font-size: 14.5px; }
+  .v3 .main, .v3 .side { display: contents; }
+  @container pg (min-width: 760px) {
+    .v3 .wrap { padding: 24px 48px 0; display: grid; grid-template-columns: 1fr 440px; gap: 26px 48px; align-items: start; }
+    .v3 .main { display: flex; flex-direction: column; gap: 22px; grid-column: 1; grid-row: 1; }
+    .v3 .side { display: flex; flex-direction: column; gap: 18px; grid-column: 2; grid-row: 1 / span 2; position: sticky; top: 90px; }
+    .v3 .acc { grid-column: 1; grid-row: 2; }
+    .v3 .intro { grid-template-columns: 1fr 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .v3 .acc .body { transition: none; } }
+
+  /* Poster's delivery note, reused by Poster + Slip */
+  .v4 .when.v1w { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 18px; background: var(--paper); box-shadow: var(--soft); font-size: 13.5px; }
+
+  /* ═════════ 4 · Poster + Slip — axis: hybrid; poster showcase, memo slip as the buy box ═════════ */
+  .v4 .slipwrap { position: relative; z-index: 4; margin: -64px 18px 0; transform: rotate(-1deg); }
+  .v4 .slipwrap .memo { box-shadow: 0 0 0 1px rgba(58,29,15,.06), 0 24px 40px -16px rgba(42,28,20,.35); }
+  .v4 .acts { padding: 26px 18px 0; display: flex; flex-direction: column; gap: 10px; }
+  .v4 .acts .addc { background: transparent; color: var(--royal); box-shadow: inset 0 0 0 1.5px var(--royal); }
+  .v4 .whenwrap { padding: 14px 18px 0; }
+  @container pg (min-width: 760px) {
+    .v4 .top { display: grid; grid-template-columns: 1.1fr 440px; gap: 48px; padding: 0 48px; align-items: start; }
+    .v4 .hero { padding: 26px 0 0; }
+    .v4 h1 { font-size: 150px; }
+    .v4 .tag { right: 0; top: 230px; }
+    .v4 .photo { margin: -30px 0 0 14%; max-width: 520px; }
+    .v4 .side { position: sticky; top: 90px; padding-top: 34px; }
+    .v4 .slipwrap { margin: 0; transform: rotate(-1deg); }
+    .v4 .acts, .v4 .whenwrap { padding-left: 0; padding-right: 0; }
+  }
+
+  /* ═════════ 5 · Signboard — axis: dark high-contrast band (the গুড় ad) + vintage jar label ═════════ */
+  .v5 .band { position: relative; margin-top: 96px; padding: 112px 18px 26px; background: var(--royal); color: var(--rice); }
+  .v5 .plate { position: absolute; left: 50%; top: -86px; width: 196px; height: 196px; margin-left: -98px; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 8px var(--rice), 0 18px 30px -10px rgba(0,0,0,.35); display: grid; place-items: center; overflow: hidden; transform: rotate(-6deg); }
+  .v5 .plate img { width: 94%; }
+  .v5 .plate-tag { position: absolute; right: 22px; top: -34px; color: var(--sun); font-size: 22px; transform: rotate(8deg); z-index: 2; }
+  .v5 .band .kick { display: block; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .16em; color: rgba(250,244,234,.6); }
+  .v5 .band h1 { margin: 6px 0 0; text-align: center; font-family: var(--disp); font-weight: 900; font-size: clamp(44px, 13cqi, 96px); line-height: 1; letter-spacing: -.01em; }
+  .v5 .band h1 small { display: block; margin-top: 8px; font-family: "Hind Siliguri", sans-serif; font-weight: 500; font-size: 13.5px; color: rgba(250,244,234,.65); letter-spacing: .02em; }
+  .v5 .band .pr { display: flex; justify-content: center; align-items: baseline; gap: 8px; margin: 14px 0 18px; }
+  .v5 .band .pr .num { font-size: 48px; line-height: 1; color: var(--sun); }
+  .v5 .band .pr small { font-size: 13px; color: rgba(250,244,234,.65); }
+  .v5 .sizes { display: flex; gap: 10px; }
+  .v5 .size { flex: 1; height: 54px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(250,244,234,.35); display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--disp); font-weight: 700; font-size: 17px; color: var(--rice); }
+  .v5 .size .num { font-size: 15px; opacity: .7; }
+  .v5 .size[aria-pressed="true"] { background: var(--rice); color: var(--royal); box-shadow: none; }
+  .v5 .size[aria-pressed="true"] .num { opacity: 1; color: var(--pink); }
+  .v5 .row { display: grid; grid-template-columns: auto 1fr; gap: 10px; margin-top: 12px; }
+  .v5 .band .qty { background: rgba(250,244,234,.08); box-shadow: inset 0 0 0 1.5px rgba(250,244,234,.3); }
+  .v5 .band .qty button, .v5 .band .qty output { color: var(--rice); }
+  .v5 .band .addc { margin-top: 10px; width: 100%; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(250,244,234,.35); }
+  .v5 .band .help { margin-top: 10px; }
+  .v5 .band .help .call { color: var(--rice); box-shadow: inset 0 0 0 1.5px rgba(250,244,234,.3); }
+  .v5 .band .when { margin-top: 14px; text-align: center; font-size: 13px; color: rgba(250,244,234,.75); }
+  .v5 .band .when b { color: var(--sun); font-family: var(--disp); }
+  .v5 .label { margin: 30px 18px 0; padding: 8px; border-radius: 30px; background: var(--paper); box-shadow: var(--soft); }
+  .v5 .label-in { border: 2px solid var(--royal); border-radius: 24px; padding: 22px 18px; outline: 1px solid var(--royal); outline-offset: -7px; }
+  .v5 .label-head { text-align: center; padding-bottom: 14px; border-bottom: 1.5px dashed rgba(91,45,23,.35); }
+  .v5 .label-head .script { color: var(--pink); font-size: 20px; }
+  .v5 .label-head b { display: block; font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--royal); }
+  .v5 .label-head p { margin: 8px 0 0; font-size: 14px; line-height: 1.7; }
+  .v5 .lrow { padding: 14px 0; border-bottom: 1.5px dashed rgba(91,45,23,.25); }
+  .v5 .lrow:last-child { border-bottom: 0; padding-bottom: 0; }
+  .v5 .lrow h3 { margin: 0 0 6px; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .18em; color: var(--pink); }
+  .v5 .lrow p { margin: 0 0 6px; text-align: center; font-size: 14px; line-height: 1.7; }
+  .v5 .lrow ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .v5 .lrow li { padding: 3px 12px; border-radius: 999px; background: var(--card); font-size: 13px; color: var(--royal); font-weight: 600; }
+  @container pg (min-width: 760px) {
+    .v5 .band { margin-top: 40px; padding: 48px 48px 40px calc(48px + 380px); min-height: 440px; }
+    .v5 .plate { left: 48px; top: 40px; margin: 0; width: 340px; height: 340px; }
+    .v5 .plate-tag { right: auto; left: 250px; top: 372px; }
+    .v5 .band h1, .v5 .band .kick { text-align: left; }
+    .v5 .band .pr { justify-content: flex-start; }
+    .v5 .band .when { text-align: left; }
+    .v5 .band-in { max-width: 560px; }
+    .v5 .label { margin: 40px auto 0; max-width: 760px; }
+  }
+
+  /* ═════════ 6 · Khata — axis: tactile, hand-made notebook page (taped photo, ticks, sticky notes) ═════════ */
+  .v6 { position: relative; background-image: linear-gradient(to right, transparent 33px, rgba(226,84,122,.45) 33px, rgba(226,84,122,.45) 34.5px, transparent 34.5px),
+    repeating-linear-gradient(to bottom, transparent 0 31px, rgba(91,45,23,.1) 31px 32px); }
+  .v6 .wrap { padding: 16px 18px 0 48px; display: flex; flex-direction: column; gap: 18px; }
+  .v6 .polaroid { position: relative; align-self: center; width: 86%; padding: 12px 12px 40px; background: var(--paper); box-shadow: 0 16px 28px -14px rgba(42,28,20,.45), 0 0 0 1px rgba(58,29,15,.06); transform: rotate(2.5deg); }
+  .v6 .polaroid .ph { background: var(--card); aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
+  .v6 .polaroid .ph img { width: 96%; }
+  .v6 .polaroid .cap { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: var(--royal); font-size: 20px; }
+  .v6 .tape { position: absolute; width: 88px; height: 26px; background: rgba(246,184,38,.55); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .v6 .tape.a { top: -12px; left: -18px; transform: rotate(-32deg); }
+  .v6 .tape.b { top: -12px; right: -18px; transform: rotate(30deg); }
+  .v6 .ttl .script { color: var(--pink); font-size: 22px; display: inline-block; transform: rotate(-4deg); }
+  .v6 .ttl h1 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 36px; line-height: 1.2; color: var(--royal); }
+  .v6 .ttl small { display: block; font-size: 13px; color: var(--sub); }
+  .v6 .circ { position: relative; display: inline-block; padding: 4px 18px; }
+  .v6 .circ .num { position: relative; z-index: 1; font-size: 44px; line-height: 1.1; color: var(--royal); }
+  .v6 .circ svg { position: absolute; inset: -10px -14px; width: calc(100% + 28px); height: calc(100% + 20px); overflow: visible; }
+  .v6 .circ path { fill: none; stroke: var(--sun); stroke-width: 4.5; stroke-linecap: round; }
+  .v6 .lede { margin: 0; font-size: 15px; line-height: 2.13; }
+  .v6 h2 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 20px; color: var(--royal); }
+  .v6 .check { display: flex; align-items: center; gap: 12px; width: 100%; height: 48px; text-align: left; }
+  .v6 .box { position: relative; flex: none; width: 26px; height: 26px; border: 2px solid var(--royal); border-radius: 6px; transform: rotate(-3deg); }
+  .v6 .box svg { position: absolute; left: -3px; top: -9px; width: 34px; height: 34px; overflow: visible; }
+  .v6 .box path { fill: none; stroke: var(--pink); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; transition: stroke-dashoffset 260ms var(--ease-out); }
+  .v6 .check[aria-pressed="true"] .box path { stroke-dashoffset: 0; }
+  .v6 .check b { font-family: var(--disp); font-weight: 700; font-size: 19px; color: var(--royal); }
+  .v6 .check i { flex: 1; border-bottom: 2px dotted rgba(91,45,23,.3); transform: translateY(5px); }
+  .v6 .check .num { font-size: 19px; color: var(--royal); }
+  .v6 .check .save { font-size: 11.5px; font-weight: 700; color: var(--pink); }
+  .v6 .buyrow { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+  .v6 .addc { background: transparent; color: var(--royal); box-shadow: inset 0 0 0 1.5px var(--royal); }
+  .v6 .when { font-size: 14px; }
+  .v6 .when b { font-family: var(--disp); color: var(--royal); background: linear-gradient(transparent 60%, rgba(246,184,38,.55) 60%); }
+  .v6 .notes { display: grid; gap: 22px; padding-top: 8px; }
+  .v6 .note { position: relative; padding: 22px 18px 18px; background: #fdf0cf; box-shadow: 0 12px 20px -12px rgba(42,28,20,.4); transform: rotate(-1.2deg); }
+  .v6 .note:nth-child(2n) { background: #fbe3df; transform: rotate(1.4deg); }
+  .v6 .note:nth-child(3n) { background: var(--paper); }
+  .v6 .note .pin { position: absolute; top: -8px; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--pink); box-shadow: inset -3px -3px 0 rgba(0,0,0,.15), 0 3px 4px rgba(58,29,15,.3); }
+  .v6 .note:nth-child(2n) .pin { background: var(--royal); }
+  .v6 .note h3 { margin: 0 0 6px; font-family: var(--disp); font-weight: 900; font-size: 19px; color: var(--royal); }
+  .v6 .note p { margin: 0 0 6px; font-size: 14px; line-height: 1.7; }
+  .v6 .note ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.8; }
+  .v6 .note li::marker { content: "✓  "; color: var(--pink); }
+  @container pg (min-width: 760px) {
+    .v6 { background-image: linear-gradient(to right, transparent 63px, rgba(226,84,122,.45) 63px, rgba(226,84,122,.45) 64.5px, transparent 64.5px), repeating-linear-gradient(to bottom, transparent 0 31px, rgba(91,45,23,.1) 31px 32px); }
+    .v6 .wrap { padding: 30px 48px 0 96px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 64px; align-items: start; }
+    .v6 .polaroid { grid-row: span 8; width: 82%; position: sticky; top: 100px; }
+    .v6 .notes { grid-column: 1 / -1; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .v6 .box path { transition: none; } }
+
+  /* ───────── Picker — verbatim from emilkowalski/skills prototype/PICKER.md ───────── */
+  .proto-picker {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.82);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 8px 24px rgba(0, 0, 0, 0.24),
+      0 2px 6px rgba(0, 0, 0, 0.12);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .proto-picker-highlight {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    will-change: transform;
+  }
+  .proto-picker[data-ready] .proto-picker-highlight {
+    transition:
+      transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+      width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+  }
+  .proto-picker-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font: inherit;
+    cursor: pointer;
+    transition: color 150ms ease-out;
+  }
+  .proto-picker-item:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .proto-picker-item:active {
+    transform: scale(0.97);
+  }
+  .proto-picker-item:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.4);
+    outline-offset: 2px;
+  }
+  .proto-picker-item[data-active] {
+    color: #fff;
+  }
+  .proto-picker-divider {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .proto-picker-replay {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+  .proto-picker[data-position="top"] {
+    bottom: auto;
+    top: 24px;
+  }
+</style>
+</head>
+<body>
+<button class="stage-mode" type="button" id="mode">Full width</button>
+<main id="stage"></main>
+
+<nav class="proto-picker" data-position="top" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Poster</button>
+  <button class="proto-picker-item">Memo</button>
+  <button class="proto-picker-item">Poster+Slip</button>
+  <button class="proto-picker-item">Signboard</button>
+  <button class="proto-picker-item">Khata</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+  const IMG = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/";
+  const LOGO = "../../../attached_assets/sera-khabar-leaf-logo.webp";
+  const P = {
+    bn: "হোমমেড কুমড়ো বড়ি", en: "Homemade Pumpkin Bori",
+    img: IMG + "4061bd9c-4908-4e43-9caa-7587c4caa1d1/41e4d871-04da-41d0-ac91-f4de112fd452/960.webp",
+    lede: "বাছাই করা মাষকলাইয়ের ডাল ও টাটকা চালকুমড়ো দিয়ে ঘরোয়া পরিবেশে তৈরি ঐতিহ্যবাহী কুমড়ো বড়ি। অভিজ্ঞ কারিগরদের হাতে বড়ি তৈরি করে পরিষ্কার-পরিচ্ছন্নভাবে রোদে শুকানো হয়।",
+    sizes: [{ t: "১ কেজি", kg: 1, p: 700 }, { t: "২ কেজি", kg: 2, p: 1300 }],
+    sections: [
+      { l: "বৈশিষ্ট্য", b: "ঘরোয়া স্বাদ ও ঐতিহ্যবাহী প্রস্তুত পদ্ধতিকে গুরুত্ব দিয়ে এই কুমড়ো বড়ি তৈরি করা হয়।", d: ["হাতে তৈরি", "ঘরোয়া পদ্ধতিতে প্রস্তুত", "অভিজ্ঞ কারিগরদের যত্নে তৈরি", "রোদে শুকানো"] },
+      { l: "উপকরণ", b: "বাছাই করা উপাদান দিয়ে তৈরি এই বড়িতে মাষকলাইয়ের ডাল ও টাটকা চালকুমড়োর স্বাভাবিক স্বাদ বজায় থাকে।", d: ["বাছাই করা মাষকলাইয়ের ডাল", "টাটকা চালকুমড়ো"] },
+      { l: "রান্নার পরামর্শ", b: "বড়ি অল্প তেলে হালকা ভেজে মাছ, সবজি, শাক বা ডালে ব্যবহার করুন।", d: ["অল্প তেলে হালকা ভেজে নিন", "রান্না শেষ হওয়ার ১৫–২০ মিনিট আগে যোগ করুন"] },
+      { l: "সংরক্ষণের নিয়ম", d: ["বায়ুরোধী পাত্রে রাখুন", "ঠান্ডা ও শুকনো স্থানে সংরক্ষণ করুন", "আর্দ্রতা ও পানি থেকে দূরে রাখুন"] },
+    ],
+    related: [
+      ["দানাদার গুড়", 300, "c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0"],
+      ["খেজুরের ঝোলা গুড়", 380, "245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192"],
+      ["খেজুরের পাটালী গুড়", 350, "ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2"],
+      ["আমসত্ত্ব আচার", 350, "38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237"],
+    ],
+  };
+  const bn = (n) => String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+  const tk = (n) => "৳" + bn(n.toLocaleString("en-IN"));
+  const MONTHS = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+  const day = (plus) => { const d = new Date(); d.setDate(d.getDate() + plus); return bn(d.getDate()) + " " + MONTHS[d.getMonth()]; };
+  const save = P.sizes[0].p * 2 - P.sizes[1].p; // ২ কেজি vs two ১ কেজি packs
+
+  const chrome = (inner, extra = "") => `
+    <div class="pg">
+      <div class="ann"><div><span class="script">শীতের নতুন গুড়</span><b><span class="num">৳২৬০০+</span> অর্ডারে ডেলিভারি ফ্রি</b></div><a href="#"><i></i>কিনুন</a></div>
+      <header class="hdr"><button class="mb press" aria-label="Open menu"><span></span></button><img src="${LOGO}" alt="Sera Khabar"><div class="tools"><button class="bag press num" data-bag aria-label="Cart">০</button></div></header>
+      <div class="crumb"><a href="#">হোম</a> · <a href="#">হোমমেড</a> · ${P.bn}</div>
+      ${inner}
+      <section class="rel"><h2>আরও দেখুন</h2><div class="row">${P.related.map(([n, p, path]) => `<a class="c press" href="#"><img class="blend" src="${IMG + path}/640.webp" alt="" loading="lazy"><b>${n}</b><span class="num">${tk(p)}</span></a>`).join("")}</div></section>
+      <footer class="foot">© ২০২৬ সেরা খাবার · রাজশাহী</footer>
+      ${extra}
+      <div class="toast" role="status" aria-live="polite"><span>কার্টে যোগ হয়েছে ✓</span></div>
+      <nav class="dock" aria-label="Dock"><span><i></i>হোম</span><span class="on"><i></i>পণ্য</span><span><i></i>খুঁজুন</span><span><i></i>মেনু</span></nav>
+    </div>`;
+
+  const sizeBtns = (cls, render) => P.sizes.map((s, i) => `<button class="${cls} press" data-size="${i}" aria-pressed="${i === 0}">${render(s, i)}</button>`).join("");
+  const qty = `<div class="qty" role="group" aria-label="পরিমাণ"><button data-q="-1" aria-label="কমান" disabled>−</button><output class="num" data-qv>১</output><button data-q="1" aria-label="বাড়ান">+</button></div>`;
+  const add = `<button class="addc press" data-add><span class="l1">কার্টে রাখুন</span><span class="l2">রাখা হয়েছে ✓</span></button>`;
+  const cod = (label = "ক্যাশ অন ডেলিভারিতে অর্ডার করুন") => `<button class="cod press" data-cod>${label}<i></i></button>`;
+  const help = `<div class="help"><a class="call press" href="#">ফোনে অর্ডার</a><a class="wa press" href="#">হোয়াটসঅ্যাপে অর্ডার</a></div>`;
+
+  const memoSlip = () => `
+          <div class="memo">
+            <span class="pin"></span>
+            <div class="mh"><b>অর্ডার স্লিপ</b><span>নং <span class="num">২০২৬</span></span></div>
+            <div class="mlbl">সাইজ</div>
+            ${sizeBtns("line", (s, i) => `<span class="radio"></span><b>${s.t}</b>${i === 1 ? `<span class="save">${tk(save)} সাশ্রয়</span>` : ""}<i></i><span class="num">${tk(s.p)}</span>`)}
+            <div class="mlbl">পরিমাণ</div>
+            <div class="qline"><b>প্যাকেট</b>${qty}</div>
+            <div class="sum"><span>মোট<small>ডেলিভারি চার্জ চেকআউটে</small></span><span class="num" data-total>${tk(P.sizes[0].p)}</span></div>
+            <span class="stamp">ক্যাশ অন<br>ডেলিভারি</span>
+          </div>`;
+  const posterStory = () => `
+        <div class="story rise">
+          <div class="sec"><span class="n num">০১</span><h2>বিবরণ</h2><p>${P.lede}</p></div>
+          ${P.sections.map((s, i) => `<div class="sec"><span class="n num">${bn(String(i + 2).padStart(2, "0"))}</span><h2>${s.l}</h2>${s.b ? `<p>${s.b}</p>` : ""}<ul>${s.d.map((x) => `<li>${x}</li>`).join("")}</ul></div>`).join("")}
+        </div>`;
+  const stickyBar = () => `<div class="bar v1b" data-bar><div><span class="t"><small>${P.bn} · <span data-per>${P.sizes[0].t}</span></small><span class="num" data-total>${tk(P.sizes[0].p)}</span></span>${cod("অর্ডার করুন")}</div></div>`;
+
+  const variants = [
+    // 1 · Poster
+    () => chrome(`
+      <div class="v1">
+        <div class="top">
+          <div class="hero rise">
+            <span class="kicker"><b>হোমমেড</b> রোদে শুকানো · হাতে তৈরি</span>
+            <h1>কুমড়ো<br>বড়ি<small>${P.en}</small></h1>
+            <span class="tag script">মায়ের রেসিপি</span>
+            <div class="photo"><img class="blend" src="${P.img}" alt="${P.bn}"><span class="stamp">ক্যাশ অন<br>ডেলিভারি</span></div>
+          </div>
+          <div class="buy rise">
+            <div class="price"><span class="num" data-price>${tk(P.sizes[0].p)}</span><small data-per>${P.sizes[0].t}</small></div>
+            <div><div class="lbl">সাইজ বেছে নিন</div><div class="sizes">${sizeBtns("size", (s) => `${s.t} <span class="num">${tk(s.p)}</span>`)}</div></div>
+            <div><div class="lbl">পরিমাণ</div><div class="ctas" data-bar-anchor>${qty}${cod("অর্ডার করুন")}${add}</div></div>
+            ${help}
+            <div class="when"><span class="dot"></span><span>আজ অর্ডার করলে <b>${day(2)}</b>-এর মধ্যে ডেলিভারি</span></div>
+          </div>
+        </div>
+        ${posterStory()}
+      </div>`,
+      stickyBar()),
+
+    // 2 · Memo
+    () => chrome(`
+      <div class="v3">
+        <div class="wrap rise">
+          <div class="main">
+          <div class="intro"><div class="pic"><img class="blend" src="${P.img}" alt="${P.bn}"></div><div><span class="script">ঘরে বানানো</span><h1>${P.bn}</h1><small>${P.en}</small></div></div>
+          <p class="lede">${P.lede}</p>
+          </div>
+          <div class="side">
+          ${memoSlip()}
+          <div class="acts">${cod()}${add}${help}</div>
+          <div class="dates"><div><span class="num">${day(0)}</span><small>অর্ডার</small></div><div><span class="num">${day(1)}</span><small>প্রসেসিং</small></div><div><span class="num">${day(2)}</span><small>ডেলিভারি</small></div></div>
+          </div>
+          <div class="acc">${P.sections.map((s, i) => `<div><button class="press" aria-expanded="${i === 0}" data-acc><span class="num">${bn(String(i + 1).padStart(2, "0"))}</span><b>${s.l}</b><em>+</em></button><div class="body"><div>${s.b ? `<p>${s.b}</p>` : ""}<ul>${s.d.map((x) => `<li>${x}</li>`).join("")}</ul></div></div></div>`).join("")}</div>
+        </div>
+      </div>`),
+    // 3 · Poster + Slip
+    () => chrome(`
+      <div class="v1 v3 v4">
+        <div class="top">
+          <div class="hero rise">
+            <span class="kicker"><b>হোমমেড</b> রোদে শুকানো · হাতে তৈরি</span>
+            <h1>কুমড়ো<br>বড়ি<small>${P.en}</small></h1>
+            <span class="tag script">মায়ের রেসিপি</span>
+            <div class="photo"><img class="blend" src="${P.img}" alt="${P.bn}"></div>
+          </div>
+          <div class="side rise">
+            <div class="slipwrap">${memoSlip()}</div>
+            <div class="acts" data-bar-anchor>${cod()}${add}${help}</div>
+            <div class="whenwrap"><div class="when v1w"><span class="dot"></span><span>আজ অর্ডার করলে <b>${day(2)}</b>-এর মধ্যে ডেলিভারি</span></div></div>
+          </div>
+        </div>
+        ${posterStory()}
+      </div>`, stickyBar()),
+
+    // 4 · Signboard
+    () => chrome(`
+      <div class="v5">
+        <section class="band rise">
+          <div class="plate"><img class="blend" src="${P.img}" alt="${P.bn}"></div>
+          <span class="plate-tag script">মায়ের রেসিপি</span>
+          <div class="band-in">
+            <span class="kick">হোমমেড · রোদে শুকানো</span>
+            <h1>${P.bn}<small>${P.en}</small></h1>
+            <div class="pr"><span class="num" data-price>${tk(P.sizes[0].p)}</span><small data-per>${P.sizes[0].t}</small></div>
+            <div class="sizes">${sizeBtns("size", (s) => `${s.t} <span class="num">${tk(s.p)}</span>`)}</div>
+            <div class="row">${qty}${cod("অর্ডার করুন")}</div>
+            ${add}
+            ${help}
+            <p class="when">আজ অর্ডার করলে <b>${day(2)}</b>-এর মধ্যে ডেলিভারি · ক্যাশ অন ডেলিভারি</p>
+          </div>
+        </section>
+        <section class="label rise"><div class="label-in">
+          <div class="label-head"><span class="script">খাঁটি ও ঘরোয়া</span><b>${P.bn}</b><p>${P.lede}</p></div>
+          ${P.sections.map((s) => `<div class="lrow"><h3>${s.l}</h3>${s.b ? `<p>${s.b}</p>` : ""}<ul>${s.d.map((x) => `<li>${x}</li>`).join("")}</ul></div>`).join("")}
+        </div></section>
+      </div>`),
+
+    // 5 · Khata
+    () => chrome(`
+      <div class="v6">
+        <div class="wrap rise">
+          <figure class="polaroid" style="margin:0"><span class="tape a"></span><span class="tape b"></span><div class="ph"><img class="blend" src="${P.img}" alt="${P.bn}"></div><figcaption class="cap script">রোদে শুকানো বড়ি</figcaption></figure>
+          <div class="ttl"><span class="script">আজকের বিশেষ</span><h1>${P.bn}</h1><small>${P.en}</small></div>
+          <div><span class="circ"><span class="num" data-price>${tk(P.sizes[0].p)}</span><svg viewBox="0 0 120 60" preserveAspectRatio="none" aria-hidden="true"><path d="M14,32 C9,15 48,6 72,8 C108,11 116,22 112,34 C108,49 56,56 32,52 C13,49 9,42 15,30"/></svg></span></div>
+          <p class="lede">${P.lede}</p>
+          <div><h2>সাইজ বেছে নিন</h2>${sizeBtns("check", (s, i) => `<span class="box"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M6 18 L14 26 L30 4"/></svg></span><b>${s.t}</b>${i === 1 ? `<span class="save">${tk(save)} সাশ্রয়</span>` : ""}<i></i><span class="num">${tk(s.p)}</span>`)}</div>
+          <div class="buyrow">${qty}${cod("অর্ডার করুন")}</div>
+          ${add}
+          ${help}
+          <p class="when" style="margin:0">আজ অর্ডার করলে <b>${day(2)}</b>-এর মধ্যে ডেলিভারি</p>
+          <div class="notes">${P.sections.map((s) => `<div class="note"><span class="pin"></span><h3>${s.l}</h3>${s.b ? `<p>${s.b}</p>` : ""}<ul>${s.d.map((x) => `<li>${x}</li>`).join("")}</ul></div>`).join("")}</div>
+        </div>
+      </div>`),
+  ];
+
+  // ── Page behaviour: size, quantity, totals, add to cart, sticky bar, accordion ──
+  let cart = 0;
+  function wire(root) {
+    let size = 0, q = 1;
+    const update = () => {
+      const s = P.sizes[size];
+      root.querySelectorAll("[data-size]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.size === size)));
+      root.querySelectorAll("[data-qv]").forEach((o) => (o.textContent = bn(q)));
+      root.querySelectorAll('[data-q="-1"]').forEach((b) => (b.disabled = q === 1));
+      root.querySelectorAll("[data-price]").forEach((e) => (e.textContent = tk(s.p)));
+      root.querySelectorAll("[data-per]").forEach((e) => (e.textContent = q > 1 ? `${s.t} × ${bn(q)}` : s.t));
+      root.querySelectorAll("[data-total]").forEach((e) => (e.textContent = tk(s.p * q)));
+    };
+    root.addEventListener("click", (e) => {
+      const t = e.target.closest("button, a");
+      if (!t) return;
+      if (t.tagName === "A") e.preventDefault();
+      if (t.dataset.size) { size = +t.dataset.size; update(); }
+      if (t.dataset.q) { q = Math.max(1, q + +t.dataset.q); update(); }
+      if (t.hasAttribute("data-acc")) t.setAttribute("aria-expanded", String(t.getAttribute("aria-expanded") !== "true"));
+      if (t.hasAttribute("data-add")) {
+        cart += q;
+        const bag = root.querySelector("[data-bag]"); bag.textContent = bn(cart); bag.classList.remove("pulse"); void bag.offsetWidth; bag.classList.add("pulse");
+        t.classList.add("added"); setTimeout(() => t.classList.remove("added"), 1400);
+        const toast = root.querySelector(".toast"); toast.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => toast.classList.remove("show"), 1600);
+      }
+      if (t.hasAttribute("data-cod")) {
+        const toast = root.querySelector(".toast span"); const old = toast.textContent;
+        toast.textContent = "এখানে নতুন অর্ডার শিটটি খুলবে"; root.querySelector(".toast").classList.add("show");
+        setTimeout(() => { root.querySelector(".toast").classList.remove("show"); setTimeout(() => (toast.textContent = old), 220); }, 1600);
+      }
+    });
+    // Poster: the buy bar appears once the inline order button scrolls out of view
+    const bar = root.querySelector("[data-bar]");
+    const anchor = root.querySelector("[data-bar-anchor]");
+    if (bar && anchor) new IntersectionObserver(([en]) => bar.classList.toggle("show", !en.isIntersecting && en.boundingClientRect.top < 0), { root: stage.querySelector(".scroller") }).observe(anchor);
+    update();
+  }
+
+  // ── Stage mode: phone frame (default) or full width ──
+  const modeBtn = document.getElementById("mode");
+  const setMode = (full) => { document.body.classList.toggle("full", full); modeBtn.textContent = full ? "Phone" : "Full width"; const u = new URL(location); u.searchParams.set("w", full ? "full" : "phone"); history.replaceState(null, "", u); };
+  modeBtn.addEventListener("click", () => setMode(!document.body.classList.contains("full")));
+  setMode(new URLSearchParams(location.search).get("w") === "full");
+
+  // ── Picker wiring: verbatim from PICKER.md; the mounted page is wrapped in .scroller and wired ──
+  const stage = document.getElementById('stage');
+  const picker = document.querySelector('.proto-picker');
+  const highlight = picker.querySelector('.proto-picker-highlight');
+  const items = [...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+  const replay = picker.querySelector('.proto-picker-replay');
+  let current = 0;
+
+  function moveHighlight() {
+    const el = items[current];
+    highlight.style.width = el.offsetWidth + 'px';
+    highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+  }
+
+  function mount(i) {
+    stage.innerHTML = '';
+    requestAnimationFrame(() => { stage.innerHTML = `<div class="scroller">${variants[i]()}</div>`; wire(stage.querySelector('.pg')); });
+  }
+
+  function setActive(i) {
+    if (i < 0 || i >= variants.length) return;
+    current = i;
+    items.forEach((el, j) => {
+      el.toggleAttribute('data-active', j === i);
+      if (j === i) el.setAttribute('aria-current', 'true');
+      else el.removeAttribute('aria-current');
+    });
+    moveHighlight();
+    const url = new URL(location);
+    url.searchParams.set('v', i + 1);
+    history.replaceState(null, '', url);
+    mount(i);
+  }
+
+  items.forEach((el, i) => el.addEventListener('click', () => setActive(i)));
+  replay?.addEventListener('click', () => mount(current));
+  window.addEventListener('resize', moveHighlight);
+
+  document.addEventListener('keydown', (e) => {
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const num = parseInt(e.key, 10);
+    if (num >= 1 && num <= variants.length) setActive(num - 1);
+    else if (e.key === 'ArrowRight') setActive((current + 1) % variants.length);
+    else if (e.key === 'ArrowLeft') setActive((current - 1 + variants.length) % variants.length);
+    else if (e.key === 'r' || e.key === 'R') mount(current);
+  });
+
+  setActive((parseInt(new URLSearchParams(location.search).get('v'), 10) || 1) - 1);
+  requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute('data-ready', '')));
+</script>
+</body>
+</html>

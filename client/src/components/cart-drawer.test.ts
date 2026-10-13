@@ -30,3 +30,9 @@ test("shows the subtotal with the taka sign, not the BDT code", () => {
   assert.match(cartDrawerSource, /toLocaleString\("en-US"\)\}/);
   assert.doesNotMatch(cartDrawerSource, /BDT \{subtotal/);
 });
+
+test("desktop cart is the same Vaul drawer as phones, as a floating right panel (2026-10-13)", () => {
+  assert.match(cartDrawerSource, /<Drawer\.Root open=\{isOpen\} onOpenChange=\{setIsOpen\} direction=\{isMobile \? "bottom" : "right"\}>/);
+  assert.match(cartDrawerSource, /isMobile \? "sk-sheet sk-cart-sheet" : "sk-panel sk-panel-right"/);
+  assert.doesNotMatch(cartDrawerSource, /SheetContent/);
+});

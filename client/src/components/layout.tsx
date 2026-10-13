@@ -1,10 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ArrowRight, ShieldCheck, X } from "lucide-react";
 import { Box as ReiconBox } from "reicon-react";
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
@@ -20,7 +19,7 @@ import {
   type StorefrontProduct,
 } from "@/lib/storefront-products";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
-import { getVisibleFeaturedCollections } from "@/lib/featured-collections";
+import { HOMEPAGE_CATEGORIES } from "@/lib/featured-collections";
 import { toBanglaDigits } from "@/lib/bangla-digits";
 import { POLICY_FACTS } from "@/lib/site-pages";
 
@@ -81,14 +80,6 @@ function HomeDuotoneIcon({ className }: { className?: string }) {
   );
 }
 
-const MENU_ITEMS = [
-  { label: "Home", href: "/" },
-  { label: "Products", href: "/products" },
-  { label: "Top Selling Products - সেরা বিক্রিত পণ্য", href: "/collection/top-selling-products" },
-  { label: "Track Order", href: "/track-order" },
-  { label: "Contact Us", href: "/contact-us" },
-] as const;
-
 const MEMO_SHOP_LINKS = [
   ["ফ্রেশ আম", "/collection/fresh-mango"],
   ["হোমমেড", "/collection/homemade"],
@@ -135,7 +126,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mobileMenuPage, setMobileMenuPage] = useState<"main" | "collections">("main");
   const shouldReduceMotion = useReducedMotion();
   const { setIsOpen: setCartOpen, itemCount, cartPulseKey, consumeCartPulse } = useCart();
   const { data: searchableProducts = [] } = useQuery({
@@ -144,14 +134,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     ...STOREFRONT_CATALOG_QUERY_OPTIONS,
     initialData: generatedStorefrontProducts,
     initialDataUpdatedAt: 0,
-    enabled: isSearchOpen || isOpen,
+    enabled: isSearchOpen,
   });
-  const visibleCollections = getVisibleFeaturedCollections(searchableProducts);
-  const desktopMenuItems = [
-    ...MENU_ITEMS.slice(0, 2),
-    ...visibleCollections.map(({ slug, label }) => ({ label, href: `/collection/${slug}` })),
-    ...MENU_ITEMS.slice(2),
-  ];
 
   const activeDockKey = isOpen
     ? "menu"
@@ -164,10 +148,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           : null;
 
   const openSearch = () => setIsSearchOpen(true);
-  const openMenu = () => {
-    setMobileMenuPage("main");
-    setIsOpen(true);
-  };
+  const openMenu = () => setIsOpen(true);
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const query = searchQuery.trim();
@@ -175,18 +156,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setIsSearchOpen(false);
   };
   const suggestions = searchStorefrontProducts(searchableProducts, searchQuery).slice(0, 5);
-
-  useEffect(() => {
-    // The phone menu is a Vaul sheet, which locks scrolling itself.
-    if (isOpen && !isMobile) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen, isMobile]);
 
   return (
     <div className="min-h-screen flex flex-col md:bg-brand-ivory text-black selection:bg-brand-gold selection:text-white">
@@ -362,132 +331,60 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Mobile menu: bottom sheet (Vaul) — drag down, tap outside or ✕ to close */}
-      <Drawer.Root open={isMobile && isOpen} onOpenChange={setIsOpen}>
+      {/* Menu: Vaul bottom sheet on phones, floating left panel on desktop — drag, tap outside or ✕ to close */}
+      <Drawer.Root open={isOpen} onOpenChange={setIsOpen} direction={isMobile ? "bottom" : "left"}>
         <Drawer.Portal>
           <Drawer.Overlay className="sk-sheet-overlay" />
-          <Drawer.Content className="sk-sheet" aria-describedby={undefined}>
+          <Drawer.Content
+            className={isMobile ? "sk-sheet sk-menu-sheet" : "sk-panel sk-panel-left sk-menu-sheet"}
+            aria-describedby={undefined}
+          >
             <Drawer.Title className="sr-only">Menu</Drawer.Title>
-            <div className="sk-sheet-grab" aria-hidden="true" />
-            <div className="sk-menu">
-              <div className="sk-menu-head">
-                {mobileMenuPage === "main" ? (
-                  <span className="sk-menu-title">মেনু</span>
-                ) : (
-                  <button type="button" onClick={() => setMobileMenuPage("main")} className="sk-menu-back">
-                    <ArrowRight size={16} className="rotate-180" /> মেনু
-                  </button>
-                )}
-                <button type="button" onClick={() => setIsOpen(false)} aria-label="Close menu" className="sk-menu-close">
+            {isMobile && <div className="sk-sheet-grab" aria-hidden="true" />}
+            <div className="skm">
+              <div className="skm-head">
+                <div>
+                  <span className="skm-ask">কী খুঁজছেন?</span>
+                  <span className="skm-title">সেরা খাবার মেনু</span>
+                </div>
+                <button type="button" onClick={() => setIsOpen(false)} aria-label="Close menu" className="skm-close press">
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              {mobileMenuPage === "main" ? (
-                  <nav aria-label="Mobile menu" className="sk-menu-list">
-                    {[
-                      { href: "/", bn: "হোম", en: "Home" },
-                      { href: "/products", bn: "সব পণ্য", en: "Products" },
-                      { href: "/collection/top-selling-products", bn: "সেরা বিক্রিত পণ্য", en: "Top Selling Products" },
-                    ].map((row) => (
-                      <Link key={row.href} href={row.href} onClick={() => setIsOpen(false)} className="sk-menu-row">
-                        <span><b>{row.bn}</b><small>{row.en}</small></span>
-                        <i aria-hidden="true"><ArrowRight size={16} /></i>
-                      </Link>
-                    ))}
-                    <button type="button" onClick={() => setMobileMenuPage("collections")} className="sk-menu-row">
-                      <span><b>ক্যাটাগরিসমূহ</b><small>Collections</small></span>
-                      <i aria-hidden="true"><ArrowRight size={16} /></i>
-                    </button>
-                  </nav>
-              ) : (
-                <nav aria-label="Collections" className="sk-menu-list">
-                  {visibleCollections.map(({ slug, label }) => {
-                    const [en, bn] = label.split("-");
-                    return (
-                      <Link key={slug} href={`/collection/${slug}`} onClick={() => setIsOpen(false)} className="sk-menu-row">
-                        <span><b>{bn ?? en}</b><small>{en}</small></span>
-                        <i aria-hidden="true"><ArrowRight size={16} /></i>
-                      </Link>
-                    );
-                  })}
-                </nav>
-              )}
+              <nav aria-label="Categories" className="skm-cats">
+                {HOMEPAGE_CATEGORIES.map((category, index) => (
+                  <Link
+                    key={category.slug}
+                    href={`/collection/${category.slug}`}
+                    onClick={() => setIsOpen(false)}
+                    className="skm-cat press"
+                    style={{ "--c": category.color, "--i": index } as CSSProperties}
+                    data-light={category.light || undefined}
+                  >
+                    <img src={category.image} alt="" decoding="async" />
+                    <span className="skm-no num">{toBanglaDigits(String(index + 1).padStart(2, "0"))}</span>
+                    <b>{category.name}</b>
+                    <small>{category.en}</small>
+                  </Link>
+                ))}
+              </nav>
+              <nav aria-label="Mobile menu" className="skm-links">
+                {[
+                  { href: "/", bn: "হোম", en: "Home" },
+                  { href: "/products", bn: "সব পণ্য", en: "All products" },
+                  { href: "/collection/top-selling-products", bn: "সেরা বিক্রিত পণ্য", en: "Top Selling Products", hot: true },
+                ].map((row) => (
+                  <Link key={row.href} href={row.href} onClick={() => setIsOpen(false)} className="skm-row press">
+                    <b>{row.bn}<small>{row.en}</small></b>
+                    {row.hot && <span className="skm-hot">জনপ্রিয়</span>}
+                    <i aria-hidden="true"><ArrowRight size={16} /></i>
+                  </Link>
+                ))}
+              </nav>
             </div>
           </Drawer.Content>
         </Drawer.Portal>
       </Drawer.Root>
-
-      {/* Desktop menu overlay */}
-      <AnimatePresence initial={true}>
-        {isOpen && !isMobile && (
-          <motion.div
-            className="fixed inset-0 z-[100] w-full h-[100dvh] supports-[height:100dvh]:h-dvh p-3 sm:p-4 pointer-events-none"
-          >
-            <motion.div
-              className="absolute inset-0 bg-black/10 pointer-events-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { duration: 0.3 } }}
-              exit={{ opacity: 0, transition: { duration: 0.3 } }}
-              onClick={() => setIsOpen(false)}
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1, transition: { duration: 0.58, ease: [0.22, 1, 0.36, 1] } }}
-              exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] } }}
-              className="relative w-full h-full flex flex-col pointer-events-auto rounded-[12px] bg-white text-black shadow-2xl overflow-hidden md:bg-neutral-500/60 md:text-white md:backdrop-blur-md"
-            >
-              <div className="hidden md:flex md:flex-col md:h-full md:px-12 md:py-10 md:justify-between md:overflow-y-auto">
-                {/* Header */}
-                <div className="flex justify-end items-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-full hover:bg-white/10 text-white transition-all h-10 w-10"
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                </div>
-
-                {/* Navigation Links */}
-                <div className="flex flex-col gap-6 md:gap-8 py-8 flex-1 justify-center px-2">
-                  {desktopMenuItems.map((item, idx) => (
-                      <motion.div
-                        key={item.label}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: idx * 0.06 + 0.2, ease: [0.22, 1, 0.36, 1] }}
-                      >
-                        <Link href={item.href} onClick={() => setIsOpen(false)}>
-                          <a className="group flex items-baseline">
-                            <span className="text-2xl font-sans font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70 md:text-3xl">{item.label}</span>
-                          </a>
-                        </Link>
-                      </motion.div>
-                    ))}
-                </div>
-
-                {/* Footer Info */}
-                <div className="space-y-6 mt-12 pb-4">
-                  <div className="h-px w-full bg-white/10" />
-                  <div className="flex justify-between items-center text-white/80 text-sm font-medium">
-                    <span className="flex items-center gap-3">
-                      Shipping to:
-                      <span className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-md text-xs">
-                        <span>BD</span> Bangladesh
-                      </span>
-                    </span>
-                  </div>
-                  <div className="text-white/60 text-sm">
-                    © 2026 সেরা খাবার - Sera Khabar
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Cart Drawer */}
       <CartDrawer />

@@ -269,6 +269,14 @@
 .sk-sheet-overlay { position: fixed; inset: 0; z-index: 110; background: rgba(42, 28, 20, 0.38); }
 .sk-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 111; display: flex; flex-direction: column; max-height: 88dvh; background: #fffdf8; color: #000;
   border-radius: 24px 24px 0 0; box-shadow: 0 -12px 32px -12px rgba(42, 28, 20, 0.35); padding-bottom: env(safe-area-inset-bottom, 0px); outline: none; }
+/* Desktop: the same menu and cart as floating side panels (Vaul left/right), matching the phone sheets.
+   --initial-transform pushes the panel past its 16px inset so no edge peeks out while closed. */
+.sk-panel { position: fixed; top: 16px; bottom: 16px; z-index: 111; display: flex; flex-direction: column; width: min(440px, calc(100vw - 32px)); background: #fffdf8; color: #000;
+  border-radius: 26px; overflow: hidden; outline: none; --initial-transform: calc(100% + 24px);
+  box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 24px 48px -16px rgba(42, 28, 20, 0.35); }
+.sk-panel-left { left: 16px; bottom: auto; max-height: calc(100dvh - 32px); } /* the menu fits its content, like the phone sheet */
+.sk-panel-right { right: 16px; width: min(460px, calc(100vw - 32px)); }
+.sk-panel .skm { padding: 22px 24px 26px; }
 /* The cart sheet fits its content (up to 88dvh) instead of always filling the screen. */
 .sk-cart-sheet { padding-bottom: env(safe-area-inset-bottom, 0px); }
 /* Cart (phone sheet and desktop drawer): homepage palette and type. */
@@ -308,22 +316,43 @@
 @media (hover: hover) and (pointer: fine) { .skc-qty button:hover { background: #f1e5d3; } .skc-remove:hover, .skc-continue:hover { color: #5b2d17; } }
 @media (prefers-reduced-motion: reduce) { .skc-close:active, .skc-qty button:active, .skc-checkout:active { transform: none; } }
 
-/* Phone menu inside the sheet: Bangla-first rows in the homepage's type, dotted like the cash memo. */
-.sk-menu { min-height: 0; overflow-y: auto; padding: 0 20px 12px; color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
-.sk-menu-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 10px; }
-.sk-menu-title { font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 26px; line-height: 1.2; color: #5b2d17; }
-.sk-menu-back { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 10px; border-radius: 999px; background: #f1e5d3; color: #5b2d17; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; border: 0; }
-.sk-menu-close { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; }
-.sk-menu-list { display: flex; flex-direction: column; }
-.sk-menu-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 62px; padding: 8px 0; border: 0; border-bottom: 1.5px dotted rgba(58, 29, 15, 0.25); background: none; text-align: left; color: inherit; text-decoration: none;
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
-.sk-menu-row:active, .sk-menu-back:active, .sk-menu-close:active { transform: scale(0.97); }
-.sk-menu-row span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.sk-menu-row b { font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 20px; line-height: 1.35; color: #5b2d17; }
-.sk-menu-row small { font-size: 12px; color: #7a6050; }
-.sk-menu-row i { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #f6b826; color: #3a1d0f; }
-@media (prefers-reduced-motion: reduce) { .sk-menu-row:active, .sk-menu-back:active, .sk-menu-close:active { transform: none; } }
 .sk-sheet-grab { flex: none; width: 40px; height: 5px; border-radius: 5px; background: rgba(91, 45, 23, 0.25); margin: 8px auto 4px; }
+/* Phone menu, "Cards" (approved 2026-10-13, docs/design/2026-10-13-homepage/mobile-menu-variants.html):
+   the homepage category cards as a bento, then the page links on a cream card. */
+.sk-menu-sheet { background: #faf4ea; }
+.skm { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 18px 22px; color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
+.skm a, .skm button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.skm .press { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.skm .press:active { transform: scale(0.97); }
+.skm-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 6px 0 14px; }
+.skm-ask { display: block; font-family: "Galada", cursive; font-size: 22px; line-height: 1; color: #e2547a; transform: rotate(-4deg); transform-origin: left; }
+.skm-title { display: block; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 30px; line-height: 1.15; color: #5b2d17; }
+.skm-close { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; cursor: pointer; }
+.skm-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 22px; }
+.skm-cat { position: relative; min-height: 116px; padding: 70px 14px 12px; border-radius: 22px; display: flex; flex-direction: column; justify-content: flex-end; background: var(--c); color: #3a1d0f; text-decoration: none; }
+.skm-cat[data-light] { color: #faf4ea; }
+.skm-cat:first-child { grid-column: 1 / -1; min-height: 128px; padding: 12px 14px 12px 52%; }
+.skm-cat img { position: absolute; top: -26px; right: 2px; width: 104px; height: auto; transform: rotate(7deg); filter: drop-shadow(0 8px 10px rgba(58, 29, 15, 0.22)); pointer-events: none; }
+.skm-cat:first-child img { top: -32px; right: auto; left: 2px; width: 142px; transform: rotate(-6deg); }
+.skm-cat b { font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 21px; line-height: 1.2; }
+.skm-cat small { font-size: 12px; opacity: 0.78; }
+.skm-no { position: absolute; top: 12px; left: 12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #faf4ea; color: #5b2d17; font-family: "Atma", sans-serif; font-weight: 700; font-size: 13px; }
+.skm-cat:first-child .skm-no { left: auto; right: 12px; }
+.skm-links { display: flex; flex-direction: column; margin-top: 18px; border-radius: 22px; background: #fffdf8;
+  box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 1px 2px rgba(58, 29, 15, 0.04), 0 4px 8px -2px rgba(58, 29, 15, 0.05), 0 14px 28px -8px rgba(58, 29, 15, 0.08); }
+.skm-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: inherit; text-decoration: none; }
+.skm-row + .skm-row { border-top: 1.5px dotted rgba(58, 29, 15, 0.2); }
+.skm-row b { flex: 1; min-width: 0; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 18px; line-height: 1.35; color: #5b2d17; }
+.skm-row small { display: block; font-family: "Hind Siliguri", sans-serif; font-weight: 500; font-size: 12px; color: #7a6050; }
+.skm-row i { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #f6b826; color: #3a1d0f; }
+.skm-hot { flex: none; padding: 2px 8px; border-radius: 999px; background: #e2547a; color: #fffdf8; font-size: 11px; font-weight: 700; transform: rotate(-3deg); }
+/* One staggered rise as the sheet opens (40ms steps); never blocks taps. */
+.skm-cat, .skm-links { animation: skm-rise 320ms cubic-bezier(0.23, 1, 0.32, 1) both; animation-delay: calc(90ms + var(--i, 3) * 40ms); }
+@keyframes skm-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .skm-cat, .skm-links { animation: none; }
+  .skm .press:active { transform: none; }
+}
 
 /* Mobile dock: compact white pill, always fixed at the bottom (phones only). */
 .sk-dock { position: fixed; z-index: 80; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; pointer-events: none; }
@@ -352,3 +381,294 @@
   .sk .press:active, .sk .fr:active .fr-card, .sk-dock-item:active, .sk-dock-cart:active { transform: none; }
   .sk .c-blob img, .sk .fr img, .sk .fr-card, .sk .fr-go { transition: none; }
 }
+
+/* Order form (checkout), 2026-10-13: the same Vaul sheet as the cart — bottom sheet on phones,
+   floating right panel on desktop — in the poster palette and type. Sits above the cart (z 120). */
+.sko-overlay { z-index: 120; }
+.sko-sheet, .sko-panel { z-index: 121; background: #faf4ea; }
+.sko-sheet { max-height: 94dvh; }
+.sko-panel { width: min(520px, calc(100vw - 32px)); }
+.sko { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px 18px calc(24px + env(safe-area-inset-bottom, 0px)); color: #3a1d0f; font-family: "Hind Siliguri", sans-serif; }
+@media (min-width: 768px) { .sko { padding: 26px 28px 30px; } }
+.sko button, .sko a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.sko-press { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease, border-color 160ms ease; }
+.sko-press:active { transform: scale(0.97); }
+.sko-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 6px 0 16px; }
+.sko-ask { display: block; font-family: "Galada", cursive; font-size: 20px; line-height: 1; color: #e2547a; transform: rotate(-4deg); transform-origin: left; }
+.sko-title { margin: 0; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 30px; line-height: 1.15; color: #5b2d17; }
+.sko-title small { display: block; font-family: "Hind Siliguri", sans-serif; font-weight: 500; font-size: 13px; color: #7a6050; }
+.sko-head-done .sko-ask, .sko-head-done .sko-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.sko-head-done { justify-content: flex-end; padding-bottom: 0; }
+.sko-close { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; cursor: pointer; }
+.sko-form { display: flex; flex-direction: column; gap: 18px; }
+
+.sko-items { padding: 10px; border-radius: 22px; background: #fffdf8; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 4px 10px -4px rgba(58, 29, 15, 0.08); }
+.sko-items-head { display: flex; align-items: baseline; justify-content: space-between; padding: 2px 6px 10px; }
+.sko-items-head span { font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; color: #5b2d17; }
+.sko-items-head small { font-size: 12px; color: #7a6050; }
+.sko-items ul { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.sko-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border-radius: 16px; background: #faf4ea; }
+.sko-img { flex: none; width: 64px; height: 64px; border-radius: 12px; background: #f1e5d3; display: grid; place-items: center; overflow: hidden; }
+.sko-img img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.sko-item-info { flex: 1; min-width: 0; }
+.sko-item-info h3 { margin: 0; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; line-height: 1.4; color: #3a1d0f; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.sko-chips { margin-top: 5px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 11.5px; color: #7a6050; }
+.sko-chips span { padding: 1px 9px; border-radius: 999px; background: #f1e5d3; color: #5b2d17; font-weight: 600; }
+.sko-chips em { font-style: normal; }
+.sko-item-price { flex: none; font-family: "Atma", sans-serif; font-weight: 700; font-size: 18px; color: #5b2d17; }
+
+.sko-grid { display: grid; gap: 14px; }
+@media (min-width: 768px) { .sko-grid { grid-template-columns: 1fr 1fr; } }
+.sko-field { display: flex; flex-direction: column; gap: 7px; }
+.sko-field > span { font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 14px; color: #5b2d17; }
+.sko-input { width: 100%; height: 50px; padding: 0 16px; border-radius: 14px; border: 1.5px solid rgba(58, 29, 15, 0.14); background: #fffdf8; color: #3a1d0f; font: inherit; font-size: 16px; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease; }
+.sko-input::placeholder { color: rgba(122, 96, 80, 0.7); }
+.sko-input:focus { border-color: #5b2d17; box-shadow: 0 0 0 3px rgba(246, 184, 38, 0.35); }
+.sko-textarea { height: auto; padding: 13px 16px; resize: none; line-height: 1.5; }
+
+.sko-option { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-height: 76px; padding: 10px 14px; border-radius: 16px; border: 1.5px solid rgba(58, 29, 15, 0.14); background: #fffdf8; color: #3a1d0f; text-align: left; cursor: pointer; }
+.sko-option[data-selected] { border-color: #5b2d17; background: #fff3d1; box-shadow: inset 0 0 0 1px #5b2d17; }
+.sko-option small { font-size: 12px; font-weight: 600; color: #7a6050; }
+.sko-option b { font-family: "Atma", sans-serif; font-weight: 700; font-size: 24px; line-height: 1.2; color: #5b2d17; }
+.sko-option b.sko-pay-bn { font-family: "Noto Serif Bengali", serif; font-size: 18px; line-height: 1.5; }
+.sko-option em { font-style: normal; font-size: 11.5px; color: #7a6050; }
+
+.sko-error { padding: 12px 14px; border-radius: 14px; background: rgba(226, 84, 122, 0.1); color: #8f2142; font-size: 13px; line-height: 1.5; }
+
+.sko-total { padding: 16px 18px; border-radius: 22px; background: #fffdf8; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 4px 10px -4px rgba(58, 29, 15, 0.08); }
+.sko-total-row { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 13px; color: #7a6050; }
+.sko-total-row b { font-family: "Atma", sans-serif; font-weight: 700; font-size: 15px; color: #3a1d0f; }
+.sko-total-sum { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-top: 10px; padding-top: 12px; border-top: 1.5px dotted rgba(58, 29, 15, 0.25); }
+.sko-total-sum span { font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 18px; color: #5b2d17; }
+.sko-total-sum b { font-family: "Atma", sans-serif; font-weight: 700; font-size: 34px; line-height: 1; color: #5b2d17; }
+.sko-total-sum em { max-width: 220px; text-align: right; font-style: normal; font-size: 12px; font-weight: 600; color: #c0304f; }
+
+.sko-submit { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 56px; padding: 0 20px; border: 0; border-radius: 999px; background: #f6b826; color: #3a1d0f; cursor: pointer; }
+.sko-submit-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-size: 16px; font-weight: 700; }
+.sko-submit i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #e2547a; }
+.sko-submit:disabled { cursor: not-allowed; opacity: 0.6; }
+
+.sko-help { display: flex; flex-direction: column; gap: 12px; }
+.sko-help p { margin: 0; text-align: center; line-height: 1.4; }
+.sko-help p b { display: block; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; color: #5b2d17; }
+.sko-help p span { display: block; font-size: 12.5px; color: #7a6050; }
+.sko-help-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sko-help-row a { display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 10px; border-radius: 999px; color: #fffdf8; font-size: 13.5px; font-weight: 600; text-decoration: none; }
+.sko-help-call { background: #5b2d17; }
+.sko-help-wa { background: #25d366; }
+
+.sko-policy { padding-top: 16px; border-top: 1.5px dotted rgba(58, 29, 15, 0.25); }
+.sko-policy-title { margin: 0 0 8px; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 14px; color: #5b2d17; }
+.sko-policy ul { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.sko-policy li { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.55; color: #7a6050; }
+.sko-policy li svg { flex: none; margin-top: 3px; color: #e2a20c; }
+.sko-policy-note { margin: 10px 0 0; font-size: 12px; line-height: 1.6; color: #7a6050; }
+.sko-policy-note a { color: #5b2d17; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+.sko-done { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 6px 12px; text-align: center; }
+.sko-done-script { font-family: "Galada", cursive; font-size: 30px; line-height: 1; color: #e2547a; transform: rotate(-4deg); }
+.sko-done h3 { margin: 0; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 26px; line-height: 1.3; color: #5b2d17; }
+.sko-done p { margin: 0; max-width: 34ch; font-size: 14px; line-height: 1.65; color: #7a6050; }
+.sko-ref { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 6px; padding: 10px 22px; border-radius: 16px; background: #fffdf8; border: 1.5px dashed rgba(91, 45, 23, 0.35); }
+.sko-ref span { font-size: 11.5px; color: #7a6050; }
+.sko-ref b { font-family: "Atma", sans-serif; font-weight: 700; font-size: 20px; color: #5b2d17; }
+.sko-dark { margin-top: 10px; height: 48px; padding: 0 26px; border: 0; border-radius: 999px; background: #5b2d17; color: #faf4ea; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+@media (hover: hover) and (pointer: fine) {
+  .sko-option:not([data-selected]):hover { border-color: rgba(58, 29, 15, 0.3); }
+  .sko-submit:not(:disabled):hover { background: #efad12; }
+}
+@media (prefers-reduced-motion: reduce) { .sko-press:active { transform: none; } }
+
+
+/* Product page (approved 2026-10-13, docs/design/2026-10-13-product-page): the "Classic" layout,
+   details as homepage shelf chips switching one footer-style cash memo, and a tear-off calendar
+   delivery estimate. Scoped under .skp; sized with the .skp container. */
+.skp {
+  --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a; --card: #f1e5d3;
+  --ink: #3a1d0f; --sub: #7a6050; --paper: #fffdf8; --rose: #e9a9a0; --blush: #fbe3df; --butter: #fdf0cf;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --disp: "Noto Serif Bengali", serif;
+  --soft: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 1px 2px rgba(58, 29, 15, 0.04), 0 4px 8px -2px rgba(58, 29, 15, 0.05), 0 14px 28px -8px rgba(58, 29, 15, 0.08);
+  container: skp / inline-size; background: var(--rice); color: var(--ink); font-family: "Hind Siliguri", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden;
+}
+/* Resets use :where() so they never outrank a component class like .skp-cod */
+.skp :where(*, *::before, *::after) { box-sizing: border-box; }
+.skp :where(img) { display: block; max-width: 100%; }
+.skp :where(button) { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+.skp :where(a) { color: inherit; text-decoration: none; }
+.skp button, .skp a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.skp :focus-visible { outline: 2px solid var(--royal); outline-offset: 2px; }
+.skp .num { font-family: "Atma", sans-serif; font-weight: 700; }
+.skp .script { font-family: "Galada", cursive; font-weight: 400; }
+.skp .press { transition: transform 160ms var(--ease-out), background-color 160ms ease, color 160ms ease, box-shadow 160ms ease; }
+.skp .press:active { transform: scale(0.97); }
+.skp-w { padding-inline: 18px; }
+@container skp (min-width: 760px) { .skp-w { padding-inline: 48px; } }
+.skp-crumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 6px; font-size: 12.5px; color: var(--sub); }
+.skp-crumb a { color: var(--royal); font-weight: 600; }
+
+/* Layout: phones stack photo → info → details; desktop puts photo + details left, info right */
+.skp-top { display: flex; flex-direction: column; gap: 18px; padding-top: 12px; }
+.skp-left { display: contents; }
+.skp-photo { order: 1; } .skp-info { order: 2; } .skp-details { order: 3; }
+@container skp (min-width: 760px) {
+  .skp-top { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; padding-top: 22px; align-items: start; }
+  .skp-left { display: flex; flex-direction: column; gap: 26px; position: sticky; top: 96px; }
+  .skp-photo, .skp-info, .skp-details { order: 0; }
+}
+
+/* Photo panel */
+.skp-photo { position: relative; border-radius: 28px; overflow: hidden; }
+.skp-gallery { overflow: hidden; }
+.skp-gallery-track { display: flex; touch-action: pan-y; }
+.skp-slide { flex: 0 0 100%; min-width: 0; }
+.skp-slide img { width: 100%; height: auto; user-select: none; }
+.skp-noimg { aspect-ratio: 1; background: var(--card); display: grid; place-items: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--sub); }
+.skp-chip { position: absolute; z-index: 2; top: 16px; left: 16px; padding: 4px 12px; border-radius: 999px; background: var(--rose); font-family: var(--disp); font-weight: 700; font-size: 13px; color: var(--ink); }
+.skp-seal { position: absolute; z-index: 2; top: 14px; right: 14px; width: 82px; height: 82px; border-radius: 50%; background: var(--paper); box-shadow: var(--soft); display: grid; place-items: center; text-align: center; transform: rotate(-10deg); }
+.skp-seal > span { width: 70px; height: 70px; border-radius: 50%; border: 1.5px dashed var(--pink); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
+.skp-seal b { font-family: var(--disp); font-weight: 900; font-size: 13px; color: var(--royal); }
+.skp-seal small { font-size: 10px; font-weight: 700; color: var(--pink); }
+.skp-dots { position: absolute; z-index: 2; left: 0; right: 0; bottom: 14px; display: flex; justify-content: center; gap: 8px; }
+.skp-dots button { width: 8px; height: 8px; border-radius: 999px; background: rgba(91, 45, 23, 0.25); transition: width 200ms var(--ease-out), background-color 160ms ease; }
+.skp-dots button[aria-current="true"] { width: 22px; background: var(--royal); }
+
+/* Info column */
+.skp-info { display: flex; flex-direction: column; gap: 14px; }
+.skp-info h1 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 34px; line-height: 1.2; color: var(--royal); }
+@container skp (min-width: 760px) { .skp-info h1 { font-size: 40px; } }
+.skp-pill { align-self: flex-start; margin-top: -6px; padding: 3px 11px; border-radius: 999px; background: var(--blush); font-size: 12.5px; font-weight: 600; color: var(--royal); }
+.skp-tag { margin: -4px 0 -6px; color: var(--pink); font-size: 18px; transform: rotate(-3deg); transform-origin: left; }
+.skp-lede { margin: 0; font-size: 14px; line-height: 1.65; color: var(--ink); }
+.skp-ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.skp-ticks li { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+.skp-ticks li::before { content: "✓"; flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); color: var(--royal); font-size: 10.5px; font-weight: 700; }
+.skp-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.skp-price .num { font-size: 40px; line-height: 1; color: var(--royal); }
+.skp-price small { font-size: 13px; color: var(--sub); }
+.skp-price s { font-family: "Atma", sans-serif; font-weight: 700; font-size: 18px; color: var(--sub); }
+.skp-lbl { display: block; font-family: var(--disp); font-weight: 700; font-size: 16px; color: var(--royal); }
+.skp-sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 12px; }
+.skp-sizes[data-count="1"] { grid-template-columns: minmax(0, 260px); }
+.skp-size { position: relative; display: flex; align-items: center; gap: 10px; padding: 16px 12px 12px; border-radius: 18px; background: var(--paper); box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); text-align: left; color: var(--ink); }
+.skp-size[aria-pressed="true"] { background: var(--butter); box-shadow: inset 0 0 0 2px var(--royal); }
+.skp-badge { position: absolute; top: -10px; left: 10px; right: 10px; padding: 3px 0; border-radius: 8px; text-align: center; font-size: 11px; font-weight: 700; color: var(--paper); background: var(--pink); }
+.skp-size img { flex: none; width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+.skp-size b { display: block; font-family: var(--disp); font-weight: 900; font-size: 18px; color: var(--royal); }
+.skp-size .num { display: block; font-size: 17px; color: var(--royal); }
+.skp-size small { display: block; font-size: 11.5px; color: var(--sub); }
+.skp-unavailable { padding: 12px 16px; border-radius: 16px; background: var(--blush); font-family: var(--disp); font-weight: 700; color: var(--royal); text-align: center; }
+.skp-buyrow { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+.skp-qty { display: inline-flex; align-items: center; height: 56px; padding: 0 6px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); }
+.skp-qty button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--royal); }
+.skp-qty button:disabled { opacity: 0.35; cursor: not-allowed; }
+.skp-qty output { min-width: 28px; text-align: center; font-size: 18px; color: var(--ink); }
+.skp-cod { display: flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 22px; border-radius: 999px; background: var(--sun); color: var(--ink); font-weight: 700; font-size: 16px; }
+.skp-cod i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+.skp-cart { height: 56px; border-radius: 999px; color: var(--royal); box-shadow: inset 0 0 0 1.5px var(--royal); font-weight: 700; font-size: 15px; }
+.skp-cod:disabled, .skp-cart:disabled { cursor: not-allowed; opacity: 0.5; }
+.skp-or { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 700; color: var(--sub); }
+.skp-or::before, .skp-or::after { content: ""; flex: 1; border-top: 1.5px dotted rgba(58, 29, 15, 0.3); }
+.skp-help { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.skp-help a { display: flex; align-items: center; justify-content: center; gap: 8px; height: 50px; border-radius: 999px; font-size: 14.5px; font-weight: 700; }
+.skp-call { background: var(--royal); color: var(--rice); }
+.skp-wa { background: #25d366; color: #fff; }
+.skp-wa img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+@media (hover: hover) and (pointer: fine) {
+  .skp-cod:not(:disabled):hover { background: #efad12; }
+  .skp-cart:not(:disabled):hover { background: rgba(91, 45, 23, 0.06); }
+  .skp-call:hover { background: #4a2412; }
+  .skp-wa:hover { background: #1fbd5a; }
+}
+
+/* Delivery estimate: a tear-off calendar page */
+.skp-cal { display: flex; align-items: center; gap: 14px; padding-top: 4px; }
+.skp-leaf { flex: none; width: 104px; border-radius: 14px; background: #fffdf6; box-shadow: var(--soft); overflow: hidden; text-align: center; rotate: -3deg; font-family: var(--disp); }
+.skp-leaf-mon { position: relative; padding: 6px 0 5px; background: var(--royal); color: var(--sun); font-size: 13px; font-weight: 700; }
+.skp-leaf-mon::before, .skp-leaf-mon::after { content: ""; position: absolute; top: -5px; width: 8px; height: 12px; border-radius: 4px; background: var(--sub); }
+.skp-leaf-mon::before { left: 26px; } .skp-leaf-mon::after { right: 26px; }
+.skp-leaf-d { padding: 6px 0 2px; font-size: 30px; line-height: 1.1; }
+.skp-leaf-d .num { color: var(--royal); }
+.skp-leaf-d em { font-style: normal; color: var(--pink); font-size: 22px; }
+.skp-leaf-wd { display: block; padding-bottom: 8px; font-size: 11.5px; font-weight: 700; color: var(--sub); }
+.skp-cal-txt .script { display: block; color: var(--pink); font-size: 17px; transform: rotate(-3deg); transform-origin: left; }
+.skp-cal-txt b { display: block; font-family: var(--disp); font-size: 17px; font-weight: 900; line-height: 1.3; color: var(--royal); }
+.skp-cal-txt small { display: block; margin-top: 4px; font-size: 12.5px; color: var(--sub); }
+
+/* Details: chips + footer-style cash memo, all in the title font */
+.skp-details { display: flex; flex-direction: column; gap: 12px; }
+.skp-dh { display: flex; align-items: baseline; gap: 10px; }
+.skp-dh h2 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 26px; color: var(--royal); }
+.skp-dh .script { color: var(--pink); font-size: 20px; transform: rotate(-4deg); }
+.skp-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 6px; }
+.skp-chips::-webkit-scrollbar { display: none; }
+.skp-chips button { flex: none; height: 38px; padding: 0 16px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--ink); background: var(--rice); font-family: "Noto Serif Bengali", serif; font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.skp-chips button:nth-child(3) { transform: rotate(-4deg); }
+.skp-chips button[aria-selected="true"] { background: var(--royal); box-shadow: none; color: #fff; }
+.skp-memo-w { position: relative; margin-top: 10px; rotate: -0.6deg; filter: drop-shadow(0 0.5px 0.5px rgba(58, 29, 15, 0.2)) drop-shadow(0 6px 8px rgba(58, 29, 15, 0.08)); animation: skp-rise 260ms var(--ease-out) both; }
+.skp .tack { position: absolute; z-index: 5; top: -8px; left: 50%; width: 18px; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; --pc: #d2342a;
+  background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.95) 0 9%, rgba(255, 255, 255, 0) 26%), radial-gradient(circle at 50% 50%, var(--pc) 0 58%, color-mix(in srgb, var(--pc) 62%, #000) 100%);
+  box-shadow: inset -1.5px -2px 2px rgba(0, 0, 0, 0.25), inset 1px 1px 1px rgba(255, 255, 255, 0.35), 3px 5px 4px -1px rgba(40, 20, 8, 0.45); }
+.skp .tack::after { content: ""; position: absolute; left: 62%; top: 78%; width: 7px; height: 1.6px; border-radius: 2px; background: rgba(40, 20, 8, 0.35); transform: rotate(38deg); filter: blur(0.4px); }
+.skp-memo { position: relative; background-color: #fffdf6; background-image: repeating-linear-gradient(180deg, transparent 0 25px, rgba(70, 110, 170, 0.18) 25px 26px); padding: 26px 18px 40px; font-family: "Noto Serif Bengali", serif;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), 97.5% 100%, 95% calc(100% - 10px), 92.5% 100%, 90% calc(100% - 10px), 87.5% 100%, 85% calc(100% - 10px), 82.5% 100%, 80% calc(100% - 10px), 77.5% 100%, 75% calc(100% - 10px), 72.5% 100%, 70% calc(100% - 10px), 67.5% 100%, 65% calc(100% - 10px), 62.5% 100%, 60% calc(100% - 10px), 57.5% 100%, 55% calc(100% - 10px), 52.5% 100%, 50% calc(100% - 10px), 47.5% 100%, 45% calc(100% - 10px), 42.5% 100%, 40% calc(100% - 10px), 37.5% 100%, 35% calc(100% - 10px), 32.5% 100%, 30% calc(100% - 10px), 27.5% 100%, 25% calc(100% - 10px), 22.5% 100%, 20% calc(100% - 10px), 17.5% 100%, 15% calc(100% - 10px), 12.5% 100%, 10% calc(100% - 10px), 7.5% 100%, 5% calc(100% - 10px), 2.5% 100%, 0 calc(100% - 10px)); }
+@container skp (min-width: 760px) { .skp-memo { padding: 26px 28px 40px; } }
+.skp-memo-top { display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--royal); padding-bottom: 12px; }
+.skp-memo-top img { height: 40px; width: auto; }
+.skp-memo-title { flex: 1; text-align: center; }
+.skp-memo-title b { display: block; font-weight: 900; font-size: 22px; line-height: 1.2; color: var(--royal); }
+.skp-memo-title span { font-weight: 700; font-size: 12px; color: var(--sub); }
+.skp-memo-no { font-weight: 700; font-size: 12px; line-height: 1.4; color: var(--sub); text-align: right; }
+.skp-memo-no .num { font-size: 18px; color: var(--pink); }
+.skp-memo p { margin: 12px 0 0; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 14.5px; line-height: 26px; color: var(--ink); }
+.skp-memo-h { margin: 12px 0 2px; font-weight: 700; font-size: 13px; letter-spacing: 0.02em; color: var(--pink); }
+.skp-memo-row { display: flex; align-items: baseline; gap: 8px; min-height: 26px; line-height: 26px; font-weight: 700; font-size: 15px; color: var(--royal); }
+.skp-memo-row span { flex: 0 1 auto; }
+.skp-memo-row::after { content: ""; order: 1; flex: 1 0 18px; border-bottom: 1.5px dotted color-mix(in srgb, var(--ink) 35%, transparent); transform: translateY(-6px); }
+.skp-memo-row em { order: 2; flex: none; font-style: normal; font-family: "Hind Siliguri", sans-serif; font-size: 13px; color: var(--pink); }
+.skp-memo.has-stamp { padding-bottom: 84px; }
+.skp .stampc { position: absolute; right: 14px; bottom: 18px; width: 76px; aspect-ratio: 1; border-radius: 50%; border: 2px solid currentColor; color: var(--pink); opacity: 0.75; rotate: -14deg; display: grid; place-items: center; text-align: center;
+  font-weight: 700; font-size: 9.5px; line-height: 1.3; box-shadow: inset 0 0 0 4px #fffdf6, inset 0 0 0 5.5px currentColor; pointer-events: none; }
+@container skp (min-width: 760px) { .skp-memo.has-stamp { padding-bottom: 40px; padding-right: 130px; } .skp .stampc { bottom: 40px; } }
+
+/* Trust strip, reels header, related heading */
+.skp-strip { margin-top: 44px; overflow: hidden; background: var(--sun); padding: 13px 0; }
+.skp-strip > div { display: flex; gap: 34px; width: max-content; animation: skp-marquee 26s linear infinite; }
+.skp-strip span { display: inline-flex; align-items: center; gap: 12px; font-family: var(--disp); font-weight: 900; font-size: 18px; color: var(--royal); white-space: nowrap; }
+.skp-strip span::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--pink); }
+@keyframes skp-marquee { to { transform: translateX(-50%); } }
+.skp-reels { padding-top: 40px; }
+.skp-reels-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.skp-reels-head h2 { margin: 0; min-width: 0; font-family: var(--disp); font-weight: 900; font-size: 26px; color: var(--royal); }
+.skp-reels-head .script { color: var(--pink); }
+.skp-reels-nav { display: flex; flex: none; gap: 8px; }
+.skp-round { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); color: var(--royal); }
+.skp-more { padding-top: 44px; padding-bottom: 20px; }
+.skp-hh { text-align: center; margin-bottom: 22px; }
+.skp-hh h2 { margin: 0; font-family: var(--f-disp, "Noto Serif Bengali", serif); font-weight: 900; font-size: clamp(26px, 4.6cqi, 44px); line-height: 1.15; color: var(--royal); }
+.skp-hh .script { display: block; width: max-content; margin: 2px auto 0; color: var(--pink); font-size: clamp(18px, 2.8cqi, 26px); transform: rotate(-4deg); }
+@keyframes skp-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .skp .press:active { transform: none; }
+  .skp-memo-w { animation: none; }
+  .skp-strip > div { animation: none; }
+  .skp-dots button { transition: none; }
+}
+
+/* Recently viewed (product and products pages): homepage heading + poster cards in a snapping row */
+.sk.rv { padding-block: 40px 28px; }
+.sk .rv-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.sk .rv-head h2 { margin: 0; font-family: var(--f-disp); font-weight: 900; font-size: clamp(26px, 4.6cqi, 44px); line-height: 1.15; color: var(--royal); }
+.sk .rv-head .script { display: block; color: var(--pink); font-size: clamp(18px, 2.8cqi, 26px); transform: rotate(-3deg); transform-origin: left; }
+.sk .rv-nav { display: flex; flex: none; gap: 8px; }
+.sk .rv-nav button { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); color: var(--royal); }
+.sk .rv-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+.sk .rv-rail { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; }
+.sk .rv-rail::-webkit-scrollbar { display: none; }
+.sk .rv-rail > .c-card { flex: 0 0 calc((100% - 12px) / 2); scroll-snap-align: start; }
+/* In a row the cards stay stacked (photo on top) even on wide screens */
+@container site (min-width: 720px) {
+  .sk .rv-rail { gap: 22px; }
+  .sk .rv-rail > .c-card { flex-basis: calc((100% - 66px) / 4); flex-direction: column; text-align: center; }
+}
+

@@ -3,65 +3,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const productSource = readFileSync(new URL("./product.tsx", import.meta.url), "utf8");
-const indexSource = readFileSync(new URL("../index.css", import.meta.url), "utf8");
-
-test("uses distinct vibrant channel colors for phone and WhatsApp order actions", () => {
-  assert.match(
-    productSource,
-    /href="tel:\+8801310980289"[\s\S]*?bg-\[#f26b4f\][\s\S]*?text-white[\s\S]*?hover:bg-\[#d9573d\]/,
-  );
-  assert.match(
-    productSource,
-    /href=\{`https:\/\/wa\.me[\s\S]*?bg-\[#25d366\][\s\S]*?text-white[\s\S]*?hover:bg-\[#1da851\]/,
-  );
-});
-
-test("keeps channel buttons visually soft rather than heavily bordered or shadowed", () => {
-  assert.match(productSource, /border-white\/20[\s\S]*?shadow-none/);
-  assert.doesNotMatch(productSource, /shadow-sm|shadow-\[/);
-});
-
-test("uses Kaium Simanto for delivery timeline Bengali labels", () => {
-  assert.match(productSource, /fontFamily: "'KaiumSimanto', serif"/);
-  assert.match(indexSource, /font-family: 'KaiumSimanto'/);
-  assert.match(indexSource, /kaium-simanto-unicode\.ttf/);
-  assert.match(productSource, /className="h-5 w-5" weight="Filled"/);
-  assert.match(productSource, /text-\[11px\] font-normal tracking-\[0\.03em\]/);
-  assert.match(productSource, /text-\[14px\] font-normal leading-4/);
-  assert.match(productSource, /অর্ডার গ্রহণ/);
-  assert.match(productSource, /প্রসেসিং/);
-  assert.match(productSource, /ডেলিভারি/);
-});
-
-test("uses shared sizing and IhtishamDeshlipi for product detail labels", () => {
-  assert.match(productSource, /বিস্তারিত/);
-  assert.match(productSource, /বৈশিষ্ট্য/);
-  assert.match(productSource, /text-\[19px\] font-normal text-black/);
-  assert.match(productSource, /text-\[19px\] font-normal text-black\/65/);
-  assert.match(productSource, /fontFamily: "'IhtishamDeshlipi', serif"/);
-  assert.match(productSource, /text-\[15px\] transition-colors md:text-\[17px\]/);
-});
+const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
 
 test("does not mark a live product unavailable while inventory is still loading", () => {
   assert.match(productSource, /const merchantUnavailable = merchantProductUnavailable \|\| inventoryUnavailable/);
   assert.match(productSource, /const inventoryUnavailable = merchantInventory\?\.inventory \? !isProductOrderable\(product\) : false/);
-});
-
-test("loads visible product thumbnails eagerly while keeping the desktop gallery lazy", () => {
-  const thumbnailStackStart = productSource.indexOf('className="absolute left-2 top-1/2 z-20');
-  const desktopGalleryStart = productSource.indexOf("{/* Desktop: Pinterest style");
-
-  assert.notEqual(thumbnailStackStart, -1);
-  assert.notEqual(desktopGalleryStart, -1);
-
-  const thumbnailStack = productSource.slice(thumbnailStackStart, desktopGalleryStart);
-  const desktopGallery = productSource.slice(desktopGalleryStart);
-
-  assert.match(thumbnailStack, /sizes=\{srcSetFor\[url\] \? "56px" : undefined\}/);
-  assert.match(thumbnailStack, /loading="eager"/);
-  assert.match(thumbnailStack, /decoding="async"/);
-  assert.doesNotMatch(thumbnailStack, /loading="lazy"/);
-  assert.match(desktopGallery, /loading="lazy"/);
 });
 
 test("only clears stale product data after the Merchant Suite confirms a 404", () => {
@@ -83,52 +29,6 @@ test("lets customers choose a quantity for cart and direct checkout", () => {
   assert.match(productSource, /selectedBundle\.title,\s*quantity/);
 });
 
-test("shows quantity before size at every breakpoint", () => {
-  const quantityIndex = productSource.indexOf("                    Quantity");
-  const sizeIndex = productSource.indexOf("                    Select Size");
-
-  assert.notEqual(quantityIndex, -1);
-  assert.notEqual(sizeIndex, -1);
-  assert.ok(quantityIndex < sizeIndex);
-});
-
-test("derives one-size width from the quantity control without changing the multi-size grid", () => {
-  assert.match(productSource, /const quantityControlRef = useRef<HTMLDivElement>\(null\)/);
-  assert.match(productSource, /const \[quantityControlWidth, setQuantityControlWidth\] = useState<number \| null>\(null\)/);
-  assert.match(productSource, /new ResizeObserver/);
-  assert.match(productSource, /ref=\{quantityControlRef\}/);
-  assert.match(productSource, /style=\{bundles\.length === 1 && quantityControlWidth/);
-  assert.match(productSource, /width: `\$\{quantityControlWidth \+ 7\}px`/);
-  assert.match(productSource, /bundles\.length === 1 \? "inline-flex" : "grid grid-cols-2 gap-2"/);
-  assert.match(productSource, /bundles\.length === 1 \? "w-full" : ""/);
-});
-
-test("highlights the বৈশিষ্ট্য label with the existing yellow hand-drawn oval", () => {
-  assert.match(
-    productSource,
-    /<span[\s\S]*?className="[^\"]*relative inline-block[^\"]*"[\s\S]*?বৈশিষ্ট্য[\s\S]*?stroke="#FBBB14"/,
-  );
-});
-
-test("uses aligned Bengali numbering in the normal detail-list font", () => {
-  assert.match(productSource, /const BENGALI_DIGITS = \[/);
-  assert.match(productSource, /function toBengaliNumeral\(value: number\)/);
-  assert.match(productSource, /toBengaliNumeral\(detailIndex \+ 1\)/);
-  assert.match(productSource, /grid-cols-\[1\.5rem_minmax\(0,1fr\)\]/);
-  assert.match(productSource, /items-start/);
-  assert.match(productSource, /fontFamily: "inherit"/);
-  assert.match(productSource, /text-brand-gold/);
-  assert.doesNotMatch(productSource, /rotate-45/);
-  assert.doesNotMatch(productSource, /rounded-full bg-brand-gold/);
-});
-
-test("left-aligns and offsets the active product detail tab content", () => {
-  assert.match(productSource, /<div className="space-y-1\.5 text-left">/);
-  assert.match(productSource, /<ul className="-ml-3 max-w-\[720px\] space-y-1 text-left md:-ml-4">/);
-  assert.match(productSource, /className="grid w-full max-w-full grid-cols-\[1\.5rem_minmax\(0,1fr\)\]/);
-  assert.doesNotMatch(productSource, /space-y-1\.5 text-center/);
-});
-
 test("renders product reels as a left-aligned horizontal snap carousel", () => {
   assert.match(productSource, /const \[reelRef, reelApi\] = useEmblaCarousel/);
   // Embla measures slides from their offset parent, so the viewport must be positioned.
@@ -136,8 +36,7 @@ test("renders product reels as a left-aligned horizontal snap carousel", () => {
   assert.match(productSource, /const \[reelRef, reelApi\] = useEmblaCarousel\(\{\s*align: "start"/);
   assert.match(productSource, /loop: true/);
   assert.match(productSource, /duration: 35/);
-  assert.match(productSource, /-mx-4[^"`]*md:mx-0/);
-  assert.match(productSource, /max-w-none px-4 md:max-w-\[480px\] md:px-0/);
+  assert.match(productSource, /<section className="skp-reels skp-w">/);
   assert.match(productSource, /mr-5 min-w-0/);
   assert.match(productSource, /basis-\[64vw\][^"`]*md:basis-\[220px\]/);
   // The active reel is outlined in brand yellow; the rest keep a transparent border so nothing shifts.
@@ -205,9 +104,9 @@ test("navigates reels with arrow keys without hijacking editable controls", () =
 });
 
 test("puts the reel title and round prev/next buttons in one header row", () => {
-  assert.match(productSource, /flex items-center justify-between gap-4">\s*<h2\s*className="min-w-0 text-left/);
-  assert.match(productSource, /aria-label="Previous reel"[\s\S]*?className="h-10 w-10 rounded-full bg-\[#f7f8f6\][^"]*md:h-12 md:w-12"/);
-  assert.match(productSource, /aria-label="Next reel"[\s\S]*?className="h-10 w-10 rounded-full bg-\[#f7f8f6\][^"]*md:h-12 md:w-12"/);
+  assert.match(productSource, /<div className="skp-reels-head">\s*<h2>/);
+  assert.match(productSource, /aria-label="Previous reel"[\s\S]*?className="skp-round press"/);
+  assert.match(productSource, /aria-label="Next reel"[\s\S]*?className="skp-round press"/);
   // Arrows no longer float over the videos, and the dot pager is gone.
   assert.doesNotMatch(productSource, /absolute (left|right)-2 top-1\/2 flex -translate-y-1\/2 rounded-full/);
   assert.doesNotMatch(productSource, /aria-label=\{`Go to reel/);
@@ -233,4 +132,50 @@ test("autoplays every on-screen reel as a muted loop and taps in sound", () => {
   // Tapping the active reel hands over to the sound player at the same moment.
   assert.match(productSource, /startReel\(i, previewVideoRefs\.current\[i\]\?\.currentTime/);
   assert.match(productSource, /`Play reel \$\{i \+ 1\} with sound`/);
+});
+
+// Product page redesign (approved 2026-10-13, docs/design/2026-10-13-product-page): "Classic" layout,
+// Chips details as the footer cash memo, Calendar delivery estimate.
+test("lays out photo, then title, price, sizes, quantity and order on the poster palette", () => {
+  for (const cls of ["skp-photo", "skp-info", "skp-pill", "skp-ticks", "skp-price", "skp-sizes", "skp-buyrow"]) {
+    assert.match(productSource, new RegExp(`className="${cls}`));
+  }
+  // Sizes come before quantity, like the approved mockup.
+  assert.ok(productSource.indexOf('className="skp-sizes') < productSource.indexOf('className="skp-buyrow'));
+  assert.match(posterSource, /\.skp \{[^}]*--rice: #faf4ea;/);
+});
+
+test("size cards show the real per-kg price and only real savings", () => {
+  assert.match(productSource, /const sizeOffers = getSizeOffers\(bundles\)/);
+  assert.match(productSource, /sizeOffers\[idx\]\?\.saving \?/);
+  assert.match(productSource, /প্রতি কেজি/);
+});
+
+test("keeps phone and WhatsApp ordering under অথবা, then the calendar delivery estimate", () => {
+  const order = productSource.indexOf("ক্যাশ অন ডেলিভারিতে অর্ডার");
+  const or = productSource.indexOf(">অথবা<");
+  const phone = productSource.indexOf('href="tel:+8801310980289"');
+  const whatsapp = productSource.indexOf("https://wa.me/8801303103540");
+  const calendar = productSource.indexOf('className="skp-cal"');
+  assert.ok(order > 0 && or > order && phone > or && whatsapp > phone && calendar > whatsapp);
+  assert.match(productSource, /ফোনে অর্ডার/);
+  assert.match(productSource, /হোয়াটসঅ্যাপে অর্ডার/);
+  assert.match(productSource, /আপনার দরজায় পৌঁছাবে/);
+  assert.match(productSource, /ঢাকায় ১–২ দিন · ঢাকার বাইরে ২–৩ দিন/);
+});
+
+test("details are chips that switch one footer-style cash memo", () => {
+  assert.match(productSource, /role="tablist"/);
+  assert.match(productSource, /className="skp-memo-w"/);
+  assert.match(productSource, /<span className="tack"/);
+  assert.match(productSource, /className="skp-memo-row"/);
+  assert.match(posterSource, /\.skp-memo \{[^}]*repeating-linear-gradient/);
+  // The details use the title font throughout.
+  assert.match(posterSource, /\.skp-chips button \{[^}]*font-family: "Noto Serif Bengali"/);
+  assert.match(posterSource, /\.skp-memo p \{[^}]*font-family: "Noto Serif Bengali"/);
+});
+
+test("related products use the homepage poster card", () => {
+  assert.match(productSource, /<PosterProductCard key=\{p\.slug\} product=\{p\} \/>/);
+  assert.doesNotMatch(productSource, /HomeProductCard/);
 });

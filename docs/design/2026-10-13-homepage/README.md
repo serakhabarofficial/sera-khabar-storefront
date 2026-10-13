@@ -93,3 +93,24 @@ edge, tilted -4°. Text: Galada "শীতের নতুন গুড়" in t
 Noto Serif Bengali 900 cream, one line of copy, "শুরু ৳৩৫০" in Atma turmeric, and an
 "এখনই অর্ডার করুন" turmeric button. Price is a placeholder. Other explored styles:
 `homepage-ad-variants.html`.
+
+**Phone menu — রঙিন কার্ড (approved 2026-10-13, variant "Cards"):** the Vaul bottom sheet on
+`#FAF4EA`. Galada "কী খুঁজছেন?" in pink over "সেরা খাবার মেনু" (Noto Serif Bengali 900). The three
+homepage categories (`HOMEPAGE_CATEGORIES`, same cut-out photos and colours) as a bento: ফ্রেশ আম
+full width, হোমমেড and গুড় below, each with the photo breaking out of the top and an Atma ০১/০২/০৩
+circle. Below, the page links (হোম, সব পণ্য, সেরা বিক্রিত পণ্য with a pink "জনপ্রিয়" tag) on a cream
+card with the FAQ-chat shadow. No second "ক্যাটাগরিসমূহ" page. Cards rise in with a 40ms stagger.
+Other explored styles (Memo, Signboard): `mobile-menu-variants.html` (switch with 1/2/3).
+
+**Desktop menu and cart (2026-10-13):** the same Vaul drawers as on phones, opening as floating
+panels 16px from the screen edge (radius 26px, same warm overlay): the menu slides in from the left
+(440px, fits its content) with the identical Cards content; the cart slides in from the right (460px).
+The old full-screen grey glass menu with English links is gone; Track Order and Contact stay in the footer.
+
+**Order form / checkout (2026-10-13):** opened by "ক্যাশ অন ডেলিভারিতে অর্ডার করুন।" on product pages and
+by the cart's checkout button. Same Vaul sheet as the cart: bottom sheet on phones (up to 94dvh), floating
+right panel on desktop (520px). Galada "ক্যাশ অন ডেলিভারি" over "অর্ডার করুন" (Noto Serif Bengali 900);
+items on a cream card with Atma prices; rounded cream inputs with a turmeric focus ring; selected
+delivery/payment options in turmeric-cream with a tamarind border; total in Atma; turmeric pill
+"Place Order" button with the pink dot; phone order button in tamarind, WhatsApp stays green.
+

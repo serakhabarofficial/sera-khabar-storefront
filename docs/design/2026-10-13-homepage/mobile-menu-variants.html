@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mobile menu variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atma:wght@700&family=Galada&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@700;900&display=swap" rel="stylesheet">
+<!--
+  Prototype for the phone menu sheet (2026-10-13). Built with Emil Kowalski's `prototype`
+  skill: one variant at a time, full phone size, picker chrome copied verbatim from PICKER.md.
+  Keys: 1–3 or ←/→ to switch, R to replay. Nothing here is imported by the storefront.
+-->
+<style>
+  :root {
+    --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a;
+    --card: #f1e5d3; --ink: #3a1d0f; --sub: #7a6050; --paper: #fffdf8; --rose: #e9a9a0;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* Vaul's own curve, so the prototype matches production */
+    --disp: "Noto Serif Bengali", serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; min-height: 100dvh; background: #e9dfd0; font-family: "Hind Siliguri", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  button, a { font: inherit; color: inherit; text-decoration: none; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  button { border: 0; background: none; padding: 0; cursor: pointer; }
+  img { display: block; max-width: 100%; }
+  .num { font-family: "Atma", sans-serif; font-weight: 700; }
+  .script { font-family: "Galada", cursive; font-weight: 400; }
+  .press { transition: transform 160ms var(--ease-out); }
+  .press:active { transform: scale(0.97); }
+
+  /* Stage: a real-size phone (375×812) so spacing is judged at 1:1 */
+  #stage { min-height: 100dvh; display: grid; place-items: center; padding: 84px 16px 32px; }
+  .phone { position: relative; width: 375px; height: 812px; max-height: calc(100dvh - 116px); border-radius: 44px; overflow: hidden; background: var(--rice); box-shadow: 0 0 0 10px #2a1c14, 0 30px 60px -20px rgba(42,28,20,.5); isolation: isolate; }
+  @media (max-width: 420px) { #stage { padding: 72px 0 0; } .phone { width: 100%; height: calc(100dvh - 72px); max-height: none; border-radius: 0; box-shadow: none; } }
+
+  /* Faded homepage behind the sheet (realistic context) */
+  .bg { position: absolute; inset: 0; padding: 12px 18px; }
+  .bg .hd { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; color: var(--royal); }
+  .bg .hd img { height: 42px; justify-self: center; }
+  .bg .open { justify-self: start; width: 40px; height: 40px; display: grid; place-items: center; font-size: 22px; }
+  .bg .bag { justify-self: end; width: 34px; height: 34px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; font-size: 15px; }
+  .bg .word { margin: 30px 0 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: 84px; line-height: .88; }
+  .bg .tag { color: var(--pink); font-size: 28px; transform: rotate(-8deg); display: inline-block; margin-left: 120px; }
+  .bg .blk { height: 128px; border-radius: 24px; background: var(--sun); margin-top: 26px; }
+  .bg .blk + .blk { background: var(--rose); margin-top: 14px; }
+
+  /* Sheet mechanics: transitions (interruptible), Vaul curve, translateY(100%) when closed */
+  .shade { position: absolute; inset: 0; background: rgba(42, 28, 20, .42); transition: opacity 500ms var(--ease-drawer); }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 88%; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; overflow: hidden;
+    transition: transform 500ms var(--ease-drawer); box-shadow: 0 -12px 32px -12px rgba(42,28,20,.35); }
+  .in { overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+  .phone[data-closed] .shade { opacity: 0; pointer-events: none; }
+  .phone[data-closed] .sheet { transform: translateY(100%); }
+  .grab { flex: none; width: 40px; height: 5px; border-radius: 5px; margin: 8px auto 2px; background: rgba(91,45,23,.25); }
+  .x { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; }
+
+  /* Stagger: 40ms steps, starts while the sheet is still settling, never blocks taps */
+  .rise > * { transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
+  .phone[data-closed] .rise > * { opacity: 0; transform: translateY(10px); transition: none; }
+  .rise > *:nth-child(1) { transition-delay: 90ms; }
+  .rise > *:nth-child(2) { transition-delay: 130ms; }
+  .rise > *:nth-child(3) { transition-delay: 170ms; }
+  .rise > *:nth-child(4) { transition-delay: 210ms; }
+  .rise > *:nth-child(5) { transition-delay: 250ms; }
+  .rise > *:nth-child(n+6) { transition-delay: 290ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet { transition: opacity 200ms ease; }
+    .phone[data-closed] .sheet { transform: none; opacity: 0; }
+    .phone[data-closed] .rise > *, .rise > * { transform: none; }
+    .press:active { transform: none; }
+  }
+
+  /* ───────── 1 · রঙিন কার্ড — axis: image-led, the homepage category cards as a bento ───────── */
+  .a { background: var(--rice); }
+  .a .in { padding: 8px 18px 0; }
+  .a .hd { display: flex; align-items: start; justify-content: space-between; padding: 6px 0 14px; }
+  .a .hd .script { display: block; color: var(--pink); font-size: 22px; line-height: 1; transform: rotate(-4deg); transform-origin: left; }
+  .a .hd b { display: block; font-family: var(--disp); font-weight: 900; font-size: 30px; line-height: 1.15; color: var(--royal); }
+  .a .x { background: var(--card); color: var(--royal); }
+  .a .cats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 22px; }
+  .a .cat { position: relative; min-height: 116px; border-radius: 22px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: end; color: var(--ink); }
+  .a .cat:first-child { grid-column: 1 / -1; min-height: 128px; background: var(--sun); padding-left: 52%; }
+  .a .cat:nth-child(2) { background: var(--rose); }
+  .a .cat:nth-child(3) { background: var(--royal); color: var(--rice); }
+  .a .cat img { position: absolute; width: 104px; top: -26px; filter: drop-shadow(0 8px 10px rgba(58,29,15,.22)); }
+  .a .cat:first-child img { width: 142px; top: -32px; left: 2px; transform: rotate(-6deg); }
+  .a .cat:not(:first-child) { padding-top: 70px; }
+  .a .cat:not(:first-child) img { right: 2px; transform: rotate(7deg); }
+  .a .cat b { font-family: var(--disp); font-weight: 900; font-size: 21px; line-height: 1.2; }
+  .a .cat small { font-size: 12px; opacity: .78; }
+  .a .cat .n { position: absolute; top: 12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; background: var(--rice); color: var(--royal); }
+  .a .cat:first-child .n { right: 12px; }
+  .a .cat:not(:first-child) .n { left: 12px; }
+  .a .links { margin-top: 18px; border-radius: 22px; background: var(--paper); box-shadow: 0 0 0 1px rgba(58,29,15,.06), 0 1px 2px rgba(58,29,15,.04), 0 4px 8px -2px rgba(58,29,15,.05), 0 14px 28px -8px rgba(58,29,15,.08); }
+  .a .row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  .a .row + .row { border-top: 1.5px dotted rgba(58,29,15,.2); }
+  .a .row b { flex: 1; font-family: var(--disp); font-weight: 700; font-size: 18px; color: var(--royal); }
+  .a .row small { display: block; font-family: "Hind Siliguri", sans-serif; font-weight: 500; font-size: 12px; color: var(--sub); }
+  .a .row .arw { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); color: var(--ink); }
+  .a .row .hot { font-size: 11px; font-weight: 700; color: var(--paper); background: var(--pink); padding: 2px 8px; border-radius: 999px; transform: rotate(-3deg); }
+
+  /* ───────── 2 · দোকানের তালিকা — axis: paper list, the cash-memo footer as a menu ───────── */
+  .b { background: var(--rice); }
+  .b .in { padding: 14px 16px 0; }
+  .b .memo { position: relative; background-color: var(--paper); border-radius: 6px 6px 0 0; padding: 20px 18px 30px;
+    box-shadow: 0 0 0 1px rgba(58,29,15,.06), 0 14px 28px -10px rgba(58,29,15,.18); padding-bottom: 64px; }
+  .b .memo::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 12px;
+    background: radial-gradient(circle at 8px 0, var(--paper) 8px, transparent 8.5px) 0 0 / 16px 12px repeat-x; }
+  .b .pin { position: absolute; top: -9px; left: 50%; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--pink); box-shadow: inset -3px -3px 0 rgba(0,0,0,.15), 0 3px 4px rgba(58,29,15,.3); }
+  .b .mh { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 2px solid var(--royal); }
+  .b .mh img { width: 40px; height: 40px; }
+  .b .mh div { flex: 1; }
+  .b .mh b { display: block; font-family: var(--disp); font-weight: 900; font-size: 22px; line-height: 1.15; color: var(--royal); }
+  .b .mh small { font-size: 12px; color: var(--sub); }
+  .b .x { background: var(--card); color: var(--royal); }
+  .b .sec { margin: 16px 0 4px; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--pink); }
+  .b .li { display: flex; align-items: baseline; gap: 8px; height: 44px; padding-top: 10px; }
+  .b .li .n { width: 26px; font-size: 14px; color: var(--sub); }
+  .b .li b { font-family: var(--disp); font-weight: 700; font-size: 19px; color: var(--royal); white-space: nowrap; }
+  .b .li i { flex: 1; border-bottom: 2px dotted rgba(91,45,23,.35); transform: translateY(-5px); }
+  .b .li .t { width: 40px; height: 30px; margin-top: -10px; object-fit: contain; }
+  .b .li em { font-style: normal; font-size: 18px; color: var(--royal); }
+  .b .stamp { position: absolute; right: 18px; bottom: 16px; padding: 6px 10px; border: 2px solid var(--pink); border-radius: 6px; color: var(--pink); font-weight: 700; font-size: 12px; text-align: center; line-height: 1.25; transform: rotate(-9deg); opacity: .85; pointer-events: none; }
+  .b .cta { margin-top: 24px; height: 52px; border-radius: 999px; background: var(--royal); color: var(--rice); display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .b .cta i { width: 8px; height: 8px; border-radius: 50%; background: var(--sun); }
+
+  /* ───────── 3 · সাইনবোর্ড — axis: inverted dark poster, giant type, the গুড় ad band as a menu ───────── */
+  .c { background: var(--royal); color: var(--rice); }
+  .c .grab { background: rgba(250,244,234,.3); }
+  .c .in { padding: 6px 20px 0; }
+  .c .hd { display: flex; align-items: center; justify-content: space-between; }
+  .c .hd .script { color: var(--sun); font-size: 22px; transform: rotate(-5deg); }
+  .c .x { background: rgba(250,244,234,.12); color: var(--rice); }
+  .c .big { margin-top: 6px; }
+  .c .big a { display: flex; align-items: baseline; gap: 12px; padding: 6px 0; }
+  .c .big .n { width: 30px; font-size: 15px; color: var(--sun); }
+  .c .big b { font-family: var(--disp); font-weight: 900; font-size: 40px; line-height: 1.12; letter-spacing: -.01em; }
+  .c .big a[aria-current] b { color: var(--sun); }
+  .c .lbl { margin: 18px 0 10px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; letter-spacing: .12em; color: rgba(250,244,234,.6); }
+  .c .lbl::after { content: ""; flex: 1; border-top: 1.5px dashed rgba(250,244,234,.25); }
+  .c .stk { display: flex; gap: 10px; }
+  .c .stk a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .c .stk .disc { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); box-shadow: 0 0 0 4px var(--rice); transform: rotate(-3deg); }
+  .c .stk a:nth-child(2) .disc { background: var(--rose); transform: rotate(4deg); }
+  .c .stk a:nth-child(3) .disc { background: var(--pink); transform: rotate(-4deg); }
+  .c .stk img { width: 86px; filter: drop-shadow(0 6px 6px rgba(0,0,0,.25)); }
+  .c .stk b { margin-top: 6px; font-family: var(--disp); font-weight: 700; font-size: 16px; }
+  .c .foot { margin-top: 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 20px; background: var(--sun); color: var(--ink); }
+  .c .foot b { font-family: var(--disp); font-weight: 900; font-size: 17px; }
+  .c .foot small { display: block; font-size: 12px; color: var(--royal); }
+  .c .foot .arw { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--royal); color: var(--sun); }
+
+  /* ───────── Picker — verbatim from emilkowalski/skills prototype/PICKER.md ───────── */
+  .proto-picker {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.82);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 8px 24px rgba(0, 0, 0, 0.24),
+      0 2px 6px rgba(0, 0, 0, 0.12);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .proto-picker-highlight {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    will-change: transform;
+  }
+  .proto-picker[data-ready] .proto-picker-highlight {
+    transition:
+      transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+      width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+  }
+  .proto-picker-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font: inherit;
+    cursor: pointer;
+    transition: color 150ms ease-out;
+  }
+  .proto-picker-item:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .proto-picker-item:active {
+    transform: scale(0.97);
+  }
+  .proto-picker-item:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.4);
+    outline-offset: 2px;
+  }
+  .proto-picker-item[data-active] {
+    color: #fff;
+  }
+  .proto-picker-divider {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .proto-picker-replay {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+  .proto-picker[data-position="top"] {
+    bottom: auto;
+    top: 24px;
+  }
+</style>
+</head>
+<body>
+<main id="stage"></main>
+
+<nav class="proto-picker" data-position="top" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Cards</button>
+  <button class="proto-picker-item">Memo</button>
+  <button class="proto-picker-item">Signboard</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+  const LOGO = "../../../client/public/home/leaf-mark.webp";
+  const CUT = { mango: "cutouts/mango-cut.webp", homemade: "cutouts/homemade-cut.webp", jaggery: "cutouts/jaggery-cut.webp" };
+
+  const page = (sheet) => `
+    <div class="phone" data-closed>
+      <div class="bg">
+        <div class="hd"><button class="open press" data-open aria-label="Open menu">☰</button><img src="${LOGO}" alt="Sera Khabar"><span class="bag num">২</span></div>
+        <div class="word">সেরা<br>খাবার</div><span class="tag script">রাজশাহী থেকে</span>
+        <div class="blk"></div><div class="blk"></div>
+      </div>
+      <div class="shade" data-close></div>
+      ${sheet}
+    </div>`;
+
+  const variants = [
+    // 1 · Colour cards
+    () => page(`
+      <div class="sheet a" role="dialog" aria-label="Menu">
+        <div class="grab"></div>
+        <div class="in">
+          <div class="hd">
+            <div><span class="script">কী খুঁজছেন?</span><b>সেরা খাবার মেনু</b></div>
+            <button class="x press" data-close aria-label="Close menu">✕</button>
+          </div>
+          <div class="cats rise">
+            <a class="cat press" href="#fresh-mango" data-close><img src="${CUT.mango}" alt=""><span class="n num">০১</span><b>ফ্রেশ আম</b><small>Fresh Mango</small></a>
+            <a class="cat press" href="#homemade" data-close><img src="${CUT.homemade}" alt=""><span class="n num">০২</span><b>হোমমেড</b><small>Homemade</small></a>
+            <a class="cat press" href="#jaggery" data-close><img src="${CUT.jaggery}" alt=""><span class="n num">০৩</span><b>গুড়</b><small>Jaggery</small></a>
+          </div>
+          <nav class="links rise" aria-label="Pages">
+            <a class="row press" href="#home" data-close><b>হোম<small>Home</small></b><span class="arw">→</span></a>
+            <a class="row press" href="#products" data-close><b>সব পণ্য<small>All products</small></b><span class="arw">→</span></a>
+            <a class="row press" href="#top-selling" data-close><b>সেরা বিক্রিত পণ্য<small>Top selling</small></b><span class="hot">জনপ্রিয়</span><span class="arw">→</span></a>
+          </nav>
+        </div>
+      </div>`),
+
+    // 2 · Shop list
+    () => page(`
+      <div class="sheet b" role="dialog" aria-label="Menu">
+        <div class="grab"></div>
+        <div class="in">
+          <div class="memo">
+            <span class="pin"></span>
+            <div class="mh">
+              <img src="${LOGO}" alt="">
+              <div><b>আজকের তালিকা</b><small>যা চান, বেছে নিন</small></div>
+              <button class="x press" data-close aria-label="Close menu">✕</button>
+            </div>
+            <nav class="rise" aria-label="Menu">
+              <div class="sec">ক্যাটাগরি</div>
+              <a class="li press" href="#fresh-mango" data-close><span class="n num">০১</span><b>ফ্রেশ আম</b><i></i><img class="t" src="${CUT.mango}" alt=""></a>
+              <a class="li press" href="#homemade" data-close><span class="n num">০২</span><b>হোমমেড</b><i></i><img class="t" src="${CUT.homemade}" alt=""></a>
+              <a class="li press" href="#jaggery" data-close><span class="n num">০৩</span><b>গুড়</b><i></i><img class="t" src="${CUT.jaggery}" alt=""></a>
+              <div class="sec">দোকান</div>
+              <a class="li press" href="#home" data-close><span class="n num">০৪</span><b>হোম</b><i></i><em>→</em></a>
+              <a class="li press" href="#top-selling" data-close><span class="n num">০৫</span><b>সেরা বিক্রিত</b><i></i><em>→</em></a>
+            </nav>
+            <div class="stamp">ক্যাশ অন<br>ডেলিভারি</div>
+          </div>
+          <a class="cta press" href="#products" data-close><i></i>সব পণ্য দেখুন</a>
+        </div>
+      </div>`),
+
+    // 3 · Signboard
+    () => page(`
+      <div class="sheet c" role="dialog" aria-label="Menu">
+        <div class="grab"></div>
+        <div class="in">
+          <div class="hd"><span class="script">কোথায় যাবেন?</span><button class="x press" data-close aria-label="Close menu">✕</button></div>
+          <nav class="big rise" aria-label="Pages">
+            <a class="press" href="#home" data-close aria-current="page"><span class="n num">০১</span><b>হোম</b></a>
+            <a class="press" href="#products" data-close><span class="n num">০২</span><b>সব পণ্য</b></a>
+            <a class="press" href="#top-selling" data-close><span class="n num">০৩</span><b>সেরা বিক্রিত</b></a>
+          </nav>
+          <div class="lbl">ক্যাটাগরি</div>
+          <div class="stk rise">
+            <a class="press" href="#fresh-mango" data-close><span class="disc"><img src="${CUT.mango}" alt=""></span><b>ফ্রেশ আম</b></a>
+            <a class="press" href="#homemade" data-close><span class="disc"><img src="${CUT.homemade}" alt=""></span><b>হোমমেড</b></a>
+            <a class="press" href="#jaggery" data-close><span class="disc"><img src="${CUT.jaggery}" alt=""></span><b>গুড়</b></a>
+          </div>
+          <a class="foot press" href="#jaggery" data-close><span><b>শীতের নতুন গুড়</b><small>শুরু <span class="num">৳৩৫০</span></small></span><span class="arw">→</span></a>
+        </div>
+      </div>`),
+  ];
+
+  // Open after first paint so the drawer transition runs; ✕, backdrop and links close; ☰ reopens.
+  const openSheet = (phone) => requestAnimationFrame(() => requestAnimationFrame(() => phone.removeAttribute("data-closed")));
+  document.getElementById("stage").addEventListener("click", (e) => {
+    const phone = e.target.closest(".phone");
+    if (!phone) return;
+    if (e.target.closest("[data-open]")) { openSheet(phone); return; }
+    const closer = e.target.closest("[data-close]");
+    if (closer) { if (closer.tagName === "A") e.preventDefault(); phone.setAttribute("data-closed", ""); }
+  });
+
+  // ── Picker wiring: verbatim from PICKER.md, plus opening the sheet after mount ──
+  const stage = document.getElementById('stage');
+  const picker = document.querySelector('.proto-picker');
+  const highlight = picker.querySelector('.proto-picker-highlight');
+  const items = [...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+  const replay = picker.querySelector('.proto-picker-replay');
+  let current = 0;
+
+  function moveHighlight() {
+    const el = items[current];
+    highlight.style.width = el.offsetWidth + 'px';
+    highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+  }
+
+  function mount(i) {
+    stage.innerHTML = '';
+    requestAnimationFrame(() => { stage.innerHTML = variants[i](); openSheet(stage.querySelector('.phone')); });
+  }
+
+  function setActive(i) {
+    if (i < 0 || i >= variants.length) return;
+    current = i;
+    items.forEach((el, j) => {
+      el.toggleAttribute('data-active', j === i);
+      if (j === i) el.setAttribute('aria-current', 'true');
+      else el.removeAttribute('aria-current');
+    });
+    moveHighlight();
+    const url = new URL(location);
+    url.searchParams.set('v', i + 1);
+    history.replaceState(null, '', url);
+    mount(i);
+  }
+
+  items.forEach((el, i) => el.addEventListener('click', () => setActive(i)));
+  replay?.addEventListener('click', () => mount(current));
+  window.addEventListener('resize', moveHighlight);
+
+  document.addEventListener('keydown', (e) => {
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const num = parseInt(e.key, 10);
+    if (num >= 1 && num <= variants.length) setActive(num - 1);
+    else if (e.key === 'ArrowRight') setActive((current + 1) % variants.length);
+    else if (e.key === 'ArrowLeft') setActive((current - 1 + variants.length) % variants.length);
+    else if (e.key === 'r' || e.key === 'R') mount(current);
+  });
+
+  setActive((parseInt(new URLSearchParams(location.search).get('v'), 10) || 1) - 1);
+  requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute('data-ready', '')));
+</script>
+</body>
+</html>

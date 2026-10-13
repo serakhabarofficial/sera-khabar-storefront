@@ -1,23 +1,20 @@
-import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { flushSync } from "react-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import "@videojs/react/video/skin.css";
 import { Gesture, PlayButton } from "@videojs/react";
 import { Video, VideoPlayer, VideoSkin } from "@videojs/react/video";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowDownRight, Phone, ChevronLeft, ChevronRight, Minus, Play, Plus, VolumeX } from "lucide-react";
-import { ShoppingBag, ClipboardCheck } from "reicon-react";
+import { useReducedMotion } from "framer-motion";
+import { Phone, ChevronLeft, ChevronRight, Minus, Play, Plus, VolumeX } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import HomeProductCard from "@/components/home-product-card";
+import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
 import RecentlyViewed from "@/components/recently-viewed";
 import { useCart } from "@/contexts/cart-context";
 import Layout from "@/components/layout";
 import OrderDialog, { type OrderDialogBundle } from "@/components/order-dialog";
 import { toGoogleAnalyticsItem, trackGoogleEcommerceEvent } from "@/lib/google-analytics";
 import { getProductDetailSections } from "@/lib/product-details";
-import { Counter } from "@/components/ui/animated-counter";
 import {
   fetchStorefrontProduct,
   fetchStorefrontProductInventory,
@@ -40,17 +37,15 @@ import {
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import { recordRecentlyViewedSlug } from "@/lib/recently-viewed";
 import { getDefaultBundleIndex } from "@/lib/product-selection";
+import { toBanglaDigits } from "@/lib/bangla-digits";
+import { FEATURED_COLLECTIONS } from "@/lib/featured-collections";
+import { POLICY_FACTS } from "@/lib/site-pages";
+import { formatTaka, getSizeOffers } from "@/lib/product-sizes";
 
 // Use the direct catalog image URL. Vercel's image optimizer currently
 // rejects these Supabase URLs in production (INVALID_IMAGE_OPTIMIZE_REQUEST),
 // so we skip it and rely on Supabase's own CDN.
 const optimizedImage = (url: string | null | undefined) => url ?? "";
-
-const transition = { duration: 1, ease: [0.25, 0.1, 0.25, 1] as const };
-const reveal = {
-  hidden: { filter: "blur(2px)", transform: "translateY(20%)", opacity: 0 },
-  visible: { filter: "blur(0)", transform: "translateY(0)", opacity: 1 },
-};
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -84,18 +79,23 @@ function getMerchantSlug(slug: string) {
   return slug || "";
 }
 
-const BENGALI_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"] as const;
-
-function toBengaliNumeral(value: number) {
-  return String(value)
-    .split("")
-    .map((digit) => BENGALI_DIGITS[Number(digit)] ?? digit)
-    .join("");
+// Delivery estimate: tomorrow to three days out (Dhaka 1–2 days, outside Dhaka 2–3 days).
+const BANGLA_MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+const BANGLA_WEEKDAYS = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
+function addDays(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date;
 }
 
-function formatTimelineDate(date: Date) {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+// The last details page restates the published delivery and payment policy (site-pages.ts).
+const DELIVERY_POINTS = [
+  "পেমেন্ট শুধু ক্যাশ অন ডেলিভারি",
+  "ঢাকায় ১–২ দিন, ঢাকার বাইরে ২–৩ দিনে ডেলিভারি",
+  `সারাদেশে ডেলিভারি চার্জ ৳${toBanglaDigits(POLICY_FACTS.deliveryCharge)}; ৳${toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}+ অর্ডারে ফ্রি`,
+  "পণ্যে সমস্যা হলে ডেলিভারির ২৪ ঘণ্টার মধ্যে জানান",
+];
+const STRIP_ITEMS = ["ক্যাশ অন ডেলিভারি", "সারাদেশে ডেলিভারি", `৳${toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}+ অর্ডারে ফ্রি ডেলিভারি`, "রাজশাহী থেকে", "সেরা খাবার"];
 
 function ProductSkeleton() {
   return (
@@ -167,8 +167,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   const [playerReel, setPlayerReel] = useState<number | null>(null);
   const [reelsInView, setReelsInView] = useState(false);
   const previewVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const quantityControlRef = useRef<HTMLDivElement>(null);
-  const [quantityControlWidth, setQuantityControlWidth] = useState<number | null>(null);
   // Only one <video> is ever mounted. Mounting all three attaches three hardware
   // decoders to layers that Embla re-transforms every frame, which is what makes the
   // horizontal drag stutter on real phones but not on a desktop localhost.
@@ -189,16 +187,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
     loop: true,
     skipSnaps: false,
   });
-  useLayoutEffect(() => {
-    const quantityControl = quantityControlRef.current;
-    if (!quantityControl) return;
-    const updateWidth = () => setQuantityControlWidth(quantityControl.getBoundingClientRect().width);
-    updateWidth();
-    if (typeof ResizeObserver === "undefined") return;
-    const resizeObserver = new ResizeObserver(updateWidth);
-    resizeObserver.observe(quantityControl);
-    return () => resizeObserver.disconnect();
-  }, []);
   const startReel = (i: number, fromTime = 0) => {
     // Mount synchronously so play() still runs inside the tap: iOS only allows
     // unmuted playback that starts within the user's gesture.
@@ -560,17 +548,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
     galleryApi?.scrollTo(idx);
   };
 
-  const today = new Date();
-  const processedDate = new Date(today);
-  processedDate.setDate(today.getDate() + 1);
-  const deliveredDate = new Date(processedDate);
-  deliveredDate.setDate(processedDate.getDate() + 1);
-  const deliveryTimeline = [
-    { title: "অর্ডার গ্রহণ", date: formatTimelineDate(today) },
-    { title: "প্রসেসিং", date: formatTimelineDate(processedDate) },
-    { title: "ডেলিভারি", date: formatTimelineDate(deliveredDate) },
-  ];
-
   const orderBundle: OrderDialogBundle | null = product ? {
         title: product.name,
         details: selectedBundle.title,
@@ -616,643 +593,446 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
     );
   }
 
+  const { bangla: titleBn, english: titleEn } = splitProductName(product.name);
+  const sizeOffers = getSizeOffers(bundles);
+  const collection = FEATURED_COLLECTIONS.find((item) => (item.productSlugs as readonly string[]).includes(product.slug));
+  const collectionBn = collection ? collection.label.split("-")[1] ?? collection.label : null;
+  // The first section with a short list gives the three ✓ highlights under the description.
+  const highlights = (detailSections.find((section) => section.label !== "Options" && section.details?.length)?.details ?? []).slice(0, 3);
+  const memoSections = [
+    ...detailSections.filter((section) => section.label !== "Options" && (section.body?.length || section.details?.length)),
+    { label: "ডেলিভারি ও পেমেন্ট", body: undefined, details: DELIVERY_POINTS },
+  ];
+  const activeMemo = memoSections[Math.min(openSection, memoSections.length - 1)];
+  const isDeliveryMemo = activeMemo === memoSections[memoSections.length - 1];
+  const totalAmount = selectedBundle.amount * quantity;
+  const deliveryFrom = addDays(1);
+  const deliveryTo = addDays(3);
+
   return (
     <Layout>
-      <div className="min-h-screen bg-brand-ivory">
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            <div className="lg:col-span-7 bg-brand-ivory p-[10px] md:p-16 xl:p-20">
-              {/* Mobile: carousel with vertical thumbnails on left inside image */}
-              <div className="md:hidden">
-                <div className="relative mx-auto aspect-square w-full max-w-[1080px] overflow-hidden rounded-[8px] bg-[#f6f6f6]">
-                  {displayGallery.length ? (
-                    <>
-                      <div ref={galleryRef} className="h-full cursor-grab overflow-hidden active:cursor-grabbing">
-                        <div className="flex h-full touch-pan-y">
-                          {displayGallery.map((url, idx) => (
-                            <div key={url} className="relative h-full min-w-0 flex-[0_0_100%] overflow-hidden">
-                              <motion.img
-                                src={url}
-                                alt={product.name}
-                                width={1080}
-                                height={1080}
-                                draggable={false}
-                                initial={false}
-                                animate={shouldReduceMotion ? { opacity: 1, scale: 1 } : {
-                                  opacity: activeImage === idx ? 1 : 0.55,
-                                  scale: activeImage === idx ? 1 : 0.96,
-                                }}
-                                whileHover={shouldReduceMotion ? undefined : { scale: activeImage === idx ? 1.035 : 0.98 }}
-                                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                                className="absolute inset-0 h-full w-full select-none object-cover object-center"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      {displayGallery.length > 1 ? (
-                        <div className="absolute left-2 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2">
-                          {displayGallery.map((url, idx) => (
-                            <button
-                              key={url}
-                              type="button"
-                              onClick={() => goToImage(idx)}
-                              aria-label={`Go to product image ${idx + 1}`}
-                              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-[6px] border-2 bg-white shadow-md transition-all ${
-                                activeImage === idx ? "border-black opacity-100" : "border-white/70 opacity-70 hover:opacity-100"
-                              }`}
-                            >
-                              <img
-                                src={url}
-                                srcSet={srcSetFor[url]}
-                                sizes={srcSetFor[url] ? "56px" : undefined}
-                                alt={`${product.name} ${idx + 1}`}
-                                loading="eager"
-                                decoding="async"
-                                className="h-full w-full object-cover object-center"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </>
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase tracking-[0.35em] text-black/25">
-                      No image
-                    </div>
-                  )}
-                </div>
-              </div>
+      <div className="skp">
+        <nav className="skp-crumb skp-w" aria-label="Breadcrumb">
+          <Link href="/">হোম</Link>
+          {collection ? (
+            <>
+              <span aria-hidden="true">›</span>
+              <Link href={`/collection/${collection.slug}`}>{collectionBn}</Link>
+            </>
+          ) : null}
+          <span aria-hidden="true">›</span>
+          <span>{titleBn}</span>
+        </nav>
 
-              {/* Desktop: Pinterest style — first image big, rest in 2-col grid */}
-              <div className="hidden md:block mx-auto max-w-[1080px]">
-                {displayGallery.length ? (
-                  <>
-                    <div className="overflow-hidden rounded-[8px] bg-[#f6f6f6]">
-                      <img
-                        src={displayGallery[0]}
-                        alt={product.name}
-                        width={1080}
-                        height={1080}
-                        className="h-auto w-full object-cover object-center"
-                      />
-                    </div>
-                    {displayGallery.length > 1 ? (
-                      <div className="mt-3 grid grid-cols-2 gap-3">
-                        {displayGallery.slice(1).map((url, idx) => (
-                          <div key={url} className="overflow-hidden rounded-[8px] bg-[#f6f6f6]">
-                            <img
-                              src={url}
-                              srcSet={srcSetFor[url]}
-                              sizes={srcSetFor[url] ? "540px" : undefined}
-                              alt={`${product.name} ${idx + 2}`}
-                              width={540}
-                              height={540}
-                              loading="lazy"
-                              decoding="async"
-                              className="h-auto w-full object-cover object-center transition-transform duration-500 hover:scale-[1.02]"
-                            />
-                          </div>
-                        ))}
+        <div className="skp-top skp-w">
+          <div className="skp-left">
+            {/* Photo panel: the catalog photo's white background blends into the cream card */}
+            <div className="skp-photo">
+              {collectionBn ? <span className="skp-chip">{collectionBn}</span> : null}
+              <span className="skp-seal" aria-hidden="true">
+                <span>
+                  <b>ক্যাশ অন</b>
+                  <b>ডেলিভারি</b>
+                  <small>সারা দেশে</small>
+                </span>
+              </span>
+              {displayGallery.length ? (
+                <div ref={galleryRef} className="skp-gallery">
+                  <div className="skp-gallery-track">
+                    {displayGallery.map((url, idx) => (
+                      <div key={url} className="skp-slide">
+                        <img
+                          src={url}
+                          srcSet={srcSetFor[url]}
+                          sizes={srcSetFor[url] ? "(min-width: 760px) 560px, 92vw" : undefined}
+                          alt={idx === 0 ? product.name : `${product.name} ${idx + 1}`}
+                          width={1080}
+                          height={1080}
+                          draggable={false}
+                          loading={idx === 0 ? "eager" : "lazy"}
+                          fetchPriority={idx === 0 ? "high" : undefined}
+                          decoding="async"
+                        />
                       </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <div className="flex aspect-square w-full items-center justify-center rounded-[8px] bg-[#f6f6f6] text-[10px] font-bold uppercase tracking-[0.35em] text-black/25">
-                    No image
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="skp-noimg">No image</div>
+              )}
+              {displayGallery.length > 1 ? (
+                <div className="skp-dots">
+                  {displayGallery.map((url, idx) => (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => goToImage(idx)}
+                      aria-label={`Go to product image ${idx + 1}`}
+                      aria-current={activeImage === idx}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
 
-            <div
-              className="lg:col-span-5 flex flex-col bg-brand-ivory"
-            >
-              <div className="flex-grow space-y-6 px-4 pb-10 pt-2 md:space-y-10 md:p-16 xl:p-20">
-                <div className="space-y-4 md:space-y-6">
-                  <h1 className="max-w-full break-words font-sans text-2xl font-semibold leading-tight tracking-tight text-black sm:text-3xl md:text-4xl lg:text-[2.75rem]">
-                    {product.name}
-                  </h1>
-
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center font-sans text-2xl font-semibold text-black">
-                      <span>৳</span>
-                      <Counter end={selectedBundle.amount} fontSize={24} className="text-black font-semibold !px-0" />
+            {/* Details: homepage shelf chips switch one footer-style cash memo */}
+            <section className="skp-details" aria-label="বিস্তারিত">
+              <div className="skp-dh">
+                <h2>বিস্তারিত</h2>
+                <span className="script">জেনে নিন</span>
+              </div>
+              <div className="skp-chips" role="tablist" aria-label="বিস্তারিত">
+                {memoSections.map((section, i) => (
+                  <button
+                    key={section.label}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeMemo === section}
+                    onClick={() => setOpenSection(i)}
+                    className="press"
+                  >
+                    {section.label}
+                  </button>
+                ))}
+              </div>
+              <div className="skp-memo-w" key={activeMemo.label} role="tabpanel">
+                <span className="tack" />
+                <div className={isDeliveryMemo ? "skp-memo has-stamp" : "skp-memo"}>
+                  <div className="skp-memo-top">
+                    <img src="/home/leaf-mark.webp" alt="" />
+                    <div className="skp-memo-title">
+                      <b>{activeMemo.label}</b>
+                      <span>{titleBn}</span>
                     </div>
-                    {Number.isFinite(compareAtAmount) && compareAtAmount > selectedBundle.amount ? (
-                      <span className="text-sm font-semibold text-black/35 line-through">৳{compareAtAmount.toLocaleString()}</span>
-                    ) : null}
-                    <div className="h-px flex-grow bg-black/5" />
+                    <div className="skp-memo-no">
+                      নং <span className="num">{toBanglaDigits(String(memoSections.indexOf(activeMemo) + 1).padStart(2, "0"))}</span>
+                      <br />
+                      মোট {toBanglaDigits(String(memoSections.length).padStart(2, "0"))}
+                    </div>
                   </div>
-
-                  {product.description ? (
-                    <p className="text-xs font-medium leading-[1.8] text-black/60 md:text-sm">
-                      {product.description}
-                    </p>
+                  {activeMemo.body?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                  {activeMemo.details?.length ? (
+                    <>
+                      <div className="skp-memo-h">{isDeliveryMemo ? "জেনে রাখুন" : "যা থাকছে"}</div>
+                      {activeMemo.details.map((detail) => (
+                        <div key={detail} className="skp-memo-row">
+                          <span>{detail}</span>
+                          <em>✓</em>
+                        </div>
+                      ))}
+                    </>
+                  ) : null}
+                  {isDeliveryMemo ? (
+                    <div className="stampc" aria-hidden="true">
+                      ক্যাশ অন
+                      <br />
+                      ডেলিভারি
+                      <br />· সারা দেশে ·
+                    </div>
                   ) : null}
                 </div>
+              </div>
+            </section>
+          </div>
 
-                <div className="space-y-2.5 md:space-y-3">
-                  <span className="block pb-1 text-[10px] font-bold uppercase tracking-[0.4em] text-black/60">
-                    Quantity
-                  </span>
-                  <div ref={quantityControlRef} className="inline-flex items-center overflow-hidden rounded-[8px] border border-black/15 bg-white">
+          <div className="skp-info">
+            <h1>{titleBn}</h1>
+            <span className="skp-pill">
+              {[titleEn, bundles.filter((bundle) => bundle.title !== "Default").map((bundle) => bundle.title).join(" / ")]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+            <span className="skp-tag script">রাজশাহী থেকে</span>
+            {product.description ? <p className="skp-lede">{product.description}</p> : null}
+            {highlights.length ? (
+              <ul className="skp-ticks">
+                {highlights.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
+
+            <div className="skp-price">
+              <span className="num">৳{toBanglaDigits(totalAmount.toLocaleString("en-IN"))}</span>
+              {quantity > 1 ? <small>প্রতি প্যাক {formatTaka(selectedBundle.amount)}</small> : null}
+              {Number.isFinite(compareAtAmount) && compareAtAmount > selectedBundle.amount ? (
+                <s>{formatTaka(compareAtAmount)}</s>
+              ) : null}
+            </div>
+
+            {selectedBundle.title !== "Default" ? (
+              <div>
+                <span className="skp-lbl">সাইজ বেছে নিন</span>
+                <div className="skp-sizes" data-count={bundles.length}>
+                  {bundles.map((bundle, idx) => (
                     <button
+                      key={bundle.id}
                       type="button"
-                      aria-label="Decrease quantity"
-                      disabled={quantity === 1}
-                      onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                      className="flex h-11 w-11 items-center justify-center text-black transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:text-black/20"
+                      onClick={() => setSelectedBundleIdx(idx)}
+                      aria-pressed={selectedBundleIdx === idx}
+                      className="skp-size press"
                     >
-                      <Minus className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                    <span
-                      aria-live="polite"
-                      className="flex h-11 min-w-12 items-center justify-center border-x border-black/10 px-3 text-sm font-semibold tabular-nums text-black"
-                    >
-                      {quantity}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="Increase quantity"
-                      onClick={() => setQuantity((current) => current + 1)}
-                      className="flex h-11 w-11 items-center justify-center text-black transition-colors hover:bg-black/5"
-                    >
-                      <Plus className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5 md:space-y-3">
-                  <span className="block pb-1 text-[10px] font-bold uppercase tracking-[0.4em] text-black/60">
-                    Select Size
-                  </span>
-                  <div
-                    className={bundles.length === 1 ? "inline-flex" : "grid grid-cols-2 gap-2"}
-                    style={bundles.length === 1 && quantityControlWidth ? { width: `${quantityControlWidth + 7}px` } : undefined}
-                  >
-                    {bundles.map((bundle, idx) => {
-                      const selected = selectedBundleIdx === idx;
-                      return (
-                        <button
-                          key={bundle.id}
-                          type="button"
-                          onClick={() => setSelectedBundleIdx(idx)}
-                          aria-pressed={selected}
-                          className={`${bundles.length === 1 ? "w-full" : ""} flex flex-col items-center justify-center rounded-[6px] border-2 px-3 py-1.5 text-center transition-all duration-200 ${
-                            selected
-                              ? "border-black bg-white text-black"
-                              : "border-black/10 bg-white text-black hover:border-black/30"
-                          }`}
-                        >
-                          <span className="text-[11px] font-medium tracking-[0.04em]">
-                            {bundle.title}
-                          </span>
-                          <span className="mt-0.5 text-[11px] font-medium font-garet">
-                            {bundle.price}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {isUnavailable ? (
-                  <div className="rounded-[8px] border border-black/10 bg-white/35 p-4 text-center text-[10px] font-bold uppercase tracking-[0.35em] text-black/45">
-                    Unavailable
-                  </div>
-                ) : null}
-
-                <div className="space-y-3 md:space-y-4">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Button
-                      disabled={isUnavailable || selectedBundle.amount <= 0}
-                      onClick={async () => {
-                        if (!(await verifyOrderable())) {
-                          return;
-                        }
-
-                        addToCart(
-                          {
-                            id: getProductNumericId(product),
-                            title: `${product.name} (${selectedBundle.title})`,
-                            price: selectedBundle.price,
-                            image: displayImage,
-                            analyticsItem: productAnalyticsItem,
-                            productUuid: canonicalProductId,
-                            variantId: canonicalVariantId,
-                          },
-                          selectedBundle.title,
-                          quantity,
-                        );
-                      }}
-                      className="group flex h-12 items-center justify-center gap-2 rounded-[8px] border border-black/20 bg-transparent px-2 text-[10px] font-bold uppercase tracking-[0.4em] text-black transition-all hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Add to Cart
-                    </Button>
-                    <Button
-                      disabled={isUnavailable || selectedBundle.amount <= 0}
-                      onClick={async () => {
-                        if (await verifyOrderable()) {
-                          setOrderOpen(true);
-                        }
-                      }}
-                      className="group flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#FBBB14] px-2 text-[14px] md:text-[10px] font-bold text-black transition-all hover:bg-[#e5a80f] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      ক্যাশ অন ডেলিভারিতে অর্ডার করুন।
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center gap-3 py-1">
-                    <div className="h-px flex-1 bg-black/10" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-black/40">
-                      অথবা
-                    </span>
-                    <div className="h-px flex-1 bg-black/10" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <a
-                      href="tel:+8801310980289"
-                      className="group flex h-11 items-center justify-center gap-2 rounded-[8px] border border-white/20 bg-[#f26b4f] px-2 text-[11px] font-medium tracking-[0.02em] text-white shadow-none transition-all hover:-translate-y-0.5 hover:border-white/30 hover:bg-[#d9573d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f26b4f]/40"
-                    >
-                      <Phone className="h-4 w-4 stroke-[1.5px]" />
-                      ফোনে অর্ডার
-                    </a>
-                    <a
-                      href={`https://wa.me/8801303103540?text=${encodeURIComponent(
-                        `Hello, I'd like to order: ${product.name} (${selectedBundle.title})`,
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex h-11 items-center justify-center gap-2 rounded-[8px] border border-white/20 bg-[#25d366] px-2 text-[11px] font-medium tracking-[0.02em] text-white shadow-none transition-all hover:-translate-y-0.5 hover:border-white/30 hover:bg-[#1da851] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/40"
-                    >
-                      <img
-                        src="https://cdn.reicon.dev/logos/whatsapp/original.svg"
-                        alt="Whatsapp"
-                        width={16}
-                        height={16}
-                        className="h-4 w-4 brightness-0 invert"
-                      />
-                      হোয়াটসএপ-এ অর্ডার
-                    </a>
-                  </div>
-
-                  <div className="rounded-[8px] border border-black/[0.06] bg-white/20 px-3 py-1.5 md:px-3">
-                    <div className="relative pb-0.5 pt-1.5">
-                       <div className="absolute left-[14%] right-[14%] top-[18px] h-px bg-black/10" />
-                      <div className="relative z-20 grid grid-cols-3 gap-2">
-                        {deliveryTimeline.map((item) => (
-                          <div key={item.title} className="flex flex-col items-center text-center">
-                             <span className="mb-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-ivory text-black">
-                              {item.title === "অর্ডার গ্রহণ" ? (
-                                 <ShoppingBag className="h-5 w-5" weight="Filled" />
-                              ) : item.title === "প্রসেসিং" ? (
-                                 <ClipboardCheck className="h-5 w-5" weight="Filled" />
-                              ) : (
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                                  <path fillRule="evenodd" clipRule="evenodd" d="M1.25 5.5C1.25 3.70508 2.70507 2.25 4.5 2.25H12.5C14.2949 2.25 15.75 3.70507 15.75 5.5V5.75H18.5341C19.4165 5.75 20.2173 6.26571 20.5825 7.06894L22.6761 11.675C22.7213 11.7689 22.7476 11.8737 22.7498 11.9844L22.75 12.0017V16.5C22.75 17.7426 21.7426 18.75 20.5 18.75H19.7388C19.7462 18.8323 19.75 18.9157 19.75 19C19.75 20.5188 18.5188 21.75 17 21.75C15.4812 21.75 14.25 20.5188 14.25 19C14.25 18.9157 14.2538 18.8323 14.2612 18.75H9.73879C9.74621 18.8323 9.75 18.9157 9.75 19C9.75 20.5188 8.51878 21.75 7 21.75C5.48122 21.75 4.25 20.5188 4.25 19C4.25 18.9157 4.25379 18.8323 4.26121 18.75H3.5C2.25736 18.75 1.25 17.7426 1.25 16.5V5.5ZM17 17.75C16.3096 17.75 15.75 18.3096 15.75 19C15.75 19.6904 16.3096 20.25 17 20.25C17.6904 20.25 18.25 19.6904 18.25 19C18.25 18.3096 17.6904 17.75 17 17.75ZM5.75 19C5.75 18.3096 6.30964 17.75 7 17.75C7.69036 17.75 8.25 18.3096 8.25 19C8.25 19.6904 7.69036 20.25 7 20.25C6.30964 20.25 5.75 19.6904 5.75 19ZM15.75 11.25H20.8352L19.2169 7.68965C19.0952 7.4219 18.8282 7.25 18.5341 7.25H15.75V11.25Z" fill="currentColor" />
-                                </svg>
-                              )}
-                            </span>
-                             <span className="font-garet text-[11px] font-normal tracking-[0.03em] text-black/45">
-                              {item.date}
-                            </span>
-                             <span
-                               className="mt-1 block text-[14px] font-normal leading-4 text-black/80"
-                 style={{ fontFamily: "'KaiumSimanto', serif" }}
-                            >
-                              {item.title}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Product Details — compact, scannable list */}
-                 <div className="border border-black/10 bg-white/35 rounded-[8px] p-5 md:p-6">
-                   <div className="mb-6 flex items-baseline gap-2">
-                    <h2
-                       className="text-[23px] font-normal text-black"
-                       style={{ fontFamily: "'IhtishamDeshlipi', serif" }}
-                    >
-                      বিস্তারিত
-                    </h2>
-                    <span
-                      className="relative inline-block text-[23px] font-normal text-black/65"
-                      style={{ fontFamily: "'IhtishamDeshlipi', serif" }}
-                    >
-                      বৈশিষ্ট্য
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 120 60"
-                        preserveAspectRatio="none"
-                        className="pointer-events-none absolute left-1/2 top-1/2 h-[165%] w-[140%] -translate-x-1/2 -translate-y-1/2"
-                        style={{ overflow: "visible" }}
-                      >
-                        <path
-                          d="M14,32 C9,15 48,6 72,8 C108,11 116,22 112,34 C108,49 56,56 32,52 C13,49 9,42 15,30"
-                          fill="none"
-                          stroke="#FBBB14"
-                          strokeWidth="4.5"
-                          strokeLinecap="round"
+                      {sizeOffers[idx]?.saving ? (
+                        <span className="skp-badge">{formatTaka(sizeOffers[idx].saving)} সাশ্রয়</span>
+                      ) : null}
+                      {displayImage ? (
+                        <img
+                          src={displayImage}
+                          srcSet={srcSetFor[displayImage]}
+                          sizes={srcSetFor[displayImage] ? "44px" : undefined}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
                         />
-                      </svg>
-                    </span>
-                  </div>
-
-                  <div>
-                    <div
-                      role="tablist"
-                      className="flex gap-1 overflow-x-auto border-b border-black/10"
-                    >
-                      {detailSections.map((item, i) => {
-                        const active = openSection === i;
-                        return (
-                          <button
-                            key={item.label}
-                            type="button"
-                            role="tab"
-                            aria-selected={active}
-                            onClick={() => setOpenSection(i)}
-                             className={`shrink-0 whitespace-nowrap border-b-2 px-3 py-3 text-[17px] transition-colors md:text-[19px] ${
-                              active
-                                ? "border-black text-black"
-                                : "border-transparent text-black/40"
-                            }`}
-                 style={{ fontFamily: "'KaiumSimanto', serif" }}
-                          >
-                            {item.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="pt-4">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={openSection}
-                          role="tabpanel"
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          {(() => {
-                            const item = detailSections[openSection];
-                            return (
-                              <div className="space-y-1.5 text-left">
-                                {item.body?.map((paragraph, idx) => (
-                                  <p
-                                    key={idx}
-                                     className="text-[13px] leading-[1.7] tracking-[0.01em] text-black/55"
-                                  >
-                                    {paragraph}
-                                  </p>
-                                ))}
-                                {item.details?.length ? (
-                                    <ul className="-ml-3 max-w-[720px] space-y-1 text-left md:-ml-4">
-                                     {item.details.map((detail, detailIndex) => (
-                                       <li
-                                         key={detail}
-                                          className="grid w-full max-w-full grid-cols-[1.5rem_minmax(0,1fr)] items-start gap-2 text-[13px] uppercase tracking-[0.03em] font-medium leading-6 text-black/70"
-                                       >
-                                         <span
-                                           className="w-6 text-right font-normal tabular-nums text-brand-gold"
-                                           style={{ fontFamily: "inherit" }}
-                                         >
-                                           {toBengaliNumeral(detailIndex + 1)}.
-                                         </span>
-                                         <span>{detail}</span>
-                                       </li>
-                                     ))}
-                                  </ul>
-                                ) : null}
-                              </div>
-                            );
-                          })()}
-                        </motion.div>
-                      </AnimatePresence>
-                    </div>
-                  </div>
+                      ) : null}
+                      <span>
+                        <b>{bundle.title}</b>
+                        <span className="num">{formatTaka(bundle.amount)}</span>
+                        {sizeOffers[idx]?.perKg ? <small>প্রতি কেজি {formatTaka(sizeOffers[idx].perKg)}</small> : null}
+                      </span>
+                    </button>
+                  ))}
                 </div>
+              </div>
+            ) : null}
 
-                {/* Reels Section — left-aligned card row, arrows in the header */}
-                {reelCount > 0 && (
-                <div className="-mx-4 pt-4 mt-4 pb-5 overflow-hidden bg-brand-ivory md:mx-0 md:mt-0 md:pt-0">
-                  <div className="mx-auto w-full max-w-none px-4 md:max-w-[480px] md:px-0">
-                    <div className="mb-4 flex items-center justify-between gap-4">
-                      <h2
-                        className="min-w-0 text-left text-[1.6rem] font-normal tracking-[-0.01em] text-black md:text-[1.8rem]"
-                        style={{ fontFamily: "'KaiumSimanto', serif" }}
-                      >
-                        আমরা ও আমাদের{" "}
-                        <span
-                          className="relative inline-block"
-                          style={{ fontFamily: "'IhtishamDeshlipi', serif" }}
-                        >
-                          সত্যতা
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 120 60"
-                            preserveAspectRatio="none"
-                            className="pointer-events-none absolute left-1/2 top-1/2 h-[165%] w-[140%] -translate-x-1/2 -translate-y-1/2"
-                            style={{ overflow: "visible" }}
-                          >
-                            <path
-                              d="M14,32 C9,15 48,6 72,8 C108,11 116,22 112,34 C108,49 56,56 32,52 C13,49 9,42 15,30"
-                              fill="none"
-                              stroke="#FBBB14"
-                              strokeWidth="4.5"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </span>
-                      </h2>
-                      <div className="flex shrink-0 items-center gap-2 md:gap-3">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label="Previous reel"
-                          onClick={() => goReel(-1)}
-                          className="h-10 w-10 rounded-full bg-[#f7f8f6] text-black hover:bg-[#e0e0e0] md:h-12 md:w-12"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label="Next reel"
-                          onClick={() => goReel(1)}
-                          className="h-10 w-10 rounded-full bg-[#f7f8f6] text-black hover:bg-[#e0e0e0] md:h-12 md:w-12"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div ref={reelRef} className="relative overflow-hidden [touch-action:pan-y_pinch-zoom] overscroll-x-contain">
-                      <div className="flex will-change-transform">
-                        {reelMedia.map(({ src, poster }, i) => (
-                          <div
-                            key={src}
-                            className={`mr-5 min-w-0 shrink-0 basis-[64vw] rounded-[10px] border-2 p-[3px] transition-colors duration-200 md:basis-[220px] ${i === currentReel ? "border-[#FBBB14]" : "border-transparent"}`}
-                          >
-                            <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[6px] bg-black">
-                              {i === playerReel ? (
-                                <VideoPlayer poster={poster}>
-                                  <VideoSkin className="absolute inset-0 h-full w-full" style={REEL_SKIN_STYLE}>
-                                    <Video
-                                      src={src}
-                                      title={`Sera Khabar reel ${i + 1}`}
-                                      playsInline
-                                      preload="metadata"
-                                      ref={(video) => {
-                                        activeReelVideoRef.current = video;
-                                      }}
-                                    />
-                                    {/* The packaged skin maps a touch tap to showing controls; reels want
-                                        tap-to-pause/play on phones too. Registered before the skin's own
-                                        gestures, so this one wins. */}
-                                    <Gesture type="tap" action="togglePaused" pointer="touch" />
-                                    <PlayButton
-                                      render={(props, state) => (
-                                        <button
-                                          {...props}
-                                          hidden={!state.paused}
-                                          className="absolute left-1/2 top-1/2 z-20 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                                        >
-                                          <Play className="ml-1 h-7 w-7 fill-current" />
-                                        </button>
-                                      )}
-                                    />
-                                  </VideoSkin>
-                                </VideoPlayer>
-                              ) : (
-                                <>
-                                  <img
-                                    src={poster}
-                                    alt=""
-                                    aria-hidden="true"
-                                    loading="lazy"
-                                    decoding="async"
-                                    className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
-                                  />
-                                  {showPreviews ? (
-                                    <>
-                                      {/* Muted + playsInline lets phones start it without a tap. */}
-                                      <video
-                                        ref={(video) => {
-                                          previewVideoRefs.current[i] = video;
-                                        }}
-                                        src={src}
-                                        poster={poster}
-                                        muted
-                                        autoPlay
-                                        loop
-                                        playsInline
-                                        preload="auto"
-                                        disablePictureInPicture
-                                        aria-hidden="true"
-                                        className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
-                                      />
-                                      <button
-                                        type="button"
-                                        aria-label={i === currentReel ? `Play reel ${i + 1} with sound` : `Show reel ${i + 1}`}
-                                        onClick={() =>
-                                          i === currentReel
-                                            ? startReel(i, previewVideoRefs.current[i]?.currentTime ?? 0)
-                                            : reelApi?.scrollTo(i)
-                                        }
-                                        className="absolute inset-0 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
-                                      >
-                                        <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white">
-                                          <VolumeX className="h-4 w-4" />
-                                        </span>
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      aria-label={i === currentReel ? `Play reel ${i + 1}` : `Show reel ${i + 1}`}
-                                      onClick={() => (i === currentReel ? startReel(i) : reelApi?.scrollTo(i))}
-                                      className="absolute left-1/2 top-1/2 z-20 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                                    >
-                                      <Play className="ml-1 h-7 w-7 fill-current" />
-                                    </button>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+            {isUnavailable ? <div className="skp-unavailable">এই মুহূর্তে পাওয়া যাচ্ছে না</div> : null}
+
+            <div className="skp-buyrow">
+              <div className="skp-qty" role="group" aria-label="পরিমাণ">
+                <button
+                  type="button"
+                  aria-label="Decrease quantity"
+                  disabled={quantity === 1}
+                  onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                >
+                  <Minus className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <output aria-live="polite" className="num">{toBanglaDigits(quantity)}</output>
+                <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((current) => current + 1)}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+              <button
+                type="button"
+                disabled={isUnavailable || selectedBundle.amount <= 0}
+                onClick={async () => {
+                  if (await verifyOrderable()) {
+                    setOrderOpen(true);
+                  }
+                }}
+                className="skp-cod press"
+                aria-label="ক্যাশ অন ডেলিভারিতে অর্ডার করুন"
+              >
+                অর্ডার করুন
+                <i aria-hidden="true" />
+              </button>
+            </div>
+            <button
+              type="button"
+              disabled={isUnavailable || selectedBundle.amount <= 0}
+              onClick={async () => {
+                if (!(await verifyOrderable())) {
+                  return;
+                }
+                addToCart(
+                  {
+                    id: getProductNumericId(product),
+                    title: `${product.name} (${selectedBundle.title})`,
+                    price: selectedBundle.price,
+                    image: displayImage,
+                    analyticsItem: productAnalyticsItem,
+                    productUuid: canonicalProductId,
+                    variantId: canonicalVariantId,
+                  },
+                  selectedBundle.title,
+                  quantity,
+                );
+              }}
+              className="skp-cart press"
+            >
+              কার্টে রাখুন
+            </button>
+
+            <div className="skp-or">অথবা</div>
+            <div className="skp-help">
+              <a href="tel:+8801310980289" className="skp-call press">
+                <Phone className="h-[18px] w-[18px] stroke-[1.75px]" aria-hidden="true" />
+                ফোনে অর্ডার
+              </a>
+              <a
+                href={`https://wa.me/8801303103540?text=${encodeURIComponent(
+                  `Hello, I'd like to order: ${product.name} (${selectedBundle.title})`,
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="skp-wa press"
+              >
+                <img src="https://cdn.reicon.dev/logos/whatsapp/original.svg" alt="" width={18} height={18} />
+                হোয়াটসঅ্যাপে অর্ডার
+              </a>
+            </div>
+
+            {/* Delivery estimate as a tear-off calendar page (approved 2026-10-13) */}
+            <div className="skp-cal" role="group" aria-label="আনুমানিক ডেলিভারি">
+              <div className="skp-leaf">
+                <div className="skp-leaf-mon">{BANGLA_MONTHS[deliveryTo.getMonth()]}</div>
+                <div className="skp-leaf-d">
+                  <span className="num">{toBanglaDigits(deliveryFrom.getDate())}</span>
+                  <em>–</em>
+                  <span className="num">{toBanglaDigits(deliveryTo.getDate())}</span>
                 </div>
-                )}
+                <span className="skp-leaf-wd">
+                  {BANGLA_WEEKDAYS[deliveryFrom.getDay()]} – {BANGLA_WEEKDAYS[deliveryTo.getDay()]}
+                </span>
+              </div>
+              <div className="skp-cal-txt">
+                <span className="script">আজ অর্ডার করলে</span>
+                <b>আপনার দরজায় পৌঁছাবে</b>
+                <small>ঢাকায় ১–২ দিন · ঢাকার বাইরে ২–৩ দিন</small>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="skp-strip" aria-hidden="true">
+          <div>
+            {[0, 1].map((copy) =>
+              STRIP_ITEMS.map((item) => <span key={`${copy}-${item}`}>{item}</span>),
+            )}
+          </div>
+        </div>
+
+        {/* Reels Section — card row, title and round arrows in one header row */}
+        {reelCount > 0 && (
+          <section className="skp-reels skp-w">
+            <div className="skp-reels-head">
+              <h2>
+                আমরা ও আমাদের <span className="script">সত্যতা</span>
+              </h2>
+              <div className="skp-reels-nav">
+                <button type="button" aria-label="Previous reel" onClick={() => goReel(-1)} className="skp-round press">
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button type="button" aria-label="Next reel" onClick={() => goReel(1)} className="skp-round press">
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div ref={reelRef} className="relative overflow-hidden [touch-action:pan-y_pinch-zoom] overscroll-x-contain">
+              <div className="flex will-change-transform">
+                {reelMedia.map(({ src, poster }, i) => (
+                  <div
+                    key={src}
+                    className={`mr-5 min-w-0 shrink-0 basis-[64vw] rounded-[10px] border-2 p-[3px] transition-colors duration-200 md:basis-[220px] ${i === currentReel ? "border-[#FBBB14]" : "border-transparent"}`}
+                  >
+                    <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[6px] bg-black">
+                      {i === playerReel ? (
+                        <VideoPlayer poster={poster}>
+                          <VideoSkin className="absolute inset-0 h-full w-full" style={REEL_SKIN_STYLE}>
+                            <Video
+                              src={src}
+                              title={`Sera Khabar reel ${i + 1}`}
+                              playsInline
+                              preload="metadata"
+                              ref={(video) => {
+                                activeReelVideoRef.current = video;
+                              }}
+                            />
+                            {/* The packaged skin maps a touch tap to showing controls; reels want
+                                tap-to-pause/play on phones too. Registered before the skin's own
+                                gestures, so this one wins. */}
+                            <Gesture type="tap" action="togglePaused" pointer="touch" />
+                            <PlayButton
+                              render={(props, state) => (
+                                <button
+                                  {...props}
+                                  hidden={!state.paused}
+                                  className="absolute left-1/2 top-1/2 z-20 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                                >
+                                  <Play className="ml-1 h-7 w-7 fill-current" />
+                                </button>
+                              )}
+                            />
+                          </VideoSkin>
+                        </VideoPlayer>
+                      ) : (
+                        <>
+                          <img
+                            src={poster}
+                            alt=""
+                            aria-hidden="true"
+                            loading="lazy"
+                            decoding="async"
+                            className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
+                          />
+                          {showPreviews ? (
+                            <>
+                              {/* Muted + playsInline lets phones start it without a tap. */}
+                              <video
+                                ref={(video) => {
+                                  previewVideoRefs.current[i] = video;
+                                }}
+                                src={src}
+                                poster={poster}
+                                muted
+                                autoPlay
+                                loop
+                                playsInline
+                                preload="auto"
+                                disablePictureInPicture
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                aria-label={i === currentReel ? `Play reel ${i + 1} with sound` : `Show reel ${i + 1}`}
+                                onClick={() =>
+                                  i === currentReel
+                                    ? startReel(i, previewVideoRefs.current[i]?.currentTime ?? 0)
+                                    : reelApi?.scrollTo(i)
+                                }
+                                className="absolute inset-0 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
+                              >
+                                <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white">
+                                  <VolumeX className="h-4 w-4" />
+                                </span>
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              aria-label={i === currentReel ? `Play reel ${i + 1}` : `Show reel ${i + 1}`}
+                              onClick={() => (i === currentReel ? startReel(i) : reelApi?.scrollTo(i))}
+                              className="absolute left-1/2 top-1/2 z-20 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                            >
+                              <Play className="ml-1 h-7 w-7 fill-current" />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
 
-      {/* You May Also Like Section */}
-      <section className="w-full bg-[#f6f6f6] pb-10 md:pb-16 pt-0">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          transition={{ staggerChildren: 0.12 }}
-          className="mx-auto max-w-[1500px] px-4 md:px-8 xl:px-12"
-        >
-          <motion.div
-            variants={reveal}
-            transition={transition}
-            className="mb-7 flex items-start justify-between gap-6 md:mb-12"
-          >
-            <motion.h2
-              className="text-[1.4rem] whitespace-nowrap font-normal tracking-[-0.02em] text-black md:text-[clamp(1.9rem,5vw,3rem)] md:whitespace-normal"
-            >
-              <span className="font-medium">আমাদের</span>{" "}
-              <span
-                className="relative inline-block"
-                 style={{ fontFamily: "'IhtishamDeshlipi', serif" }}
-              >
-                আরও কিছু পণ্য
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 120 60"
-                  preserveAspectRatio="none"
-                  className="pointer-events-none absolute left-1/2 top-1/2 h-[165%] w-[140%] -translate-x-1/2 -translate-y-1/2"
-                  style={{ overflow: "visible" }}
-                >
-                  <path
-                    d="M14,32 C9,15 48,6 72,8 C108,11 116,22 112,34 C108,49 56,56 32,52 C13,49 9,42 15,30"
-                    fill="none"
-                    stroke="#FBBB14"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-            </motion.h2>
-
-            <Link
-              href="/products"
-              className="mt-1.5 shrink-0 border-b-2 border-black pb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-black transition-opacity hover:opacity-60 md:mt-2 md:text-base md:tracking-[0.24em]"
-            >
-              Discover More
-            </Link>
-          </motion.div>
-
-          <motion.div
-            transition={{ staggerChildren: 0.08 }}
-            className="grid grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4"
-          >
+      {/* আরও দেখুন: the homepage product cards */}
+      <section className="sk skp-more">
+        <div className="wrap">
+          <div className="skp-hh">
+            <h2>আরও দেখুন</h2>
+            <span className="script">যা খুঁজছেন</span>
+          </div>
+          <div className="c-list">
             {relatedProducts.map((p) => (
-              <HomeProductCard key={p.slug} product={p} />
+              <PosterProductCard key={p.slug} product={p} />
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       <RecentlyViewed products={relatedSource} excludeSlug={product?.slug} />

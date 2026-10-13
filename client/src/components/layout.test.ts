@@ -78,31 +78,38 @@ test("uses the pinned cash memo footer with the Arc Labs signature", () => {
   }
 });
 
-test("uses visible Featured Categories for menu navigation", () => {
-  assert.match(layoutSource, /getVisibleFeaturedCollections/);
-  assert.match(layoutSource, /getVisibleFeaturedCollections\(searchableProducts\)/);
-  assert.match(layoutSource, /\/collection\/\$\{slug\}/);
-  assert.match(layoutSource, /visibleCollections\.map/);
+test("desktop menu is the same Cards menu in a left panel (2026-10-13)", () => {
+  // One Vaul drawer serves both: a bottom sheet on phones, a floating left panel on desktop.
+  assert.match(layoutSource, /<Drawer\.Root open=\{isOpen\} onOpenChange=\{setIsOpen\} direction=\{isMobile \? "bottom" : "left"\}>/);
+  assert.match(layoutSource, /isMobile \? "sk-sheet sk-menu-sheet" : "sk-panel sk-panel-left sk-menu-sheet"/);
+  assert.doesNotMatch(layoutSource, /Desktop menu overlay/);
+  assert.doesNotMatch(layoutSource, /md:bg-neutral-500\/60/);
+  assert.doesNotMatch(layoutSource, /const MENU_ITEMS = \[/);
 });
 
-test("links Top Selling Products in desktop and mobile navigation", () => {
-  const menuItemsStart = layoutSource.indexOf("const MENU_ITEMS = [");
-  const menuItemsEnd = layoutSource.indexOf("] as const;", menuItemsStart);
-  const mobileMenuStart = layoutSource.indexOf('<nav aria-label="Mobile menu"');
-  const mobileMenuEnd = layoutSource.indexOf("</nav>", mobileMenuStart);
+test("links Top Selling Products in the menu", () => {
+  const menuStart = layoutSource.indexOf('<nav aria-label="Mobile menu"');
+  const menuEnd = layoutSource.indexOf("</nav>", menuStart);
+  assert.notEqual(menuStart, -1);
+  const menuSource = layoutSource.slice(menuStart, menuEnd);
+  assert.match(menuSource, /\/collection\/top-selling-products/);
+  assert.match(menuSource, /Top Selling Products/);
+  assert.match(menuSource, /সেরা বিক্রিত পণ্য/);
+});
 
-  assert.notEqual(menuItemsStart, -1);
-  assert.notEqual(menuItemsEnd, -1);
-  assert.notEqual(mobileMenuStart, -1);
-  assert.notEqual(mobileMenuEnd, -1);
-
-  const desktopMenuSource = layoutSource.slice(menuItemsStart, menuItemsEnd);
-  const mobileMenuSource = layoutSource.slice(mobileMenuStart, mobileMenuEnd);
-  assert.match(desktopMenuSource, /\/collection\/top-selling-products/);
-  assert.match(desktopMenuSource, /Top Selling Products - সেরা বিক্রিত পণ্য/);
-  assert.match(mobileMenuSource, /\/collection\/top-selling-products/);
-  assert.match(mobileMenuSource, /Top Selling Products/);
-  assert.match(mobileMenuSource, /সেরা বিক্রিত পণ্য/);
+test("phone menu uses the homepage category cards (approved 2026-10-13, Cards variant)", () => {
+  const sheetStart = layoutSource.indexOf("<Drawer.Content\n");
+  const sheetEnd = layoutSource.indexOf("</Drawer.Content>", sheetStart);
+  assert.notEqual(sheetStart, -1);
+  const sheet = layoutSource.slice(sheetStart, sheetEnd);
+  assert.match(sheet, /HOMEPAGE_CATEGORIES\.map/);
+  assert.match(sheet, /className="skm-cat press"/);
+  assert.match(sheet, /<img src=\{category\.image\}/);
+  assert.match(sheet, /toBanglaDigits\(String\(index \+ 1\)\.padStart\(2, "0"\)\)/);
+  assert.match(sheet, /কী খুঁজছেন\?/);
+  // Categories sit on the first screen; the old second "Collections" page is gone.
+  assert.doesNotMatch(layoutSource, /mobileMenuPage/);
+  assert.doesNotMatch(layoutSource, /sk-menu-back/);
 });
 
 test("does not expose obsolete menu categories", () => {

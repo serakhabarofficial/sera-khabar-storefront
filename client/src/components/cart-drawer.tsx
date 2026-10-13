@@ -1,5 +1,4 @@
 import { useCart } from "@/contexts/cart-context";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, X } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
@@ -234,33 +233,22 @@ export default function CartDrawer() {
 
     return (
         <>
-            {/* Desktop Drawer - Visible only on md and up */}
-            {!isMobile && (
-                <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                    <SheetContent
-                        side="right"
-                        className="top-0 bottom-0 w-full h-[100dvh] supports-[height:100dvh]:h-dvh max-h-screen overflow-hidden [&>button]:hidden bg-[#fffdf8] border-l border-black/5 md:w-[500px] p-0"
+            {/* Vaul drawer: bottom sheet on phones, floating right panel on desktop — drag, tap outside or ✕ to close */}
+            <Drawer.Root open={isOpen} onOpenChange={setIsOpen} direction={isMobile ? "bottom" : "right"}>
+                <Drawer.Portal>
+                    <Drawer.Overlay className="sk-sheet-overlay" />
+                    <Drawer.Content
+                        className={isMobile ? "sk-sheet sk-cart-sheet" : "sk-panel sk-panel-right"}
+                        aria-describedby={undefined}
                     >
-                        <CartInnerContent {...innerProps} />
-                    </SheetContent>
-                </Sheet>
-            )}
-
-            {/* Mobile: bottom sheet (Vaul) — drag down, tap outside or ✕ to close */}
-            {isMobile && (
-                <Drawer.Root open={isOpen} onOpenChange={setIsOpen}>
-                    <Drawer.Portal>
-                        <Drawer.Overlay className="sk-sheet-overlay" />
-                        <Drawer.Content className="sk-sheet sk-cart-sheet" aria-describedby={undefined}>
-                            <Drawer.Title className="sr-only">Your Cart</Drawer.Title>
-                            <div className="sk-sheet-grab" aria-hidden="true" />
-                            <div className="flex min-h-0 flex-1 flex-col">
-                                <CartInnerContent {...innerProps} />
-                            </div>
-                        </Drawer.Content>
-                    </Drawer.Portal>
-                </Drawer.Root>
-            )}
+                        <Drawer.Title className="sr-only">Your Cart</Drawer.Title>
+                        {isMobile && <div className="sk-sheet-grab" aria-hidden="true" />}
+                        <div className="flex min-h-0 flex-1 flex-col">
+                            <CartInnerContent {...innerProps} />
+                        </div>
+                    </Drawer.Content>
+                </Drawer.Portal>
+            </Drawer.Root>
 
             <OrderDialog
                 open={orderOpen}
