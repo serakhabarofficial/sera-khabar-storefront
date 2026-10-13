@@ -40,8 +40,8 @@ export default function PosterProductCard({ product, variant: fixedVariant }: { 
   const detail = [variant ? variantLabel : "", english].filter(Boolean).join(" · ");
 
   return (
-    <article className="c-card">
-      <Link href={`/product/${product.slug}`} className="c-blob" aria-label={bangla}>
+    <article className="c-card" data-reveal="">
+      <Link href={`/product/${product.slug}`} className="c-blob" aria-label={bangla} data-reveal-img="">
         {image ? (
           <img src={image} srcSet={srcSet} sizes={srcSet ? "170px" : undefined} alt={product.name} loading="lazy" decoding="async" />
         ) : null}

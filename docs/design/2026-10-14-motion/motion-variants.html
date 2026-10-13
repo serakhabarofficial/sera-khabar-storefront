@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Storefront Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Galada&family=Geist:wght@400;600;700&family=Noto+Serif+Bengali:wght@400;600;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* Tokens copied from client/src/poster.css (.sk) */
+  :root {
+    --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a;
+    --card: #f1e5d3; --ink: #3a1d0f; --sub: #7a6050;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  html, body { margin: 0; background: var(--rice); color: var(--ink); font-family: "Geist", "Noto Serif Bengali", serif; -webkit-font-smoothing: antialiased; }
+  *, *::before, *::after { box-sizing: border-box; }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; border: 0; background: none; color: inherit; padding: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  .script { font-family: "Galada", cursive; font-weight: 400; }
+  .app { max-width: 1120px; margin: 0 auto; min-height: 100vh; padding-bottom: 120px; overflow-x: clip; }
+  .wrap { padding: 0 18px; }
+  @media (min-width: 720px) { .wrap { padding: 0 40px; } }
+
+  .press { transition: transform 160ms var(--ease-out), background-color 160ms ease; }
+  .press:active { transform: scale(0.97); }
+
+  /* Header stays still during navigation; only the page below it moves. */
+  .hd { position: sticky; top: 0; z-index: 20; height: 56px; padding: 0 8px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; background: rgba(250, 244, 234, 0.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .logo { justify-self: center; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 20px; color: var(--royal); }
+  .icon-btn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; color: var(--royal); position: relative; }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .badge { position: absolute; top: 6px; right: 4px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--pink); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+  .badge:empty { display: none; }
+
+  /* Hero */
+  .hero { position: relative; padding: 18px 0 30px; }
+  .hero .tag { position: absolute; left: 46%; top: 4px; z-index: 3; color: var(--pink); font-size: clamp(26px, 5.6vw, 52px); transform: rotate(-8deg); }
+  .hero h1 { margin: 0; position: relative; z-index: 2; font-family: "Noto Serif Bengali", serif; font-weight: 900; color: var(--royal); font-size: clamp(78px, 21vw, 200px); line-height: 0.92; letter-spacing: -0.02em; }
+  .hero h1 .ln { display: block; }
+  .hero-img { position: absolute; right: -4%; top: 6%; width: 52%; max-width: 470px; z-index: 1; transform: rotate(8deg); mix-blend-mode: multiply; }
+  .hero p { position: relative; z-index: 2; margin: 18px 0; max-width: 34ch; font-size: 15px; line-height: 1.7; color: var(--royal); }
+  .btn-sun { height: 46px; padding: 0 22px; border-radius: 999px; background: var(--sun); color: var(--ink); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; }
+  .btn-sun i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+
+  h2 { font-family: "Noto Serif Bengali", serif; font-weight: 900; color: var(--royal); font-size: clamp(26px, 5vw, 40px); margin: 0 0 4px; }
+  .sub { color: var(--pink); font-size: 20px; display: inline-block; transform: rotate(-3deg); margin-bottom: 16px; }
+  .sec { padding: 34px 0 10px; }
+  .rule { height: 1px; background: rgba(91, 45, 23, 0.14); margin-top: 30px; }
+
+  /* Categories */
+  .cats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cat { position: relative; height: 170px; border-radius: 22px; overflow: hidden; background: var(--c); color: var(--ink); }
+  .cat.wide { grid-column: span 2; }
+  .cat.light { color: #fff; }
+  .cat img { position: absolute; right: -6%; bottom: -10%; height: 112%; width: auto; max-width: none; }
+  .cat span { position: absolute; left: 18px; top: 16px; font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: 26px; }
+  @media (min-width: 720px) { .cats { grid-template-columns: 1fr 1.4fr 1.4fr; } .cat.wide { grid-column: auto; } .cat { height: 230px; } }
+
+  /* Product cards. Fixed aspect-ratio frames reserve space, so nothing jumps while images load. */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 14px; }
+  @media (min-width: 720px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+  .ph { position: relative; aspect-ratio: 1; border-radius: 18px; overflow: hidden; background: var(--card); }
+  .ph img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 300ms var(--ease-out); }
+  .ph img.ld { opacity: 1; }
+  .card .nm { margin-top: 10px; font-family: "Noto Serif Bengali", serif; font-weight: 700; font-size: 15px; color: var(--royal); line-height: 1.35; }
+  .card .en { font-size: 12px; color: var(--sub); }
+  .card .row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px; }
+  .pr { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .add { display: grid; place-items: center; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--royal); color: var(--rice); font-size: 12px; font-weight: 700; }
+  .add > span { grid-area: 1 / 1; transition: opacity 200ms var(--ease-out), filter 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  .add .l2 { opacity: 0; filter: blur(2px); transform: translateY(4px); }
+  .add.added .l1 { opacity: 0; filter: blur(2px); transform: translateY(-4px); }
+  .add.added .l2 { opacity: 1; filter: none; transform: none; }
+
+  .offer { position: relative; display: block; margin: 40px 0 0; padding: 40px 18px; background: var(--sun); overflow: hidden; }
+  .offer .big { font-family: "Noto Serif Bengali", serif; font-weight: 900; font-size: clamp(72px, 18vw, 170px); color: var(--royal); line-height: 1; }
+  .offer .rib { display: inline-block; margin-top: 10px; background: var(--pink); color: #fff; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+  .offer img { position: absolute; right: -10px; bottom: -20px; width: 46%; max-width: 360px; mix-blend-mode: multiply; transform: rotate(-6deg); }
+
+  .story { padding: 50px 0 10px; text-align: center; }
+  .story h2 { font-family: "Galada", cursive; font-weight: 400; color: var(--pink); }
+  .story p { max-width: 46ch; margin: 10px auto 0; font-size: 16px; line-height: 1.8; color: var(--royal); }
+
+  .faq { display: grid; gap: 10px; }
+  .q { background: #fff; border-radius: 18px 18px 18px 4px; padding: 14px 16px; max-width: 80%; font-size: 14px; line-height: 1.6; }
+  .a { justify-self: end; background: var(--royal); color: var(--rice); border-radius: 18px 18px 4px 18px; padding: 14px 16px; max-width: 80%; font-size: 14px; line-height: 1.6; }
+
+  /* Product page */
+  .pdp-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-top: 12px; }
+  @media (min-width: 820px) { .pdp-top { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: start; padding-top: 28px; } }
+  .ph.hero-ph { border-radius: 26px; }
+  .pdp-info .tag2 { color: var(--pink); font-size: 22px; display: inline-block; transform: rotate(-4deg); }
+  .pdp-info h1 { margin: 2px 0 0; font-family: "Noto Serif Bengali", serif; font-weight: 900; color: var(--royal); font-size: clamp(30px, 6vw, 48px); line-height: 1.2; }
+  .pdp-info .en { color: var(--sub); font-size: 14px; margin-top: 2px; }
+  .pdp-info .price { margin-top: 14px; font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sizes { display: flex; gap: 8px; margin-top: 14px; }
+  .chip { height: 38px; padding: 0 16px; border-radius: 999px; border: 1.5px solid rgba(91, 45, 23, 0.25); color: var(--royal); font-weight: 600; font-size: 14px; transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 160ms var(--ease-out); }
+  .chip:active { transform: scale(0.97); }
+  .chip.on { background: var(--royal); border-color: var(--royal); color: var(--rice); }
+  .pdp-info .add { margin-top: 18px; height: 52px; width: 100%; max-width: 380px; font-size: 16px; background: var(--sun); color: var(--ink); }
+  .pdp-info .desc { margin-top: 18px; font-size: 15px; line-height: 1.85; color: var(--royal); max-width: 52ch; }
+  .why { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 720px) { .why { grid-template-columns: repeat(3, 1fr); } }
+  .why div { background: var(--card); border-radius: 20px; padding: 20px; }
+  .why b { display: block; font-family: "Noto Serif Bengali", serif; font-size: 18px; color: var(--royal); margin-bottom: 6px; }
+  .why span { font-size: 14px; line-height: 1.7; color: var(--sub); }
+  .ship { display: flex; gap: 14px; align-items: center; background: #fff; border-radius: 20px; padding: 18px 20px; }
+  .ship .ico { width: 44px; height: 44px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; flex: none; font-size: 20px; }
+  .ship p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--royal); }
+
+  /* Page layers for transitions where the old and new page are on screen together. */
+  .page { position: relative; z-index: 2; background: var(--rice); }
+  .page.frozen { position: fixed; z-index: 0; pointer-events: none; }
+  .page.frozen.over { z-index: 3; }
+  .scrim { position: fixed; inset: 0; background: rgb(58 29 15 / 0.22); pointer-events: none; }
+  .page.edge { box-shadow: 0 0 40px rgb(58 29 15 / 0.18); }
+  .page.sheet { border-radius: 24px 24px 0 0; box-shadow: 0 -12px 40px rgb(58 29 15 / 0.16); }
+
+  /* ── Scroll reveal (kept from Morph). JS adds .in when an element enters the viewport;
+     .now marks content you've already seen (back navigation), which appears without motion. ── */
+  .v3 [data-r] { opacity: 0; transition: opacity 500ms var(--ease-out); }
+  .v3 [data-r] .ph img, .v3 .cat[data-r] img { transform: scale(1.08); transition: opacity 300ms var(--ease-out), transform 900ms var(--ease-out); }
+  .v3 [data-r].in .ph img, .v3 .cat[data-r].in img { transform: none; }
+
+  [data-r].in { opacity: 1; transform: none; }
+  [data-r].now, [data-r].now * { transition: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-r], .v3 [data-r] .ph img, .v3 .cat[data-r] img { transform: none !important; clip-path: none !important; transition: opacity 160ms ease-out !important; }
+  }
+
+  /* ── Picker: verbatim from emilkowalski/skills prototype/PICKER.md ── */
+  .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10, 10, 10, 0.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(0, 0, 0, 0.24), 0 2px 6px rgba(0, 0, 0, 0.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); will-change: transform; }
+  .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1), width 250ms cubic-bezier(0.23, 1, 0.32, 1); }
+  @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } }
+  .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+  .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+  .proto-picker-item:active { transform: scale(0.97); }
+  .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+  .proto-picker-item[data-active] { color: #fff; }
+  .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+  .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<nav class="proto-picker" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Settle</button>
+  <button class="proto-picker-item">Push</button>
+  <button class="proto-picker-item">Sheet</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+const PUBLIC = "../../../client/public";
+const IMG = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/";
+const P = [
+  { name: "দানাদার গুড় | Granulated Jaggery", slug: "granulated-jaggery", cat: "jaggery", sizes: [300, 560], img: "c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0", desc: "খেজুরের রস থেকে তৈরি দানাদার গুড়ের প্রতিটি দানায় রয়েছে প্রাকৃতিক মিষ্টতা ও মনমাতানো ঘ্রাণ। ঝরঝরে গঠন ও সমৃদ্ধ স্বাদের এই গুড় পিঠা, পায়েস এবং প্রতিদিনের মিষ্টান্ন তৈরিতে দারুণ উপযোগী।" },
+  { name: "খেজুরের ঝোলা গুড় | Liquid Date Jaggery", slug: "liquid-date-jaggery", cat: "jaggery", sizes: [380, 720], img: "245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192", desc: "তাজা খেজুরের রস থেকে তৈরি ঘন, সুগন্ধি ও মিষ্টি ঝোলা গুড়। এর মোলায়েম ঘনত্ব ও মনভোলানো স্বাদ পিঠা, পুলি, পায়েস কিংবা রুটির সঙ্গে এনে দেয় শীতের গ্রামবাংলার ঐতিহ্যবাহী স্বাদ।" },
+  { name: "খেজুরের পাটালী গুড় | Date Palm Patali", slug: "date-palm-patali", cat: "jaggery", sizes: [350, 671], img: "ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2", desc: "খাঁটি খেজুরের রস থেকে ঐতিহ্যবাহী পদ্ধতিতে তৈরি সুস্বাদু পাটালি গুড়। এর মনমাতানো ঘ্রাণ, প্রাকৃতিক মিষ্টতা ও অনন্য স্বাদ পিঠা, পায়েসসহ নানা মিষ্টান্নে এনে দেয় গ্রামবাংলার চিরচেনা স্বাদ।" },
+  { name: "হোমমেড কুমড়ো বড়ি | Homemade Pumpkin Bori", slug: "homemade-pumpkin-bori", cat: "homemade", sizes: [700, 1300], img: "4061bd9c-4908-4e43-9caa-7587c4caa1d1/41e4d871-04da-41d0-ac91-f4de112fd452", desc: "ঘরে তৈরি কুমড়ো বড়ি দিয়ে লাউ, শাক কিংবা মাছের ঝোল—বাঙালির রান্নাঘরের পুরোনো এক স্বাদ। তেলে ভাজলে মচমচে, আর ঝোলে দিলে নরম।" },
+  { name: "আমসত্ত্ব আচার | Mango Leather Pickle", slug: "mango-leather-pickle", cat: "homemade", sizes: [350, 700], img: "38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237", desc: "খাঁটি আমসত্ত্ব দিয়ে তৈরি সুস্বাদু আচার, যেখানে মিষ্টি, টক ও ঝালের রয়েছে দারুণ সমন্বয়। বাছাই করা মসলা ও ঐতিহ্যবাহী স্বাদে তৈরি।" },
+];
+const SIZE_LABELS = ["৫০০ গ্রাম", "১ কেজি"];
+const bn = (v) => String(v).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+const split = (n) => { const [b, e] = n.split("|").map((s) => s.trim()); return { b, e }; };
+const src = (p, w) => `${IMG}${p.img}/${w}.webp`;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EO = "cubic-bezier(0.23, 1, 0.32, 1)";
+const EIO = "cubic-bezier(0.77, 0, 0.175, 1)";
+const DRAWER = "cubic-bezier(0.32, 0.72, 0, 1)";
+
+/* ── Markup ── */
+const card = (p, i) => {
+  const { b, e } = split(p.name);
+  return `<div class="card" data-r data-slug="${p.slug}">
+    <a href="#/p/${p.slug}" data-go="p:${p.slug}">
+      <div class="ph"><img src="${src(p, 640)}" alt="${b}" loading="${i < 4 ? "eager" : "lazy"}" decoding="async"></div>
+      <div class="nm">${b}</div><div class="en">${e}</div>
+    </a>
+    <div class="row"><span class="pr">৳${bn(p.sizes[0])}</span>
+      <button class="add press" data-add><span class="l1">যোগ করুন</span><span class="l2">যোগ হয়েছে ✓</span></button></div>
+  </div>`;
+};
+
+const homeHTML = () => `<div class="page home">
+  <div class="wrap"><section class="hero">
+    <span class="script tag" data-step>রাজশাহী থেকে</span>
+    <h1><span class="ln" data-step>সেরা</span><span class="ln" data-step>খাবার</span></h1>
+    <div class="hero-img"><img src="${PUBLIC}/home/hero-bori.webp" alt="" fetchpriority="high" data-hero-img></div>
+    <p data-step>ঘরে বানানো বড়ি, আচার আর গুড়। মায়ের রেসিপি, ছোট ব্যাচ, সারাদেশে ডেলিভারি।</p>
+    <div data-step><a class="btn-sun press" href="#/p/date-palm-patali" data-go="p:date-palm-patali">অর্ডার করুন <i></i></a></div>
+  </section></div>
+
+  <section class="sec"><div class="wrap">
+    <h2 data-r>আমাদের ক্যাটাগরিসমূহ</h2><span class="script sub" data-r>যা খুঁজছেন</span>
+    <div class="cats">
+      <a class="cat" data-r style="--c:#F6B826" href="#/p/mango-leather-pickle" data-go="p:mango-leather-pickle"><img src="${PUBLIC}/home/category-mango.webp" alt=""><span>ফ্রেশ আম</span></a>
+      <a class="cat wide" data-r style="--c:#E9A9A0" href="#/p/homemade-pumpkin-bori" data-go="p:homemade-pumpkin-bori"><img src="${PUBLIC}/home/category-homemade.webp" alt=""><span>হোমমেড</span></a>
+      <a class="cat wide light" data-r style="--c:#5B2D17" href="#/p/date-palm-patali" data-go="p:date-palm-patali"><img src="${PUBLIC}/home/category-jaggery.webp" alt=""><span>গুড়</span></a>
+    </div>
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <h2 data-r>আমাদের পণ্য</h2>
+    <div class="grid" style="margin-top:16px">${P.map(card).join("")}</div>
+    <div class="rule"></div>
+  </div></section>
+
+  <a class="offer" href="#/p/date-palm-patali" data-go="p:date-palm-patali" data-r>
+    <img src="${PUBLIC}/home/jaggery-ad.webp" alt="">
+    <div class="wrap" style="padding:0"><div class="big">৳${bn(350)}</div><span class="rib">খেজুরের পাটালী গুড়, ৫০০ গ্রাম থেকে শুরু</span></div>
+  </a>
+
+  <div class="wrap"><section class="story">
+    <h2 data-r>রাজশাহীর রান্নাঘরের গল্প</h2>
+    <p data-r><b>সেরা খাবার</b> শুরু হয়েছিল পরিবারের পুরনো রেসিপি থেকে। প্রতিটি বড়ি রোদে শুকানো, প্রতিটি আচার ছোট হাঁড়িতে জ্বাল দেওয়া। আমরা যতটুকু বানাই, ততটুকুই বিক্রি করি।</p>
+  </section></div>
+
+  <section class="sec"><div class="wrap">
+    <h2 data-r>আমাদের গুড়</h2>
+    <div class="grid" style="margin-top:16px">${P.filter((p) => p.cat === "jaggery").map(card).join("")}</div>
+    <div class="rule"></div>
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <h2 data-r>আমাদের হোমমেড</h2>
+    <div class="grid" style="margin-top:16px">${P.filter((p) => p.cat === "homemade").map(card).join("")}</div>
+    <div class="rule"></div>
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <h2 data-r>প্রশ্ন আছে?</h2><span class="script sub" data-r>আমরা উত্তর দিই</span>
+    <div class="faq">
+      <div class="q" data-r>ডেলিভারি কত দিনে পাবো?</div>
+      <div class="a" data-r>ঢাকায় ১–২ দিন, ঢাকার বাইরে ২–৩ দিনের মধ্যে।</div>
+      <div class="q" data-r>ক্যাশ অন ডেলিভারি আছে?</div>
+      <div class="a" data-r>হ্যাঁ, পণ্য হাতে পেয়ে টাকা দিন।</div>
+    </div>
+  </div></section>
+</div>`;
+
+const pdpHTML = (slug) => {
+  const p = P.find((x) => x.slug === slug);
+  const { b, e } = split(p.name);
+  const more = P.filter((x) => x.slug !== slug).slice(0, 4);
+  return `<div class="page pdp">
+    <div class="wrap pdp-top">
+      <div data-step><div class="ph hero-ph" data-hero><img src="${src(p, 960)}" alt="${b}" decoding="async"></div></div>
+      <div class="pdp-info">
+        <span class="script tag2" data-step>রাজশাহী থেকে</span>
+        <h1 data-step>${b}</h1>
+        <div class="en" data-step>${e}</div>
+        <div class="price" data-step data-price>৳${bn(p.sizes[0])}</div>
+        <div class="sizes" data-step>${p.sizes.map((pr, i) => `<button class="chip${i ? "" : " on"}" data-size="${pr}">${SIZE_LABELS[i]}</button>`).join("")}</div>
+        <div data-step><button class="add press" data-add><span class="l1">কার্টে যোগ করুন</span><span class="l2">কার্টে যোগ হয়েছে ✓</span></button></div>
+        <p class="desc" data-step>${p.desc}</p>
+      </div>
+    </div>
+    <section class="sec"><div class="wrap">
+      <h2 data-r>কেন সেরা খাবার?</h2>
+      <div class="why" style="margin-top:14px">
+        <div data-r><b>ছোট ব্যাচ</b><span>যতটুকু বানাই, ততটুকুই বিক্রি করি। তাই প্রতিটি প্যাকেট তাজা।</span></div>
+        <div data-r><b>কোনো মেশানো নেই</b><span>চিনি, রং বা প্রিজারভেটিভ ছাড়া, পুরোনো ঘরোয়া পদ্ধতিতে।</span></div>
+        <div data-r><b>রাজশাহী থেকে সরাসরি</b><span>নিজেদের রান্নাঘর থেকে আপনার দরজায়।</span></div>
+      </div>
+    </div></section>
+    <section class="sec"><div class="wrap">
+      <div class="ship" data-r><div class="ico">🚚</div><p>সারাদেশে ক্যাশ অন ডেলিভারি। ঢাকায় ১–২ দিন, বাইরে ২–৩ দিন।</p></div>
+    </div></section>
+    <section class="sec"><div class="wrap">
+      <h2 data-r>আরও দেখুন</h2>
+      <div class="grid" style="margin-top:16px">${more.map(card).join("")}</div>
+    </div></section>
+  </div>`;
+};
+
+/* ── App state (reset on every mount) ── */
+const stage = document.getElementById("stage");
+let VAR, S;
+
+function track(el, keyframes, opts, { keep = false } = {}) {
+  if (!el || typeof el.animate !== "function") return Promise.resolve();
+  if (reduce) {
+    keyframes = keyframes.map(({ transform, clipPath, borderRadius, ...rest }) => rest);
+    if (keyframes.every((k) => Object.keys(k).length === 0)) return Promise.resolve();
+    opts = { ...opts, duration: Math.min(opts.duration, 160), delay: 0 };
+  }
+  const a = el.animate(keyframes, { fill: "both", ...opts });
+  S.running.push(a);
+  // Enter animations end at the element's resting style, so drop the fill when done.
+  if (!keep) a.addEventListener("finish", () => a.cancel());
+  return a.finished.catch(() => {});
+}
+
+function finishRunning() {
+  S.running.forEach((a) => { try { a.finish(); } catch {} });
+  S.running = [];
+  stage.querySelectorAll(".frozen, .scrim").forEach((n) => n.remove());
+  stage.querySelectorAll("#view > .page").forEach((n) => { n.classList.remove("edge", "sheet"); n.style.transformOrigin = ""; });
+}
+
+function wireImages(root) {
+  root.querySelectorAll(".ph img").forEach((img) => {
+    const done = () => img.classList.add("ld");
+    if (img.complete && img.naturalWidth) done();
+    else { img.addEventListener("load", done, { once: true }); img.addEventListener("error", done, { once: true }); }
+  });
+}
+
+function setupReveal(page, { instant }) {
+  S.io?.disconnect();
+  const els = [...page.querySelectorAll("[data-r]")];
+  els.forEach((el, i) => { el.dataset.rid = `${S.key}#${i}`; });
+  if (instant) els.forEach((el) => { if (S.seen.has(el.dataset.rid)) el.classList.add("in", "now"); });
+  S.io = new IntersectionObserver((entries) => {
+    // Items that enter together (a row of cards) cascade 50ms apart, capped at 200ms.
+    const entering = entries.filter((e) => e.isIntersecting).sort((a, b) =>
+      a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left);
+    entering.forEach((e, n) => {
+      const el = e.target;
+      if (VAR.stagger && !reduce) {
+        el.style.transitionDelay = `${Math.min(n, 4) * VAR.stagger}ms`;
+        el.addEventListener("transitionend", () => { el.style.transitionDelay = ""; }, { once: true });
+      }
+      el.classList.add("in");
+      S.seen.add(el.dataset.rid);
+      S.io.unobserve(el);
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+  els.filter((el) => !el.classList.contains("in")).forEach((el) => S.io.observe(el));
+}
+
+const keyFromHash = () => {
+  const m = location.hash.match(/^#\/p\/([\w-]+)/);
+  return m && P.some((p) => p.slug === m[1]) ? `p:${m[1]}` : "home";
+};
+
+function renderPage(key) {
+  const view = stage.querySelector("#view");
+  view.innerHTML = key === "home" ? homeHTML() : pdpHTML(key.slice(2));
+  const page = view.firstElementChild;
+  wireImages(page);
+  stage.querySelector("[data-back]").style.visibility = key === "home" ? "hidden" : "visible";
+  return page;
+}
+
+async function navigate(key, { from = null, push = true, back = false } = {}) {
+  if (key === S.key) return;
+  finishRunning();
+  const t = ++S.token;
+  if (push) { history.pushState(null, "", location.pathname + location.search + (key === "home" ? "#/" : `#/p/${key.slice(2)}`)); S.depth++; }
+  S.scroll.set(S.key, window.scrollY);
+  const old = stage.querySelector("#view > .page");
+  const ctx = { back, oldKey: S.key, newKey: key, fromEl: from };
+
+  await VAR.leave(old, ctx);
+  if (t !== S.token) return;
+  S.key = key;
+  const page = renderPage(key);
+  // The outgoing page is already invisible, so the scroll jump is never seen.
+  window.scrollTo(0, back && S.scroll.has(key) ? S.scroll.get(key) : 0);
+  setupReveal(page, { instant: back });
+  await VAR.enter(page, ctx);
+}
+
+/* ── Kept from Morph: the refresh animation. The photo settles in, text fades up in order. ── */
+function morphLoad(app, page) {
+  const img = page.querySelector("[data-hero-img], [data-hero] img");
+  if (img) track(img.closest(".ph") || img, [{ opacity: 0, transform: "scale(1.06)" }, { opacity: 1, transform: "scale(1)" }], { duration: 900, easing: EO });
+  track(app.querySelector(".hd"), [{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: EO });
+  return Promise.all([...page.querySelectorAll("[data-step]")].filter((el) => !el.querySelector("[data-hero]"))
+    .map((el, i) => track(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 80 + i * 70, easing: EO })));
+}
+
+// Take the outgoing page out of the flow, pinned exactly where it sits, so the new page can move against it.
+function freeze(old) {
+  const r = old.getBoundingClientRect();
+  Object.assign(old.style, { top: `${r.top}px`, left: `${r.left}px`, width: `${r.width}px` });
+  old.classList.add("frozen");
+  old.inert = true;
+  stage.appendChild(old);
+  return old;
+}
+
+function addScrim(z) {
+  const el = document.createElement("div");
+  el.className = "scrim";
+  el.style.zIndex = z;
+  stage.appendChild(el);
+  return el;
+}
+
+/* ── Three ways to move between pages ── */
+const SETTLE = {
+  load: morphLoad,
+  leave(old) { return track(old, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: EO }, { keep: true }); },
+  enter(page, ctx) {
+    const fade = track(page, [{ opacity: 0 }, { opacity: 1 }], { duration: ctx.back ? 200 : 260, easing: EO });
+    if (ctx.back) return fade;
+    // Same language as the refresh: the main photo eases from slightly large to its place.
+    const img = page.querySelector("[data-hero] img, [data-hero-img]");
+    return Promise.all([fade, img && track(img, [{ transform: "scale(1.04)" }, { transform: "scale(1)" }], { duration: 600, easing: EO })]);
+  },
+};
+
+const VARIANTS = [
+  // 1 · Settle: the old page fades out, the new one fades in while its photo settles. Nothing slides.
+  SETTLE,
+
+  // 2 · Push: like moving forward in a phone app. The product page slides in from the right,
+  //     and back slides it away to the right, revealing the homepage where you left it.
+  {
+    load: morphLoad,
+    leave(old, ctx) {
+      if (reduce) return SETTLE.leave(old);
+      ctx.frozen = freeze(old);
+      return Promise.resolve();
+    },
+    async enter(page, ctx) {
+      if (!ctx.frozen) return SETTLE.enter(page, ctx);
+      const old = ctx.frozen, w = innerWidth, opts = { duration: 400, easing: DRAWER };
+      const scrim = addScrim(ctx.back ? 2 : 1);
+      if (!ctx.back) {
+        page.classList.add("edge");
+        await Promise.all([
+          track(page, [{ transform: `translateX(${w}px)` }, { transform: "translateX(0px)" }], opts),
+          track(old, [{ transform: "translateX(0px)" }, { transform: `translateX(${-w * 0.3}px)` }], opts, { keep: true }),
+          track(scrim, [{ opacity: 0 }, { opacity: 1 }], opts, { keep: true }),
+        ]);
+      } else {
+        old.classList.add("over", "edge");
+        await Promise.all([
+          track(page, [{ transform: `translateX(${-w * 0.3}px)` }, { transform: "translateX(0px)" }], opts),
+          track(old, [{ transform: "translateX(0px)" }, { transform: `translateX(${w}px)` }], opts, { keep: true }),
+          track(scrim, [{ opacity: 1 }, { opacity: 0 }], opts, { keep: true }),
+        ]);
+      }
+      page.classList.remove("edge");
+      old.remove();
+      scrim.remove();
+    },
+  },
+
+  // 3 · Sheet: the product page rises from the bottom like a card laid over the homepage,
+  //     which shrinks back slightly behind it. Back drops the card down again.
+  {
+    load: morphLoad,
+    leave(old, ctx) {
+      if (reduce) return SETTLE.leave(old);
+      ctx.frozen = freeze(old);
+      return Promise.resolve();
+    },
+    async enter(page, ctx) {
+      if (!ctx.frozen) return SETTLE.enter(page, ctx);
+      const old = ctx.frozen, h = innerHeight;
+      const scrim = addScrim(ctx.back ? 2 : 1);
+      // The page behind shrinks toward the middle of the screen, not toward its own (very tall) centre.
+      const behind = ctx.back ? page : old;
+      behind.style.transformOrigin = `50% ${h / 2 - behind.getBoundingClientRect().top}px`;
+      if (!ctx.back) {
+        const opts = { duration: 460, easing: DRAWER };
+        page.classList.add("sheet");
+        await Promise.all([
+          track(page, [{ transform: `translateY(${h}px)` }, { transform: "translateY(0px)" }], opts),
+          track(old, [{ transform: "scale(1)" }, { transform: "scale(0.94)" }], opts, { keep: true }),
+          track(scrim, [{ opacity: 0 }, { opacity: 1 }], opts, { keep: true }),
+        ]);
+      } else {
+        // Dismissing is quicker than opening: the system is responding, not presenting.
+        const opts = { duration: 360, easing: DRAWER };
+        old.classList.add("over", "sheet");
+        await Promise.all([
+          track(old, [{ transform: "translateY(0px)" }, { transform: `translateY(${h}px)` }], opts, { keep: true }),
+          track(page, [{ transform: "scale(0.94)" }, { transform: "scale(1)" }], opts),
+          track(scrim, [{ opacity: 1 }, { opacity: 0 }], opts, { keep: true }),
+        ]);
+      }
+      page.classList.remove("sheet");
+      page.style.transformOrigin = "";
+      old.remove();
+      scrim.remove();
+    },
+  },
+];
+
+/* ── Mount (re-runs on variant switch and on ↻ / R, which is the "refresh") ── */
+function mount(i) {
+  if (S) { finishRunning(); S.io?.disconnect(); }
+  stage.innerHTML = "";
+  requestAnimationFrame(() => {
+    VAR = VARIANTS[i];
+    S = { key: keyFromHash(), scroll: new Map(), seen: new Set(), token: 0, running: [], io: null, depth: 0, cart: 0 };
+    stage.className = `v3 n${i + 1}`;
+    stage.innerHTML = `<div class="app">
+      <header class="hd">
+        <button class="icon-btn press" data-back aria-label="ফিরে যান"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <a class="logo" href="#/" data-go="home">সেরা খাবার</a>
+        <button class="icon-btn press" aria-label="কার্ট"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="badge" data-badge></span></button>
+      </header>
+      <main id="view"></main>
+    </div>`;
+    window.scrollTo(0, 0);
+    const page = renderPage(S.key);
+    setupReveal(page, { instant: false });
+    VAR.load(stage.querySelector(".app"), page);
+  });
+}
+
+stage.addEventListener("click", (e) => {
+  const go = e.target.closest("[data-go]");
+  if (go) {
+    e.preventDefault();
+    navigate(go.dataset.go, { from: go.querySelector(".ph") });
+    return;
+  }
+  if (e.target.closest("[data-back]")) {
+    if (S.depth > 0) { S.depth--; history.back(); } else navigate("home");
+    return;
+  }
+  const add = e.target.closest("[data-add]");
+  if (add) {
+    add.classList.add("added");
+    setTimeout(() => add.classList.remove("added"), 1400);
+    const badge = stage.querySelector("[data-badge]");
+    badge.textContent = bn(++S.cart);
+    track(badge, [{ transform: "scale(0.8)" }, { transform: "scale(1)" }], { duration: 200, easing: EO });
+    return;
+  }
+  const size = e.target.closest("[data-size]");
+  if (size) {
+    size.parentElement.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === size));
+    stage.querySelector("[data-price]").textContent = `৳${bn(size.dataset.size)}`;
+  }
+});
+window.addEventListener("popstate", () => { if (S) navigate(keyFromHash(), { push: false, back: true }); });
+
+/* ── Picker wiring: verbatim behavior contract from PICKER.md ── */
+const picker = document.querySelector(".proto-picker");
+const highlight = picker.querySelector(".proto-picker-highlight");
+const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+const replay = picker.querySelector(".proto-picker-replay");
+let current = 0;
+
+function moveHighlight() {
+  const el = items[current];
+  highlight.style.width = el.offsetWidth + "px";
+  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+}
+
+function setActive(i) {
+  if (i < 0 || i >= VARIANTS.length) return;
+  current = i;
+  items.forEach((el, j) => {
+    el.toggleAttribute("data-active", j === i);
+    if (j === i) el.setAttribute("aria-current", "true");
+    else el.removeAttribute("aria-current");
+  });
+  moveHighlight();
+  const url = new URL(location);
+  url.searchParams.set("v", i + 1);
+  history.replaceState(null, "", url);
+  mount(i);
+}
+
+items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+replay?.addEventListener("click", () => mount(current));
+window.addEventListener("resize", moveHighlight);
+
+document.addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const num = parseInt(e.key, 10);
+  if (num >= 1 && num <= VARIANTS.length) setActive(num - 1);
+  else if (e.key === "ArrowRight") setActive((current + 1) % VARIANTS.length);
+  else if (e.key === "ArrowLeft") setActive((current - 1 + VARIANTS.length) % VARIANTS.length);
+  else if (e.key === "r" || e.key === "R") mount(current);
+});
+
+setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>

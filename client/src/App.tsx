@@ -1,6 +1,7 @@
 import { Switch, Route, useLocation } from "wouter";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/page-transition";
+import { queueRouteScroll } from "@/lib/page-motion";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -135,19 +136,21 @@ function Router() {
     }
 
     const savedY = scrollPositions.current.get(location);
-    const targetY = isHistoryNavigation.current && savedY !== undefined ? savedY : 0;
+    const isBack = isHistoryNavigation.current && savedY !== undefined;
+    const targetY = isBack ? savedY : 0;
     isHistoryNavigation.current = false;
     currentLocation.current = location;
 
-    // Restore synchronously before paint so the entering page is already at its
-    // final scroll position when it fades in — avoids mid-fade scrolling jank.
-    window.scrollTo({ top: targetY, left: 0, behavior: "auto" });
+    // The outgoing page is still fading out here, so scrolling now would make it jump.
+    // The entering page applies this target before its first paint (see PageTransition).
+    queueRouteScroll(targetY, isBack);
   }, [location]);
 
   return (
     <>
       <CampaignMetadata location={location} />
-      <AnimatePresence>
+      {/* Settle: the old page fades out completely, then the new one fades in. */}
+      <AnimatePresence mode="wait">
         <Switch location={location} key={location}>
           <Route path="/step/sundarbans-natural-honey/thank-you">
             <PageTransition standalone><SundarbansHoneyThankYouPage /></PageTransition>

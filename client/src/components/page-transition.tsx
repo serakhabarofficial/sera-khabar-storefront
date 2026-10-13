@@ -1,97 +1,108 @@
 import { AnimatePresence, usePresence, useReducedMotion } from "framer-motion";
-import { createContext, useContext, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
-import { getPageMotion, getPageTransformOrigin } from "@/lib/page-motion";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { getLoadMotion, getPageMotion, PAGE_EASE, takeRouteScroll } from "@/lib/page-motion";
+import { startScrollReveal } from "@/lib/scroll-reveal";
 
-const PagePresenceContext = createContext(true);
+// Only the very first page after a refresh plays the load animation; later pages use Settle.
+let hasShownFirstPage = false;
 
-function useNativePageMotion(
-  ref: RefObject<HTMLDivElement | null>,
-  isPresent: boolean,
-  reducedMotion: boolean,
-  depth: boolean,
-  contentOnly = false,
-  onExitComplete?: () => void,
-) {
-  const exitComplete = useRef(onExitComplete);
-  exitComplete.current = onExitComplete;
+function play(element: Element | null, keyframes: Keyframe[], options: KeyframeAnimationOptions) {
+  if (!element || typeof element.animate !== "function") return null;
+  const animation = element.animate(keyframes, { fill: "both", easing: PAGE_EASE, ...options });
+  // Every entrance ends on the element's resting style, so release the fill when it finishes.
+  animation.onfinish = () => animation.cancel();
+  return animation;
+}
 
-  useLayoutEffect(() => {
-    let cancelled = false;
-    let animation: Animation | undefined;
-    // Router's parent layout effect restores scroll before this microtask. Read
-    // the untransformed parent, not the animated element's projected bounds.
-    queueMicrotask(() => {
-      const element = ref.current;
-      if (cancelled || !element) return;
-      const moves = depth && !reducedMotion;
-      if (moves && element.parentElement) {
-        element.style.transformOrigin = getPageTransformOrigin(
-          element.parentElement.getBoundingClientRect().top,
-          window.innerHeight,
-        );
-      }
-
-      const config = getPageMotion(reducedMotion, depth);
-      const current = getComputedStyle(element);
-      const from: Keyframe = {};
-      const to: Keyframe = {};
-      if (!contentOnly) {
-        from.opacity = isPresent ? 0 : Number(current.opacity);
-        to.opacity = isPresent ? 1 : 0;
-      }
-      if (moves) {
-        from.transform = isPresent ? config.initial.transform : current.transform;
-        to.transform = isPresent ? config.animate.transform : config.exit.transform[1];
-      }
-
-      const finish = () => {
-        // Set the underlying final styles BEFORE releasing the native animation.
-        // Otherwise cancellation can expose a hidden starting style for a frame.
-        if (!contentOnly) element.style.opacity = isPresent ? "1" : "0";
-        if (depth) element.style.transform = isPresent || reducedMotion ? "none" : "translateY(0px) scale(0.985)";
-        animation?.cancel();
-        if (!isPresent) exitComplete.current?.();
-      };
-
-      if ((contentOnly && !moves) || typeof element.animate !== "function") {
-        finish();
-        return;
-      }
-      const transition = isPresent ? config.animate.transition : config.exit.transition;
-      animation = element.animate([from, to], {
-        duration: transition.duration * 1000,
-        easing: `cubic-bezier(${transition.ease.join(",")})`,
-        fill: "both",
-      });
-      animation.onfinish = () => { if (!cancelled) finish(); };
-    });
-
-    return () => {
-      cancelled = true;
-      // Preserve the current frame if rapid navigation interrupts an entrance.
-      const element = ref.current;
-      if (animation && element) {
-        const current = getComputedStyle(element);
-        if (!contentOnly) element.style.opacity = current.opacity;
-        if (depth && !reducedMotion) element.style.transform = current.transform;
-      }
-      animation?.cancel();
-    };
-  }, [ref, isPresent, reducedMotion, depth, contentOnly]);
+// Grow from the photo's resting transform (the homepage photo is tilted), not from none.
+function settleKeyframes(element: Element, scale: number, fadeIn: boolean): Keyframe[] {
+  const rest = getComputedStyle(element).transform;
+  const from: Keyframe = { transform: `${rest === "none" ? "" : `${rest} `}scale(${scale})` };
+  const to: Keyframe = { transform: rest };
+  if (fadeIn) {
+    from.opacity = 0;
+    to.opacity = 1;
+  }
+  return [from, to];
 }
 
 export function PageTransition({ children, standalone = false }: { children: ReactNode; standalone?: boolean }) {
   const [isPresent, safeToRemove] = usePresence();
   const reducedMotion = Boolean(useReducedMotion());
   const ref = useRef<HTMLDivElement>(null);
-  const [exitStyle, setExitStyle] = useState<CSSProperties>();
-  useNativePageMotion(ref, isPresent, reducedMotion, standalone, false, safeToRemove ?? undefined);
+  const entrance = useRef<(Animation | null)[]>([]);
 
+  // Pages with the shared Layout fade only their content, so the header and dock stay still.
+  // Standalone campaign pages have no shared header and fade as a whole.
+  const fadingPart = (root: HTMLElement) => (standalone ? root : root.querySelector<HTMLElement>("[data-page-content]") ?? root);
+
+  // Entrance, before the new page's first paint.
   useLayoutEffect(() => {
-    if (!isPresent && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setExitStyle({ position: "fixed", top: rect.top, left: rect.left, width: rect.width, zIndex: 0, pointerEvents: "none" });
+    const root = ref.current;
+    if (!root) return;
+    const firstPage = !hasShownFirstPage;
+    hasShownFirstPage = true;
+
+    // The outgoing page has already faded out, so this jump is never seen.
+    const route = takeRouteScroll();
+    if (route) window.scrollTo({ top: route.top, left: 0, behavior: "auto" });
+    const back = route?.back ?? false;
+    const stopReveal = startScrollReveal(root, { instantInView: back });
+
+    const photo = root.querySelector("[data-page-settle]");
+    const animations: (Animation | null)[] = [];
+    if (firstPage) {
+      const load = getLoadMotion(reducedMotion);
+      const steps = Array.from(root.querySelectorAll("[data-load-step]"));
+      if (photo) {
+        animations.push(load.photo
+          ? play(photo, settleKeyframes(photo, load.photo.scale, true), { duration: load.photo.duration })
+          : play(photo, [{ opacity: 0 }, { opacity: 1 }], { duration: load.steps.duration }));
+      }
+      animations.push(play(root.querySelector("[data-page-header]"), [{ opacity: 0 }, { opacity: 1 }], { duration: load.header.duration }));
+      if (steps.length) {
+        steps.forEach((step, index) => animations.push(play(step, [{ opacity: 0 }, { opacity: 1 }], {
+          duration: load.steps.duration,
+          delay: load.steps.delay + index * load.steps.gap,
+        })));
+      } else if (!photo) {
+        animations.push(play(fadingPart(root), [{ opacity: 0 }, { opacity: 1 }], { duration: load.steps.duration }));
+      }
+    } else {
+      const motion = getPageMotion(reducedMotion, back);
+      animations.push(play(fadingPart(root), [{ opacity: 0 }, { opacity: 1 }], { duration: motion.enter.duration }));
+      if (photo && motion.settle) {
+        animations.push(play(photo, settleKeyframes(photo, motion.settle.scale, false), { duration: motion.settle.duration }));
+      }
     }
+    entrance.current = animations;
+
+    return () => {
+      stopReveal();
+      animations.forEach((animation) => animation?.cancel());
+    };
+    // Runs once per page: each route change mounts a fresh PageTransition.
+  }, []);
+
+  // Exit: fade the old content out; AnimatePresence (mode="wait") mounts the next page afterwards.
+  useLayoutEffect(() => {
+    if (isPresent) return;
+    const root = ref.current;
+    const part = root ? fadingPart(root) : null;
+    if (!part || typeof part.animate !== "function") {
+      safeToRemove?.();
+      return;
+    }
+    // Leaving mid-entrance starts from the frame on screen, not from fully visible.
+    const from = getComputedStyle(part).opacity;
+    entrance.current.forEach((animation) => animation?.cancel());
+    const exit = part.animate([{ opacity: from }, { opacity: 0 }], {
+      duration: getPageMotion(reducedMotion).exit.duration,
+      easing: PAGE_EASE,
+      fill: "forwards",
+    });
+    exit.onfinish = () => safeToRemove?.();
+    return () => exit.cancel();
   }, [isPresent]);
 
   return (
@@ -101,30 +112,15 @@ export function PageTransition({ children, standalone = false }: { children: Rea
       data-page-presence={isPresent ? "present" : "exiting"}
       inert={!isPresent}
       aria-hidden={!isPresent || undefined}
-      style={isPresent ? { position: "relative", zIndex: 1, opacity: 1 } : exitStyle}
     >
-      <PagePresenceContext.Provider value={isPresent}>
-        {/* Keep new dock highlights, drawers and other local motion from joining
-            the outgoing route's exit barrier as their location changes. */}
-        <AnimatePresence>{children}</AnimatePresence>
-      </PagePresenceContext.Provider>
+      {/* Keep drawers, dock highlights and other local motion from joining the outgoing
+          route's exit barrier as their location changes. */}
+      <AnimatePresence>{children}</AnimatePresence>
     </div>
   );
 }
 
+// Marks the part of a Layout page that fades between routes; the header and dock stay put.
 export function PageContentTransition({ children }: { children: ReactNode }) {
-  const isPresent = useContext(PagePresenceContext);
-  const reducedMotion = Boolean(useReducedMotion());
-  const ref = useRef<HTMLDivElement>(null);
-  useNativePageMotion(ref, isPresent, reducedMotion, true, true);
-
-  return (
-    <div
-      ref={ref}
-      data-page-content=""
-      style={{ transform: "none" }}
-    >
-      {children}
-    </div>
-  );
+  return <div data-page-content="">{children}</div>;
 }

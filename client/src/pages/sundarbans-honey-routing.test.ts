@@ -42,7 +42,7 @@ test("does not branch campaign routes for direct tracking", () => {
 
 test("owns campaign metadata outside the animated route lifecycle", () => {
   const metadataOwner = app.indexOf("<CampaignMetadata location={location} />");
-  const animatedRoutes = app.indexOf("<AnimatePresence>");
+  const animatedRoutes = app.indexOf("<AnimatePresence mode=\"wait\">");
 
   assert.ok(metadataOwner >= 0, "Router should render a stable campaign metadata owner");
   assert.ok(
