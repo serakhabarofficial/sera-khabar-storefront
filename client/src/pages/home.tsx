@@ -28,7 +28,7 @@ import { CONTACT_DETAILS, POLICY_FACTS } from "@/lib/site-pages";
 // Approved homepage redesign (2026-10-13): "Market Poster" in tamarind + turmeric.
 // Spec and mockup: docs/design/2026-10-13-homepage/. Styles live in client/src/poster.css.
 
-const WHATSAPP_ORDER_HREF = `${CONTACT_DETAILS.whatsappHref}?text=${encodeURIComponent("হোমমেড কুমড়ো বড়ি অর্ডার করতে চাই")}`;
+const WHATSAPP_ORDER_HREF = `${CONTACT_DETAILS.whatsappHref}?text=${encodeURIComponent("আমসত্ত্ব আচার অর্ডার করতে চাই")}`;
 
 function productsInCollection(products: StorefrontProduct[], slug: string) {
   const collection = getFeaturedCollection(slug);
@@ -275,19 +275,19 @@ function OfferBand({ product }: { product: StorefrontProduct }) {
   );
 }
 
-// "Signboard" ad for the homemade pumpkin বড়ি (the hero already sells the winter পাটালী). Priced from
-// the catalog; if the product is not published, the button takes the order on WhatsApp.
-function BoriAdBoard({ product }: { product?: StorefrontProduct }) {
+// "Signboard" ad for the আমসত্ত্ব আচার (the hero already sells the winter পাটালী). Priced from the
+// catalog; if the product is not published, the button takes the order on WhatsApp.
+function AcharAdBoard({ product }: { product?: StorefrontProduct }) {
   const startingPrice = product ? getStartingOption(product).price : null;
 
   return (
     <section className="ad-board" data-reveal="">
       <div className="wrap ad-b-in">
-        <img className="ad-b-img" src="/home/category-homemade.webp" alt="হোমমেড কুমড়ো বড়ি" loading="lazy" decoding="async" />
+        <img className="ad-b-img" src="/home/achar-ad.webp" alt="আমসত্ত্ব আচার" loading="lazy" decoding="async" />
         <div className="ad-b-txt">
-          <span className="script ad-tag">রোদে শুকানো</span>
-          <h2>হোমমেড কুমড়ো বড়ি</h2>
-          <p>মায়ের রেসিপিতে ঘরে বানানো, রোদে শুকানো বড়ি। তেলে ভাজলে মচমচে, ঝোলে দিলে নরম।</p>
+          <span className="script ad-tag">টক-ঝাল-মিষ্টি</span>
+          <h2>আমসত্ত্ব আচার</h2>
+          <p>খাঁটি আমসত্ত্বে তৈরি, মিষ্টি-টক-ঝালের দারুণ সমন্বয়। বাছাই করা মসলা আর ঐতিহ্যবাহী স্বাদে বানানো।</p>
           <div className="ad-b-buy">
             {startingPrice != null && Number.isFinite(startingPrice) ? (
               <span className="ad-b-price">
@@ -469,8 +469,8 @@ export default function Home() {
         {/* Jaggery Shelf */}
         {renderShelf("jaggery")}
 
-        {/* Bori Ad */}
-        <BoriAdBoard product={homepageProducts.find((product) => product.slug === HOMEPAGE_AD_PRODUCT_SLUG)} />
+        {/* Achar Ad */}
+        <AcharAdBoard product={homepageProducts.find((product) => product.slug === HOMEPAGE_AD_PRODUCT_SLUG)} />
 
         {/* Homemade Shelf */}
         {renderShelf("homemade")}

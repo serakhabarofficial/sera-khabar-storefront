@@ -167,7 +167,8 @@
 .sk .ad-board { background: var(--royal); color: var(--rice); margin-block: 70px 30px; padding-block: 0 34px; overflow: visible; }
 .sk .ad-b-in { display: grid; gap: 10px; align-items: end; }
 @container site (min-width: 720px) { .sk .ad-b-in { grid-template-columns: 1fr 1fr; gap: 30px; } }
-.sk .ad-b-img { width: 100%; max-width: 440px; margin: -60px auto 0; transform: rotate(-4deg); }
+/* The আচার cutout is clipped at its right edge (a pale strip of the stone slab); fade that edge into the board. */
+.sk .ad-b-img { width: 100%; max-width: 440px; margin: -60px auto 0; transform: rotate(-4deg); -webkit-mask-image: linear-gradient(to left, transparent, #000 10%); mask-image: linear-gradient(to left, transparent, #000 10%); }
 .sk .ad-b-txt { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
 .sk .ad-tag { color: var(--sun); font-size: clamp(20px, 3.2cqi, 30px); transform: rotate(-3deg); display: inline-block; width: max-content; }
 .sk .ad-b-txt h2 { margin: 0; font-family: var(--f-disp); font-weight: 900; font-size: clamp(30px, 5.4cqi, 54px); line-height: 1.15; }
