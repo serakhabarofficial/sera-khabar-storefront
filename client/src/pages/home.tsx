@@ -17,6 +17,7 @@ import {
   getFeaturedCollection,
   getProductsForCollection,
   groupProductsByTabs,
+  HOMEPAGE_AD_PRODUCT_SLUG,
   HOMEPAGE_CATEGORIES,
   HOMEPAGE_OFFER_PRODUCT_SLUG,
   HOMEPAGE_SHELVES,
@@ -27,7 +28,7 @@ import { CONTACT_DETAILS, POLICY_FACTS } from "@/lib/site-pages";
 // Approved homepage redesign (2026-10-13): "Market Poster" in tamarind + turmeric.
 // Spec and mockup: docs/design/2026-10-13-homepage/. Styles live in client/src/poster.css.
 
-const WHATSAPP_ORDER_HREF = `${CONTACT_DETAILS.whatsappHref}?text=${encodeURIComponent("খেজুরের পাটালী গুড় অর্ডার করতে চাই")}`;
+const WHATSAPP_ORDER_HREF = `${CONTACT_DETAILS.whatsappHref}?text=${encodeURIComponent("হোমমেড কুমড়ো বড়ি অর্ডার করতে চাই")}`;
 
 function productsInCollection(products: StorefrontProduct[], slug: string) {
   const collection = getFeaturedCollection(slug);
@@ -274,20 +275,19 @@ function OfferBand({ product }: { product: StorefrontProduct }) {
   );
 }
 
-// "Signboard" ad for the winter date-palm patali. Priced from the catalog once a jaggery
-// product is published; until then the button takes the order on WhatsApp.
-function JaggeryAdBoard({ products }: { products: StorefrontProduct[] }) {
-  const product = products.find((item) => item.name.includes("পাটালী")) ?? products[0];
+// "Signboard" ad for the homemade pumpkin বড়ি (the hero already sells the winter পাটালী). Priced from
+// the catalog; if the product is not published, the button takes the order on WhatsApp.
+function BoriAdBoard({ product }: { product?: StorefrontProduct }) {
   const startingPrice = product ? getStartingOption(product).price : null;
 
   return (
     <section className="ad-board" data-reveal="">
       <div className="wrap ad-b-in">
-        <img className="ad-b-img" src="/home/jaggery-ad.webp" alt="খেজুরের পাটালী গুড়" loading="lazy" decoding="async" />
+        <img className="ad-b-img" src="/home/category-homemade.webp" alt="হোমমেড কুমড়ো বড়ি" loading="lazy" decoding="async" />
         <div className="ad-b-txt">
-          <span className="script ad-tag">শীতের নতুন গুড়</span>
-          <h2>খেজুরের পাটালী গুড়</h2>
-          <p>এই শীতের প্রথম রস, মাটির চুলায় জ্বাল দেওয়া। ছোট ব্যাচ, তাই শেষ হওয়ার আগেই নিন।</p>
+          <span className="script ad-tag">রোদে শুকানো</span>
+          <h2>হোমমেড কুমড়ো বড়ি</h2>
+          <p>মায়ের রেসিপিতে ঘরে বানানো, রোদে শুকানো বড়ি। তেলে ভাজলে মচমচে, ঝোলে দিলে নরম।</p>
           <div className="ad-b-buy">
             {startingPrice != null && Number.isFinite(startingPrice) ? (
               <span className="ad-b-price">
@@ -469,8 +469,8 @@ export default function Home() {
         {/* Jaggery Shelf */}
         {renderShelf("jaggery")}
 
-        {/* Jaggery Ad */}
-        <JaggeryAdBoard products={jaggeryProducts} />
+        {/* Bori Ad */}
+        <BoriAdBoard product={homepageProducts.find((product) => product.slug === HOMEPAGE_AD_PRODUCT_SLUG)} />
 
         {/* Homemade Shelf */}
         {renderShelf("homemade")}

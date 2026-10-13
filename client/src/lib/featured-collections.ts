@@ -161,6 +161,8 @@ export const HOMEPAGE_SHELVES = [
 
 // The product priced in the big ৳ offer band.
 export const HOMEPAGE_OFFER_PRODUCT_SLUG = "mango-leather-pickle";
+// The brown signboard features বড়ি: the hero already sells the winter পাটালী.
+export const HOMEPAGE_AD_PRODUCT_SLUG = "homemade-pumpkin-bori";
 
 // ড় can be stored as one code point or as ড + nukta, so compare normalized text.
 const normalizeName = (value: string) => value.normalize("NFC").toLowerCase();

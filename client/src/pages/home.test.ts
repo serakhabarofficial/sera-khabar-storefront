@@ -17,7 +17,7 @@ test("renders the approved sections in order", () => {
     "Offer Section",
     "Story Section",
     "Jaggery Shelf",
-    "Jaggery Ad",
+    "Bori Ad",
     "Homemade Shelf",
     "FAQ Section",
   ];
@@ -96,11 +96,16 @@ test("separates product shelves with a quiet hairline instead of a progress-styl
   assert.doesNotMatch(divider, /linear-gradient|var\(--pink\)|border-radius/);
 });
 
-test("prices the offer band and the jaggery ad from catalog data", () => {
+test("prices the offer band and the বড়ি ad from catalog data", () => {
   assert.match(homeSource, /HOMEPAGE_OFFER_PRODUCT_SLUG/);
   assert.match(homeSource, /offerProduct \? <OfferBand product=\{offerProduct\} \/> : null/);
   assert.match(homeSource, /getStartingOption\(product\)\.price/);
-  assert.match(homeSource, /src="\/home\/jaggery-ad\.webp"/);
+  assert.match(homeSource, /<BoriAdBoard product=\{homepageProducts\.find\(\(product\) => product\.slug === HOMEPAGE_AD_PRODUCT_SLUG\)\} \/>/);
+  assert.match(homeSource, /<img className="ad-b-img" src="\/home\/category-homemade\.webp"/);
+  // The hero sells the winter পাটালী, so the signboard must not repeat it.
+  const boardStart = homeSource.indexOf("function BoriAdBoard");
+  const board = homeSource.slice(boardStart, homeSource.indexOf("\n}\n", boardStart));
+  assert.doesNotMatch(board, /পাটালী|jaggery-ad/);
 });
 
 test("answers FAQ delivery questions from the policy facts", () => {
