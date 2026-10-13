@@ -38,9 +38,11 @@ food photo breaks out over the top-left of a rounded card (turmeric / soft pink
 `#E9A9A0` / tamarind), name in Noto Serif Bengali, arrow, and a notched number
 circle (০১ ০২ ০৩ in Atma). Desktop: 3 across. **Phone: one full-width card per
 row** (owner said three across was too small). Cut-outs are in `cutouts/`
-(mango from `katimon-mango-6kg.webp`, bori from the product photo, gur from the
-category image with the sketch removed). The bori cut-out keeps a faint pale shadow
-patch; a clean transparent product shot would be better.
+(mango from `katimon-mango-6kg.webp`). The গুড় card uses `jaggery-cut.webp`, the
+owner's transparent "Jaggery Syrup and Sugar Still Life" shot (2026-10-13), replacing
+the old `jag-cut.webp`. The হোমমেড card uses `homemade-cut.webp`, the owner's clean transparent
+"Bowl of Golden Folded Crackers" shot (2026-10-13); it replaced the old
+`bori-cut.webp`, which had a pale shadow patch.
 
 Alternative kept for reference: `alt-categories-khata-pins.html` (notebook pages
 with red/yellow push pins, hand-placed tilt) — liked earlier, then replaced.
@@ -72,3 +74,22 @@ hover effects only on `(hover:hover) and (pointer:fine)`, everything off under
 - Product chips in আমাদের পণ্য should probably match the three categories — confirm with the owner.
 - "দাম শুরু" prices in the mockup are samples; use real data.
 - Optimise new images with `cwebp` before committing.
+
+**FAQ — সাধারণ জিজ্ঞাসা (approved 2026-10-13, variant ক · মেসেঞ্জার):** sits right
+above the cash-memo footer. A Messenger-style chat card (`#FFFDF8`, same 760px max width as the cash memo, radius 26px, no
+hard border; shadow is a hairline ring plus tight warm-brown layers:
+`0 0 0 1px rgba(58,29,15,.06), 0 1px 2px rgba(58,29,15,.04), 0 4px 8px -2px rgba(58,29,15,.05), 0 14px 28px -8px rgba(58,29,15,.08)`).
+Header: leaf logo with green online dot, "অনলাইন · সাধারণত কয়েক সেকেন্ডে উত্তর দেয়".
+Tapping a quick-reply question shows it as a tamarind bubble, a short typing indicator,
+then the answer in a cream bubble. Bottom bar "অন্য প্রশ্ন? হোয়াটসঅ্যাপে লিখুন…" opens
+WhatsApp. Questions/answers are placeholders until the owner confirms delivery times,
+charges and storage advice. Other explored styles: `homepage-faq-variants.html`,
+`homepage-faq-chat-variants.html`.
+
+**Product ad — সাইনবোর্ড (approved 2026-10-13):** between আমাদের গুড় and আমাদের হোমমেড.
+A full-width tamarind (`#5B2D17`) band; the owner's "Jaggery Syrup and Sugar Still Life"
+photo (`cutouts/jaggery-ad.webp`, used as-is, no drop shadow) breaks out over the top
+edge, tilted -4°. Text: Galada "শীতের নতুন গুড়" in turmeric, "খেজুরের পাটালী গুড়" in
+Noto Serif Bengali 900 cream, one line of copy, "শুরু ৳৩৫০" in Atma turmeric, and an
+"এখনই অর্ডার করুন" turmeric button. Price is a placeholder. Other explored styles:
+`homepage-ad-variants.html`.
