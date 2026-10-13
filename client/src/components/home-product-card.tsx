@@ -25,7 +25,7 @@ const reveal = {
   visible: { filter: "blur(0)", transform: "translateY(0)", opacity: 1 },
 };
 
-function formatCardAmount(value: unknown) {
+export function formatCardAmount(value: unknown) {
   const amount = Number(value);
   return Number.isFinite(amount) ? `৳${amount.toLocaleString("en-US")}` : "৳0";
 }
@@ -37,7 +37,7 @@ function isVariantInStock(variant: NonNullable<StorefrontProduct["variants"]>[nu
 
 // Same label the product page shows for a variant, so a card add and a product
 // page add of the same variant collapse into one cart row.
-function getVariantLabel(variant: NonNullable<StorefrontProduct["variants"]>[number] | undefined) {
+export function getVariantLabel(variant: NonNullable<StorefrontProduct["variants"]>[number] | undefined) {
   if (!variant) return "Default";
   return String(variant.attributes?.size ?? Object.values(variant.attributes ?? {})[0] ?? "Default");
 }
@@ -45,7 +45,7 @@ function getVariantLabel(variant: NonNullable<StorefrontProduct["variants"]>[num
 // The variant the product page preselects: in-stock options in catalog order,
 // then the per-slug preference. Sharing getDefaultBundleIndex keeps the card
 // price and the product page's opening price from drifting apart.
-function selectDefaultVariant(product: StorefrontProduct) {
+export function selectDefaultVariant(product: StorefrontProduct) {
   const inStock = product.variants?.filter(isVariantInStock) ?? [];
   if (!inStock.length) return undefined;
   return inStock[getDefaultBundleIndex(product.slug, inStock.map((variant) => ({ title: getVariantLabel(variant) })))];
@@ -77,7 +77,7 @@ export default function HomeProductCard({ product, className = "" }: HomeProduct
       className={`group flex min-w-0 flex-col ${className}`}
     >
       <Link href={`/product/${product.slug}`} className="block flex-1">
-        <div className="relative aspect-[3/4] overflow-hidden bg-[#e5e5e5]">
+        <div className="relative aspect-[3/4] overflow-hidden bg-white">
           {image ? (
             <img
               src={image}
@@ -86,7 +86,7 @@ export default function HomeProductCard({ product, className = "" }: HomeProduct
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+              className="h-full w-full object-contain object-center mix-blend-multiply transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-[0.3em] text-black/30">

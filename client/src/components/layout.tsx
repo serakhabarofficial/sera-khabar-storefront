@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, ArrowRight, Globe, ShieldCheck, X } from "lucide-react";
-import { Box as ReiconBox, MoneyReceive, TruckFast, ShieldTick, CheckCircle } from "reicon-react";
+import { ArrowUpRight, ArrowRight, ShieldCheck, X } from "lucide-react";
+import { Box as ReiconBox } from "reicon-react";
 import { useState, useEffect, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -9,7 +9,6 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
-import brandLogo from "@assets/sera-khabar-logo.webp";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
 import {
   fetchStorefrontProducts,
@@ -20,6 +19,8 @@ import {
 } from "@/lib/storefront-products";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import { getVisibleFeaturedCollections } from "@/lib/featured-collections";
+import { toBanglaDigits } from "@/lib/bangla-digits";
+import { POLICY_FACTS } from "@/lib/site-pages";
 
 function BagIcon({ className }: { className?: string }) {
   return (
@@ -78,8 +79,6 @@ function HomeDuotoneIcon({ className }: { className?: string }) {
   );
 }
 
-const DHAKA_TIME_ZONE = "Asia/Dhaka";
-
 const MENU_ITEMS = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
@@ -88,32 +87,29 @@ const MENU_ITEMS = [
   { label: "Contact Us", href: "/contact-us" },
 ] as const;
 
-const INFORMATION_LINKS = [
-  ["About Us", "/about-us"],
-  ["Contact", "/contact-us"],
-  ["Company Information", "/about-us"],
-  ["The Sera Khabar Story", "/about-us"],
-  ["Terms & Conditions", "/terms-and-conditions"],
-  ["Privacy Policy", "/privacy-policy"],
-  ["Careers", "/contact-us"],
-  ["Refund & Exchange", "/refund-return-exchange"],
+const ANNOUNCEMENT_CLOSED_KEY = "sk-announcement-closed";
+
+const MEMO_SHOP_LINKS = [
+  ["ফ্রেশ আম", "/collection/fresh-mango"],
+  ["হোমমেড", "/collection/homemade"],
+  ["গুড়", "/collection/jaggery"],
+  ["সব পণ্য", "/products"],
 ] as const;
 
-const SUPPORT_LINKS = [
-  ["Help Center", "/faq"],
-  ["How to Order", "/how-to-order"],
-  ["Order Tracking", "/track-order"],
-  ["Payment & Shipping", "/shipping-policy"],
+// The approved memo shows three policy links; the other help pages stay reachable here too.
+const POLICY_LINKS = [
+  ["Privacy Policy", "/privacy-policy"],
+  ["Refund & Return", "/refund-return-exchange"],
+  ["Terms & Conditions", "/terms-and-conditions"],
+  ["Shipping Policy", "/shipping-policy"],
   ["Payment Policy", "/payment-policy"],
   ["Cancellation Policy", "/cancellation-policy"],
-  ["Frequently Asked Questions", "/faq"],
-  ["Consumer Policy", "/terms-and-conditions"],
+  ["How to Order", "/how-to-order"],
+  ["Track Order", "/track-order"],
+  ["FAQ", "/faq"],
+  ["Contact", "/contact-us"],
 ] as const;
 
-const pad = (value: number) => value.toString().padStart(2, "0");
-
-// Wall-clock time in Bangladesh whatever timezone the visitor is in, so the
-// footer clock follows the shop's own day.
 // A 40px search suggestion thumbnail was pulling the 960px original; `sizes`
 // lets the browser take the 320px variant instead.
 function SuggestionThumbnail({ product }: { product: StorefrontProduct }) {
@@ -133,26 +129,12 @@ function SuggestionThumbnail({ product }: { product: StorefrontProduct }) {
   );
 }
 
-function dhakaClock(now: Date) {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: DHAKA_TIME_ZONE,
-    hourCycle: "h23",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(now);
-  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? 0);
-  return { hours: value("hour"), minutes: value("minute"), seconds: value("second") };
-}
-
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [location, setLocation] = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuPage, setMobileMenuPage] = useState<"main" | "collections">("main");
-  const [time, setTime] = useState('');
-  const [isAtPageBottom, setIsAtPageBottom] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const { setIsOpen: setCartOpen, itemCount, cartPulseKey, consumeCartPulse } = useCart();
   const { data: searchableProducts = [] } = useQuery({
@@ -169,6 +151,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     ...visibleCollections.map(({ slug, label }) => ({ label, href: `/collection/${slug}` })),
     ...MENU_ITEMS.slice(2),
   ];
+
+  // Closing the announcement lasts for this browser session.
+  const [isAnnouncementClosed, setIsAnnouncementClosed] = useState(false);
+  useEffect(() => {
+    try {
+      setIsAnnouncementClosed(window.sessionStorage.getItem(ANNOUNCEMENT_CLOSED_KEY) === "1");
+    } catch {
+      // Storage can be blocked (private mode); the bar simply shows again.
+    }
+  }, []);
+  const closeAnnouncement = () => {
+    setIsAnnouncementClosed(true);
+    try {
+      window.sessionStorage.setItem(ANNOUNCEMENT_CLOSED_KEY, "1");
+    } catch {
+      // Ignore: closing still works for this page view.
+    }
+  };
+
+  const activeDockKey = isOpen
+    ? "menu"
+    : isSearchOpen
+      ? "search"
+      : location === "/"
+        ? "home"
+        : location === "/products"
+          ? "products"
+          : null;
 
   const openSearch = () => setIsSearchOpen(true);
   const openMenu = () => {
@@ -194,170 +204,127 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    const tick = () => {
-      const clock = dhakaClock(new Date());
-      setTime(`${pad(clock.hours)}:${pad(clock.minutes)}`);
-    };
-
-    tick();
-    const intervalId = setInterval(tick, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    const updatePageBottom = () => {
-      const documentHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-      setIsAtPageBottom(window.innerHeight + window.scrollY >= documentHeight - 24);
-    };
-
-    updatePageBottom();
-    window.addEventListener("scroll", updatePageBottom, { passive: true });
-    window.addEventListener("resize", updatePageBottom);
-    return () => {
-      window.removeEventListener("scroll", updatePageBottom);
-      window.removeEventListener("resize", updatePageBottom);
-    };
-  }, [location]);
-
   return (
     <div className="min-h-screen flex flex-col md:bg-brand-ivory text-black selection:bg-brand-gold selection:text-white">
-      {/* Announcement Bar */}
-      <div className="border-b border-black bg-[#FBBB14] px-4 text-black sm:px-10 lg:px-16">
-        <div className="mx-auto max-w-[1440px]">
-          <div className="flex min-h-[34px] items-center justify-center overflow-hidden py-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] sm:min-h-[42px] sm:py-2.5 sm:text-xs" aria-label="Free shipping announcement">
-            <p className="whitespace-nowrap">
-              Free shipping on orders over <strong className="text-[#163B33]">৳2600</strong> <span aria-hidden="true">—</span>{" "}
-              <Link href="/products">
-                <a className="underline decoration-[#e53935] decoration-2 underline-offset-4 transition-colors hover:text-[#e53935]">Shop now</a>
-              </Link>
-            </p>
+      {/* Announcement Bar: turmeric "Poster" sign (approved 2026-10-13); one row on desktop, two lines on phones */}
+      {!isAnnouncementClosed && (
+        <div className="sk-announce" role="region" aria-label="ঘোষণা">
+          <div className="sk-announce-text">
+            <span className="sk-announce-script">শীতের নতুন গুড়</span>
+            <b>
+              <span className="num">৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}</span>+ অর্ডারে ডেলিভারি ফ্রি
+            </b>
           </div>
+          <span className="sk-announce-stamp">ক্যাশ অন ডেলিভারি</span>
+          <Link href="/collection/jaggery" className="sk-announce-cta">
+            কিনুন <i aria-hidden="true" />
+          </Link>
+          <button type="button" className="sk-announce-close" aria-label="ঘোষণা বন্ধ করুন" onClick={closeAnnouncement}>
+            <X size={16} strokeWidth={1.75} />
+          </button>
+        </div>
+      )}
+      {/* Navigation */}
+      <div className="sk sk-header">
+        <div className="wrap">
+          <header className="c-head">
+            <nav className="menu" aria-label="Main">
+              <button type="button" className="menu-btn press" aria-label="Open menu" onClick={openMenu}>
+                <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
+                  <circle cx="12" cy="12" r="11.75" fill="#F6B826" />
+                  <path d="M8 8h8M8 12h8M8 16h8" stroke="#000" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
+              <button type="button" className="link" onClick={openMenu}>Menu</button>
+              <Link href="/products" className="link">Shop</Link>
+              <Link href="/about-us" className="link">About Us</Link>
+            </nav>
+            <Link href="/" aria-label="সেরা খাবার — হোম">
+              <img className="c-logoimg" src={headerLogo} alt="Sera Khabar" />
+            </Link>
+            <div className="tools">
+              <button type="button" className="icon-btn press" onClick={openSearch} aria-label="Search">
+                <SearchIcon className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                className="bag press"
+                onClick={() => setCartOpen(true)}
+                aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
+              >
+                {itemCount > 0 ? (
+                  <span className="num">{toBanglaDigits(itemCount > 99 ? "99+" : itemCount)}</span>
+                ) : (
+                  <BagIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </header>
         </div>
       </div>
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 w-full bg-[#f6f6f6] backdrop-blur-xl md:bg-brand-ivory/80 md:backdrop-blur-md transition-all duration-300">
-        <div className="flex h-14 items-center justify-between pl-2.5 pr-1.5 md:h-20 md:gap-8 md:px-10 lg:px-16">
-          <div className="flex flex-1 items-center justify-start md:flex-none md:basis-64">
-            <div className="md:hidden">
-              <Button variant="ghost" size="icon" aria-label="Open menu" className="group flex h-9 w-auto items-center justify-center rounded-[8px] px-0 [&_svg]:size-7 md:h-12" onClick={openMenu}>
-                <MenuLinesIcon className="opacity-70 transition-opacity group-hover:opacity-100" />
-              </Button>
-            </div>
-            <Link href="/">
-              <a className="hidden items-center text-black md:flex">
-                <img src={headerLogo} alt="Sera Khabar" className="h-16 w-auto" />
-              </a>
-            </Link>
-          </div>
 
-          <div className="flex items-center justify-center md:hidden">
-            <Link href="/">
-              <a className="flex items-center text-black">
-                <img
-                  src={headerLogo}
-                  alt="Sera Khabar"
-                  className="h-12 w-auto md:h-11"
-                />
-              </a>
-            </Link>
-          </div>
-
-          <div className="hidden min-w-0 flex-1 items-center justify-start md:flex md:overflow-x-auto no-scrollbar">
-            <div className="flex w-max items-center justify-center gap-5 text-[10px] font-medium uppercase tracking-[0.16em] text-black/70 lg:gap-8">
-              {visibleCollections.map(({ slug, label }) => (
-                <Link key={slug} href={`/collection/${slug}`}>
-                  <a className="whitespace-nowrap transition-colors hover:text-brand-gold">{label}</a>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-1 items-center justify-end gap-1 md:flex-none md:basis-44">
-            <Button
-              variant="ghost"
-              onClick={openSearch}
-              aria-label="Search"
-              className="group flex h-9 w-auto items-center justify-center rounded-[8px] px-1 hover:bg-transparent [&_svg]:size-5 md:h-12 md:px-3"
-            >
-              <SearchIcon className="opacity-70 transition-opacity group-hover:opacity-100" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              onClick={() => setCartOpen(true)}
-              aria-label="Cart"
-              className="group relative flex h-9 items-center justify-center rounded-[8px] px-1 hover:bg-transparent [&_svg]:size-6 md:h-12 md:px-3"
-            >
-              <BagIcon className="opacity-70 transition-opacity group-hover:opacity-100" />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-brand-gold text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
-            </Button>
-          </div>
+      {/* Mobile bottom navigation: compact white pill, always at the bottom (approved 2026-10-13, "Label") */}
+      <nav aria-label="Mobile navigation" className="sk-dock md:hidden">
+        <div className="sk-dock-pill">
+          {[
+            { key: "home", label: "হোম", href: "/", icon: <HomeDuotoneIcon className="h-5 w-5" /> },
+            { key: "products", label: "পণ্য", href: "/products", icon: <ReiconBox size={20} color="currentColor" weight="Outline" /> },
+            { key: "search", label: "খুঁজুন", onClick: openSearch, icon: <SearchIcon className="h-5 w-5" /> },
+            { key: "menu", label: "মেনু", onClick: openMenu, icon: <MenuLinesIcon className="h-5 w-5" /> },
+          ].map((item) => {
+            const isActive = item.key === activeDockKey;
+            const content = (
+              <>
+                {isActive && (
+                  <motion.span
+                    layoutId="sk-dock-highlight"
+                    className="sk-dock-hl"
+                    aria-hidden="true"
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                )}
+                <span className="sk-dock-ic">{item.icon}</span>
+                {isActive && <span className="sk-dock-lbl">{item.label}</span>}
+              </>
+            );
+            return item.href ? (
+              <Link
+                key={item.key}
+                href={item.href}
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
+                className={`sk-dock-item${isActive ? " is-active" : ""}`}
+              >
+                {content}
+              </Link>
+            ) : (
+              <button
+                key={item.key}
+                type="button"
+                aria-label={item.label}
+                onClick={item.onClick}
+                className={`sk-dock-item${isActive ? " is-active" : ""}`}
+              >
+                {content}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
+            onClick={() => setCartOpen(true)}
+            onAnimationEnd={() => { if (cartPulseKey > 0) consumeCartPulse(); }}
+            className={`sk-dock-cart${cartPulseKey > 0 ? " cart-dock-pulse" : ""}`}
+          >
+            <BagIcon className="!h-7 !w-7" />
+            {itemCount > 0 && (
+              <span aria-hidden="true" className="sk-dock-badge">
+                {toBanglaDigits(itemCount > 99 ? "99+" : itemCount)}
+              </span>
+            )}
+          </button>
         </div>
       </nav>
-
-      {/* Mobile bottom navigation */}
-      <motion.nav
-        aria-label="Mobile navigation"
-        initial={false}
-        animate={{ y: isAtPageBottom ? "110%" : 0 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed inset-x-3 bottom-3 z-[80] flex h-16 items-center justify-around rounded-[8px] border border-white/10 bg-neutral-500/60 px-2 text-white shadow-2xl backdrop-blur-md md:hidden"
-      >
-        <Link href="/">
-          <a
-            aria-label="Home"
-            aria-current={location === "/" ? "page" : undefined}
-            className={`flex min-w-[52px] flex-col items-center gap-1 text-[9px] font-medium tracking-[0.04em] transition-colors ${location === "/" ? "text-white" : "text-white/55"}`}
-          >
-            <HomeDuotoneIcon className="h-5 w-5" />
-            <span>Home</span>
-          </a>
-        </Link>
-        <Link href="/products">
-          <a
-            aria-label="Products"
-            aria-current={location === "/products" ? "page" : undefined}
-            className={`flex min-w-[52px] flex-col items-center gap-1 text-[9px] font-medium tracking-[0.04em] transition-colors ${location === "/products" ? "text-white" : "text-white/55"}`}
-          >
-            <ReiconBox size={20} color="currentColor" weight="Outline" />
-            <span>Products</span>
-          </a>
-        </Link>
-        <Button
-          variant="ghost"
-          aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
-          onClick={() => setCartOpen(true)}
-          onAnimationEnd={() => { if (cartPulseKey > 0) consumeCartPulse(); }}
-          className={`relative flex h-12 w-16 flex-col items-center justify-center rounded-full bg-[#C8F45A] p-0 text-black shadow-none hover:bg-[#C8F45A]${cartPulseKey > 0 ? "cart-dock-pulse" : ""}`}
-        >
-          <BagIcon className="!h-8 !w-8" />
-          {itemCount > 0 && (
-            <span aria-hidden="true" className="absolute right-2 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#163B33] px-1 text-[10px] font-bold text-[#C8F45A]">
-              {itemCount > 99 ? "99+" : itemCount}
-            </span>
-          )}
-          <span className="sr-only">Cart</span>
-        </Button>
-        <button type="button" aria-label="Search products" onClick={openSearch} className="flex min-w-[52px] flex-col items-center gap-1 text-[9px] font-medium tracking-[0.04em] text-white/55 transition-colors hover:text-white">
-            <SearchIcon className="h-5 w-5" />
-            <span>Search</span>
-        </button>
-        <Button
-          variant="ghost"
-          aria-label="Open menu"
-          onClick={openMenu}
-          className="flex min-w-[52px] flex-col items-center gap-1 rounded-none p-0 text-[9px] font-medium tracking-[0.04em] text-white/55 shadow-none transition-colors hover:bg-transparent hover:text-white"
-        >
-          <MenuLinesIcon className="!h-5 !w-5 scale-125 opacity-70" />
-          <span>Menu</span>
-        </Button>
-      </motion.nav>
 
       <AnimatePresence>
         {isSearchOpen && (
@@ -559,164 +526,71 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </main>
 
-      {/* Luxury Swiss Grid Footer */}
-      <footer className="relative border-t border-black/10 text-black/70 pt-12 md:pt-24 overflow-hidden">
-        {/* Background image — desktop */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 md:opacity-40 hidden md:block"
-          style={{ backgroundImage: "url('/footer-bg.webp')" }}
-        />
-        {/* Background image — mobile */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-35 md:opacity-40 md:hidden"
-          style={{ backgroundImage: "url('/footer-bg-mobile-v2.webp')" }}
-        />
-        {/* Foggy gradient on left for mobile */}
-        <div
-          className="absolute inset-0 md:hidden"
-          style={{ background: "linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 25%, rgba(255,255,255,0.2) 50%, transparent 70%)" }}
-        />
-        {/* Foggy gradient on bottom for mobile */}
-        <div
-          className="absolute inset-0 md:hidden"
-          style={{ background: "linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 15%, transparent 40%)" }}
-        />
-        {/* White overlay for text readability */}
-        <div className="absolute inset-0 bg-white/60" />
-
-        {/* Main Grid Content */}
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 max-w-[1440px] mx-auto px-4 sm:px-8 md:px-16 gap-16 mb-8 md:mb-24">
-          {/* Brand Col */}
-          <div className="md:col-span-4 space-y-8">
-            <img
-              src={brandLogo}
-              alt="Sera Khabar"
-              className="h-9 w-auto md:hidden"
-            />
-            <p className="text-[13px] font-bold leading-[2] text-black/60 md:max-w-md">
-              সাধ্যের মধ্যে সেরা মানের পন্য আপনার ও আপনার পরিবারের জন্য, যা আমরা পাঠাই একদম মাঠ পর্যায় থেকে, তাই পাচ্ছেন সাশ্রয়ী দামে সেরা মানের পন্যের নিশ্চয়তা।
-            </p>
-            <div className="flex gap-6 items-center">
-              <a href="https://www.facebook.com/profile.php?id=100068711778004" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:opacity-80 transition-opacity">
-                <img src="https://cdn.reicon.dev/logos/facebook/original.svg" alt="Facebook" width={20} height={20} className="w-5 h-5" />
-              </a>
-            </div>
-            <div className="space-y-6 pt-2">
-              <span className="text-[10px] uppercase tracking-[0.5em] font-bold text-[#FBBB14] block [-webkit-text-stroke:1px_rgba(0,0,0,0.06)]">Newsletter</span>
-              <div className="flex border-b border-black/10 pb-4">
-                <input
-                  type="email"
-                  placeholder="JOIN THE ATELIER"
-                  className="bg-transparent border-none outline-none flex-grow text-[9px] uppercase tracking-[0.4em] font-medium placeholder:text-black/20"
-                />
-                <button className="text-[9px] uppercase tracking-[0.4em] font-bold hover:text-brand-gold transition-colors">Join</button>
+      {/* Cash memo footer (approved 2026-10-13) */}
+      <footer className="sk">
+        <div className="fa">
+          <div className="memo-w">
+            <span className="tack" />
+            <div className="memo">
+              <div className="memo-top">
+                <img src={headerLogo} alt="সেরা খাবার" loading="lazy" decoding="async" />
+                <div className="memo-title">
+                  <b>ক্যাশ মেমো</b>
+                  <span>প্রকৃতির স্বাদ, যত্নের সঙ্গে পৌঁছে দিই আপনার ঘরে।</span>
+                </div>
+                <div className="memo-no">
+                  নং <span className="num">২০২৬</span>
+                  <br />
+                  তারিখ: আজ
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Link Columns */}
-          <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-x-8 gap-y-8">
-            <div className="space-y-8">
-              <span className="text-[28px] md:text-[22px] font-bold text-[#FBBB14] block">Information</span>
-              <ul className="space-y-3 text-[15px] md:text-[15px] font-bold text-black">
-                {INFORMATION_LINKS.map(([label, href]) => (
-                  <li key={label}><Link href={href}><a className="hover:text-black transition-colors block">{label}</a></Link></li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-8">
-              <span className="text-[28px] md:text-[22px] font-bold text-[#FBBB14] block">Shop</span>
-              <ul className="space-y-3 text-[17px] md:text-[15px] font-bold text-black">
-                {visibleCollections.map(({ slug, label }) => (
-                  <li key={slug}>
-                    <Link href={`/collection/${slug}`}>
-                      <a className="hover:text-black transition-colors block">{label}</a>
+              <div className="memo-cols">
+                <div>
+                  <div className="memo-h">কেনাকাটা</div>
+                  {MEMO_SHOP_LINKS.map(([label, href]) => (
+                    <Link key={label} href={href} className="memo-row">
+                      {label}
+                      <em>→</em>
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-8">
-              <span className="text-[28px] md:text-[22px] font-bold text-[#FBBB14] block">Support</span>
-              <ul className="space-y-3 text-[17px] md:text-[15px] font-bold text-black">
-                {SUPPORT_LINKS.map(([label, href]) => (
-                  <li key={label}><Link href={href}><a className="hover:text-black transition-colors block">{label}</a></Link></li>
-                ))}
-              </ul>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Decorative Divider + Brand Name + Trust Badges */}
-        <div className="relative z-10 px-4 md:px-16 pt-10 pb-6 md:pt-12 md:pb-8">
-          {/* Gold Divider */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="h-px w-16 bg-[#FBBB14]/40" />
-            <div className="w-2 h-2 rotate-45 bg-[#FBBB14]/50" />
-            <div className="h-px w-16 bg-[#FBBB14]/40" />
-          </div>
-          {/* Bengali Brand Name */}
-          <p
-            className="text-center text-[54px] md:text-[58px] font-bold text-[#FBBB14] mb-8 tracking-wide"
-            style={{ fontFamily: "'IhtishamDeshlipi', serif" }}
-          >
-            সেরা খাবার
-          </p>
-          {/* Trust Badges */}
-          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-            {[
-              { icon: MoneyReceive, label: "ক্যাশ অন ডেলিভারি" },
-              { icon: TruckFast, label: "দ্রুত ডেলিভারি" },
-              { icon: ShieldTick, label: "নিরাপদ পেমেন্ট" },
-              { icon: CheckCircle, label: "মান নিশ্চিত" },
-            ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex flex-col items-center gap-2">
-                <Icon size={22} color="#FBBB14" weight="Outline" />
-                <span
-                  className="text-[11px] md:text-[12px] text-black/50 font-medium"
-                  style={{ fontFamily: "'KaiumSimanto', serif" }}
-                >
-                  {label}
-                </span>
+                  ))}
+                </div>
+                <div>
+                  <div className="memo-h">যোগাযোগ</div>
+                  <a className="memo-row" href="tel:+8801310980289">কল করুন<em>→</em></a>
+                  <a className="memo-row" href="https://api.whatsapp.com/send/?phone=8801303103540" target="_blank" rel="noopener noreferrer">হোয়াটসঅ্যাপ করুন<em>→</em></a>
+                  <Link href="/about-us" className="memo-row">আমাদের গল্প<em>→</em></Link>
+                  <a className="memo-row" href={`https://api.whatsapp.com/send/?phone=8801303103540&text=${encodeURIComponent("পাইকারি অর্ডার করতে চাই")}`} target="_blank" rel="noopener noreferrer">পাইকারি অর্ডার<em>→</em></a>
+                </div>
               </div>
+              <div className="memo-foot">
+                <p>
+                  সাধ্যের মধ্যে সেরা মানের পন্য আপনার ও আপনার পরিবারের জন্য,
+                  <br />
+                  যা আমরা পাঠাই একদম মাঠ পর্যায় থেকে, তাই পাচ্ছেন সাশ্রয়ী দামে সেরা মানের পন্যের নিশ্চয়তা।
+                </p>
+                {/* Bottom Bar */}
+                <a className="sign" href="https://api.whatsapp.com/send/?phone=8801733670129" target="_blank" rel="noopener noreferrer">
+                  <img src="/arc-labs-emblem.webp" alt="Arc Labs Corporation" width={173} height={72} loading="lazy" decoding="async" />
+                  <hr />
+                  <small>Designed &amp; Engineered by</small>
+                </a>
+              </div>
+              <div className="stampc" aria-hidden="true">
+                ক্যাশ অন
+                <br />
+                ডেলিভারি
+                <br />· সারা দেশে ·
+              </div>
+            </div>
+          </div>
+          <p className="f-copy">
+            © <span className="num">২০২৬</span> সেরা খাবার · নওহাটা, পবা, রাজশাহী, বাংলাদেশ, <span className="num">৬২১৩</span>
+          </p>
+          <nav className="f-pol" aria-label="Policies">
+            {POLICY_LINKS.map(([label, href]) => (
+              <Link key={href} href={href}>• {label}</Link>
             ))}
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="relative z-10 bg-transparent border-t border-black/10 px-4 sm:px-8 md:px-16 py-8">
-          <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-3 md:gap-6">
-            <div className="text-center md:text-left">
-              <a
-                href="https://api.whatsapp.com/send/?phone=8801733670129"
-                className="group inline-flex items-center gap-3 text-black transition-colors hover:text-[#163B33]"
-              >
-                <span className="-mr-[0.28em] text-[8px] font-medium uppercase tracking-[0.28em] text-black/55">
-                  Designed &amp; Engineered by
-                </span>
-                <span aria-hidden="true" className="h-4 w-px shrink-0 bg-black/20" />
-                <img
-                  src="/arc-labs-emblem.webp"
-                  alt="Arc Labs Corporation"
-                  width={173}
-                  height={72}
-                  className="h-[22px] w-auto transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </a>
-              <span className="mt-3 block text-[8px] tracking-normal text-black/40">
-                © 2026 সেরা খাবার - Sera Khabar
-              </span>
-            </div>
-            <div className="flex gap-8 text-[9px] uppercase tracking-[0.4em] text-black/40">
-              <div className="flex items-center gap-2"><Globe className="w-3 h-3" /> Dhaka, Bangladesh</div>
-              <div className="hidden md:flex items-center gap-2 font-modern">{time} BST</div>
-            </div>
-          </div>
+          </nav>
         </div>
       </footer>
     </div>

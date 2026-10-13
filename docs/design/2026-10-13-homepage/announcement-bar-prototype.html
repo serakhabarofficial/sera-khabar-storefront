@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Announcement Bar Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atma:wght@700&family=Galada&family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700;900&display=swap">
+<style>
+/*
+ * Announcement bar exploration (after Emil Kowalski's `prototype` skill).
+ * Five directions on different axes, one at a time, above the real header and hero.
+ * Picker at the bottom: keys 1–5, ← →, R replays. Resize the window to see phone and desktop.
+ */
+:root{--rice:#FAF4EA;--royal:#5B2D17;--sun:#F6B826;--pink:#E2547A;--card:#F1E5D3;--ink:#3A1D0F;--sub:#7A6050;--paper:#FFFDF8;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);--ease-in-out:cubic-bezier(0.77,0,0.175,1)}
+*{box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--rice);color:var(--ink);font-family:"Hind Siliguri",sans-serif}
+.num{font-family:"Atma",sans-serif;font-weight:700}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.press{transition:transform 160ms var(--ease-out),background-color 160ms ease,color 160ms ease}
+.press:active{transform:scale(.97)}
+
+/* page context: the real header + hero */
+.wrap{padding:0 18px}
+@media (min-width:720px){.wrap{padding:0 48px}}
+.head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:10px 0;color:var(--royal);font-size:13px;font-weight:600}
+.head .l{display:flex;gap:16px;align-items:center}
+.head .l a{display:none}
+@media (min-width:720px){.head .l a{display:inline}.head .l .mb{display:none}}
+.head img{height:46px}
+@media (min-width:720px){.head img{height:58px}}
+.head .r{justify-self:end;display:flex;gap:8px;align-items:center}
+.bag{width:34px;height:34px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-size:15px}
+.hero{position:relative;padding:18px 0 40px}
+.hero h1{margin:0;font-family:"Noto Serif Bengali",serif;font-weight:900;color:var(--royal);font-size:clamp(78px,17vw,200px);line-height:.88;letter-spacing:-.02em;position:relative;z-index:2}
+.hero .tag{position:absolute;left:46%;top:0;z-index:3;font-family:"Galada",cursive;color:var(--pink);font-size:clamp(26px,4.6vw,52px);transform:rotate(-8deg)}
+.hero img{position:absolute;right:-4%;top:6%;width:50%;max-width:500px;transform:rotate(8deg);mix-blend-mode:multiply}
+.hero p{position:relative;z-index:2;margin:18px 0;max-width:34ch;color:var(--royal);font-size:15px}
+.btn{height:44px;padding:0 20px;border-radius:999px;background:var(--sun);color:var(--ink);font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:10px}
+.btn i{width:8px;height:8px;border-radius:50%;background:var(--pink)}
+.demo{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--sub)}
+.demo button{height:36px;padding:0 14px;border-radius:999px;background:var(--royal);color:var(--rice);font-weight:700}
+
+/* ===== 1 · Quiet: thin tamarind line, one sentence ===== */
+.a1{background:var(--royal);color:var(--rice);font-size:13px;min-height:36px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 16px;text-align:center}
+.a1 .num{color:var(--sun);font-size:14px}
+.a1 a{color:var(--sun);font-weight:700;white-space:nowrap}
+@media (hover:hover) and (pointer:fine){.a1 a:hover{text-decoration:underline;text-underline-offset:3px}}
+
+/* ===== 2 · Ticker: three promises scroll past, like a market banner ===== */
+.a2{background:var(--sun);color:var(--ink);height:40px;overflow:hidden;display:flex;align-items:center;border-bottom:1.5px solid var(--royal)}
+.a2-track{display:flex;flex:none;gap:0;animation:tick 32s linear infinite;will-change:transform}
+.a2:hover .a2-track{animation-play-state:paused}
+.a2-set{display:flex;flex:none;align-items:center}
+.a2 span.it{display:inline-flex;align-items:center;gap:10px;padding:0 22px;white-space:nowrap;font-family:"Noto Serif Bengali",serif;font-weight:700;font-size:14px}
+.a2 span.it::after{content:"✦";color:var(--pink);font-size:12px;margin-left:22px}
+.a2 .num{font-size:15px}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* ===== 3 · Rotator: one message at a time, swapped in place every few seconds ===== */
+.a3{background:var(--rice);color:var(--royal);border-bottom:1px solid rgba(91,45,23,.14);height:40px;display:flex;align-items:center;justify-content:center;gap:12px;padding:0 12px;overflow:hidden}
+.a3 .arw{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--sub);flex:none}
+.a3-view{position:relative;flex:1;max-width:560px;height:40px;overflow:hidden}
+.a3-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px;font-weight:600;white-space:nowrap;
+  transition:transform 280ms var(--ease-out),opacity 280ms var(--ease-out),filter 280ms var(--ease-out)}
+.a3-msg[data-state="below"]{transform:translateY(100%);opacity:0;filter:blur(2px)}
+.a3-msg[data-state="above"]{transform:translateY(-100%);opacity:0;filter:blur(2px)}
+.a3-msg .num{color:var(--pink);font-size:15px}
+.a3-msg b{font-family:"Galada",cursive;font-weight:400;color:var(--pink);font-size:17px}
+
+/* ===== 4 · Progress: the bar tells each shopper how far they are from free delivery ===== */
+.a4{background:var(--paper);color:var(--royal);border-bottom:1px solid rgba(91,45,23,.12);padding:8px 16px 9px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.a4 p{margin:0;font-size:13.5px;font-weight:600;text-align:center}
+.a4 p .num{color:var(--pink);font-size:15px}
+.a4 p.done{color:#2F8F5B}
+.a4-track{width:min(100%,360px);height:6px;border-radius:999px;background:var(--card);overflow:hidden}
+.a4-fill{height:100%;border-radius:inherit;background:var(--sun);transform-origin:left;transform:scaleX(var(--p,0));transition:transform 420ms var(--ease-out)}
+.a4.full .a4-fill{background:#3BB273}
+
+/* ===== 5 · Poster: a turmeric shop sign in the homepage's own voice ===== */
+.a5{position:relative;background:var(--sun);color:var(--ink);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:10px 16px;flex-wrap:wrap;overflow:hidden}
+.a5 .script{font-family:"Galada",cursive;color:var(--pink);font-size:20px;transform:rotate(-3deg);display:inline-block;line-height:1}
+.a5 b{font-family:"Noto Serif Bengali",serif;font-weight:900;font-size:15px;color:var(--royal)}
+.a5 .num{font-size:17px;color:var(--royal)}
+.a5 .stamp{display:inline-grid;place-items:center;height:28px;padding:0 12px;border-radius:999px;border:1.5px solid var(--royal);font-size:12px;font-weight:700;color:var(--royal);transform:rotate(-2deg)}
+.a5 a{height:30px;padding:0 14px;border-radius:999px;background:var(--royal);color:var(--rice);font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;gap:8px}
+.a5 a i{width:6px;height:6px;border-radius:50%;background:var(--sun)}
+.a5 .x{position:absolute;right:8px;top:50%;translate:0 -50%;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--royal);opacity:.7}
+@media (max-width:560px){.a5 .stamp{display:none}.a5{padding-right:40px}}
+.a5.gone{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important}
+  .a2-track{animation:none}
+  .a2{overflow-x:auto;scrollbar-width:none}
+}
+
+/* ===== Picker (verbatim from emilkowalski/skills prototype/PICKER.md) ===== */
+.proto-picker{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2147483647;display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(10,10,10,0.82);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset,0 8px 24px rgba(0,0,0,0.24),0 2px 6px rgba(0,0,0,0.12);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;line-height:1;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+.proto-picker-highlight{position:absolute;top:4px;left:0;height:28px;border-radius:999px;background:rgba(255,255,255,0.12);will-change:transform}
+.proto-picker[data-ready] .proto-picker-highlight{transition:transform 250ms cubic-bezier(0.23,1,0.32,1),width 250ms cubic-bezier(0.23,1,0.32,1)}
+@media (prefers-reduced-motion:reduce){.proto-picker[data-ready] .proto-picker-highlight{transition:none}}
+.proto-picker-item{position:relative;display:flex;align-items:center;height:28px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:rgba(255,255,255,0.55);font:inherit;cursor:pointer;transition:color 150ms ease-out}
+.proto-picker-item:hover{color:rgba(255,255,255,0.85)}
+.proto-picker-item:active{transform:scale(0.97)}
+.proto-picker-item:focus-visible{outline:2px solid rgba(255,255,255,0.4);outline-offset:2px}
+.proto-picker-item[data-active]{color:#fff}
+.proto-picker-divider{width:1px;height:16px;margin:0 4px;background:rgba(255,255,255,0.12)}
+.proto-picker-replay{padding:0 10px;font-size:14px}
+.proto-picker[data-position="top"]{bottom:auto;top:24px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="wrap">
+  <header class="head">
+    <div class="l"><svg class="mb" viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><circle cx="12" cy="12" r="11.75" fill="#F6B826"/><path d="M8 8h8M8 12h8M8 16h8" stroke="#000" stroke-width="1.5" stroke-linecap="round"/></svg><a>Menu</a><a>Shop</a><a>About Us</a></div>
+    <img src="../../../attached_assets/sera-khabar-leaf-logo.webp" alt="সেরা খাবার">
+    <div class="r"><span class="bag num" id="bagCount">০</span></div>
+  </header>
+  <section class="hero">
+    <span class="tag">রাজশাহী থেকে</span>
+    <h1>সেরা<br>খাবার</h1>
+    <img src="../../../client/public/home/hero-bori.webp" alt="">
+    <p>ঘরে বানানো বড়ি, আচার আর গুড়। মায়ের রেসিপি, ছোট ব্যাচ, সারাদেশে ডেলিভারি।</p>
+    <span class="btn">অর্ডার করুন <i></i></span>
+    <div class="demo"><button class="press" data-add="650">+ পাটালী গুড় ১ কেজি (৳৬৫০)</button><button class="press" data-clear>কার্ট খালি করুন</button><span>Try these on “Progress”.</span></div>
+  </section>
+</div>
+
+<nav class="proto-picker" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Quiet</button>
+  <button class="proto-picker-item">Ticker</button>
+  <button class="proto-picker-item">Rotator</button>
+  <button class="proto-picker-item">Progress</button>
+  <button class="proto-picker-item">Poster</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+// Facts the live site already uses (client/src/lib/site-pages.ts POLICY_FACTS).
+const FREE_FROM=2600, CHARGE=100;
+const bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+const N=n=>`<span class="num">${bn(n)}</span>`;
+let cartTotal=0;
+const MSGS=[
+  `${N("৳"+FREE_FROM)} বা তার বেশি অর্ডারে ডেলিভারি ফ্রি`,
+  `ক্যাশ অন ডেলিভারি · পণ্য হাতে পেয়ে টাকা দিন`,
+  `<b>শীতের নতুন গুড়</b> এসে গেছে`
+];
+
+const variants=[
+ // 1 Quiet
+ ()=>`<div class="a1" role="region" aria-label="ঘোষণা"><span>${N("৳"+FREE_FROM)} বা তার বেশি অর্ডারে ডেলিভারি ফ্রি</span><a href="#">কেনাকাটা করুন →</a></div>`,
+ // 2 Ticker
+ ()=>{const set=`<div class="a2-set">${[...MSGS,`রাজশাহী থেকে সরাসরি আপনার ঘরে`].map(m=>`<span class="it">${m}</span>`).join("")}</div>`;
+   return `<div class="a2" role="region" aria-label="ঘোষণা"><div class="a2-track">${set}${set.replace('class="a2-set"','class="a2-set" aria-hidden="true"')}</div></div>`},
+ // 3 Rotator
+ ()=>`<div class="a3" role="region" aria-label="ঘোষণা" aria-live="polite"><button class="arw press" data-rot="-1" aria-label="আগের ঘোষণা">‹</button>
+   <div class="a3-view">${MSGS.map((m,i)=>`<div class="a3-msg" data-state="${i?"below":"on"}">${m}</div>`).join("")}</div>
+   <button class="arw press" data-rot="1" aria-label="পরের ঘোষণা">›</button></div>`,
+ // 4 Progress
+ ()=>`<div class="a4" role="region" aria-label="ফ্রি ডেলিভারি"><p data-a4></p><div class="a4-track"><div class="a4-fill"></div></div></div>`,
+ // 5 Poster
+ ()=>`<div class="a5" role="region" aria-label="ঘোষণা"><span class="script">শীতের নতুন গুড়</span><b>${N("৳"+FREE_FROM)}+ অর্ডারে ডেলিভারি ফ্রি</b><span class="stamp">ক্যাশ অন ডেলিভারি</span><a href="#" class="press">কিনুন <i></i></a><button class="x press" data-close aria-label="বন্ধ করুন">✕</button></div>`
+];
+
+/* 3 · rotate every 4s; pause while hovered or focused; arrows step it */
+let rotIdx=0,rotTimer;
+function rotate(step){const msgs=[...document.querySelectorAll(".a3-msg")];if(!msgs.length)return;
+  const prev=rotIdx;rotIdx=(rotIdx+step+msgs.length)%msgs.length;
+  msgs.forEach((m,i)=>m.dataset.state=i===rotIdx?"on":i===prev?(step>0?"above":"below"):(step>0?"below":"above"))}
+function startRot(){clearInterval(rotTimer);rotIdx=0;if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  rotTimer=setInterval(()=>{const a=document.querySelector(".a3");if(a&&!a.matches(":hover,:focus-within"))rotate(1)},4000)}
+
+/* 4 · progress copy and fill from the cart total */
+function paintProgress(){const p=document.querySelector("[data-a4]");document.getElementById("bagCount").textContent=bn(cartTotal?Math.ceil(cartTotal/650):0);if(!p)return;
+  const left=Math.max(FREE_FROM-cartTotal,0),bar=document.querySelector(".a4");
+  bar.style.setProperty("--p",Math.min(cartTotal/FREE_FROM,1));bar.classList.toggle("full",!left);
+  p.className=left?"":"done";
+  p.innerHTML=!cartTotal?`${N("৳"+FREE_FROM)} বা তার বেশি অর্ডারে ডেলিভারি ফ্রি`:left?`আর ${N("৳"+left)} কিনলেই ডেলিভারি ফ্রি`:`অভিনন্দন! আপনার ডেলিভারি ফ্রি ✓`}
+
+document.addEventListener("click",e=>{
+  const r=e.target.closest("[data-rot]");if(r){rotate(+r.dataset.rot);startRot();return}
+  const add=e.target.closest("[data-add]");if(add){cartTotal+= +add.dataset.add;paintProgress();return}
+  if(e.target.closest("[data-clear]")){cartTotal=0;paintProgress();return}
+  if(e.target.closest("[data-close]")){document.querySelector(".a5").classList.add("gone");return}
+  if(e.target.closest('a[href="#"]'))e.preventDefault();
+});
+
+/* ===== Picker wiring (verbatim behaviour from PICKER.md) ===== */
+const stage=document.getElementById('stage');
+const picker=document.querySelector('.proto-picker');
+const highlight=picker.querySelector('.proto-picker-highlight');
+const items=[...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+const replay=picker.querySelector('.proto-picker-replay');
+let current=0;
+function moveHighlight(){const el=items[current];highlight.style.width=el.offsetWidth+'px';highlight.style.transform=`translateX(${el.offsetLeft}px)`}
+function mount(i){stage.innerHTML='';requestAnimationFrame(()=>{stage.innerHTML=variants[i]();startRot();paintProgress()})}
+function setActive(i){if(i<0||i>=variants.length)return;current=i;
+  items.forEach((el,j)=>{el.toggleAttribute('data-active',j===i);if(j===i)el.setAttribute('aria-current','true');else el.removeAttribute('aria-current')});
+  moveHighlight();const url=new URL(location);url.searchParams.set('v',i+1);history.replaceState(null,'',url);mount(i)}
+items.forEach((el,i)=>el.addEventListener('click',()=>setActive(i)));
+replay?.addEventListener('click',()=>mount(current));
+window.addEventListener('resize',moveHighlight);
+document.addEventListener('keydown',(e)=>{
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.target.isContentEditable)return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const num=parseInt(e.key,10);
+  if(num>=1&&num<=variants.length)setActive(num-1);
+  else if(e.key==='ArrowRight')setActive((current+1)%variants.length);
+  else if(e.key==='ArrowLeft')setActive((current-1+variants.length)%variants.length);
+  else if(e.key==='r'||e.key==='R')mount(current);
+});
+setActive((parseInt(new URLSearchParams(location.search).get('v'),10)||1)-1);
+requestAnimationFrame(()=>requestAnimationFrame(()=>picker.setAttribute('data-ready','')));
+</script>
+</body>
+</html>

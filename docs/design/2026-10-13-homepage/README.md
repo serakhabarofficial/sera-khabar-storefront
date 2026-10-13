@@ -1,6 +1,6 @@
 # Homepage redesign — approved direction (2026-10-13)
 
-Agreed with the owner over several mockup rounds. **Not implemented yet.** Open
+Agreed with the owner over several mockup rounds. **Implemented 2026-10-13** (`client/src/pages/home.tsx`, `client/src/poster.css`, header/footer/dock/announcement in `client/src/components/layout.tsx`). Approved follow-ups: mobile dock = `mobile-dock-white-pill.html` variant "Label" (always fixed, phones only, existing icons); announcement = `announcement-bar-prototype.html` variant "Poster" (two lines on phones). Open
 `homepage-mockup.html` in a browser (it is self-contained) and pick variant
 **ক · রঙিন কার্ড** at the top; that is the approved page. Desktop and phone frames
 are shown side by side.

@@ -42,7 +42,7 @@ export const FEATURED_COLLECTIONS = [
     slug: "homemade",
     label: "Homemade-হোমমেড",
     image: "/categories/homemade-3-320.webp",
-    productSlugs: ["amsotto-pickle", "jhalmuri-moshla"],
+    productSlugs: ["amsotto-pickle", "jhalmuri-moshla", "homemade-pumpkin-bori", "mango-leather-pickle"],
   },
   {
     slug: "functional-food",
@@ -70,7 +70,7 @@ export const FEATURED_COLLECTIONS = [
     slug: "jaggery",
     label: "Jaggery-গুড়",
     image: "/categories/jaggery-1-320.webp",
-    productSlugs: ["sugarcane-juice-powder", "granulated-sugarcane-jaggery"],
+    productSlugs: ["sugarcane-juice-powder", "granulated-sugarcane-jaggery", "date-palm-patali", "liquid-date-jaggery", "granulated-jaggery"],
   },
   {
     slug: "semai",
@@ -125,4 +125,55 @@ export function getTopSellingProducts(products: StorefrontProduct[]) {
 
 export function getVisibleFeaturedCollections(products: StorefrontProduct[]) {
   return FEATURED_COLLECTIONS.filter((collection) => getProductsForCollection(products, collection).length > 0);
+}
+
+// Homepage redesign (approved 2026-10-13, docs/design/2026-10-13-homepage): only these three
+// categories appear on the homepage, as coloured cards with a cut-out food photo.
+export const HOMEPAGE_CATEGORIES = [
+  { slug: "fresh-mango", name: "ফ্রেশ আম", image: "/home/category-mango.webp", color: "#F6B826", wide: false, light: false },
+  { slug: "homemade", name: "হোমমেড", image: "/home/category-homemade.webp", color: "#E9A9A0", wide: true, light: false },
+  { slug: "jaggery", name: "গুড়", image: "/home/category-jaggery.webp", color: "#5B2D17", wide: true, light: true },
+] as const;
+
+export type ShelfTab = { label: string; keywords: readonly string[] };
+
+// Category shelves on the homepage. Tabs split a category's products by name keywords;
+// a tab only shows when at least one published product matches it.
+export const HOMEPAGE_SHELVES = [
+  {
+    slug: "jaggery",
+    title: "আমাদের গুড়",
+    tabs: [
+      { label: "পাটালী গুড়", keywords: ["পাটালী", "patali"] },
+      { label: "ঝোলা গুড়", keywords: ["ঝোলা", "liquid", "jhola"] },
+      { label: "দানাদার গুড়", keywords: ["দানাদার", "granulated"] },
+    ],
+  },
+  {
+    slug: "homemade",
+    title: "আমাদের হোমমেড",
+    tabs: [
+      { label: "বড়ি", keywords: ["বড়ি", "bori"] },
+      { label: "আচার", keywords: ["আচার", "pickle"] },
+    ],
+  },
+] as const satisfies readonly { slug: string; title: string; tabs: readonly ShelfTab[] }[];
+
+// The product priced in the big ৳ offer band.
+export const HOMEPAGE_OFFER_PRODUCT_SLUG = "mango-leather-pickle";
+
+// ড় can be stored as one code point or as ড + nukta, so compare normalized text.
+const normalizeName = (value: string) => value.normalize("NFC").toLowerCase();
+
+export function groupProductsByTabs(products: StorefrontProduct[], tabs: readonly ShelfTab[]) {
+  const remaining = new Set(products);
+  const groups = tabs.flatMap((tab) => {
+    const matches = products.filter((product) => {
+      const name = normalizeName(product.name ?? "");
+      return remaining.has(product) && tab.keywords.some((keyword) => name.includes(normalizeName(keyword)));
+    });
+    matches.forEach((product) => remaining.delete(product));
+    return matches.length ? [{ label: tab.label, products: matches }] : [];
+  });
+  return remaining.size ? [...groups, { label: "অন্যান্য", products: Array.from(remaining) }] : groups;
 }

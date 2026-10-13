@@ -4,19 +4,28 @@ import { test } from "node:test";
 
 const layoutSource = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
 
-test("uses a compact announcement bar on mobile and restores desktop spacing", () => {
-  assert.match(
-    layoutSource,
-    /min-h-\[34px\][^\n]*py-1\.5[^\n]*sm:min-h-\[42px\][^\n]*sm:py-2\.5/,
-  );
+test("uses the turmeric Poster announcement, closable for the session", () => {
+  // Approved 2026-10-13; the free-delivery amount comes from the same POLICY_FACTS checkout uses.
+  assert.match(layoutSource, /<div className="sk-announce" role="region" aria-label="ঘোষণা">/);
+  assert.match(layoutSource, /toBanglaDigits\(POLICY_FACTS\.freeDeliveryThreshold\)/);
+  assert.match(layoutSource, /window\.sessionStorage\.setItem\(ANNOUNCEMENT_CLOSED_KEY, "1"\)/);
+  assert.doesNotMatch(layoutSource, /Free shipping on orders over/);
 });
 
-test("hides the mobile navigation dock at the document bottom with Framer Motion", () => {
-  assert.match(layoutSource, /useReducedMotion/);
-  assert.match(layoutSource, /window\.innerHeight \+ window\.scrollY >= documentHeight - 24/);
-  assert.match(layoutSource, /<motion\.nav/);
-  assert.match(layoutSource, /animate=\{\{ y: isAtPageBottom \? "110%" : 0 \}\}/);
-  assert.match(layoutSource, /className="fixed inset-x-3 bottom-3[^\"]*md:hidden"/);
+test("keeps the compact white pill dock fixed at the bottom on phones", () => {
+  // Approved 2026-10-13 ("Label"): it never hides; the active tab shows its name on a sliding highlight.
+  assert.match(layoutSource, /<nav aria-label="Mobile navigation" className="sk-dock md:hidden">/);
+  assert.doesNotMatch(layoutSource, /isAtPageBottom/);
+  assert.match(layoutSource, /layoutId="sk-dock-highlight"/);
+  assert.match(layoutSource, /duration: shouldReduceMotion \? 0 : 0\.22/);
+  assert.match(layoutSource, /\{isActive && <span className="sk-dock-lbl">\{item\.label\}<\/span>\}/);
+});
+
+test("uses the existing icons in the mobile dock", () => {
+  const dockSource = layoutSource.slice(layoutSource.indexOf('className="sk-dock md:hidden"'));
+  for (const icon of ["<HomeDuotoneIcon", "<ReiconBox", "<SearchIcon", "<MenuLinesIcon", "<BagIcon"]) {
+    assert.ok(dockSource.includes(icon), icon);
+  }
 });
 
 test("uses the Solar cart icon in both desktop and mobile navigation", () => {
@@ -26,9 +35,9 @@ test("uses the Solar cart icon in both desktop and mobile navigation", () => {
 });
 
 test("keeps header cart icons balanced without changing the mobile dock", () => {
-  assert.match(layoutSource, /\[&_svg\]:size-6/);
-  assert.match(layoutSource, /<BagIcon className="!h-8 !w-8" \/>/);
-  assert.match(layoutSource, /<SearchIcon className="opacity-70/);
+  assert.match(layoutSource, /<BagIcon className="h-5 w-5" \/>/);
+  assert.match(layoutSource, /<BagIcon className="!h-7 !w-7" \/>/);
+  assert.match(layoutSource, /<SearchIcon className="h-5 w-5" \/>/);
 });
 
 test("uses the mobile menu white treatment for the shared search overlay", () => {
@@ -50,11 +59,23 @@ test("keeps the mobile dock search panel compact", () => {
   assert.match(layoutSource, /className="relative h-auto max-h-\[70dvh\] w-full[^"]*md:h-auto/);
 });
 
-test("reserves desktop width for the logo before category navigation", () => {
-  assert.match(layoutSource, /md:flex-none md:basis-64/);
-  assert.match(layoutSource, /<div className="md:hidden">/);
-  assert.match(layoutSource, /hidden min-w-0 flex-1 items-center justify-start md:flex md:overflow-x-auto no-scrollbar/);
-  assert.match(layoutSource, /flex w-max items-center justify-center gap-5/);
+test("uses the poster header: turmeric menu button, centred logo, turmeric bag", () => {
+  // Approved 2026-10-13 homepage redesign (docs/design/2026-10-13-homepage).
+  assert.match(layoutSource, /<div className="sk sk-header">/);
+  assert.match(layoutSource, /<header className="c-head">/);
+  assert.match(layoutSource, /className="menu-btn press" aria-label="Open menu" onClick=\{openMenu\}/);
+  assert.match(layoutSource, /<img className="c-logoimg" src=\{headerLogo\}/);
+  assert.match(layoutSource, /className="bag press"/);
+});
+
+test("uses the pinned cash memo footer with the Arc Labs signature", () => {
+  assert.match(layoutSource, /<footer className="sk">/);
+  assert.match(layoutSource, /<b>ক্যাশ মেমো<\/b>/);
+  assert.match(layoutSource, /className="stampc"/);
+  assert.match(layoutSource, /<a className="sign" href="https:\/\/api\.whatsapp\.com\/send\/\?phone=8801733670129"/);
+  for (const label of ["ফ্রেশ আম", "হোমমেড", "গুড়", "সব পণ্য", "কল করুন", "হোয়াটসঅ্যাপ করুন", "আমাদের গল্প", "পাইকারি অর্ডার"]) {
+    assert.match(layoutSource, new RegExp(label));
+  }
 });
 
 test("uses visible Featured Categories for menu navigation", () => {
@@ -131,7 +152,7 @@ test("shows a numeric badge on the mobile dock cart instead of a dot", () => {
 
 test("pulses the dock cart once per toast handoff, then clears the signal", () => {
   assert.match(layoutSource, /cartPulseKey, consumeCartPulse/);
-  assert.match(layoutSource, /cartPulseKey > 0 \? "cart-dock-pulse" : ""/);
+  assert.match(layoutSource, /cartPulseKey > 0 \? " cart-dock-pulse" : ""/);
   assert.match(layoutSource, /if \(cartPulseKey > 0\) consumeCartPulse\(\);/);
 });
 

@@ -11,9 +11,9 @@ const productCardSource = readFileSync(
   "utf8",
 );
 
-test("renders Recently Viewed on the homepage", () => {
-  assert.match(homeSource, /import RecentlyViewed from "@\/components\/recently-viewed"/);
-  assert.match(homeSource, /<RecentlyViewed products=\{homepageProducts\} \/>/);
+test("leaves Recently Viewed off the redesigned homepage", () => {
+  // The approved 2026-10-13 homepage ends with the FAQ chat; Recently Viewed stays on product pages.
+  assert.doesNotMatch(homeSource, /<RecentlyViewed/);
 });
 
 test("renders Recently Viewed on the all-products page without replacing its catalog", () => {

@@ -8,6 +8,8 @@ import {
   getTopSellingProducts,
   getProductsForCollection,
   getVisibleFeaturedCollections,
+  groupProductsByTabs,
+  HOMEPAGE_SHELVES,
 } from "./featured-collections";
 
 test("defines the nine homepage collections", () => {
@@ -46,6 +48,11 @@ test("assigns every current product to exactly one collection", () => {
     "amsotto-pickle",
     "lachcha-semai",
     "jhalmuri-moshla",
+    "homemade-pumpkin-bori",
+    "mango-leather-pickle",
+    "date-palm-patali",
+    "liquid-date-jaggery",
+    "granulated-jaggery",
   ];
 
   assert.equal(new Set(assignments.map(({ productSlug }) => productSlug)).size, assignments.length);
@@ -89,7 +96,13 @@ test("assigns both sugarcane products to the visible Jaggery category", () => {
   assert.ok(homemade);
   assert.ok(jaggery);
   assert.equal(homemade.productSlugs.includes("sugarcane-juice-powder"), false);
-  assert.deepEqual(jaggery.productSlugs, ["sugarcane-juice-powder", "granulated-sugarcane-jaggery"]);
+  assert.deepEqual(jaggery.productSlugs, [
+    "sugarcane-juice-powder",
+    "granulated-sugarcane-jaggery",
+    "date-palm-patali",
+    "liquid-date-jaggery",
+    "granulated-jaggery",
+  ]);
   assert.deepEqual(
     getVisibleFeaturedCollections([
       { slug: "sugarcane-juice-powder", name: "Sugarcane Juice Powder" },
@@ -185,4 +198,26 @@ test("resolves Top Selling Products without exposing it as a Featured Category",
   assert.equal(getCollection("top-selling-products")?.slug, "top-selling-products");
   assert.equal(getFeaturedCollection("top-selling-products"), null);
   assert.doesNotMatch(FEATURED_COLLECTIONS.map(({ slug }) => slug).join(" "), /top-selling-products/);
+});
+
+test("splits a homepage shelf into tabs by product name, hiding empty tabs", () => {
+  const homemade = HOMEPAGE_SHELVES.find((shelf) => shelf.slug === "homemade");
+  assert.ok(homemade);
+  const groups = groupProductsByTabs(
+    [
+      // ড় written as ড + nukta must still match the tab keyword.
+      { slug: "homemade-pumpkin-bori", name: "হোমমেড কুমড়ো বড\u09bcি | Homemade Pumpkin Bori" },
+      { slug: "mango-leather-pickle", name: "আমসত্ত্ব আচার | Mango Leather Pickle" },
+      { slug: "jhalmuri-moshla", name: "ঝালমুড়ি মশলা" },
+    ],
+    homemade.tabs,
+  );
+  assert.deepEqual(
+    groups.map(({ label, products }) => [label, products.map(({ slug }) => slug)]),
+    [
+      ["বড়ি", ["homemade-pumpkin-bori"]],
+      ["আচার", ["mango-leather-pickle"]],
+      ["অন্যান্য", ["jhalmuri-moshla"]],
+    ],
+  );
 });
