@@ -384,8 +384,10 @@
   font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13.5px; line-height: 1; box-shadow: 0 0 0 2px #fffdf8; }
 /* Phones only: unlayered CSS beats Tailwind's md:hidden, so hide it here explicitly. */
 @media (min-width: 768px) { .sk-dock { display: none; } }
-/* Keep the end of every page clear of the dock on phones. */
-@media (max-width: 767px) { footer.sk { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
+/* Phones: iOS Safari draws the page under its floating toolbar, so the white body showed as a band below the
+   dock at the end of every page. Pages with the shared footer paint the canvas cream instead. The dock's
+   clearance lives only on footer .fa; a second padding on footer.sk once doubled the empty space. */
+@media (max-width: 767px) { html:has(footer.sk), html:has(footer.sk) body { background-color: #faf4ea; } }
 
 @media (prefers-reduced-motion: reduce) {
   .sk .stagger > *, .sk .reveal, .sk .fr, .sk .bub, .sk .bub.typing i { animation: none !important; }

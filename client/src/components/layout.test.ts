@@ -177,6 +177,14 @@ test("no grey gap above the footer: cream main, dock space lives in the footer",
   assert.match(posterSource, /@media \(max-width: 767px\) \{ footer\.sk \.fa \{ padding-bottom: calc\(98px \+ env\(safe-area-inset-bottom, 0px\)\); \} \}/);
 });
 
+test("no gap below the footer on phones: one dock clearance and a cream canvas", () => {
+  const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
+  // A second clearance on footer.sk stacked on top of .fa's and doubled the empty space above the dock.
+  assert.doesNotMatch(posterSource, /footer\.sk \{ padding-bottom/);
+  // iOS Safari shows the canvas under its floating toolbar; white there read as a band below the dock.
+  assert.match(posterSource, /@media \(max-width: 767px\) \{ html:has\(footer\.sk\), html:has\(footer\.sk\) body \{ background-color: #faf4ea; \} \}/);
+});
+
 test("the dock keeps a tab selected on product and collection pages", () => {
   // Product, collection and search pages belong to the shop, so the পণ্য tab stays active there.
   assert.match(layoutSource, /location === "\/products" \|\| location\.startsWith\("\/product\/"\) \|\| location\.startsWith\("\/collection\/"\)/);
