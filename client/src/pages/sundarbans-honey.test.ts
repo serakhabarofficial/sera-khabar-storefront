@@ -294,7 +294,7 @@ test("CTAs scroll to checkout and focus its heading without direct interaction t
 
 test("campaign typography and palette stay scoped off global tokens", () => {
   assert.match(campaignCssSource, /\.sundarbans-honey-page/);
-  assert.match(campaignCssSource, /Hind Siliguri/);
+  assert.match(campaignCssSource, /Noto Serif Bengali/);
   assert.match(campaignCssSource, /honey-heading-heavy/);
   assert.match(campaignCssSource, /font-weight: 700/);
   assert.match(campaignCssSource, /-webkit-text-stroke: 0\.45px/);
@@ -302,7 +302,7 @@ test("campaign typography and palette stay scoped off global tokens", () => {
   assert.match(campaignCssSource, /--honey-gold/);
   assert.match(campaignCssSource, /--honey-brown/);
   assert.match(campaignCssSource, /--honey-cream/);
-  assert.match(htmlSource, /Hind\+Siliguri/);
+  assert.match(htmlSource, /Noto\+Serif\+Bengali/);
 });
 
 test("missing authentic media is documented per asset, not fabricated", () => {

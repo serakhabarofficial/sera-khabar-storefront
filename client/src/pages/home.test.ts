@@ -43,7 +43,7 @@ test("uses the tamarind and turmeric palette", () => {
 });
 
 test("loads Noto Serif Bengali, Atma and Galada and sets digits in Atma", () => {
-  assert.match(indexHtml, /family=Noto\+Serif\+Bengali:wght@700;900/);
+  assert.match(indexHtml, /family=Noto\+Serif\+Bengali:wght@400;500;600;700;800;900/);
   assert.match(indexHtml, /family=Atma:wght@700/);
   assert.match(indexHtml, /family=Galada/);
   assert.match(posterCss, /\.sk \.num \{ font-family: "Atma"/);

@@ -23,6 +23,8 @@ test("shows the coming-soon letter to visitors without access", async () => {
   const html = await res.text();
   assert.match(html, /প্রিয় গ্রাহক,/);
   assert.match(html, /জাহিদুল ইসলাম/);
+  assert.match(html, /--text:"Noto Serif Bengali",serif;/);
+  assert.match(html, /family=Noto\+Serif\+Bengali:wght@300;400;600/);
   assert.match(html, /href="tel:\+8801310980289"/);
   assert.match(html, /href="https:\/\/wa\.me\/8801303103540"/);
   assert.doesNotMatch(html, new RegExp(password.replace(/[$]/g, "\\$")));

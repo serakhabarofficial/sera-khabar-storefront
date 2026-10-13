@@ -3,6 +3,25 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const cartDrawerSource = readFileSync(new URL("./cart-drawer.tsx", import.meta.url), "utf8");
+const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
+
+test("the cart uses Geist for English while retaining Bengali fallback fonts", () => {
+  assert.match(posterSource, /\.skc \{[^}]*font-family: "Geist", "Noto Serif Bengali", serif;/);
+  for (const selector of [".skc-title", ".skc-info h3", ".skc-empty h3", ".skc-subtotal"]) {
+    const rule = posterSource.slice(posterSource.indexOf(`${selector} {`)).split("}")[0];
+    assert.match(rule, /font-family: "Geist", "Noto Serif Bengali", serif;/);
+  }
+  const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
+  assert.match(html, /family=Geist:wght@400;500;600;700/);
+  assert.match(html, /family=Noto\+Serif\+Bengali:wght@400;500;600;700;800;900/);
+});
+
+test("cart prices and quantity digits keep the existing Atma font", () => {
+  for (const selector of [".skc-price", ".skc-qty span", ".skc-subtotal b"]) {
+    const rule = posterSource.slice(posterSource.indexOf(`${selector} {`)).split("}")[0];
+    assert.match(rule, /font-family: "Atma", sans-serif;/);
+  }
+});
 
 test("keeps the cart drawer English-only", () => {
   // The taka sign (U+09F3) is allowed: it is currency, not Bengali copy.

@@ -21,7 +21,7 @@ if (trackerUrl && !document.getElementById("merchant-suite-tracker")) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <MotionConfig reducedMotion="never">
+  <MotionConfig reducedMotion="user">
     <App />
   </MotionConfig>,
 );

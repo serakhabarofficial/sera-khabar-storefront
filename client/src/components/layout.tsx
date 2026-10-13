@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
+import { PageContentTransition } from "@/components/page-transition";
 import { Drawer } from "vaul";
 import { useIsMobile } from "@/hooks/use-mobile";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
@@ -398,21 +399,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <CartDrawer />
       <CartAddedToast />
 
-      {/* Main Content with Transition */}
+      {/* Subtle Depth moves content only; fixed navigation and drawers stay outside. */}
       <main className="flex-grow overflow-hidden bg-[#faf4ea]">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={location}
-            initial={{ opacity: 0, y: 14, filter: "blur(3px)" }}
-            // Clear the filter once the page is in: a lingering blur(0px) still wraps the
-            // whole page in a filter layer, so every carousel frame repaints the page on phones.
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
-            exit={{ opacity: 0, y: -14, filter: "blur(3px)" }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <PageContentTransition>{children}</PageContentTransition>
       </main>
 
       {/* Cash memo footer (approved 2026-10-13) */}

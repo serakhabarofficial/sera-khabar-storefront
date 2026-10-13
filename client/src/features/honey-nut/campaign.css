@@ -4,11 +4,11 @@
   --honey-brown: #3d211a;
   --honey-green: #5b793e;
   --honey-peach: #f0d2a0;
-  font-family: "Hind Siliguri", "Inter", system-ui, sans-serif;
+  font-family: "Noto Serif Bengali", "Inter", system-ui, serif;
 }
 
 .honey-nut-heading {
-  font-family: "Hind Siliguri", "Inter", system-ui, sans-serif;
+  font-family: "Noto Serif Bengali", "Inter", system-ui, serif;
   font-weight: 800;
   -webkit-text-stroke: 0.25px currentColor;
   paint-order: stroke fill;
