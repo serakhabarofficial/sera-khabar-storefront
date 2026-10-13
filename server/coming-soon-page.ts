@@ -8,7 +8,8 @@ export const COMING_SOON_HTML = `<!doctype html>
 <title>সেরা খাবার - Sera Khabar</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="সেরা খাবারের নতুন ওয়েবসাইট শীঘ্রই চালু হবে।">
-<link rel="icon" href="/coming-soon/sera-khabar-logo.webp" type="image/webp">
+<link rel="icon" href="/coming-soon/favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/coming-soon/favicon.png" type="image/png" sizes="512x512">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@200;300;400;600&family=Bodoni+Moda:opsz,wght@6..96,400&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
