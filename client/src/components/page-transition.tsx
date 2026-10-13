@@ -2,6 +2,7 @@ import { AnimatePresence, usePresence, useReducedMotion } from "framer-motion";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { getLoadMotion, getPageMotion, PAGE_EASE, takeRouteScroll } from "@/lib/page-motion";
 import { startScrollReveal } from "@/lib/scroll-reveal";
+import { startSkewReveal } from "@/lib/skew-reveal";
 
 // Only the very first page after a refresh plays the load animation; later pages use Settle.
 let hasShownFirstPage = false;
@@ -48,6 +49,7 @@ export function PageTransition({ children, standalone = false }: { children: Rea
     if (route) window.scrollTo({ top: route.top, left: 0, behavior: "auto" });
     const back = route?.back ?? false;
     const stopReveal = startScrollReveal(root, { instantInView: back });
+    const stopSkewReveal = startSkewReveal(root, { instantInView: back });
 
     const photo = root.querySelector("[data-page-settle]");
     const animations: (Animation | null)[] = [];
@@ -79,6 +81,7 @@ export function PageTransition({ children, standalone = false }: { children: Rea
 
     return () => {
       stopReveal();
+      stopSkewReveal();
       animations.forEach((animation) => animation?.cancel());
     };
     // Runs once per page: each route change mounts a fresh PageTransition.

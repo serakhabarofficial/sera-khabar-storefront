@@ -39,6 +39,18 @@
 /* Motion: press feedback and the add-to-cart label swap. Scroll reveal lives in index.css. */
 .sk .press { transition: transform 160ms var(--ease-out), background-color 160ms ease, color 160ms ease; }
 .sk .press:active { transform: scale(0.97); }
+/* Skew reveal words inherit their heading's full type style, including in the memo,
+   whose other spans use a smaller caption style. No-JS markup is visible by default. */
+.sk [data-skew-reveal] > [data-skew-word] {
+  display: inline-block;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  transform-origin: 50% 70%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk [data-skew-word] { opacity: 1 !important; filter: none !important; transform: none !important; }
+}
 .sk .add { display: grid; place-items: center; }
 .sk .add > span { grid-area: 1 / 1; transition: opacity 200ms var(--ease-out), filter 200ms var(--ease-out), transform 200ms var(--ease-out); }
 .sk .add .l2 { opacity: 0; filter: blur(2px); transform: translateY(4px); }

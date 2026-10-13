@@ -54,7 +54,7 @@ test("loads Noto Serif Bengali and Galada and sets digits in Geist with a Bangla
 test("renders the cash-memo hero with live prices and the jaggery photo", () => {
   // Same pinned memo as the footer, so the page opens and closes on one motif.
   assert.match(homeSource, /<div className="memo-w mh-w">\s*<span className="tack" \/>\s*<div className="memo">/);
-  assert.match(homeSource, /<h1 className="mh-title" data-load-step="">খেজুরের পাটালী<\/h1>/);
+  assert.match(homeSource, /<SkewReveal as="h1" className="mh-title" delay=\{70\}>খেজুরের পাটালী<\/SkewReveal>/);
   // Sizes and prices are read from the catalog product, never typed into the hero.
   assert.match(homeSource, /<MemoHero product=\{jaggeryProducts\.find\(\(product\) => product\.name\.includes\("পাটালী"\)\)\} \/>/);
   assert.match(homeSource, /sizes\.map\(\(option\) => \(\s*<Link key=\{option\.size\} href=\{href\} className="memo-row">/);
@@ -122,6 +122,19 @@ test("follows the motion rules and respects reduced motion", () => {
   assert.match(posterCss, /@media \(hover: hover\) and \(pointer: fine\)/);
   assert.match(posterCss, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(homeSource, /useReducedMotion/);
+});
+
+test("uses the approved Skew reveal on display text without fading its parent twice", () => {
+  assert.match(homeSource, /import SkewReveal from "@\/components\/skew-reveal"/);
+  for (const title of ["এ বছরের নতুন", "আমাদের ক্যাটাগরিসমূহ", "আমাদের পণ্য", "রাজশাহীর রান্নাঘরের গল্প", "সাধারণ জিজ্ঞাসা"]) {
+    assert.match(homeSource, new RegExp(`<SkewReveal[^>]*>${title}<\\/SkewReveal>`));
+  }
+  assert.match(homeSource, /<SkewReveal as="h2">\{title\}<\/SkewReveal>/);
+  assert.doesNotMatch(homeSource, /className="(c-sec-head|c-story|ad-board|wrap fq)" data-reveal/);
+  assert.doesNotMatch(homeSource, /<SkewReveal[^>]*(?:price|rows|ctas)/);
+  const transition = readFileSync(new URL("../components/page-transition.tsx", import.meta.url), "utf8");
+  assert.match(transition, /startSkewReveal\(root, \{ instantInView: back \}\)/);
+  assert.match(transition, /stopSkewReveal\(\)/);
 });
 
 test("shows every size of a product as its own card on the category shelves", () => {

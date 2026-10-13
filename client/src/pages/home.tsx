@@ -1,6 +1,7 @@
 import Layout from "@/components/layout";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
+import SkewReveal from "@/components/skew-reveal";
 import {
   fetchStorefrontProducts,
   getProductImage,
@@ -74,8 +75,8 @@ function MemoHero({ product }: { product?: StorefrontProduct }) {
             </div>
             <div className="mh-body">
               <div>
-                <span className="script mh-kick" data-load-step="">এ বছরের নতুন</span>
-                <h1 className="mh-title" data-load-step="">খেজুরের পাটালী</h1>
+                <SkewReveal className="script mh-kick">এ বছরের নতুন</SkewReveal>
+                <SkewReveal as="h1" className="mh-title" delay={70}>খেজুরের পাটালী</SkewReveal>
                 {sizes.length ? (
                   <div className="mh-rows" data-load-step="">
                     {sizes.map((option) => (
@@ -149,8 +150,8 @@ function CategoryCards() {
   return (
     <section className="cx-sec">
       <div className="wrap">
-        <h2 data-reveal="">আমাদের ক্যাটাগরিসমূহ</h2>
-        <span className="script sub" data-reveal="">যা খুঁজছেন</span>
+        <SkewReveal as="h2">আমাদের ক্যাটাগরিসমূহ</SkewReveal>
+        <SkewReveal className="script sub">যা খুঁজছেন</SkewReveal>
         <div className="fr-grid">
           {HOMEPAGE_CATEGORIES.map((category, index) => (
             <Link
@@ -190,8 +191,8 @@ function AllProductsSection({ products, failed }: { products: StorefrontProduct[
   return (
     <section className="c-sec">
       <div className="wrap">
-        <div className="c-sec-head" data-reveal="">
-          <h2>আমাদের পণ্য</h2>
+        <div className="c-sec-head">
+          <SkewReveal as="h2">আমাদের পণ্য</SkewReveal>
           {chips.length > 2 ? (
             <div className="c-tabs" role="tablist" aria-label="ক্যাটাগরি">
               {chips.map((chip) => (
@@ -230,8 +231,8 @@ function CategoryShelf({ title, groups }: { title: string; groups: ReturnType<ty
   return (
     <section className="c-sec">
       <div className="wrap">
-        <div className="c-sec-head" data-reveal="">
-          <h2>{title}</h2>
+        <div className="c-sec-head">
+          <SkewReveal as="h2">{title}</SkewReveal>
           {showTabs ? (
             <div className="c-tabs" role="tablist" aria-label={title}>
               {groups.map((group, index) => (
@@ -283,12 +284,12 @@ function AcharAdBoard({ product }: { product?: StorefrontProduct }) {
   const startingPrice = product ? getStartingOption(product).price : null;
 
   return (
-    <section className="ad-board" data-reveal="">
+    <section className="ad-board">
       <div className="wrap ad-b-in">
-        <span className="script ad-tag">টক-ঝাল-মিষ্টি</span>
+        <SkewReveal className="script ad-tag">টক-ঝাল-মিষ্টি</SkewReveal>
         <h2 className="ad-b-title">
-          <span className="ad-b-pre">আমসত্ত্ব</span>
-          <span className="ad-b-word">আচার</span>
+          <SkewReveal className="ad-b-pre">আমসত্ত্ব</SkewReveal>
+          <SkewReveal className="ad-b-word">আচার</SkewReveal>
         </h2>
         <div className="ad-b-art">
           {startingPrice != null && Number.isFinite(startingPrice) ? (
@@ -361,12 +362,12 @@ function FaqChat() {
   const [question, answer] = FAQS[activeIndex];
 
   return (
-    <section className="wrap fq" data-reveal="">
+    <section className="wrap fq">
       <div className="fq-ctr">
-        <span className="script fq-kick">প্রশ্ন আছে?</span>
-        <h2>সাধারণ জিজ্ঞাসা</h2>
+        <SkewReveal className="script fq-kick">প্রশ্ন আছে?</SkewReveal>
+        <SkewReveal as="h2">সাধারণ জিজ্ঞাসা</SkewReveal>
       </div>
-      <div className="ch-card">
+      <div className="ch-card" data-reveal="">
         <div className="ch-head">
           <span className="ch-av">
             <img src="/home/leaf-mark.webp" alt="" />
@@ -465,9 +466,9 @@ export default function Home() {
 
         {/* Story Section */}
         <div className="wrap">
-          <section className="c-story" data-reveal="">
-            <h2 className="script">রাজশাহীর রান্নাঘরের গল্প</h2>
-            <p>
+          <section className="c-story">
+            <SkewReveal as="h2" className="script">রাজশাহীর রান্নাঘরের গল্প</SkewReveal>
+            <p data-reveal="">
               <b>সেরা খাবার</b> শুরু হয়েছিল পরিবারের পুরনো রেসিপি থেকে। প্রতিটি বড়ি রোদে শুকানো, প্রতিটি আচার ছোট হাঁড়িতে
               জ্বাল দেওয়া। আমরা যতটুকু বানাই, ততটুকুই বিক্রি করি।
             </p>

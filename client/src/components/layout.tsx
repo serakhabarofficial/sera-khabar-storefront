@@ -9,6 +9,7 @@ import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
 import { PageContentTransition } from "@/components/page-transition";
+import SkewReveal from "@/components/skew-reveal";
 import { Drawer } from "vaul";
 import { useIsMobile } from "@/hooks/use-mobile";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
@@ -413,7 +414,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="memo-top">
                 <img src={headerLogo} alt="সেরা খাবার" loading="lazy" decoding="async" />
                 <div className="memo-title">
-                  <b>ক্যাশ মেমো</b>
+                  <SkewReveal as="b" enabled={location === "/"}>ক্যাশ মেমো</SkewReveal>
                   <span>প্রকৃতির স্বাদ, যত্নের সঙ্গে পৌঁছে দিই আপনার ঘরে।</span>
                 </div>
                 <div className="memo-no">

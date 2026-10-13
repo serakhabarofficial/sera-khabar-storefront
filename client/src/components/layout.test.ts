@@ -70,7 +70,7 @@ test("uses the poster header: turmeric menu button, centred logo, turmeric bag",
 
 test("uses the pinned cash memo footer with the Arc Labs signature", () => {
   assert.match(layoutSource, /<footer className="sk">/);
-  assert.match(layoutSource, /<b>ক্যাশ মেমো<\/b>/);
+  assert.match(layoutSource, /<SkewReveal as="b" enabled=\{location === "\/"\}>ক্যাশ মেমো<\/SkewReveal>/);
   assert.match(layoutSource, /className="stampc"/);
   assert.match(layoutSource, /<a className="sign" href="https:\/\/api\.whatsapp\.com\/send\/\?phone=8801733670129"/);
   for (const label of ["ফ্রেশ আম", "হোমমেড", "গুড়", "সব পণ্য", "কল করুন", "হোয়াটসঅ্যাপ করুন", "আমাদের গল্প", "পাইকারি অর্ডার"]) {
