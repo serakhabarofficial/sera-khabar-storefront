@@ -275,35 +275,43 @@ function OfferBand({ product }: { product: StorefrontProduct }) {
   );
 }
 
-// "Signboard" ad for the আমসত্ত্ব আচার (the hero already sells the winter পাটালী). Priced from the
-// catalog; if the product is not published, the button takes the order on WhatsApp.
+// "Signboard" ad for the আমসত্ত্ব আচার (the hero already sells the winter পাটালী): a giant yellow
+// "আচার" behind the bowl, lit by a warm spotlight (approved 2026-10-14, a mix of the "Glow" and "Big word"
+// variants in docs/design/2026-10-14-hero/achar-board-variants.html). Priced from the catalog; if the
+// product is not published, the button takes the order on WhatsApp.
 function AcharAdBoard({ product }: { product?: StorefrontProduct }) {
   const startingPrice = product ? getStartingOption(product).price : null;
 
   return (
     <section className="ad-board" data-reveal="">
       <div className="wrap ad-b-in">
-        <img className="ad-b-img" src="/home/achar-ad.webp" alt="আমসত্ত্ব আচার" loading="lazy" decoding="async" />
-        <div className="ad-b-txt">
-          <span className="script ad-tag">টক-ঝাল-মিষ্টি</span>
-          <h2>আমসত্ত্ব আচার</h2>
-          <p>খাঁটি আমসত্ত্বে তৈরি, মিষ্টি-টক-ঝালের দারুণ সমন্বয়। বাছাই করা মসলা আর ঐতিহ্যবাহী স্বাদে বানানো।</p>
-          <div className="ad-b-buy">
-            {startingPrice != null && Number.isFinite(startingPrice) ? (
-              <span className="ad-b-price">
-                <small>শুরু</small>৳<BanglaNumber value={startingPrice} />
+        <span className="script ad-tag">টক-ঝাল-মিষ্টি</span>
+        <h2 className="ad-b-title">
+          <span className="ad-b-pre">আমসত্ত্ব</span>
+          <span className="ad-b-word">আচার</span>
+        </h2>
+        <div className="ad-b-art">
+          {startingPrice != null && Number.isFinite(startingPrice) ? (
+            <span className="ad-b-stamp">
+              <span>
+                <b>৳<BanglaNumber value={startingPrice} /></b>
+                <small>থেকে শুরু</small>
               </span>
-            ) : null}
-            {product ? (
-              <Link href={`/product/${product.slug}`} className="btn-sun press">
-                এখনই অর্ডার করুন <i />
-              </Link>
-            ) : (
-              <a href={WHATSAPP_ORDER_HREF} target="_blank" rel="noopener noreferrer" className="btn-sun press">
-                এখনই অর্ডার করুন <i />
-              </a>
-            )}
-          </div>
+            </span>
+          ) : null}
+          <img className="ad-b-img" src="/home/achar-ad.webp" alt="আমসত্ত্ব আচার" width={880} height={880} loading="lazy" decoding="async" />
+        </div>
+        <p className="ad-b-lede">খাঁটি আমসত্ত্বে তৈরি, মিষ্টি-টক-ঝালের দারুণ সমন্বয়।</p>
+        <div className="ad-b-buy">
+          {product ? (
+            <Link href={`/product/${product.slug}`} className="btn-sun press">
+              এখনই অর্ডার করুন <i />
+            </Link>
+          ) : (
+            <a href={WHATSAPP_ORDER_HREF} target="_blank" rel="noopener noreferrer" className="btn-sun press">
+              এখনই অর্ডার করুন <i />
+            </a>
+          )}
         </div>
       </div>
     </section>
