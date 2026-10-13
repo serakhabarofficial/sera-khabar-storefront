@@ -105,7 +105,7 @@ test("sections reveal as they reach the screen, not when the page mounts", () =>
   assert.doesNotMatch(poster, /\.sk \.stagger|\.sk \.reveal|sk-clip-in|animation: sk-rise/);
   const home = read("../pages/home.tsx");
   assert.doesNotMatch(home, /className="[^"]*\b(stagger|reveal)\b/);
-  assert.match(home, /className="c-hero-img"[^>]*data-page-settle=""/);
+  assert.match(home, /src="\/home\/hero-jaggery-memo\.webp"[\s\S]*?data-page-settle=""/);
   assert.match(read("../components/poster-product-card.tsx"), /<article className="c-card" data-reveal="">/);
   assert.match(read("../pages/product.tsx"), /className="skp-gallery" data-page-settle=""/);
 });

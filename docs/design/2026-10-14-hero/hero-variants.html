@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Homepage Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Galada&family=Geist:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* Tokens from client/src/poster.css (.sk) */
+  :root {
+    --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a;
+    --card: #f1e5d3; --ink: #3a1d0f; --sub: #7a6050; --paper: #fffdf8;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --disp: "Noto Serif Bengali", serif;
+  }
+  html, body { margin: 0; background: var(--rice); color: var(--ink); font-family: "Geist", "Noto Serif Bengali", serif; -webkit-font-smoothing: antialiased; }
+  *, *::before, *::after { box-sizing: border-box; }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; border: 0; background: none; color: inherit; padding: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  .script { font-family: "Galada", cursive; font-weight: 400; }
+  .wrap { padding: 0 18px; max-width: 1240px; margin: 0 auto; }
+  @media (min-width: 760px) { .wrap { padding: 0 40px; } }
+  .press { transition: transform 160ms var(--ease-out), background-color 160ms ease; }
+  .press:active { transform: scale(0.97); }
+
+  /* Shared chrome: announcement bar, header, next section, phone dock (copied from the live site) */
+  .ann { background: var(--sun); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 12px; font-size: 13px; font-weight: 600; color: var(--ink); }
+  .ann .script { color: var(--pink); font-size: 17px; }
+  .ann .stamp { border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px 10px; font-size: 11px; transform: rotate(-2deg); }
+  .ann .go { background: var(--royal); color: var(--rice); border-radius: 999px; padding: 5px 12px; font-size: 12px; }
+  @media (max-width: 600px) { .ann .stamp, .ann .hide-sm { display: none; } }
+  .hd { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 10px 18px; }
+  @media (min-width: 760px) { .hd { padding: 12px 40px; } }
+  .hd .menu { display: flex; gap: 16px; font-size: 13px; font-weight: 600; color: var(--royal); }
+  .hd .menu a.txt { display: none; }
+  @media (min-width: 760px) { .hd .menu a.txt { display: inline; } .hd .menu .ic-menu { display: none; } }
+  .ic-round { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); color: var(--ink); position: relative; }
+  .ic-round svg, .ic-plain svg { width: 20px; height: 20px; }
+  .ic-plain { width: 40px; height: 40px; display: grid; place-items: center; color: var(--royal); }
+  .logo { height: 46px; width: auto; }
+  .hd .right { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+  .cart-n { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--pink); color: #fff; font-size: 10.5px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--rice); }
+  .cart-n:empty { display: none; }
+
+  .next { padding: 44px 0 160px; text-align: center; }
+  .next h2 { margin: 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: clamp(26px, 4.6vw, 42px); }
+  .next .script { display: block; color: var(--pink); font-size: 22px; transform: rotate(-4deg); }
+  .next .row { display: flex; justify-content: center; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+  .next .row span { width: 150px; height: 110px; border-radius: 22px; background: var(--card); }
+
+  .dock { position: fixed; z-index: 50; left: 12px; right: 12px; bottom: 12px; display: flex; justify-content: center; }
+  .dock-pill { width: 100%; max-width: 440px; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; background: var(--paper); box-shadow: 0 10px 30px -10px rgba(42, 28, 20, 0.35), 0 0 0 1px rgba(91, 45, 23, 0.06); }
+  .dock-pill > * { height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--sub); flex: 1; }
+  .dock-pill .on { flex: 1.9; background: var(--card); color: var(--royal); gap: 7px; font-family: var(--disp); font-weight: 700; font-size: 15px; }
+  .dock-pill .cart { flex: none; width: 50px; background: var(--sun); color: var(--ink); }
+  .dock-pill svg { width: 22px; height: 22px; }
+  @media (min-width: 760px) { .dock { display: none; } }
+
+  .btn-sun { height: 48px; padding: 0 22px; border-radius: 999px; background: var(--sun); color: var(--ink); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; }
+  .btn-sun i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+  .btn-ghost { height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid rgba(91, 45, 23, 0.25); color: var(--royal); font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; }
+  .btn-royal { height: 50px; padding: 0 24px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-ghost:hover { background: rgba(91, 45, 23, 0.06); }
+  }
+
+  /* Entrance shared by every variant: text fades up in order, photos settle. Runs on each switch / ↻. */
+  [data-in] { animation: rise 520ms var(--ease-out) both; animation-delay: calc(var(--d, 0) * 70ms + 60ms); }
+  [data-settle] { animation: settle 900ms var(--ease-out) both; animation-delay: calc(var(--d, 0) * 70ms); }
+  /* Individual translate/scale compose with an element's own transform (the tilted script, the stamp). */
+  @keyframes rise { from { opacity: 0; translate: 0 10px; } }
+  @keyframes settle { from { opacity: 0; scale: 1.06; } }
+
+  /* ───────── 1 · Spotlight ───────── */
+  .spot { display: grid; gap: 8px; padding: 12px 0 8px; align-items: center; }
+  @media (min-width: 860px) { .spot { grid-template-columns: 1fr 1fr; gap: 40px; padding: 30px 0 20px; } }
+  .spot .kick { color: var(--pink); font-size: 24px; display: inline-block; transform: rotate(-4deg); }
+  .spot h1 { margin: 2px 0 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: clamp(38px, 9.4vw, 72px); line-height: 1.12; letter-spacing: -0.01em; }
+  .spot p { margin: 14px 0 20px; max-width: 36ch; font-size: 15.5px; line-height: 1.75; color: var(--royal); }
+  .spot .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+  .spot-stage { position: relative; aspect-ratio: 1 / 0.92; max-width: 560px; width: 100%; justify-self: center; order: -1; }
+  @media (min-width: 860px) { .spot-stage { order: 0; } }
+  .spot-blob { position: absolute; left: 12%; right: 12%; top: 8%; aspect-ratio: 1; border-radius: 50%; background: var(--c, var(--sun)); transition: background-color 600ms ease; }
+  .spot-img { position: absolute; inset: 4% 6% 14%; width: 88%; height: 82%; object-fit: contain; opacity: 0; transform: scale(0.94) translateY(8px); transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out); filter: drop-shadow(0 18px 18px rgba(58, 29, 15, 0.22));
+    /* Some cutouts are cropped at their corners (the spoon handle); fade the corners so no straight edge shows. */
+    -webkit-mask-image: radial-gradient(farthest-side at 50% 52%, #000 82%, transparent 100%); mask-image: radial-gradient(farthest-side at 50% 52%, #000 82%, transparent 100%); }
+  .spot-img.on { opacity: 1; transform: none; transition: opacity 600ms var(--ease-out), transform 700ms var(--ease-out); }
+  .spot-tag { position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--paper); box-shadow: 0 10px 26px -12px rgba(58, 29, 15, 0.4); white-space: nowrap; }
+  .spot-tag .nm { display: grid; font-family: var(--disp); font-weight: 700; color: var(--royal); font-size: 15px; }
+  .spot-tag .nm > span, .spot-tag .pr > span { grid-area: 1 / 1; transition: opacity 200ms var(--ease-out), filter 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  .spot-tag .old { opacity: 0; filter: blur(2px); transform: translateY(-4px); }
+  .spot-tag .pr { display: grid; height: 38px; padding: 0 14px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; place-items: center; font-variant-numeric: tabular-nums; }
+  .spot-dots { position: absolute; left: 50%; top: 2%; transform: translateX(-50%); display: flex; gap: 6px; }
+  .spot-dots button { width: 34px; height: 24px; display: grid; place-items: center; }
+  .spot-dots button span { position: relative; display: block; width: 100%; height: 4px; border-radius: 99px; background: rgba(91, 45, 23, 0.16); overflow: hidden; }
+  .spot-dots button span i { position: absolute; inset: 0; background: var(--royal); transform-origin: left; transform: scaleX(0); }
+  .spot-dots button.done span i { transform: scaleX(1); }
+  .spot-dots button.on span i { animation: fill 4500ms linear forwards; }
+  @keyframes fill { to { transform: scaleX(1); } }
+  @media (hover: hover) and (pointer: fine) { .spot-stage:hover .spot-dots button.on span i { animation-play-state: paused; } }
+
+  /* ───────── 2 · Bento ───────── */
+  .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 8px 0 4px; }
+  @media (min-width: 860px) { .bento { grid-template-columns: 1.5fr 1fr 1fr; grid-template-rows: 230px 230px; gap: 14px; padding-top: 20px; } }
+  .tile { position: relative; border-radius: 26px; overflow: hidden; padding: 18px; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between; }
+  .tile.lead { grid-column: span 2; background: var(--royal); color: var(--rice); min-height: 0; padding: 24px 22px; }
+  @media (min-width: 860px) { .tile.lead { grid-column: 1; grid-row: span 2; padding: 34px; } }
+  .tile.lead .script { color: var(--sun); font-size: 22px; transform: rotate(-3deg); display: inline-block; }
+  .tile.lead h1 { margin: 4px 0 0; font-family: var(--disp); font-weight: 900; font-size: clamp(32px, 8vw, 54px); line-height: 1.15; }
+  .tile.lead p { margin: 12px 0 18px; font-size: 14.5px; line-height: 1.7; opacity: 0.86; max-width: 34ch; }
+  .tile .name { position: relative; z-index: 2; font-family: var(--disp); font-weight: 900; font-size: 22px; line-height: 1.15; }
+  .tile .from { position: relative; z-index: 2; font-size: 12.5px; font-weight: 600; opacity: 0.8; }
+  .tile .go { position: relative; z-index: 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(58, 29, 15, 0.12); transition: transform 240ms var(--ease-out); }
+  .tile .cut { position: absolute; z-index: 1; right: -12%; bottom: -10%; width: 82%; transition: transform 400ms var(--ease-out); filter: drop-shadow(0 12px 12px rgba(40, 20, 8, 0.25)); }
+  .tile.t-gur { background: var(--sun); color: var(--ink); }
+  .tile.t-bori { background: #e9a9a0; color: var(--ink); }
+  .tile.t-achar { background: var(--card); color: var(--royal); }
+  .tile.t-free { background: var(--paper); color: var(--royal); box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.14); justify-content: center; gap: 4px; }
+  .t-free b { font-family: var(--disp); font-size: 30px; font-weight: 900; color: var(--pink); line-height: 1.1; }
+  .t-free span { font-size: 13.5px; line-height: 1.5; }
+  .t-free small { margin-top: 8px; font-size: 11.5px; letter-spacing: 0.02em; color: var(--sub); }
+  @media (hover: hover) and (pointer: fine) {
+    .tile:not(.lead):not(.t-free):hover .cut { transform: translateY(-6px) rotate(-3deg) scale(1.04); }
+    .tile:not(.lead):not(.t-free):hover .go { transform: translateX(3px); }
+  }
+
+  /* ───────── 3 · Poster ───────── */
+  .poster { position: relative; background: var(--sun); overflow: hidden; }
+  .poster .wrap { position: relative; display: grid; padding-top: 26px; padding-bottom: 0; }
+  @media (min-width: 860px) { .poster .wrap { grid-template-columns: 1.05fr 1fr; align-items: center; padding-top: 40px; } }
+  .poster .kick { color: var(--pink); font-size: clamp(24px, 5vw, 36px); transform: rotate(-5deg); display: inline-block; }
+  .poster h1 { margin: 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: clamp(64px, 17vw, 150px); line-height: 0.95; letter-spacing: -0.02em; }
+  .poster .lede { margin: 16px 0 20px; max-width: 32ch; font-size: 15.5px; line-height: 1.7; color: var(--ink); font-weight: 500; }
+  .poster .trust { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px; padding-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--royal); }
+  .poster .trust span::before { content: "✓ "; color: var(--pink); }
+  .poster .art { position: relative; margin: 8px -8% -12% 0; }
+  @media (min-width: 860px) { .poster .art { margin: 0 -6% -10% 0; } }
+  .poster .art img { width: 100%; filter: drop-shadow(0 24px 22px rgba(58, 29, 15, 0.28)); }
+  .price-stamp { position: absolute; z-index: 2; left: 2%; top: 6%; width: 112px; aspect-ratio: 1; border-radius: 50%; background: var(--pink); color: #fff; display: grid; place-items: center; text-align: center; transform: rotate(-12deg); box-shadow: 0 0 0 5px var(--sun), 0 0 0 6.5px var(--pink); }
+  .price-stamp b { display: block; font-size: 30px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .price-stamp small { font-family: var(--disp); font-size: 12px; }
+  .poster + .next { padding-top: 70px; }
+
+  /* ───────── 4 · Shelf ───────── */
+  .shelf { padding: 12px 0 0; }
+  .shelf .kick { color: var(--pink); font-size: 22px; transform: rotate(-4deg); display: inline-block; }
+  .shelf h1 { margin: 2px 0 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: clamp(32px, 8vw, 58px); line-height: 1.15; max-width: 16ch; }
+  .shelf .trust { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 0; }
+  .shelf .trust span { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--paper); font-size: 12.5px; font-weight: 600; color: var(--royal); box-shadow: inset 0 0 0 1px rgba(91, 45, 23, 0.1); }
+  .shelf .trust span i { width: 6px; height: 6px; border-radius: 50%; background: #3bb273; }
+  .shelf .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 22px; }
+  .chips { display: flex; gap: 6px; }
+  .chip { height: 34px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--royal); box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.2); transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 160ms var(--ease-out); }
+  .chip:active { transform: scale(0.97); }
+  .chip.on { background: var(--royal); color: var(--rice); box-shadow: none; }
+  .shelf .all { font-size: 13px; font-weight: 600; color: var(--royal); white-space: nowrap; }
+  .rail { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 14px 18px 6px; scroll-padding-inline: 18px; }
+  .rail::-webkit-scrollbar { display: none; }
+  @media (min-width: 760px) { .rail { padding-inline: max(40px, calc((100vw - 1240px) / 2 + 40px)); scroll-padding-inline: 40px; } }
+  .pc { flex: 0 0 64%; max-width: 250px; scroll-snap-align: start; background: var(--card); border-radius: 24px; padding: 12px 12px 14px; animation: rise 420ms var(--ease-out) both; animation-delay: calc(var(--d, 0) * 40ms); }
+  .pc .ph { aspect-ratio: 1; border-radius: 16px; display: grid; place-items: center; }
+  .pc .ph img { width: 92%; mix-blend-mode: multiply; }
+  .pc .nm { margin-top: 8px; font-family: var(--disp); font-weight: 700; font-size: 15.5px; color: var(--royal); }
+  .pc .en { font-size: 12px; color: var(--sub); }
+  .pc .buy { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .pc .pr { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .plus { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--royal); color: var(--rice); font-size: 20px; }
+  .plus > span { grid-area: 1 / 1; transition: opacity 200ms var(--ease-out), filter 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  .plus .l2 { opacity: 0; filter: blur(2px); transform: translateY(4px); font-size: 15px; }
+  .plus.added { background: #3bb273; }
+  .plus.added .l1 { opacity: 0; filter: blur(2px); transform: translateY(-4px); }
+  .plus.added .l2 { opacity: 1; filter: none; transform: none; }
+  .shelf + .next { padding-top: 34px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-in], [data-settle], .pc { animation-name: fade !important; animation-duration: 160ms !important; animation-delay: 0ms !important; }
+    @keyframes fade { from { opacity: 0; } }
+    .spot-img, .spot-img.on { transform: none !important; }
+    .spot-dots button.on span i { animation: none; transform: scaleX(1); }
+  }
+
+  /* ── Picker: verbatim from emilkowalski/skills prototype/PICKER.md. Top, because the phone dock owns bottom-center. ── */
+  .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10, 10, 10, 0.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(0, 0, 0, 0.24), 0 2px 6px rgba(0, 0, 0, 0.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); will-change: transform; }
+  .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1), width 250ms cubic-bezier(0.23, 1, 0.32, 1); }
+  @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } }
+  .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+  .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+  .proto-picker-item:active { transform: scale(0.97); }
+  .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+  .proto-picker-item[data-active] { color: #fff; }
+  .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+  .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+  .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<nav class="proto-picker" data-position="top" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">Spotlight</button>
+  <button class="proto-picker-item">Bento</button>
+  <button class="proto-picker-item">Poster</button>
+  <button class="proto-picker-item">Shelf</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+const CUT = "../2026-10-13-homepage/cutouts/";
+const LOGO = "../../../attached_assets/sera-khabar-leaf-logo.webp";
+const IMG = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/";
+const bn = (v) => String(v).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ICON = {
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>',
+  bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M9.5 15.5c1.4 1 3.6 1 5 0" stroke-linecap="round"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+};
+const PRODUCTS = [
+  { b: "খেজুরের পাটালী গুড়", e: "Date Palm Patali", pr: 350, cat: "gur", img: "ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2" },
+  { b: "খেজুরের ঝোলা গুড়", e: "Liquid Date Jaggery", pr: 380, cat: "gur", img: "245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192" },
+  { b: "হোমমেড কুমড়ো বড়ি", e: "Homemade Pumpkin Bori", pr: 700, cat: "home", img: "4061bd9c-4908-4e43-9caa-7587c4caa1d1/41e4d871-04da-41d0-ac91-f4de112fd452" },
+  { b: "আমসত্ত্ব আচার", e: "Mango Leather Pickle", pr: 350, cat: "home", img: "38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237" },
+  { b: "দানাদার গুড়", e: "Granulated Jaggery", pr: 300, cat: "gur", img: "c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0" },
+];
+let cart = 0;
+
+const chrome = (hero) => `
+  <div class="ann"><span class="script">শীতের নতুন গুড়</span><span>৳২৬০০+ অর্ডারে ডেলিভারি ফ্রি</span><span class="stamp">ক্যাশ অন ডেলিভারি</span><a class="go press" href="#">কিনুন</a></div>
+  <header class="hd">
+    <nav class="menu"><button class="ic-round ic-menu press" aria-label="মেনু">${ICON.menu}</button><a class="txt" href="#">Menu</a><a class="txt" href="#">Shop</a><a class="txt" href="#">About Us</a></nav>
+    <img class="logo" src="${LOGO}" alt="Sera Khabar">
+    <div class="right"><span class="ic-plain">${ICON.search}</span><button class="ic-round press" aria-label="কার্ট">${ICON.bag}<span class="cart-n" data-cart>${cart ? bn(cart) : ""}</span></button></div>
+  </header>
+  ${hero}
+  <section class="next"><div class="wrap"><h2>আমাদের ক্যাটাগরিসমূহ</h2><span class="script">যা খুঁজছেন</span><div class="row"><span></span><span></span><span></span></div></div></section>
+  <nav class="dock"><div class="dock-pill"><span class="on">${ICON.home}হোম</span><span>${ICON.box}</span><span>${ICON.search}</span><span>${ICON.menu}</span><span class="cart">${ICON.bag}</span></div></nav>`;
+
+/* ── 1 · Spotlight: one product at a time on a coloured disc, rotating with a progress bar ── */
+const SPOT_MS = 4500;
+let spotCleanup = () => {};
+const SPOT = [
+  { b: "খেজুরের গুড়", pr: 300, img: "jaggery-cut.webp", c: "#f6b826" },
+  { b: "হোমমেড কুমড়ো বড়ি", pr: 700, img: "bori-cut.webp", c: "#efb8ae" },
+  { b: "আমসত্ত্ব আচার", pr: 350, img: "achar-cut.webp", c: "#f3d9b4" },
+];
+const spotlight = {
+  html: () => `<div class="wrap"><section class="spot">
+    <div class="spot-copy">
+      <span class="script kick" data-in style="--d:1">রাজশাহী থেকে</span>
+      <h1 data-in style="--d:2">ঘরে বানানো,<br>মায়ের রেসিপিতে</h1>
+      <p data-in style="--d:3">বড়ি, আচার আর খেজুরের গুড়। ছোট ব্যাচে বানাই, রোদে শুকাই, সারাদেশে পৌঁছে দিই।</p>
+      <div class="ctas" data-in style="--d:4"><a class="btn-sun press" href="#">অর্ডার করুন <i></i></a><a class="btn-ghost press" href="#">সব পণ্য দেখুন</a></div>
+    </div>
+    <div class="spot-stage" data-settle style="--c:${SPOT[0].c}">
+      <div class="spot-blob"></div>
+      ${SPOT.map((s, i) => `<img class="spot-img${i ? "" : " on"}" src="${CUT}${s.img}" alt="${s.b}">`).join("")}
+      <div class="spot-dots">${SPOT.map((s, i) => `<button aria-label="${s.b}" class="${i ? "" : "on"}"><span><i></i></span></button>`).join("")}</div>
+      <a class="spot-tag press" href="#"><span class="nm"><span>${SPOT[0].b}</span></span><span class="pr"><span>৳${bn(SPOT[0].pr)}</span></span></a>
+    </div>
+  </section></div>`,
+  init(root) {
+    const stage = root.querySelector(".spot-stage");
+    const imgs = [...stage.querySelectorAll(".spot-img")];
+    const dots = [...stage.querySelectorAll(".spot-dots button")];
+    let at = 0, timer = 0, started = 0, remaining = SPOT_MS;
+    // A timer advances the slides; the progress bar is the same 4.5s drawn in CSS, and both pause on hover.
+    const schedule = () => { started = performance.now(); timer = setTimeout(() => go((at + 1) % SPOT.length), remaining); };
+    // Swap a label by blurring the old text out while the new one comes in, in the same grid cell.
+    const swap = (holder, text) => {
+      const old = holder.firstElementChild;
+      const next = document.createElement("span");
+      next.textContent = text;
+      next.className = "old";
+      holder.appendChild(next);
+      requestAnimationFrame(() => { old.classList.add("old"); next.classList.remove("old"); });
+      setTimeout(() => old.remove(), 220);
+    };
+    const go = (i) => {
+      if (i === at) return;
+      at = i;
+      clearTimeout(timer);
+      remaining = SPOT_MS;
+      if (!reduce) schedule();
+      imgs.forEach((im, j) => im.classList.toggle("on", j === i));
+      dots.forEach((d, j) => { d.classList.toggle("on", j === i); d.classList.toggle("done", j < i); });
+      stage.style.setProperty("--c", SPOT[i].c);
+      swap(stage.querySelector(".nm"), SPOT[i].b);
+      swap(stage.querySelector(".pr"), `৳${bn(SPOT[i].pr)}`);
+    };
+    dots.forEach((d, i) => d.addEventListener("click", () => go(i)));
+    const finePointer = matchMedia("(hover: hover) and (pointer: fine)");
+    stage.addEventListener("mouseenter", () => { if (!finePointer.matches) return; clearTimeout(timer); remaining -= performance.now() - started; });
+    stage.addEventListener("mouseleave", () => { if (finePointer.matches && !reduce) schedule(); });
+    if (!reduce) schedule();
+    spotCleanup = () => clearTimeout(timer);
+  },
+};
+
+/* ── 2 · Bento: a grid of tappable tiles — headline, three categories, delivery promise ── */
+const bento = {
+  html: () => `<div class="wrap"><section class="bento">
+    <div class="tile lead" data-in style="--d:1">
+      <div>
+        <span class="script">রাজশাহী থেকে</span>
+        <h1>ঘরে বানানো খাবার, সারাদেশে</h1>
+        <p>মায়ের রেসিপিতে ছোট ব্যাচে বানানো বড়ি, আচার আর খেজুরের গুড়।</p>
+      </div>
+      <div><a class="btn-sun press" href="#">অর্ডার করুন <i></i></a></div>
+    </div>
+    <a class="tile t-gur press" href="#" data-in style="--d:2"><div><div class="name">গুড়</div><div class="from">৳${bn(300)} থেকে</div></div><span class="go">${ICON.arrow}</span><img class="cut" src="${CUT}jaggery-cut.webp" alt=""></a>
+    <a class="tile t-bori press" href="#" data-in style="--d:3"><div><div class="name">হোমমেড বড়ি</div><div class="from">৳${bn(700)} থেকে</div></div><span class="go">${ICON.arrow}</span><img class="cut" src="${CUT}bori-cut.webp" alt=""></a>
+    <a class="tile t-achar press" href="#" data-in style="--d:4"><div><div class="name">আচার</div><div class="from">৳${bn(350)} থেকে</div></div><span class="go">${ICON.arrow}</span><img class="cut" src="${CUT}achar-cut.webp" alt=""></a>
+    <div class="tile t-free" data-in style="--d:5"><b>৳${bn(2600)}+</b><span>অর্ডারে ডেলিভারি একদম ফ্রি</span><small>ক্যাশ অন ডেলিভারি · সারাদেশে</small></div>
+  </section></div>`,
+};
+
+/* ── 3 · Poster: a full-bleed seasonal campaign — big cutout, giant type, price stamp ── */
+const poster = {
+  html: () => `<section class="poster"><div class="wrap">
+    <div>
+      <span class="script kick" data-in style="--d:1">শীতের নতুন গুড়</span>
+      <h1 data-in style="--d:2">খেজুরের<br>পাটালী</h1>
+      <p class="lede" data-in style="--d:3">রাজশাহীর গাছির হাতে নামানো রস, ঘরের চুলায় জ্বাল। এ বছরের প্রথম ব্যাচ।</p>
+      <div data-in style="--d:4"><a class="btn-royal press" href="#">এখনই অর্ডার করুন ${ICON.arrow}</a></div>
+      <div class="trust" data-in style="--d:5"><span>ক্যাশ অন ডেলিভারি</span><span>সারাদেশে ২–৩ দিনে</span></div>
+    </div>
+    <div class="art">
+      <div class="price-stamp" data-in style="--d:4"><span><b>৳${bn(350)}</b><small>থেকে শুরু</small></span></div>
+      <img data-settle style="--d:1" src="../../../client/public/home/jaggery-ad.webp" alt="খেজুরের পাটালী গুড়">
+    </div>
+  </div></section>`,
+};
+
+/* ── 4 · Shelf: short headline, then real products to add right from the first screen ── */
+const card = (p, i) => `<article class="pc" style="--d:${i}">
+  <div class="ph"><img src="${IMG}${p.img}/640.webp" alt="${p.b}" loading="eager"></div>
+  <div class="nm">${p.b}</div><div class="en">${p.e}</div>
+  <div class="buy"><span class="pr">৳${bn(p.pr)}</span><button class="plus press" data-add aria-label="${p.b} কার্টে যোগ করুন"><span class="l1">+</span><span class="l2">✓</span></button></div>
+</article>`;
+const shelf = {
+  html: () => `<section class="shelf">
+    <div class="wrap">
+      <span class="script kick" data-in style="--d:1">রাজশাহী থেকে</span>
+      <h1 data-in style="--d:2">ঘরে বানানো বড়ি, আচার আর গুড়</h1>
+      <div class="trust" data-in style="--d:3"><span><i></i>ক্যাশ অন ডেলিভারি</span><span><i></i>ছোট ব্যাচ</span><span><i></i>সারাদেশে ২–৩ দিনে</span></div>
+      <div class="head" data-in style="--d:4"><div class="chips"><button class="chip on" data-f="">সব</button><button class="chip" data-f="gur">গুড়</button><button class="chip" data-f="home">হোমমেড</button></div><a class="all" href="#">সব দেখুন →</a></div>
+    </div>
+    <div class="rail" data-in style="--d:5">${PRODUCTS.map(card).join("")}</div>
+  </section>`,
+  init(root) {
+    const rail = root.querySelector(".rail");
+    root.querySelectorAll("[data-f]").forEach((chip) => chip.addEventListener("click", () => {
+      root.querySelectorAll("[data-f]").forEach((c) => c.classList.toggle("on", c === chip));
+      const list = PRODUCTS.filter((p) => !chip.dataset.f || p.cat === chip.dataset.f);
+      rail.innerHTML = list.map(card).join("");
+      rail.scrollTo({ left: 0 });
+    }));
+  },
+};
+
+const VARIANTS = [spotlight, bento, poster, shelf];
+
+/* ── Mount ── */
+const stage = document.getElementById("stage");
+function mount(i) {
+  spotCleanup();
+  spotCleanup = () => {};
+  stage.innerHTML = "";
+  requestAnimationFrame(() => {
+    stage.innerHTML = chrome(VARIANTS[i].html());
+    VARIANTS[i].init?.(stage);
+  });
+}
+
+stage.addEventListener("click", (e) => {
+  const add = e.target.closest("[data-add]");
+  if (add) {
+    add.classList.add("added");
+    setTimeout(() => add.classList.remove("added"), 1400);
+    cart++;
+    stage.querySelector("[data-cart]").textContent = bn(cart);
+    return;
+  }
+  if (e.target.closest('a[href="#"]')) e.preventDefault();
+});
+
+/* ── Picker wiring: verbatim behavior contract from PICKER.md ── */
+const picker = document.querySelector(".proto-picker");
+const highlight = picker.querySelector(".proto-picker-highlight");
+const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+const replay = picker.querySelector(".proto-picker-replay");
+let current = 0;
+
+function moveHighlight() {
+  const el = items[current];
+  highlight.style.width = el.offsetWidth + "px";
+  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+}
+
+function setActive(i) {
+  if (i < 0 || i >= VARIANTS.length) return;
+  current = i;
+  items.forEach((el, j) => {
+    el.toggleAttribute("data-active", j === i);
+    if (j === i) el.setAttribute("aria-current", "true");
+    else el.removeAttribute("aria-current");
+  });
+  moveHighlight();
+  const url = new URL(location);
+  url.searchParams.set("v", i + 1);
+  history.replaceState(null, "", url);
+  mount(i);
+}
+
+items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+replay?.addEventListener("click", () => mount(current));
+window.addEventListener("resize", moveHighlight);
+
+document.addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const num = parseInt(e.key, 10);
+  if (num >= 1 && num <= VARIANTS.length) setActive(num - 1);
+  else if (e.key === "ArrowRight") setActive((current + 1) % VARIANTS.length);
+  else if (e.key === "ArrowLeft") setActive((current - 1 + VARIANTS.length) % VARIANTS.length);
+  else if (e.key === "r" || e.key === "R") mount(current);
+});
+
+setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>

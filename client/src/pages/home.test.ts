@@ -51,11 +51,21 @@ test("loads Noto Serif Bengali and Galada and sets digits in Geist with a Bangla
   assert.match(homeSource, /withNumeralDigits|BanglaNumber/);
 });
 
-test("renders the giant wordmark hero with the hand-lettered accent", () => {
-  assert.match(homeSource, /<span className="script tag" data-load-step="">রাজশাহী থেকে<\/span>/);
-  assert.match(homeSource, /<h1 className="c-word" data-load-step="">/);
-  assert.match(homeSource, /src="\/home\/hero-bori\.webp"/);
-  assert.ok(existsSync(new URL("../../public/home/hero-bori.webp", import.meta.url)));
+test("renders the cash-memo hero with live prices and the jaggery photo", () => {
+  // Same pinned memo as the footer, so the page opens and closes on one motif.
+  assert.match(homeSource, /<div className="memo-w mh-w">\s*<span className="tack" \/>\s*<div className="memo">/);
+  assert.match(homeSource, /<h1 className="mh-title" data-load-step="">খেজুরের পাটালী<\/h1>/);
+  // Sizes and prices are read from the catalog product, never typed into the hero.
+  assert.match(homeSource, /<MemoHero product=\{jaggeryProducts\.find\(\(product\) => product\.name\.includes\("পাটালী"\)\)\} \/>/);
+  assert.match(homeSource, /sizes\.map\(\(option\) => \(\s*<Link key=\{option\.size\} href=\{href\} className="memo-row">/);
+  assert.match(homeSource, /POLICY_FACTS\.freeDeliveryThreshold/);
+  for (const file of ["hero-jaggery-memo.webp", "hero-jaggery-memo-640.webp"]) {
+    assert.match(homeSource, new RegExp(`/home/${file.replace(".", "\\.")}`));
+    assert.ok(existsSync(new URL(`../../public/home/${file}`, import.meta.url)));
+  }
+  // The old wordmark hero is gone, along with its styles.
+  assert.doesNotMatch(homeSource, /className="c-word"|className="c-hero/);
+  assert.doesNotMatch(posterCss, /\.sk \.c-hero|\.sk \.c-word/);
 });
 
 test("shows only the three coloured category cards, one per row on phones", () => {

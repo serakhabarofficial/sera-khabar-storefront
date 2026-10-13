@@ -1,4 +1,5 @@
 import Layout from "@/components/layout";
+import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
 import {
   fetchStorefrontProducts,
@@ -40,6 +41,85 @@ function getStartingOption(product: StorefrontProduct) {
     .map((variant) => ({ price: Number(variant.price), size: String(variant.attributes?.size ?? "") }))
     .sort((a, b) => a.price - b.price);
   return options[0] ?? { price: Number(product.price), size: "" };
+}
+
+// Homepage hero (approved 2026-10-14, "Memo" in docs/design/2026-10-14-hero/poster-variants.html): the
+// season's গুড় written up on the same pinned cash memo as the footer. Sizes and prices come from the live
+// catalog, so a price change in the dashboard shows here without a deploy.
+function MemoHero({ product }: { product?: StorefrontProduct }) {
+  const sizes = (product?.variants ?? [])
+    .filter((variant) => variant.available !== false && Number.isFinite(Number(variant.price)))
+    .map((variant) => ({ size: String(variant.attributes?.size ?? ""), price: Number(variant.price) }))
+    .sort((a, b) => a.price - b.price);
+  const href = product ? `/product/${product.slug}` : "/products";
+
+  return (
+    <div className="wrap">
+      <section className="mh">
+        <div className="memo-w mh-w">
+          <span className="tack" />
+          <div className="memo">
+            <div className="memo-top">
+              <img src={headerLogo} alt="সেরা খাবার" decoding="async" />
+              <div className="memo-title">
+                <b>শীতের প্রথম ব্যাচ</b>
+                <span>রাজশাহী থেকে সরাসরি আপনার ঘরে।</span>
+              </div>
+              <div className="memo-no">
+                নং <span className="num">{toBanglaDigits(String(new Date().getFullYear()))}</span>
+                <br />
+                তারিখ: আজ
+              </div>
+            </div>
+            <div className="mh-body">
+              <div>
+                <span className="script mh-kick" data-load-step="">এ বছরের নতুন</span>
+                <h1 className="mh-title" data-load-step="">খেজুরের পাটালী</h1>
+                {sizes.length ? (
+                  <div className="mh-rows" data-load-step="">
+                    {sizes.map((option) => (
+                      <Link key={option.size} href={href} className="memo-row">
+                        {option.size}
+                        <em>৳<BanglaNumber value={option.price} /></em>
+                      </Link>
+                    ))}
+                    <div className="memo-row">
+                      ডেলিভারি (৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}+ অর্ডারে)
+                      <em>ফ্রি</em>
+                    </div>
+                  </div>
+                ) : null}
+                <div className="mh-ctas" data-load-step="">
+                  <Link href={href} className="btn-royal press">
+                    এখনই অর্ডার করুন <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              </div>
+              <div className="mh-art">
+                <div className="stampc" aria-hidden="true">
+                  ক্যাশ অন
+                  <br />
+                  ডেলিভারি
+                  <br />· সারা দেশে ·
+                </div>
+                <img
+                  src="/home/hero-jaggery-memo.webp"
+                  srcSet="/home/hero-jaggery-memo-640.webp 640w, /home/hero-jaggery-memo.webp 960w"
+                  sizes="(min-width: 860px) 560px, 100vw"
+                  alt="খেজুরের পাটালী, ঝোলা ও দানাদার গুড়"
+                  width={960}
+                  height={960}
+                  fetchPriority="high"
+                  decoding="async"
+                  data-page-settle=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 function ProductGrid({ products, bySize = false }: { products: StorefrontProduct[]; bySize?: boolean }) {
@@ -364,23 +444,7 @@ export default function Home() {
     <Layout>
       <div className="sk">
         {/* Hero Section */}
-        <div className="wrap">
-          <section className="c-hero">
-            <span className="script tag" data-load-step="">রাজশাহী থেকে</span>
-            <h1 className="c-word" data-load-step="">
-              সেরা
-              <br />
-              খাবার
-            </h1>
-            <img className="c-hero-img" src="/home/hero-bori.webp" alt="" fetchPriority="high" decoding="async" data-page-settle="" />
-            <p data-load-step="">ঘরে বানানো বড়ি, আচার আর গুড়। মায়ের রেসিপি, ছোট ব্যাচ, সারাদেশে ডেলিভারি।</p>
-            <div className="c-ctas" data-load-step="">
-              <Link href="/products" className="btn-sun press">
-                অর্ডার করুন <i />
-              </Link>
-            </div>
-          </section>
-        </div>
+        <MemoHero product={jaggeryProducts.find((product) => product.name.includes("পাটালী"))} />
 
         {/* Categories Section */}
         <CategoryCards />

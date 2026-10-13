@@ -63,12 +63,22 @@
 .sk .c-head .bag .num { font-size: 15px; line-height: 1; }
 
 /* Hero */
-.sk .c-hero { position: relative; padding-block: 18px 26px; }
-.sk .c-word { margin: 0; font-family: var(--f-disp); font-weight: 900; color: var(--royal); font-size: clamp(78px, 21cqi, 220px); line-height: 0.88; letter-spacing: -0.02em; position: relative; z-index: 2; }
-.sk .c-hero .tag { position: absolute; color: var(--pink); font-size: clamp(26px, 5.6cqi, 56px); transform: rotate(-8deg); left: 46%; top: 0; z-index: 3; }
-.sk .c-hero-img { position: absolute; right: -4%; top: 6%; width: 52%; max-width: 520px; transform: rotate(8deg); mix-blend-mode: multiply; z-index: 1; }
-.sk .c-hero p { position: relative; z-index: 2; margin: 18px 0; max-width: 34ch; font-size: 15px; color: var(--royal); }
-.sk .c-ctas { position: relative; z-index: 2; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+/* Hero: the season's গুড় on the footer's pinned cash memo (approved 2026-10-14, "Memo"). Reuses .memo-w,
+   .memo, .memo-top, .memo-row and .stampc from the footer; only the layout below is hero-specific. */
+.sk .mh { padding-block: 26px 6px; }
+/* Two classes, so this beats the footer's later .sk .memo-w width. */
+.sk .memo-w.mh-w { max-width: 1040px; margin: 0 auto; }
+.sk .mh-body { display: grid; gap: 4px; margin-top: 14px; align-items: center; }
+@container site (min-width: 860px) { .sk .mh-body { grid-template-columns: 1.1fr 1fr; gap: 30px; } }
+.sk .mh-kick { display: inline-block; color: var(--pink); font-size: clamp(22px, 4.6cqi, 32px); transform: rotate(-4deg); }
+.sk .mh-title { margin: 0; font-family: var(--f-disp); font-weight: 900; color: var(--royal); font-size: clamp(46px, 11cqi, 96px); line-height: 1.05; letter-spacing: -0.02em; }
+.sk .mh-rows { margin-top: 14px; max-width: 420px; }
+.sk .mh-ctas { margin-top: 20px; }
+.sk .btn-royal { height: 50px; padding: 0 24px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; width: max-content; }
+/* The photo runs to the memo's right edge (cancelling its padding), so the cropped hand reads as reaching in from off the paper. */
+.sk .mh-art { position: relative; margin-right: calc(-1 * clamp(16px, 4cqi, 40px)); }
+.sk .mh-art img { width: 100%; max-width: 560px; height: auto; margin-left: auto; filter: drop-shadow(0 18px 18px rgba(58, 29, 15, 0.22)); }
+.sk .mh-art .stampc { left: 2%; top: 4%; right: auto; bottom: auto; z-index: 2; width: clamp(80px, 12cqi, 112px); }
 .sk .btn-sun { height: 44px; padding: 0 20px; border-radius: 999px; background: var(--sun); color: var(--ink-c); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 10px; width: max-content; }
 .sk .btn-sun i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
 
