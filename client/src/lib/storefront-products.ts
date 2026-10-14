@@ -1,7 +1,7 @@
 const storefrontEnv = import.meta.env ?? {};
 
 export const STOREFRONT_ID = storefrontEnv.VITE_STOREFRONT_ID ?? "690aa8b3-6657-46c4-8df5-addcc1f96035";
-const PRODUCTION_MERCHANT_SUITE_URL = "https://sera-khabar-commerceos.vercel.app";
+const PRODUCTION_MERCHANT_SUITE_URL = "https://admin.serakhabar.com";
 const configuredMerchantSuiteUrl = (storefrontEnv.VITE_MERCHANT_SUITE_URL ?? "").replace(/\/$/, "");
 const MERCHANT_SUITE_URL = storefrontEnv.PROD
   ? PRODUCTION_MERCHANT_SUITE_URL

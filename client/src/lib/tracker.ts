@@ -1,4 +1,4 @@
-export const PRODUCTION_MERCHANT_SUITE_URL = "https://sera-khabar-commerceos.vercel.app";
+export const PRODUCTION_MERCHANT_SUITE_URL = "https://admin.serakhabar.com";
 
 const FREE_NGROK_HOST = /\.ngrok-free\.(?:app|dev)$/i;
 

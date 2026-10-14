@@ -12,7 +12,7 @@ import {
 const storefrontId = process.env.VITE_STOREFRONT_ID ?? "690aa8b3-6657-46c4-8df5-addcc1f96035";
 const configuredMerchantSuiteUrl = (process.env.VITE_MERCHANT_SUITE_URL ?? "").replace(/\/$/, "");
 const MERCHANT_SUITE_URL = process.env.NODE_ENV === "production"
-  ? "https://sera-khabar-commerceos.vercel.app"
+  ? "https://admin.serakhabar.com"
   : configuredMerchantSuiteUrl;
 if (!MERCHANT_SUITE_URL) {
   throw new Error("VITE_MERCHANT_SUITE_URL environment variable is not set");

@@ -16,8 +16,8 @@ test("does not inject a tracker from a free ngrok tunnel", () => {
 
 test("builds the tracker URL for a stable Merchant Suite origin", () => {
   assert.equal(
-    getMerchantSuiteTrackerUrl("https://sera-khabar-commerceos.vercel.app/", storefrontId),
-    `https://sera-khabar-commerceos.vercel.app/api/tracker.js?org=${storefrontId}`,
+    getMerchantSuiteTrackerUrl("https://admin.serakhabar.com/", storefrontId),
+    `https://admin.serakhabar.com/api/tracker.js?org=${storefrontId}`,
   );
 });
 

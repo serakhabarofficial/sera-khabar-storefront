@@ -96,7 +96,7 @@ export async function resolveCampaignRedirect(req: CampaignRequest, value: unkno
   const incoming = new URL(req.url || '/', ORIGIN).search;
   const fallback = { location: mergeCampaignDestination('/', incoming, slug ? { utm_campaign: slug } : {}) };
   if (!slug) return fallback;
-  const suite = (options.merchantSuiteUrl ?? (process.env.NODE_ENV === 'production' ? 'https://sera-khabar-commerceos.vercel.app' : process.env.MERCHANT_SUITE_URL) ?? '').replace(/\/$/, '');
+  const suite = (options.merchantSuiteUrl ?? (process.env.NODE_ENV === 'production' ? 'https://admin.serakhabar.com' : process.env.MERCHANT_SUITE_URL) ?? '').replace(/\/$/, '');
   const handle = options.storefrontHandle ?? process.env.STOREFRONT_HANDLE;
   const secret = options.secret ?? process.env.STOREFRONT_CONTEXT_SECRET;
   const local = options.local ?? process.env.NODE_ENV !== 'production';

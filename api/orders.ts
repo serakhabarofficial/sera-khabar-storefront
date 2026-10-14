@@ -233,7 +233,7 @@ function getCanonicalOrderRef(value: unknown) {
 export async function processOrder(order: OrderRequest, dependencies: OrderServiceDependencies = {}) {
   const merchantSuiteUrl = (dependencies.merchantSuiteUrl
     ?? (process.env.NODE_ENV === "production"
-      ? "https://sera-khabar-commerceos.vercel.app"
+      ? "https://admin.serakhabar.com"
       : process.env.MERCHANT_SUITE_URL)
     ?? "").replace(/\/$/, "");
   const fetchImpl = dependencies.fetchImpl ?? fetch;

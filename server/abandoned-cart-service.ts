@@ -146,7 +146,7 @@ export async function processAbandonedCartCapture(
   const capture = parseAbandonedCartCapture(body);
   const merchantSuiteUrl = (dependencies.merchantSuiteUrl
     ?? (process.env.NODE_ENV === "production"
-      ? "https://sera-khabar-commerceos.vercel.app"
+      ? "https://admin.serakhabar.com"
       : process.env.MERCHANT_SUITE_URL)
     ?? "").replace(/\/$/, "");
   const apiKey = dependencies.apiKey ?? process.env.CUSTOM_ORDERS_API_KEY ?? "";

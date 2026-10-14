@@ -21,7 +21,7 @@ export default async function middleware(request: Request, context: { waitUntil(
     waitUntil: promise => context.waitUntil(promise),
     next: () => next(),
     clientIp: req => ipAddress(req),
-    merchantSuiteUrl: 'https://sera-khabar-commerceos.vercel.app',
+    merchantSuiteUrl: 'https://admin.serakhabar.com',
     storefrontHandle: 'serakhabar',
     secret: process.env.CAMPAIGN_EDGE_SECRET,
   })(request);
