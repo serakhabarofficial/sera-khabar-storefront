@@ -3,6 +3,7 @@ import { OrderProtectionError, type OrderProcessResult } from "./order-protectio
 import { normalizeLandingPagePath } from "./landing-page-attribution.ts";
 import { CLIENT_CONTEXT_HEADER } from "./client-context.ts";
 import { normalizeBdMobile } from "../shared/bd-phone.ts";
+import { MAX_LINE_QUANTITY, MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.ts";
 import { CAMPAIGN_CLICK_HEADER, CAMPAIGN_RECEIPT_HEADER } from './campaign-links.js';
 import { ANALYTICS_SESSION_HEADER } from './analytics-session.js';
 
@@ -43,7 +44,7 @@ export const orderRequestSchema = z.object({
   items: z.array(z.object({
     productId: z.string().trim().min(1).max(120),
     variantId: z.string().trim().min(1).max(120),
-    quantity: z.number().int().min(1).max(100).refine(Number.isSafeInteger),
+    quantity: z.number().int().min(1).max(MAX_LINE_QUANTITY, MAX_LINE_QUANTITY_MESSAGE).refine(Number.isSafeInteger),
   })).min(1).max(50),
   shippingZoneId: z.string().trim().min(1).max(120).optional(),
 }).refine(

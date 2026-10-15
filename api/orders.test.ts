@@ -9,6 +9,7 @@ import {
   processOrder,
   validateOrder,
 } from "./orders.ts";
+import { MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.ts";
 
 const canonicalItems = [{
   productId: "11111111-1111-4111-8111-111111111111",
@@ -448,4 +449,10 @@ test("Vercel handler preserves a retryable 429 and ignores malformed telemetry",
   await handler(createRequest({ ...validOrder, checkoutTelemetry: { pastedFields: ["other"] } }), response);
   assert.equal(called, true);
   assert.equal(read().status, 429);
+});
+
+test("caps each line at 10 units with a WhatsApp message", () => {
+  const withQuantity = (quantity: number) => ({ ...validOrder, items: [{ ...canonicalItems[0], quantity }] });
+  assert.equal(validateOrder(withQuantity(10)).items[0].quantity, 10);
+  assert.throws(() => validateOrder(withQuantity(100)), { message: MAX_LINE_QUANTITY_MESSAGE });
 });

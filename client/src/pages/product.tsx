@@ -38,6 +38,7 @@ import { generatedStorefrontProducts } from "@/lib/generated-storefront-products
 import { recordRecentlyViewedSlug } from "@/lib/recently-viewed";
 import { getDefaultBundleIndex } from "@/lib/product-selection";
 import { toBanglaDigits } from "@/lib/bangla-digits";
+import { MAX_LINE_QUANTITY } from "@shared/order-limits";
 import { FEATURED_COLLECTIONS } from "@/lib/featured-collections";
 import { POLICY_FACTS } from "@/lib/site-pages";
 import { formatTaka, getSizeOffers } from "@/lib/product-sizes";
@@ -809,7 +810,12 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                   <Minus className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <output aria-live="polite" className="num">{toBanglaDigits(quantity)}</output>
-                <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((current) => current + 1)}>
+                <button
+                  type="button"
+                  aria-label="Increase quantity"
+                  disabled={quantity >= MAX_LINE_QUANTITY}
+                  onClick={() => setQuantity((current) => Math.min(MAX_LINE_QUANTITY, current + 1))}
+                >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>

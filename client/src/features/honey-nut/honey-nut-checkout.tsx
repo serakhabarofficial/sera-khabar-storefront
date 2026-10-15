@@ -10,6 +10,7 @@ import { useCheckoutProtectionSignals } from "@/lib/order-protection";
 import { OrderProtectionMessage } from "@/components/order-protection-message";
 import { TurnstileChallenge } from "@/components/turnstile-challenge";
 import { normalizeBdMobile } from "../../../../shared/bd-phone";
+import { MAX_LINE_QUANTITY, MAX_LINE_QUANTITY_MESSAGE } from "../../../../shared/order-limits";
 import { OrderHoldConfirmation } from "@/components/order-hold-confirmation";
 import { readAbandonedCartCampaign } from "@/lib/abandoned-cart-capture";
 import { useAbandonedCartCapture } from "@/hooks/use-abandoned-cart-capture";
@@ -117,9 +118,9 @@ function getFieldErrors(
   if (
     !Number.isSafeInteger(fields.quantity) ||
     fields.quantity < 1 ||
-    fields.quantity > 100
+    fields.quantity > MAX_LINE_QUANTITY
   )
-    errors.quantity = "পরিমাণ ১ থেকে ১০০-এর মধ্যে পূর্ণ সংখ্যায় লিখুন।";
+    errors.quantity = MAX_LINE_QUANTITY_MESSAGE;
   return errors;
 }
 
@@ -166,7 +167,7 @@ export function HoneyNutCheckout({
   const totals = presentedPack
     ? calculateHoneyNutOrder(
         presentedPack.unitPrice,
-        Number.isSafeInteger(quantity) && quantity > 0 && quantity <= 100
+        Number.isSafeInteger(quantity) && quantity > 0 && quantity <= MAX_LINE_QUANTITY
           ? quantity
           : 1,
       )
@@ -536,7 +537,7 @@ export function HoneyNutCheckout({
                 type="number"
                 inputMode="numeric"
                 min={1}
-                max={100}
+                max={MAX_LINE_QUANTITY}
                 step={1}
                 value={quantity}
                 onChange={(event) => setQuantity(Number(event.target.value))}
@@ -549,7 +550,7 @@ export function HoneyNutCheckout({
                 aria-label="পরিমাণ বাড়ান"
                 onClick={() => {
                   beginCheckout();
-                  setQuantity((current) => Math.min(100, current + 1));
+                  setQuantity((current) => Math.min(MAX_LINE_QUANTITY, current + 1));
                 }}
               >
                 <Plus className="size-4" />

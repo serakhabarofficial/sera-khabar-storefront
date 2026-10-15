@@ -1,12 +1,12 @@
 import type { StorefrontProduct } from "../../lib/storefront-products.ts";
 import { isProductOrderable } from "../../lib/storefront-product-orderability.ts";
 import { normalizeBdMobile } from "../../../../shared/bd-phone";
+import { MAX_LINE_QUANTITY } from "../../../../shared/order-limits";
 
 export const HONEY_NUT_DELIVERY_CHARGE = 100 as const;
 export const HONEY_NUT_CONFIRMATION_KEY = "honey-nut-order-confirmation-v1";
 
 const MAX_PRICE = 10_000_000;
-const MAX_QUANTITY = 100;
 
 type HoneyNutConfirmationStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -70,7 +70,7 @@ export function getHoneyNutPackOptions(product: StorefrontProduct): HoneyNutPack
 
 export function calculateHoneyNutOrder(unitPrice: number, quantity: number): HoneyNutOrderTotals {
   if (!isPositiveSafeInteger(unitPrice, MAX_PRICE)) throw new Error("Unit price is invalid");
-  if (!isPositiveSafeInteger(quantity, MAX_QUANTITY)) throw new Error("Quantity is invalid");
+  if (!isPositiveSafeInteger(quantity, MAX_LINE_QUANTITY)) throw new Error("Quantity is invalid");
   const subtotal = unitPrice * quantity;
   const total = subtotal + HONEY_NUT_DELIVERY_CHARGE;
   if (!Number.isSafeInteger(subtotal) || subtotal > MAX_PRICE || !Number.isSafeInteger(total)) throw new Error("Order total is invalid");
@@ -145,7 +145,7 @@ function parseHoneyNutOrderConfirmation(value: unknown): HoneyNutOrderConfirmati
     const customerName = requiredTrimmedString(confirmation.customerName, 120, "Customer name");
     const phone = requiredTrimmedString(confirmation.phone, 11, "Phone");
     const address = requiredTrimmedString(confirmation.address, 500, "Address");
-    if (!isPositiveSafeInteger(quantity, MAX_QUANTITY) || !isPositiveSafeInteger(unitPrice, MAX_PRICE) || !Number.isSafeInteger(subtotal) || (subtotal as number) < 0 || confirmation.deliveryCharge !== HONEY_NUT_DELIVERY_CHARGE || !Number.isSafeInteger(total) || (total as number) < 0 || subtotal !== (unitPrice as number) * (quantity as number) || total !== (subtotal as number) + HONEY_NUT_DELIVERY_CHARGE) return null;
+    if (!isPositiveSafeInteger(quantity, MAX_LINE_QUANTITY) || !isPositiveSafeInteger(unitPrice, MAX_PRICE) || !Number.isSafeInteger(subtotal) || (subtotal as number) < 0 || confirmation.deliveryCharge !== HONEY_NUT_DELIVERY_CHARGE || !Number.isSafeInteger(total) || (total as number) < 0 || subtotal !== (unitPrice as number) * (quantity as number) || total !== (subtotal as number) + HONEY_NUT_DELIVERY_CHARGE) return null;
     return { orderRef, productName, variantLabel, quantity, unitPrice, subtotal: subtotal as number, deliveryCharge: HONEY_NUT_DELIVERY_CHARGE, total: total as number, customerName, phone, address };
   } catch {
     return null;

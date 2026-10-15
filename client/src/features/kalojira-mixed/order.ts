@@ -1,12 +1,12 @@
 import type { StorefrontProduct } from "../../lib/storefront-products.ts";
 import { isProductOrderable } from "../../lib/storefront-product-orderability.ts";
 import { normalizeBdMobile } from "../../../../shared/bd-phone";
+import { MAX_LINE_QUANTITY } from "../../../../shared/order-limits";
 
 export const KALOJIRA_DELIVERY_CHARGE = 0;
 export const KALOJIRA_CONFIRMATION_KEY = "kalojira-mixed-order-confirmation-v1";
 
 const MAX_PRICE = 10_000_000;
-const MAX_QUANTITY = 100;
 
 type KalojiraConfirmationStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -94,7 +94,7 @@ export function calculateKalojiraOrder(unitPrice: number, quantity: number, deli
   if (!isPositiveSafeInteger(unitPrice, MAX_PRICE)) {
     throw new Error("Unit price is invalid");
   }
-  if (!isPositiveSafeInteger(quantity, MAX_QUANTITY)) {
+  if (!isPositiveSafeInteger(quantity, MAX_LINE_QUANTITY)) {
     throw new Error("Quantity is invalid");
   }
 
@@ -197,7 +197,7 @@ function parseKalojiraOrderConfirmation(value: unknown): KalojiraOrderConfirmati
     const phone = requiredTrimmedString(confirmation.phone, 11, "Phone");
     const address = requiredTrimmedString(confirmation.address, 500, "Address");
 
-    if (!isPositiveSafeInteger(quantity, MAX_QUANTITY)
+    if (!isPositiveSafeInteger(quantity, MAX_LINE_QUANTITY)
       || !isPositiveSafeInteger(unitPrice, MAX_PRICE)
       || !Number.isSafeInteger(subtotal) || (subtotal as number) < 0
       || !Number.isSafeInteger(deliveryCharge) || (deliveryCharge as number) < 0
