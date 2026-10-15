@@ -120,7 +120,7 @@ input:focus-visible{outline:none}
     </div>
     <a class="credit" href="https://api.whatsapp.com/send/?phone=8801733670129" target="_blank" rel="noopener">
       <span class="lbl">Designed &amp; Engineered by</span><span class="bar" aria-hidden="true"></span>
-      <img src="/coming-soon/arc-labs-emblem.webp" alt="Arc Labs Corporation" width="173" height="72">
+      <img src="/coming-soon/arc-logo.webp" alt="Arc Labs Corporation" width="244" height="88">
     </a>
     <span class="copy">© 2026 সেরা খাবার - Sera Khabar</span>
   </footer>

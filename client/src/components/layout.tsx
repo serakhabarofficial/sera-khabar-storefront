@@ -449,7 +449,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </p>
                 {/* Bottom Bar */}
                 <a className="sign" href="https://api.whatsapp.com/send/?phone=8801733670129" target="_blank" rel="noopener noreferrer">
-                  <img src="/arc-labs-emblem.webp" alt="Arc Labs Corporation" width={173} height={72} loading="lazy" decoding="async" />
+                  <img src="/arc-logo.webp" alt="Arc Labs Corporation" width={244} height={88} loading="lazy" decoding="async" />
                   <hr />
                   <small>Designed &amp; Engineered by</small>
                 </a>

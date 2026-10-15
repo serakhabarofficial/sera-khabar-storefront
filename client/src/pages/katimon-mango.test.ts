@@ -138,7 +138,7 @@ test("the Katimon nutritionist section matches the gallery side gap on mobile", 
 });
 
 test("the Katimon footer credits Arc Labs with the emblem", () => {
-  assert.match(pageSource, /Designed &amp; Engineered by<\/span><span aria-hidden="true" className="h-4 w-px[^"]*" \/><img src="\/arc-labs-emblem\.webp" alt="Arc Labs Corporation"/);
+  assert.match(pageSource, /Designed &amp; Engineered by<\/span><span aria-hidden="true" className="h-4 w-px[^"]*" \/><img src="\/arc-logo\.webp" alt="Arc Labs Corporation"/);
 });
 
 test("the Katimon page reuses the mobile order dock with its checkout target", () => {
