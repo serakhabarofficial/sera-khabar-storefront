@@ -9,6 +9,7 @@ import {
   processOrder,
 } from "./order-service.ts";
 import { registerRoutes } from "./routes.ts";
+import { MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.ts";
 
 const canonicalItems = [{
   productId: "11111111-1111-4111-8111-111111111111",
@@ -435,4 +436,12 @@ test("local handler returns a stable 502", async () => {
     status: 502,
     body: { message: "Could not confirm order. Please try again." },
   });
+});
+
+test("caps each line at 10 units with a WhatsApp message", () => {
+  const withQuantity = (quantity: number) => ({ ...validOrder, items: [{ ...canonicalItems[0], quantity }] });
+  assert.equal(orderRequestSchema.parse(withQuantity(10)).items[0].quantity, 10);
+  const result = orderRequestSchema.safeParse(withQuantity(100));
+  assert.equal(result.success, false);
+  assert.ok(result.error?.issues.some((issue) => issue.message === MAX_LINE_QUANTITY_MESSAGE));
 });

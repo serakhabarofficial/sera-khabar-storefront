@@ -6,6 +6,7 @@ import { Drawer } from "vaul";
 import { useMemo, useState, useEffect } from "react";
 import OrderDialog, { type OrderDialogBundle } from "@/components/order-dialog";
 import { parseCurrencyAmount, toGoogleAnalyticsItem } from "@/lib/google-analytics";
+import { MAX_LINE_QUANTITY } from "@shared/order-limits";
 
 const cartEase = [0.23, 1, 0.32, 1] as const;
 
@@ -103,7 +104,7 @@ function CartInnerContent({ items, isOpen, setIsOpen, removeFromCart, updateQuan
                                                     <Minus className="w-3.5 h-3.5" />
                                                 </button>
                                                 <span>{item.quantity}</span>
-                                                <button type="button" aria-label="Increase quantity" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                                                <button type="button" aria-label="Increase quantity" disabled={item.quantity >= MAX_LINE_QUANTITY} onClick={() => updateQuantity(item.id, item.quantity + 1)}>
                                                     <Plus className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>

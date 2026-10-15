@@ -1,12 +1,12 @@
 import type { StorefrontProduct } from "../../lib/storefront-products.ts";
 import { isProductOrderable } from "../../lib/storefront-product-orderability.ts";
 import { normalizeBdMobile } from "../../../../shared/bd-phone";
+import { MAX_LINE_QUANTITY } from "../../../../shared/order-limits";
 
 export const HONEY_DELIVERY_CHARGE = 100;
 export const HONEY_CONFIRMATION_KEY = "sundarbans-honey-order-confirmation-v1";
 
 const MAX_PRICE = 10_000_000;
-const MAX_QUANTITY = 100;
 
 type HoneyConfirmationStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -94,7 +94,7 @@ export function calculateHoneyOrder(unitPrice: number, quantity: number): HoneyO
   if (!isPositiveSafeInteger(unitPrice, MAX_PRICE)) {
     throw new Error("Unit price is invalid");
   }
-  if (!isPositiveSafeInteger(quantity, MAX_QUANTITY)) {
+  if (!isPositiveSafeInteger(quantity, MAX_LINE_QUANTITY)) {
     throw new Error("Quantity is invalid");
   }
 
@@ -195,7 +195,7 @@ function parseHoneyOrderConfirmation(value: unknown): HoneyOrderConfirmation | n
     const phone = requiredTrimmedString(confirmation.phone, 11, "Phone");
     const address = requiredTrimmedString(confirmation.address, 500, "Address");
 
-    if (!isPositiveSafeInteger(quantity, MAX_QUANTITY)
+    if (!isPositiveSafeInteger(quantity, MAX_LINE_QUANTITY)
       || !isPositiveSafeInteger(unitPrice, MAX_PRICE)
       || !Number.isSafeInteger(subtotal) || (subtotal as number) < 0
       || confirmation.deliveryCharge !== HONEY_DELIVERY_CHARGE

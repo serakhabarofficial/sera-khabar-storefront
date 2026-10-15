@@ -8,6 +8,7 @@ import {
   type OrderRequest,
 } from "./order-service.ts";
 import { OrderProtectionError, type OrderProcessResult } from "./order-protection-errors.ts";
+import { MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.ts";
 import { createSignedClientContext } from "./client-context.ts";
 import { readOrCreateDeviceId } from "./device-id.ts";
 import { readCampaignClickCookie, readCampaignReceipt, type CampaignRedirectOptions } from './campaign-links.js';
@@ -82,7 +83,9 @@ export async function registerRoutes(
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({
-          message: "Invalid order details",
+          message: error.issues.some((issue) => issue.message === MAX_LINE_QUANTITY_MESSAGE)
+            ? MAX_LINE_QUANTITY_MESSAGE
+            : "Invalid order details",
         });
         return;
       }

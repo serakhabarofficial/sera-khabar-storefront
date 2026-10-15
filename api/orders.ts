@@ -4,6 +4,7 @@ import { normalizeLandingPagePath } from "../server/landing-page-attribution.js"
 import { CLIENT_CONTEXT_HEADER, createSignedClientContext, parseCheckoutTelemetry, type CheckoutTelemetryInput } from "../server/client-context.js";
 import { readOrCreateDeviceId } from "../server/device-id.js";
 import { normalizeBdMobile } from "../shared/bd-phone.js";
+import { MAX_LINE_QUANTITY, MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.js";
 import { CAMPAIGN_CLICK_HEADER, CAMPAIGN_RECEIPT_HEADER, readCampaignClickCookie, readCampaignReceipt } from '../server/campaign-links.js';
 import { ANALYTICS_SESSION_HEADER, readAnalyticsSessionCookie } from '../server/analytics-session.js';
 
@@ -40,8 +41,8 @@ export type OrderRequest = {
 };
 
 class OrderValidationError extends Error {
-  constructor() {
-    super("Invalid order details");
+  constructor(message = "Invalid order details") {
+    super(message);
     this.name = "OrderValidationError";
   }
 }
@@ -196,6 +197,7 @@ export function validateOrder(body: unknown): OrderRequest {
       || typeof candidate.quantity !== "number" || !Number.isSafeInteger(candidate.quantity) || candidate.quantity < 1 || candidate.quantity > 100) {
       throw new OrderValidationError();
     }
+    if (candidate.quantity > MAX_LINE_QUANTITY) throw new OrderValidationError(MAX_LINE_QUANTITY_MESSAGE);
     return { productId: candidate.productId.trim(), variantId: candidate.variantId.trim(), quantity: candidate.quantity };
   });
   const shippingZoneId = optionalString("shippingZoneId", 120);
@@ -340,7 +342,7 @@ export function createOrderHandler(dependencies: OrderHandlerDependencies = {}) 
         return;
       }
       if (error instanceof OrderValidationError) {
-        sendJson(res, 400, { message: "Invalid order details" });
+        sendJson(res, 400, { message: error.message });
         return;
       }
       if (error instanceof OrderUpstreamError) {

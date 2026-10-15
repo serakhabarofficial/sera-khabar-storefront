@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { trackMerchantSuiteEvent } from "@/lib/merchant-suite";
 import { trackGoogleEcommerceEvent, type GoogleAnalyticsItem } from "@/lib/google-analytics";
+import { MAX_LINE_QUANTITY } from "@shared/order-limits";
 
 export interface CartItem {
     id: string;
@@ -109,7 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 // Update quantity if item already exists
                 return prevItems.map(item =>
                     item.id === itemId
-                        ? { ...item, quantity: item.quantity + quantity }
+                        ? { ...item, quantity: Math.min(MAX_LINE_QUANTITY, item.quantity + quantity) }
                         : item
                 );
             } else {
@@ -125,7 +126,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                         price: product.price,
                         image: product.image,
                         size,
-                        quantity,
+                        quantity: Math.min(MAX_LINE_QUANTITY, quantity),
                         analyticsItem: product.analyticsItem
                     }
                 ];
@@ -174,7 +175,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         setItems(prevItems =>
             prevItems.map(item =>
-                item.id === itemId ? { ...item, quantity } : item
+                item.id === itemId ? { ...item, quantity: Math.min(MAX_LINE_QUANTITY, quantity) } : item
             )
         );
     };
