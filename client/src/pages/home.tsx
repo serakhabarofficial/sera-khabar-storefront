@@ -105,8 +105,8 @@ function MemoHero({ product }: { product?: StorefrontProduct }) {
                   <br />· সারা দেশে ·
                 </div>
                 <img
-                  src="/home/hero-jaggery-collection.webp"
-                  srcSet="/home/hero-jaggery-collection-640.webp 640w, /home/hero-jaggery-collection.webp 960w"
+                  src="/home/hero-jaggery-still-life.webp"
+                  srcSet="/home/hero-jaggery-still-life-640.webp 640w, /home/hero-jaggery-still-life.webp 960w"
                   sizes="(min-width: 860px) 620px, 100vw"
                   alt="সেরা খাবারের দানাদার, ঝোলা ও বীজ গুড় এবং খেজুরের পাটালী"
                   width={960}

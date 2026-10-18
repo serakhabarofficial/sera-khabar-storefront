@@ -59,7 +59,7 @@ test("renders the cash-memo hero with live prices and the jaggery photo", () => 
   assert.match(homeSource, /<MemoHero product=\{jaggeryProducts\.find\(\(product\) => product\.name\.includes\("পাটালী"\)\)\} \/>/);
   assert.match(homeSource, /sizes\.map\(\(option\) => \(\s*<Link key=\{option\.size\} href=\{href\} className="memo-row">/);
   assert.match(homeSource, /POLICY_FACTS\.freeDeliveryThreshold/);
-  for (const file of ["hero-jaggery-collection.webp", "hero-jaggery-collection-640.webp"]) {
+  for (const file of ["hero-jaggery-still-life.webp", "hero-jaggery-still-life-640.webp"]) {
     assert.match(homeSource, new RegExp(`/home/${file.replace(".", "\\.")}`));
     assert.ok(existsSync(new URL(`../../public/home/${file}`, import.meta.url)));
   }
@@ -73,7 +73,7 @@ test("shows only the three coloured category cards, one per row on phones", () =
   assert.match(homeSource, /HOMEPAGE_CATEGORIES\.map/);
   assert.match(homeSource, /href=\{`\/collection\/\$\{category\.slug\}`\}/);
   assert.match(posterCss, /@container site \(max-width: 719px\) \{\n  \.sk \.fr-grid \{ grid-template-columns: 1fr;/);
-  for (const image of ["category-mango", "category-homemade", "category-jaggery-sugarcane"]) {
+  for (const image of ["category-mango", "category-homemade", "category-jaggery-date-palm"]) {
     assert.ok(existsSync(new URL(`../../public/home/${image}.webp`, import.meta.url)), image);
   }
 });
