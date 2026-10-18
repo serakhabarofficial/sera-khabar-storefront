@@ -14,7 +14,6 @@ import {
 } from "@/lib/featured-collections";
 import {
   fetchStorefrontProducts,
-  mergeInventory,
   STOREFRONT_CATALOG_QUERY_OPTIONS,
   STOREFRONT_POLL_INTERVAL_MS,
 } from "@/lib/storefront-products";
@@ -41,11 +40,9 @@ export default function CollectionPage({ params }: { params: { slug: string } })
     return <NotFound />;
   }
 
-  const filteredProducts = (
-    collection.slug === "top-selling-products"
-      ? getTopSellingProducts(products ?? [])
-      : getProductsForCollection(products ?? [], collection)
-  ).map((product) => mergeInventory(product, inventoryEntryFor(inventory, product)) ?? product);
+  const filteredProducts = collection.slug === "top-selling-products"
+    ? getTopSellingProducts(products ?? [])
+    : getProductsForCollection(products ?? [], collection);
   const [englishName = "", bengaliName = ""] = collection.label.split("-").map((part) => part.trim());
   const shelf = HOMEPAGE_SHELVES.find((item) => item.slug === collection.slug);
   const groups = shelf ? groupProductsByTabs(filteredProducts, shelf.tabs) : [];
@@ -85,7 +82,11 @@ export default function CollectionPage({ params }: { params: { slug: string } })
             {visibleProducts.length > 0 ? (
               <div key={active?.label ?? "all"} className="c-list">
                 {visibleProducts.map((product) => (
-                  <PosterProductCard key={product.id || product.slug} product={product} />
+                  <PosterProductCard
+                    key={product.id || product.slug}
+                    product={product}
+                    inventory={inventoryEntryFor(inventory, product)}
+                  />
                 ))}
               </div>
             ) : (

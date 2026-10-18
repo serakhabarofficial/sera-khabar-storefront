@@ -13,12 +13,13 @@ test("renders generated products before the live catalog request completes", () 
   assert.match(productsSource, /generatedStorefrontProducts/);
   assert.match(productsSource, /initialData: generatedStorefrontProducts/);
   assert.match(productsSource, /initialDataUpdatedAt: 0/);
-  assert.match(productsSource, /isError && !filteredProducts\?\.length/);
+  // The error message only replaces the grid when there is nothing at all to show.
+  assert.match(productsSource, /visibleProducts\.length > 0 \?[\s\S]*\{isError\s*\? "এই মুহূর্তে পণ্য দেখানো যাচ্ছে না।/);
 });
 
 test("renders a bilingual All Products title", () => {
-  assert.match(productsSource, /All Products-/);
-  assert.match(productsSource, /font-display italic">সকল পণ্য<\/span>/);
+  assert.match(productsSource, /<SkewReveal as="h1">সকল পণ্য<\/SkewReveal>/);
+  assert.match(productsSource, /<SkewReveal className="script sub">All Products<\/SkewReveal>/);
 });
 
 test("keeps the shared product grid visible when background revalidation fails", () => {

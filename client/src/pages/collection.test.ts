@@ -23,10 +23,9 @@ test("renders the homepage's empty message", () => {
 
 test("uses the homepage poster cards with live stock merged in", () => {
   assert.match(collectionSource, /<div className="sk">/);
-  assert.match(collectionSource, /<PosterProductCard key=\{product\.id \|\| product\.slug\} product=\{product\} \/>/);
-  assert.match(collectionSource, /mergeInventory\(product, inventoryEntryFor\(inventory, product\)\)/);
+  assert.match(collectionSource, /<PosterProductCard\s+key=\{product\.id \|\| product\.slug\}\s+product=\{product\}\s+inventory=\{inventoryEntryFor\(inventory, product\)\}/);
   assert.doesNotMatch(collectionSource, /StorefrontProductCard/);
-  assert.match(productsSource, /StorefrontProductCard/);
+  assert.doesNotMatch(productsSource, /StorefrontProductCard/);
 });
 
 test("splits a collection with a homepage shelf into the same tabs", () => {

@@ -5,7 +5,13 @@ import { formatCardAmount, getVariantLabel, selectDefaultVariant } from "@/compo
 import { useCart } from "@/contexts/cart-context";
 import { BanglaNumber } from "@/lib/bangla-digits";
 import { toGoogleAnalyticsItem } from "@/lib/google-analytics";
-import { getProductImageSet, getProductNumericId, type StorefrontProduct } from "@/lib/storefront-products";
+import {
+  getProductImageSet,
+  getProductNumericId,
+  mergeInventory,
+  type StorefrontInventoryEntry,
+  type StorefrontProduct,
+} from "@/lib/storefront-products";
 
 // Catalog names are "বাংলা নাম | English Name"; the card shows them on two lines.
 export function splitProductName(name: string) {
@@ -18,7 +24,20 @@ type Variant = NonNullable<StorefrontProduct["variants"]>[number];
 // Homepage product card from the approved Market Poster design: photo on top (its white
 // background blends into the card), centred name, big numeral price, round + button.
 // Pass `variant` to sell one specific size; otherwise the card uses the default variant.
-export default function PosterProductCard({ product, variant: fixedVariant }: { product: StorefrontProduct; variant?: Variant }) {
+// Listing pages pass `inventory` from their single batched stock read.
+export default function PosterProductCard({
+  product: catalogProduct,
+  variant: catalogVariant,
+  inventory,
+}: {
+  product: StorefrontProduct;
+  variant?: Variant;
+  inventory?: StorefrontInventoryEntry | null;
+}) {
+  const product = mergeInventory(catalogProduct, inventory) ?? catalogProduct;
+  const fixedVariant = catalogVariant
+    ? product.variants?.find((item) => item.id === catalogVariant.id) ?? catalogVariant
+    : undefined;
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
   const addedTimer = useRef<number | undefined>(undefined);

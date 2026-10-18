@@ -86,15 +86,17 @@
 /* Two classes, so this beats the footer's later .sk .memo-w width. */
 .sk .memo-w.mh-w { max-width: 1040px; margin: 0 auto; }
 .sk .mh-body { display: grid; gap: 4px; margin-top: 14px; align-items: center; }
-@container site (min-width: 860px) { .sk .mh-body { grid-template-columns: 1.1fr 1fr; gap: 30px; } }
+@container site (min-width: 860px) { .sk .mh-body { grid-template-columns: 1fr 1.1fr; gap: 30px; } }
 .sk .mh-kick { display: inline-block; color: var(--pink); font-size: clamp(22px, 4.6cqi, 32px); transform: rotate(-4deg); }
 .sk .mh-title { margin: 0; font-family: var(--f-disp); font-weight: 900; color: var(--royal); font-size: clamp(46px, 11cqi, 96px); line-height: 1.05; letter-spacing: -0.02em; }
 .sk .mh-rows { margin-top: 14px; max-width: 420px; }
 .sk .mh-ctas { margin-top: 20px; }
 .sk .btn-royal { height: 50px; padding: 0 24px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; width: max-content; }
-/* The photo runs to the memo's right edge (cancelling its padding), so the cropped hand reads as reaching in from off the paper. */
+/* The photo runs to the memo's right edge (cancelling its padding); on phones, where it sits
+   under the text, it runs to both edges of the paper. */
 .sk .mh-art { position: relative; margin-right: calc(-1 * clamp(16px, 4cqi, 40px)); }
-.sk .mh-art img { width: 100%; max-width: 560px; height: auto; margin-left: auto; filter: drop-shadow(0 18px 18px rgba(58, 29, 15, 0.22)); }
+@container site (max-width: 859px) { .sk .mh-art { margin-left: calc(-1 * clamp(16px, 4cqi, 40px)); } }
+.sk .mh-art img { width: 100%; max-width: 620px; height: auto; margin-left: auto; filter: drop-shadow(0 18px 18px rgba(58, 29, 15, 0.22)); }
 .sk .mh-art .stampc { left: 2%; top: 4%; right: auto; bottom: auto; z-index: 2; width: clamp(80px, 12cqi, 112px); }
 .sk .btn-sun { height: 44px; padding: 0 20px; border-radius: 999px; background: var(--sun); color: var(--ink-c); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 10px; width: max-content; }
 .sk .btn-sun i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
@@ -174,6 +176,7 @@
 .sk .col-head { padding-block: clamp(30px, 6cqi, 60px) 0; }
 .sk .col-sec { padding-block: clamp(22px, 4cqi, 40px) clamp(44px, 8cqi, 90px); }
 .sk .col-tabs { margin-bottom: 18px; }
+.sk .col-note { margin: 14px 0 0; text-align: center; color: var(--sub-c); font-size: 14px; }
 @container site (min-width: 720px) { .sk .col-tabs { justify-content: center; margin-bottom: 28px; } }
 .sk .c-rule { height: 1px; background: color-mix(in srgb, var(--royal) 18%, transparent); margin-top: 22px; }
 

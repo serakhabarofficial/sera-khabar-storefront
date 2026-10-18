@@ -107,7 +107,7 @@ function MemoHero({ product }: { product?: StorefrontProduct }) {
                 <img
                   src="/home/hero-jaggery-collection.webp"
                   srcSet="/home/hero-jaggery-collection-640.webp 640w, /home/hero-jaggery-collection.webp 960w"
-                  sizes="(min-width: 860px) 560px, 100vw"
+                  sizes="(min-width: 860px) 620px, 100vw"
                   alt="সেরা খাবারের দানাদার, ঝোলা ও বীজ গুড় এবং খেজুরের পাটালী"
                   width={960}
                   height={640}

@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout";
-import StorefrontProductCard from "@/components/storefront-product-card";
+import PosterProductCard from "@/components/poster-product-card";
 import RecentlyViewed from "@/components/recently-viewed";
+import SkewReveal from "@/components/skew-reveal";
 import { useLocation } from "wouter";
 import {
   fetchStorefrontProducts,
@@ -11,12 +13,16 @@ import {
   type StorefrontProduct,
 } from "@/lib/storefront-products";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
+import { getFeaturedCollection, getProductsForCollection, HOMEPAGE_CATEGORIES } from "@/lib/featured-collections";
+import { toBanglaDigits } from "@/lib/bangla-digits";
 import { inventoryEntryFor, useCatalogInventory } from "@/lib/use-catalog-inventory";
 
+// The all-products page uses the homepage "Market Poster" look (client/src/poster.css), with the
+// same category chips as the homepage's "আমাদের পণ্য" section.
 export default function ProductsPage() {
   const [location] = useLocation();
   const searchQuery = new URLSearchParams(location.split("?")[1] ?? "").get("search") ?? "";
-  const { data: products, isLoading, isError } = useQuery({
+  const { data: products, isError } = useQuery({
     queryKey: ["merchant-suite-products-listing"],
     queryFn: fetchStorefrontProducts,
     ...STOREFRONT_CATALOG_QUERY_OPTIONS,
@@ -24,50 +30,87 @@ export default function ProductsPage() {
     initialDataUpdatedAt: 0,
     refetchInterval: STOREFRONT_POLL_INTERVAL_MS,
   });
-  const filteredProducts = products ? searchStorefrontProducts(products, searchQuery) : products;
+  const filteredProducts: StorefrontProduct[] = products ? searchStorefrontProducts(products, searchQuery) : [];
   const inventory = useCatalogInventory(products ?? []);
+  const [activeSlug, setActiveSlug] = useState("");
+
+  // Category chips only make sense for the whole catalog, not for search results.
+  const chips = searchQuery
+    ? []
+    : [
+        { slug: "", label: "সব", products: filteredProducts },
+        ...HOMEPAGE_CATEGORIES.map((category) => {
+          const collection = getFeaturedCollection(category.slug);
+          return {
+            slug: category.slug,
+            label: category.name,
+            products: collection ? getProductsForCollection(filteredProducts, collection) : [],
+          };
+        }).filter((chip) => chip.products.length > 0),
+      ];
+  const active = chips.length > 2 ? chips.find((chip) => chip.slug === activeSlug) ?? chips[0] : undefined;
+  const visibleProducts = active?.products ?? filteredProducts;
 
   return (
     <Layout>
-      <div className="mx-auto max-w-[1500px] px-4 py-10 md:px-8 md:py-16 xl:px-12">
-        <header className="mb-10 md:mb-16">
-          <p className="text-[10px] font-medium uppercase tracking-[0.4em] text-black/50">Shop</p>
-          <h1 className="mt-3 text-[clamp(2.2rem,6vw,3.4rem)] font-bold leading-none tracking-[-0.04em] text-black">
-            All Products-<span className="font-display italic">সকল পণ্য</span>
-          </h1>
-        </header>
-
-        {isLoading && (
-          <div className="grid grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-[3/4] animate-pulse bg-[#ededed]" />
-            ))}
+      <div className="sk">
+        <section className="cx-sec col-head">
+          <div className="wrap">
+            <SkewReveal as="h1">সকল পণ্য</SkewReveal>
+            <SkewReveal className="script sub">All Products</SkewReveal>
+            {searchQuery ? (
+              <p className="col-note">
+                “{searchQuery}” খুঁজে <span className="num">{toBanglaDigits(filteredProducts.length)}</span>টি পণ্য পাওয়া গেছে
+              </p>
+            ) : null}
           </div>
-        )}
+        </section>
 
-        {isError && !filteredProducts?.length && (
-          <div className="border border-black/10 bg-white px-6 py-10 text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-black/60">Could not load products right now.</p>
-            <p className="mt-2 text-xs text-black/40">Please try again shortly.</p>
+        <section className="c-sec col-sec">
+          <div className="wrap">
+            {active ? (
+              <div className="c-tabs col-tabs" role="tablist" aria-label="ক্যাটাগরি">
+                {chips.map((chip) => (
+                  <button
+                    key={chip.slug || "all"}
+                    type="button"
+                    role="tab"
+                    aria-selected={chip === active}
+                    className={`chip press${chip === active ? " on" : ""}`}
+                    onClick={() => setActiveSlug(chip.slug)}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {visibleProducts.length > 0 ? (
+              <div key={active?.slug || "all"} className="c-list">
+                {visibleProducts.map((product) => (
+                  <PosterProductCard
+                    key={product.id || product.slug}
+                    product={product}
+                    inventory={inventoryEntryFor(inventory, product)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="c-list">
+                <p className="c-empty">
+                  {isError
+                    ? "এই মুহূর্তে পণ্য দেখানো যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।"
+                    : searchQuery
+                      ? `“${searchQuery}” নামে কোনো পণ্য পাওয়া যায়নি।`
+                      : "নতুন পণ্য শীঘ্রই আসছে।"}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-
-        {filteredProducts && filteredProducts.length === 0 && (
-          <div className="border border-black/10 bg-white px-6 py-10 text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-black/60">{searchQuery ? `No products found for "${searchQuery}".` : "No products published yet."}</p>
-          </div>
-        )}
-
-        {filteredProducts && filteredProducts.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4">
-            {filteredProducts.map((product: StorefrontProduct, index: number) => (
-              <StorefrontProductCard key={product.slug} product={product} index={index} inventory={inventoryEntryFor(inventory, product)} />
-            ))}
-          </div>
-        )}
-
-        <RecentlyViewed products={products ?? generatedStorefrontProducts} />
+        </section>
       </div>
+
+      <RecentlyViewed products={products ?? generatedStorefrontProducts} />
     </Layout>
   );
 }
