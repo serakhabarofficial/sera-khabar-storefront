@@ -9,6 +9,7 @@ import { OrderProtectionMessage } from "@/components/order-protection-message";
 import { TurnstileChallenge } from "@/components/turnstile-challenge";
 import { normalizeBdMobile } from "../../../shared/bd-phone";
 import { OrderHoldConfirmation } from "@/components/order-hold-confirmation";
+import { OrderConfirmed, warmOrderConfirmedArt, type ConfirmedOrder } from "@/components/order-confirmed";
 import { readAbandonedCartCampaign, type AbandonedCartItem } from "@/lib/abandoned-cart-capture";
 import { useAbandonedCartCapture } from "@/hooks/use-abandoned-cart-capture";
 import { trackMerchantSuiteEvent } from "@/lib/merchant-suite";
@@ -87,7 +88,7 @@ export default function OrderDialog({
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [orderError, setOrderError] = useState("");
-  const [orderRef, setOrderRef] = useState("");
+  const [confirmedOrder, setConfirmedOrder] = useState<ConfirmedOrder | null>(null);
   const [protectionDecision, setProtectionDecision] = useState<"review" | "block" | null>(null);
   const [protectionRetryable, setProtectionRetryable] = useState(true);
   const { formHandlers, trackPhoneCandidate, buildProtectionPayload,
@@ -152,6 +153,7 @@ export default function OrderDialog({
   useEffect(() => {
     if (!previousOpen.current && open) {
       setOpenInstance((current) => current + 1);
+      warmOrderConfirmedArt();
       trackMerchantSuiteEvent("checkout");
       if (bundle) {
         trackGoogleEcommerceEvent("begin_checkout", {
@@ -202,7 +204,7 @@ export default function OrderDialog({
     setOrderSubmitted(false);
     setOrderSubmitting(false);
     setOrderError("");
-    setOrderRef("");
+    setConfirmedOrder(null);
     setProtectionDecision(null);
     setPaymentMethod(null);
   };
@@ -285,7 +287,11 @@ export default function OrderDialog({
         throw new Error("Could not confirm order. Please try again.");
       }
       capture.clear();
-      setOrderRef(result.orderRef);
+      setConfirmedOrder({
+        ref: result.orderRef,
+        firstName: name.split(/\s+/)[0] ?? "",
+        total: bundle.price + selectedDeliveryCharge,
+      });
       setOrderSubmitted(true);
       onSuccess?.();
       trackGoogleEcommerceEvent("purchase", {
@@ -327,9 +333,9 @@ export default function OrderDialog({
           aria-describedby={undefined}
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
-          {isMobile && <div className="sk-sheet-grab" aria-hidden="true" />}
+          {isMobile && <div className={orderSubmitted ? "sk-sheet-grab sko-grab-over" : "sk-sheet-grab"} aria-hidden="true" />}
           {bundle && (
-            <div key={openInstance} className="sko">
+            <div key={openInstance} className={orderSubmitted ? "sko sko-is-done" : "sko"}>
               <div className={orderSubmitted ? "sko-head sko-head-done" : "sko-head"}>
                 <div>
                   <span className="sko-ask">ক্যাশ অন ডেলিভারি</span>
@@ -340,23 +346,8 @@ export default function OrderDialog({
                 </button>
               </div>
 
-              {orderSubmitted ? (
-                <div className="sko-done">
-                  <span className="sko-done-script">ধন্যবাদ!</span>
-                  <h3>Order Confirmed - অর্ডার কনফার্ম</h3>
-                  <p>
-                    Our studio team will contact you shortly to confirm delivery and payment. - আমাদের টিম শীঘ্রই ডেলিভারি ও পেমেন্ট কনফার্ম করতে যোগাযোগ করবে।
-                  </p>
-                  {orderRef && (
-                    <div className="sko-ref">
-                      <span>Order Number - অর্ডার নম্বর</span>
-                      <b>{orderRef}</b>
-                    </div>
-                  )}
-                  <button type="button" onClick={() => resetDialog(false)} className="sko-dark sko-press">
-                    Close - বন্ধ
-                  </button>
-                </div>
+              {orderSubmitted && confirmedOrder ? (
+                <OrderConfirmed order={confirmedOrder} onClose={() => resetDialog(false)} />
               ) : protectionDecision === "review" ? (
                 <div className="sko-done">
                   <OrderHoldConfirmation />
