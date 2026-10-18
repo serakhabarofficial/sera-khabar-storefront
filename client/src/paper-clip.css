@@ -1,0 +1,18 @@
+/* Paper clip on a memo (components/paper-clip.tsx). The parent must be position: relative with the paper at its top;
+   --clip-size is the clip's width. Like a real clip it lies over whatever is written at the top of the memo.
+   The back layer sits under the paper, the front layer over it. */
+.paper-clip {
+  --clip-size: 24px;
+  position: absolute;
+  top: calc(var(--clip-size) * -14 / 28);
+  left: calc(50% - var(--clip-size) / 2);
+  width: var(--clip-size);
+  height: calc(var(--clip-size) * 76 / 28);
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  transform: rotate(-4deg);
+  transform-origin: 50% calc(var(--clip-size) * 14 / 28);
+}
+.paper-clip-back { z-index: 0; filter: drop-shadow(.8px 1.2px .6px rgba(58, 29, 15, .28)); }
+.paper-clip-front { z-index: 5; filter: drop-shadow(1px 1.6px .7px rgba(58, 29, 15, .3)) drop-shadow(1.5px 3px 2.5px rgba(58, 29, 15, .1)); }

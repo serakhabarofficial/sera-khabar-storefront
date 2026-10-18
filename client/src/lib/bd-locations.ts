@@ -18,6 +18,14 @@ const ALIASES: Record<string, string> = {
   Netrokona: "netrakona",
   Jhalakathi: "jhalokati",
   Moulvibazar: "maulvibazar",
+  // Upazilas: former names and the spellings used in the news.
+  Shantiganj: "southsunamganj dakshinsunamganj দক্ষিণসুনামগঞ্জ",
+  Zianagar: "indurkani ইন্দুরকানী",
+  Shayestaganj: "shaistaganj sayestaganj",
+  Mokamtala: "mokamtola",
+  Chandraganj: "chandrogonj",
+  Ruhia: "ruhea",
+  Bhulli: "bhully",
 };
 const POPULAR = ["Dhaka", "Chattogram", "Rajshahi", "Gazipur", "Narayanganj", "Khulna", "Sylhet", "Bogura"];
 const fold = (value: string) => value.normalize("NFC").toLowerCase().replace(/[\s'’.-]/g, "");

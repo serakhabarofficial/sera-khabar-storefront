@@ -82,6 +82,12 @@ test("the form starts straight at the fields, with no numbered section heading",
   assert.doesNotMatch(pageCss, /skx-section-(head|num)/);
 });
 
+test("the memo is held by a paper clip: tongue behind the paper, loop over it", () => {
+  assert.match(dialogSource, /<PaperClip layer="back" \/>\s*<article className="skx-paper">/);
+  assert.match(dialogSource, /<\/article>\s*<PaperClip layer="front" \/>/);
+  assert.doesNotMatch(dialogSource + pageCss, /skx-pin/);
+});
+
 test("the phone's back button returns to the product, where the customer was", () => {
   assert.match(dialogSource, /window\.history\.pushState\(\{ \.\.\.window\.history\.state, \[HISTORY_KEY\]: historyToken\.current \}, ""\)/);
   // Closing from the page pops the entry it pushed, so back doesn't need pressing twice.

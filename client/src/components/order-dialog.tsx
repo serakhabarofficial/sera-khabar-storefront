@@ -8,6 +8,7 @@ import { useCheckoutProtectionSignals } from "@/lib/order-protection";
 import { OrderProtectionMessage } from "@/components/order-protection-message";
 import { TurnstileChallenge } from "@/components/turnstile-challenge";
 import { PlaceCombobox } from "@/components/place-combobox";
+import { PaperClip } from "@/components/paper-clip";
 import { normalizeBdMobile } from "../../../shared/bd-phone";
 import { MAX_LINE_QUANTITY } from "../../../shared/order-limits";
 import { OrderHoldConfirmation } from "@/components/order-hold-confirmation";
@@ -497,7 +498,7 @@ export default function OrderDialog({
               <p>আপনার পছন্দের খাবার এবার আপনার ঠিকানায়।</p>
             </div>
             <div className="skx-paper-wrap">
-              <span className="skx-pin" aria-hidden="true" />
+              <PaperClip layer="back" />
               <article className="skx-paper">
                 <div className="skx-paper-head">
                   <img src="/home/leaf-mark.webp" alt="" width={48} height={48} />
@@ -655,6 +656,7 @@ export default function OrderDialog({
                   </div>
                 </form>
               </article>
+              <PaperClip layer="front" />
             </div>
           </>
         )}
