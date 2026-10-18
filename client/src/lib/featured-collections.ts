@@ -70,7 +70,16 @@ export const FEATURED_COLLECTIONS = [
     slug: "jaggery",
     label: "Jaggery-গুড়",
     image: "/categories/jaggery-1-320.webp",
-    productSlugs: ["sugarcane-juice-powder", "granulated-sugarcane-jaggery", "date-palm-patali", "liquid-date-jaggery", "granulated-jaggery"],
+    productSlugs: [
+      "sugarcane-juice-powder",
+      "granulated-sugarcane-jaggery",
+      "date-palm-patali",
+      "liquid-date-jaggery",
+      "granulated-jaggery",
+      "round-patali-jaggery",
+      "foil-wrapped-patali-jaggery",
+      "chocolate-seed-jaggery",
+    ],
   },
   {
     slug: "semai",
@@ -144,9 +153,11 @@ export const HOMEPAGE_SHELVES = [
     slug: "jaggery",
     title: "আমাদের গুড়",
     tabs: [
-      { label: "পাটালী গুড়", keywords: ["পাটালী", "patali"] },
+      // Catalog names spell it both পাটালী and পাটালি.
+      { label: "পাটালী গুড়", keywords: ["পাটালী", "পাটালি", "patali"] },
       { label: "ঝোলা গুড়", keywords: ["ঝোলা", "liquid", "jhola"] },
       { label: "দানাদার গুড়", keywords: ["দানাদার", "granulated"] },
+      { label: "বীজ গুড়", keywords: ["বীজ", "seed"] },
     ],
   },
   {

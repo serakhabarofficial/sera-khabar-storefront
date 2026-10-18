@@ -53,6 +53,9 @@ test("assigns every current product to exactly one collection", () => {
     "date-palm-patali",
     "liquid-date-jaggery",
     "granulated-jaggery",
+    "round-patali-jaggery",
+    "foil-wrapped-patali-jaggery",
+    "chocolate-seed-jaggery",
   ];
 
   assert.equal(new Set(assignments.map(({ productSlug }) => productSlug)).size, assignments.length);
@@ -102,6 +105,9 @@ test("assigns both sugarcane products to the visible Jaggery category", () => {
     "date-palm-patali",
     "liquid-date-jaggery",
     "granulated-jaggery",
+    "round-patali-jaggery",
+    "foil-wrapped-patali-jaggery",
+    "chocolate-seed-jaggery",
   ]);
   assert.deepEqual(
     getVisibleFeaturedCollections([
@@ -218,6 +224,31 @@ test("splits a homepage shelf into tabs by product name, hiding empty tabs", () 
       ["বড়ি", ["homemade-pumpkin-bori"]],
       ["আচার", ["mango-leather-pickle"]],
       ["অন্যান্য", ["jhalmuri-moshla"]],
+    ],
+  );
+});
+
+test("files every গুড় product under a named jaggery tab", () => {
+  const jaggery = HOMEPAGE_SHELVES.find((shelf) => shelf.slug === "jaggery");
+  assert.ok(jaggery);
+  const groups = groupProductsByTabs(
+    [
+      { slug: "date-palm-patali", name: "খেজুরের পাটালী গুড় | Date Palm Patali" },
+      // Spelled পাটালি with no English name, so only the Bangla keyword can match.
+      { slug: "round-patali-jaggery", name: "গোল পাটালি" },
+      { slug: "liquid-date-jaggery", name: "খেজুরের ঝোলা গুড় | Liquid Date Jaggery" },
+      { slug: "granulated-jaggery", name: "দানাদার গুড় | Granulated Jaggery" },
+      { slug: "chocolate-seed-jaggery", name: "চকলেট বীজ গুড় | Chocolate Seed Jaggery" },
+    ],
+    jaggery.tabs,
+  );
+  assert.deepEqual(
+    groups.map(({ label, products }) => [label, products.map(({ slug }) => slug)]),
+    [
+      ["পাটালী গুড়", ["date-palm-patali", "round-patali-jaggery"]],
+      ["ঝোলা গুড়", ["liquid-date-jaggery"]],
+      ["দানাদার গুড়", ["granulated-jaggery"]],
+      ["বীজ গুড়", ["chocolate-seed-jaggery"]],
     ],
   );
 });

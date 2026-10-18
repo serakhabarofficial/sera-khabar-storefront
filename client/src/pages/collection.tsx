@@ -1,23 +1,30 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout";
-import StorefrontProductCard from "@/components/storefront-product-card";
+import PosterProductCard from "@/components/poster-product-card";
+import SkewReveal from "@/components/skew-reveal";
 import NotFound from "@/pages/not-found";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import {
   getCollection,
   getTopSellingProducts,
   getProductsForCollection,
+  groupProductsByTabs,
+  HOMEPAGE_SHELVES,
 } from "@/lib/featured-collections";
 import {
   fetchStorefrontProducts,
+  mergeInventory,
   STOREFRONT_CATALOG_QUERY_OPTIONS,
   STOREFRONT_POLL_INTERVAL_MS,
 } from "@/lib/storefront-products";
 import { inventoryEntryFor, useCatalogInventory } from "@/lib/use-catalog-inventory";
 
+// Collection pages use the homepage "Market Poster" look (client/src/poster.css): the same
+// product cards and, for categories with a homepage shelf, the same tabs.
 export default function CollectionPage({ params }: { params: { slug: string } }) {
   const collection = getCollection(params.slug);
-  const { data: products, isLoading, isError } = useQuery({
+  const { data: products, isError } = useQuery({
     queryKey: ["merchant-suite-products-listing"],
     queryFn: fetchStorefrontProducts,
     ...STOREFRONT_CATALOG_QUERY_OPTIONS,
@@ -28,54 +35,68 @@ export default function CollectionPage({ params }: { params: { slug: string } })
   // Keyed on the full catalog (not the filtered slice) so /products and every
   // /collection page share one inventory query instead of one per page.
   const inventory = useCatalogInventory(products ?? []);
+  const [activeTab, setActiveTab] = useState("");
 
   if (!collection) {
     return <NotFound />;
   }
 
-  const filteredProducts = collection.slug === "top-selling-products"
-    ? getTopSellingProducts(products ?? [])
-    : getProductsForCollection(products ?? [], collection);
-  const [englishName, bengaliName] = collection.label.split("-");
+  const filteredProducts = (
+    collection.slug === "top-selling-products"
+      ? getTopSellingProducts(products ?? [])
+      : getProductsForCollection(products ?? [], collection)
+  ).map((product) => mergeInventory(product, inventoryEntryFor(inventory, product)) ?? product);
+  const [englishName = "", bengaliName = ""] = collection.label.split("-").map((part) => part.trim());
+  const shelf = HOMEPAGE_SHELVES.find((item) => item.slug === collection.slug);
+  const groups = shelf ? groupProductsByTabs(filteredProducts, shelf.tabs) : [];
+  const tabs = groups.length > 1 ? [{ label: "সব", products: filteredProducts }, ...groups] : [];
+  const active = tabs.find((tab) => tab.label === activeTab) ?? tabs[0];
+  const visibleProducts = active?.products ?? filteredProducts;
 
   return (
     <Layout>
-      <div className="mx-auto max-w-[1500px] px-4 py-10 md:px-8 md:py-16 xl:px-12">
-        <header className="mb-10 md:mb-16">
-          <p className="text-[10px] font-medium uppercase tracking-[0.4em] text-black/50">Collection</p>
-          <h1 className="mt-3 text-[clamp(2.2rem,6vw,3.4rem)] font-bold leading-none tracking-[-0.04em] text-black">
-            {englishName} <span className="font-display italic">{bengaliName}</span>
-          </h1>
-        </header>
-
-        {isLoading && (
-          <div className="grid grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="aspect-[3/4] animate-pulse bg-[#ededed]" />
-            ))}
+      <div className="sk">
+        <section className="cx-sec col-head">
+          <div className="wrap">
+            <SkewReveal as="h1">{bengaliName || englishName}</SkewReveal>
+            {bengaliName && englishName ? <SkewReveal className="script sub">{englishName}</SkewReveal> : null}
           </div>
-        )}
+        </section>
 
-        {isError && !filteredProducts.length && (
-          <div className="border border-black/10 bg-white px-6 py-10 text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-black/60">Could not load products right now.</p>
-            <p className="mt-2 text-xs text-black/40">Please try again shortly.</p>
-          </div>
-        )}
+        <section className="c-sec col-sec">
+          <div className="wrap">
+            {tabs.length ? (
+              <div className="c-tabs col-tabs" role="tablist" aria-label={bengaliName || englishName}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.label}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === active}
+                    className={`chip press${tab === active ? " on" : ""}`}
+                    onClick={() => setActiveTab(tab.label)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
-        {!isLoading && !isError && filteredProducts.length === 0 && (
-          <div className="border border-black/10 bg-white px-6 py-10 text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-black/60">No product found</p>
+            {visibleProducts.length > 0 ? (
+              <div key={active?.label ?? "all"} className="c-list">
+                {visibleProducts.map((product) => (
+                  <PosterProductCard key={product.id || product.slug} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="c-list">
+                <p className="c-empty">
+                  {isError ? "এই মুহূর্তে পণ্য দেখানো যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।" : "নতুন পণ্য শীঘ্রই আসছে।"}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-
-        {filteredProducts.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4">
-            {filteredProducts.map((product, index) => (
-              <StorefrontProductCard key={product.slug} product={product} index={index} inventory={inventoryEntryFor(inventory, product)} />
-            ))}
-          </div>
-        )}
+        </section>
       </div>
     </Layout>
   );

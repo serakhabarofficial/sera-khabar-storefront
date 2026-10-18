@@ -17,11 +17,19 @@ test("uses the complete ordered catalog for Top Selling Products", () => {
   assert.match(collectionSource, /getTopSellingProducts\(products \?\? \[\]\)/);
 });
 
-test("renders the exact empty collection message", () => {
-  assert.match(collectionSource, /No product found/);
+test("renders the homepage's empty message", () => {
+  assert.match(collectionSource, /নতুন পণ্য শীঘ্রই আসছে।/);
 });
 
-test("reuses the shared inventory-aware product card", () => {
-  assert.match(collectionSource, /StorefrontProductCard/);
+test("uses the homepage poster cards with live stock merged in", () => {
+  assert.match(collectionSource, /<div className="sk">/);
+  assert.match(collectionSource, /<PosterProductCard key=\{product\.id \|\| product\.slug\} product=\{product\} \/>/);
+  assert.match(collectionSource, /mergeInventory\(product, inventoryEntryFor\(inventory, product\)\)/);
+  assert.doesNotMatch(collectionSource, /StorefrontProductCard/);
   assert.match(productsSource, /StorefrontProductCard/);
+});
+
+test("splits a collection with a homepage shelf into the same tabs", () => {
+  assert.match(collectionSource, /HOMEPAGE_SHELVES\.find\(\(item\) => item\.slug === collection\.slug\)/);
+  assert.match(collectionSource, /groupProductsByTabs\(filteredProducts, shelf\.tabs\)/);
 });
