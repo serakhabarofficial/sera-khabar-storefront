@@ -17,7 +17,7 @@ The latest status and to-do list for both repos are in the Suite's `handoff.md`.
 **Done**
 - **Safety rebrand:** Suite URL, handle (`serakhabar`), workspace id, contact details, logo, icons and hero changed to Sera Khabar. Mango Lover GTM/Pixel, reels, product snapshot and comparison art removed.
 - **Live:** deployed via the Suite's Provision Storefront to https://serakhabar-storefront.vercel.app (Vercel project `storefront-690aa8b3`).
-- **Pre-launch gate ON:** `server/site-access.ts`, `server/coming-soon-page.ts`, `middleware.ts`. While the env var `SITE_ACCESS_PASSWORD` is set, visitors see the founder's letter (503 + noindex) and the team password unlocks the shop for 30 days. **Delete that env var and redeploy to launch.**
+- **Launched (2026-10-18):** the pre-launch password gate and the founder's letter page were removed from the code, so the shop is public. The Vercel env var `SITE_ACCESS_PASSWORD` no longer does anything and can be deleted.
 
 **Left**
 - **Design:** colours/layout are still Mango Lover's (yellow), some Mango Lover homepage/category images remain, and the `/step/*` campaign pages need removing or reworking. **The homepage redesign is approved but not built (2026-10-13):** read `docs/design/2026-10-13-homepage/README.md` and open its `homepage-mockup.html` (palette তেঁতুল + হলুদ, Noto Serif Bengali titles, Atma digits, coloured-card categories for ফ্রেশ আম/হোমমেড/গুড় only, cash-memo footer with the Arc Labs credit).
