@@ -822,10 +822,12 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
               <button
                 type="button"
                 disabled={isUnavailable || selectedBundle.amount <= 0}
-                onClick={async () => {
-                  if (await verifyOrderable()) {
-                    setOrderOpen(true);
-                  }
+                onClick={() => {
+                  // Checkout opens on the tap; if the stock check fails, it closes and the page shows why.
+                  setOrderOpen(true);
+                  void verifyOrderable().then((orderable) => {
+                    if (!orderable) setOrderOpen(false);
+                  });
                 }}
                 className="skp-cod press"
                 aria-label="ক্যাশ অন ডেলিভারিতে অর্ডার করুন"
@@ -1043,7 +1045,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
       <RecentlyViewed products={relatedSource} excludeSlug={product?.slug} />
 
-      <OrderDialog open={orderOpen} onOpenChange={setOrderOpen} bundle={orderBundle} />
+      <OrderDialog open={orderOpen} onOpenChange={setOrderOpen} bundle={orderBundle} onQuantityChange={setQuantity} />
     </Layout>
   );
 }

@@ -86,6 +86,8 @@ function Router() {
     }
 
     const saveCurrentScroll = () => {
+      // Checkout covers the page without a route change; its scroll is not the page's.
+      if (document.documentElement.hasAttribute("data-sk-checkout")) return;
       scrollPositions.current.set(currentLocation.current, window.scrollY);
     };
 
@@ -106,6 +108,8 @@ function Router() {
     };
 
     const markHistoryNavigation = () => {
+      // Same-path entries (closing checkout) don't change the route, so no scroll reset follows to clear the flag.
+      if (window.location.pathname === currentLocation.current) return;
       saveCurrentScroll();
       isHistoryNavigation.current = true;
     };
