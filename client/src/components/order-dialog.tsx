@@ -15,6 +15,7 @@ import { useAbandonedCartCapture } from "@/hooks/use-abandoned-cart-capture";
 import { trackMerchantSuiteEvent } from "@/lib/merchant-suite";
 import { bundleHasFreeDeliveryProduct, bundleHasLitchiFlowerHoney } from "@/lib/free-delivery";
 import { toGoogleAnalyticsItem, trackGoogleEcommerceEvent, type GoogleAnalyticsItem } from "@/lib/google-analytics";
+import { observeCheckoutViewport, type CheckoutViewportStyle } from "@/lib/checkout-viewport";
 
 const deliveryOptions = [
   { label: "Standard Delivery", bn: "সাধারণ ডেলিভারি", charge: 100 }
@@ -83,6 +84,7 @@ export default function OrderDialog({
   if (bundleProp) lastBundle.current = bundleProp;
   const bundle = bundleProp ?? lastBundle.current;
   const isMobile = useIsMobile();
+  const [checkoutViewportStyle, setCheckoutViewportStyle] = useState<CheckoutViewportStyle>();
   const [openInstance, setOpenInstance] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState<number | null>(100);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
@@ -149,6 +151,11 @@ export default function OrderDialog({
     const snapshot = getCaptureSnapshot(form);
     if (snapshot) void capture.flush(snapshot);
   };
+
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    return observeCheckoutViewport(window, setCheckoutViewportStyle);
+  }, [open, isMobile]);
 
   useEffect(() => {
     if (!previousOpen.current && open) {
@@ -325,11 +332,12 @@ export default function OrderDialog({
   };
 
   return (
-    <Drawer.Root open={open} onOpenChange={resetDialog} direction={isMobile ? "bottom" : "right"}>
+    <Drawer.Root open={open} onOpenChange={resetDialog} direction={isMobile ? "bottom" : "right"} repositionInputs={false}>
       <Drawer.Portal>
         <Drawer.Overlay className="sk-sheet-overlay sko-overlay" />
         <Drawer.Content
           className={isMobile ? "sk-sheet sko-sheet" : "sk-panel sk-panel-right sko-panel"}
+          style={isMobile ? checkoutViewportStyle : undefined}
           aria-describedby={undefined}
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
