@@ -12,6 +12,31 @@ test("covers all 64 districts, and every thana belongs to one of them", () => {
   assert.ok(THANAS.every((row) => ids.has(row[1])));
 });
 
+test("has all 500 upazilas, including the five approved on 7 May 2026", () => {
+  assert.equal(THANAS.filter((row) => row[4] === 0).length, 500);
+  assert.equal(new Set(THANAS.map((row) => row[0])).size, THANAS.length);
+  for (const [district, upazila] of [
+    ["Habiganj", "শায়েস্তাগঞ্জ"],
+    ["Bogura", "মোকামতলা"],
+    ["Coxsbazar", "মাতামুহুরী"],
+    ["Lakshmipur", "চন্দ্রগঞ্জ"],
+    ["Thakurgaon", "রুহিয়া"],
+    ["Thakurgaon", "ভুল্লী"],
+  ]) {
+    assert.ok(thanasOf(districtId(district)).some((row) => row[2] === upazila && row[4] === 0), upazila);
+  }
+});
+
+test("renamed upazilas show the current name and still match the old one", () => {
+  const sunamganj = districtId("Sunamganj");
+  assert.equal(thanasOf(sunamganj, "দক্ষিণ সুনামগঞ্জ")[0][2], "শান্তিগঞ্জ");
+  assert.equal(thanasOf(sunamganj, "south sunamganj")[0][2], "শান্তিগঞ্জ");
+  assert.equal(thanasOf(sunamganj, "shanti")[0][2], "শান্তিগঞ্জ");
+  assert.equal(thanasOf(districtId("Pirojpur"), "ইন্দুরকানী")[0][2], "জিয়ানগর");
+  assert.equal(thanasOf(districtId("Pirojpur"), "indurkani")[0][2], "জিয়ানগর");
+  assert.equal(thanasOf(districtId("Thakurgaon"), "bhully")[0][2], "ভুল্লী");
+});
+
 test("district search works in Bangla, English and old spellings, busy districts first", () => {
   assert.equal(searchDistricts("raj")[0][1], "রাজশাহী");
   assert.equal(searchDistricts("ঢাকা")[0][2], "Dhaka");

@@ -52,8 +52,9 @@ test("loads Noto Serif Bengali and Galada and sets digits in Geist with a Bangla
 });
 
 test("renders the cash-memo hero with live prices and the jaggery photo", () => {
-  // Same pinned memo as the footer, so the page opens and closes on one motif.
-  assert.match(homeSource, /<div className="memo-w mh-w">\s*<span className="tack" \/>\s*<div className="memo">/);
+  // The footer's cash memo, held by the same paper clip as the checkout memo: the tongue behind the paper, the loop over it.
+  assert.match(homeSource, /<div className="memo-w mh-w">\s*<PaperClip layer="back" \/>\s*<div className="memo">/);
+  assert.match(homeSource, /<\/div>\s*<PaperClip layer="front" \/>\s*<\/div>\s*<\/section>/);
   assert.match(homeSource, /<SkewReveal as="h1" className="mh-title" delay=\{70\}>খেজুরের পাটালী<\/SkewReveal>/);
   // Sizes and prices are read from the catalog product, never typed into the hero.
   assert.match(homeSource, /<MemoHero product=\{jaggeryProducts\.find\(\(product\) => product\.name\.includes\("পাটালী"\)\)\} \/>/);

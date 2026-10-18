@@ -1,5 +1,6 @@
 import Layout from "@/components/layout";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
+import { PaperClip } from "@/components/paper-clip";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
 import SkewReveal from "@/components/skew-reveal";
 import {
@@ -46,7 +47,7 @@ function getStartingOption(product: StorefrontProduct) {
 }
 
 // Homepage hero (approved 2026-10-14, "Memo" in docs/design/2026-10-14-hero/poster-variants.html): the
-// season's গুড় written up on the same pinned cash memo as the footer. Sizes and prices come from the live
+// season's গুড় written up on the footer's cash memo, clipped like the checkout memo. Sizes and prices come from the live
 // catalog, so a price change in the dashboard shows here without a deploy.
 function MemoHero({ product }: { product?: StorefrontProduct }) {
   const sizes = (product?.variants ?? [])
@@ -59,7 +60,7 @@ function MemoHero({ product }: { product?: StorefrontProduct }) {
     <div className="wrap">
       <section className="mh">
         <div className="memo-w mh-w">
-          <span className="tack" />
+          <PaperClip layer="back" />
           <div className="memo">
             <div className="memo-top">
               <img src={headerLogo} alt="সেরা খাবার" decoding="async" />
@@ -118,6 +119,7 @@ function MemoHero({ product }: { product?: StorefrontProduct }) {
               </div>
             </div>
           </div>
+          <PaperClip layer="front" />
         </div>
       </section>
     </div>
