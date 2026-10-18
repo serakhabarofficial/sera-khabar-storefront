@@ -105,12 +105,12 @@ function MemoHero({ product }: { product?: StorefrontProduct }) {
                   <br />· সারা দেশে ·
                 </div>
                 <img
-                  src="/home/hero-jaggery-memo.webp"
-                  srcSet="/home/hero-jaggery-memo-640.webp 640w, /home/hero-jaggery-memo.webp 960w"
+                  src="/home/hero-jaggery-collection.webp"
+                  srcSet="/home/hero-jaggery-collection-640.webp 640w, /home/hero-jaggery-collection.webp 960w"
                   sizes="(min-width: 860px) 560px, 100vw"
-                  alt="খেজুরের পাটালী, ঝোলা ও দানাদার গুড়"
+                  alt="সেরা খাবারের দানাদার, ঝোলা ও বীজ গুড় এবং খেজুরের পাটালী"
                   width={960}
-                  height={960}
+                  height={640}
                   fetchPriority="high"
                   decoding="async"
                   data-page-settle=""
@@ -157,7 +157,7 @@ function CategoryCards() {
             <Link
               key={category.slug}
               href={`/collection/${category.slug}`}
-              className={`fr${category.wide ? " wide" : ""}${category.light ? " light" : ""}`}
+              className={`fr fr-${category.slug}${category.wide ? " wide" : ""}${category.light ? " light" : ""}`}
               style={{ "--c": category.color } as CSSProperties}
               data-reveal=""
             >

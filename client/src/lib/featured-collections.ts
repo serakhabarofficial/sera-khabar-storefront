@@ -132,7 +132,7 @@ export function getVisibleFeaturedCollections(products: StorefrontProduct[]) {
 export const HOMEPAGE_CATEGORIES = [
   { slug: "fresh-mango", name: "ফ্রেশ আম", en: "Fresh Mango", image: "/home/category-mango.webp", color: "#F6B826", wide: false, light: false },
   { slug: "homemade", name: "হোমমেড", en: "Homemade", image: "/home/category-homemade.webp", color: "#E9A9A0", wide: true, light: false },
-  { slug: "jaggery", name: "গুড়", en: "Jaggery", image: "/home/category-jaggery.webp", color: "#5B2D17", wide: true, light: true },
+  { slug: "jaggery", name: "গুড়", en: "Jaggery", image: "/home/category-jaggery-sugarcane.webp", color: "#5B2D17", wide: true, light: true },
 ] as const;
 
 export type ShelfTab = { label: string; keywords: readonly string[] };
