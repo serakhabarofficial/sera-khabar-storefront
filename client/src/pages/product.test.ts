@@ -145,10 +145,18 @@ test("lays out photo, then title, price, sizes, quantity and order on the poster
   assert.match(posterSource, /\.skp \{[^}]*--rice: #faf4ea;/);
 });
 
-test("size cards show the real per-kg price and only real savings", () => {
+test("size cards show the size, the price and only real savings, with no per-kg line", () => {
   assert.match(productSource, /const sizeOffers = getSizeOffers\(bundles\)/);
   assert.match(productSource, /sizeOffers\[idx\]\?\.saving \?/);
-  assert.match(productSource, /প্রতি কেজি/);
+  assert.doesNotMatch(productSource, /প্রতি কেজি/);
+  // The saving is a round stamp on the card's corner: amount over সাশ্রয়.
+  assert.match(productSource, /<span className="skp-badge">\s*<span>\{formatTaka\(sizeOffers\[idx\]\.saving\)\}<\/span>\s*<span>সাশ্রয়<\/span>/);
+  assert.match(posterSource, /\.skp-badge \{[^}]*border-radius: 50%;[^}]*transform: rotate\(-12deg\);/);
+});
+
+test("a single size spans the row and is not offered as a choice", () => {
+  assert.match(productSource, /bundles\.length > 1 \? "সাইজ বেছে নিন" : "সাইজ"/);
+  assert.match(posterSource, /\.skp-sizes\[data-count="1"\] \{ grid-template-columns: minmax\(0, 1fr\); \}/);
 });
 
 test("keeps phone and WhatsApp ordering under অথবা, then the calendar delivery estimate", () => {

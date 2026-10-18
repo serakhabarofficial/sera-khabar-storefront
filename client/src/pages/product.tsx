@@ -763,7 +763,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
             {selectedBundle.title !== "Default" ? (
               <div>
-                <span className="skp-lbl">সাইজ বেছে নিন</span>
+                <span className="skp-lbl">{bundles.length > 1 ? "সাইজ বেছে নিন" : "সাইজ"}</span>
                 <div className="skp-sizes" data-count={bundles.length}>
                   {bundles.map((bundle, idx) => (
                     <button
@@ -774,7 +774,10 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                       className="skp-size press"
                     >
                       {sizeOffers[idx]?.saving ? (
-                        <span className="skp-badge">{formatTaka(sizeOffers[idx].saving)} সাশ্রয়</span>
+                        <span className="skp-badge">
+                          <span>{formatTaka(sizeOffers[idx].saving)}</span>
+                          <span>সাশ্রয়</span>
+                        </span>
                       ) : null}
                       {displayImage ? (
                         <img
@@ -789,7 +792,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                       <span>
                         <b>{bundle.title}</b>
                         <span className="num">{formatTaka(bundle.amount)}</span>
-                        {sizeOffers[idx]?.perKg ? <small>প্রতি কেজি {formatTaka(sizeOffers[idx].perKg)}</small> : null}
                       </span>
                     </button>
                   ))}
