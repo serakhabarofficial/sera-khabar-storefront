@@ -508,17 +508,19 @@ export default function OrderDialog({
                   <span className="skx-serial" aria-hidden="true">খাতা নং<br /><b>০১</b></span>
                 </div>
 
-                <div className="skx-label-row">
-                  <span>আপনার পছন্দের খাবার</span>
-                  <span>{toBanglaDigits(lineItemCount)} প্যাক</span>
-                </div>
-                <ul className="skx-items" aria-label="আপনার অর্ডার">
-                  {lineItems.map((item, index) => (
-                    <li key={`${item.name}-${item.details}-${index}`} className="skx-item">
-                      {item.image ? <img src={item.image} alt="" width={80} height={80} /> : <span />}
-                      <div className="skx-item-copy">
-                        <h3>{item.name}</h3>
-                        <p>{item.details}{canEditQuantity ? "" : `${item.details ? " · " : ""}${toBanglaDigits(item.quantity)} প্যাক`}</p>
+                <div className="skx-order">
+                  <div className="skx-label-row">
+                    <span>আপনার পছন্দের খাবার</span>
+                    <span>{toBanglaDigits(lineItemCount)} প্যাক</span>
+                  </div>
+                  <ul className="skx-items" aria-label="আপনার অর্ডার">
+                    {lineItems.map((item, index) => (
+                      <li key={`${item.name}-${item.details}-${index}`} className={canEditQuantity ? "skx-item skx-item-editable" : "skx-item"}>
+                        {item.image ? <img src={item.image} alt="" width={80} height={80} /> : <span />}
+                        <div className="skx-item-copy">
+                          <h3>{item.name}</h3>
+                          <p>{item.details}{canEditQuantity ? "" : `${item.details ? " · " : ""}${toBanglaDigits(item.quantity)} প্যাক`}</p>
+                        </div>
                         {canEditQuantity ? (
                           <div className="skx-qty" role="group" aria-label={`${item.name} পরিমাণ`}>
                             <button type="button" aria-label="কমান" disabled={item.quantity <= 1} onClick={() => onQuantityChange?.(item.quantity - 1)}>−</button>
@@ -526,11 +528,11 @@ export default function OrderDialog({
                             <button type="button" aria-label="বাড়ান" disabled={item.quantity >= MAX_LINE_QUANTITY} onClick={() => onQuantityChange?.(item.quantity + 1)}>+</button>
                           </div>
                         ) : null}
-                      </div>
-                      <strong className="skx-item-price">{money(item.unitPrice * item.quantity)}</strong>
-                    </li>
-                  ))}
-                </ul>
+                        <strong className="skx-item-price">{money(item.unitPrice * item.quantity)}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
                 <form
                   id="order-dialog-form"
@@ -543,14 +545,7 @@ export default function OrderDialog({
                   noValidate
                 >
                   <input name="hp_x7" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="absolute -left-[9999px] h-px w-px opacity-0" />
-                  <section className="skx-section">
-                    <div className="skx-section-head">
-                      <span className="skx-section-num" aria-hidden="true">০১</span>
-                      <div>
-                        <h2>কার কাছে পৌঁছে দেব?</h2>
-                        <p>আপনার নাম, নম্বর ও ঠিকানা</p>
-                      </div>
-                    </div>
+                  <section className="skx-section" aria-label="আপনার নাম, নম্বর ও ঠিকানা">
                     <div className="skx-row">
                       {textField("name", "আপনার নাম", "Full name", "যেমন: সিহাব আহমেদ")}
                       {textField("phone", "মোবাইল নম্বর", "Phone number", "01XXXXXXXXX", "এই নম্বরেই অর্ডার কনফার্ম করব।")}

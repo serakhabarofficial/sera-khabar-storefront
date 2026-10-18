@@ -5,6 +5,7 @@ import { test } from "node:test";
 const dialogSource = readFileSync(new URL("./order-dialog.tsx", import.meta.url), "utf8");
 const comboboxSource = readFileSync(new URL("./place-combobox.tsx", import.meta.url), "utf8");
 const pageCss = readFileSync(new URL("../checkout-page.css", import.meta.url), "utf8");
+const posterCss = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
 const cartDrawerSource = readFileSync(new URL("./cart-drawer.tsx", import.meta.url), "utf8");
 const productSource = readFileSync(new URL("../pages/product.tsx", import.meta.url), "utf8");
 const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
@@ -56,9 +57,29 @@ test("reduced motion turns the Lift into a plain cross-fade", () => {
   assert.match(pageCss, /@media \(prefers-reduced-motion: reduce\) \{\n\s+html\[data-sk-nav\]::view-transition-group\(\*\) \{ animation: none !important; \}\n\s+html\[data-sk-nav\]::view-transition-old\(\*\) \{ animation: 160ms ease-out both skx-fade-out !important; \}/);
 });
 
-test("the checkout logo is a little smaller than the site header's", () => {
+test("the checkout logo and header match the storefront header: 40px/60px, then 58px/78px from 720px", () => {
+  assert.match(posterCss, /\.sk \.c-logoimg \{[^}]*height: 40px;[^}]*\}\n@container site \(min-width: 720px\) \{ \.sk \.c-logoimg \{ height: 58px; \} \}/);
+  assert.match(pageCss, /\.skx-header-in \{ max-width: 1256px; height: 78px;/);
   assert.match(pageCss, /\.skx-brand img \{ display: block; width: auto; height: 58px; \}/);
-  assert.match(pageCss, /@media \(max-width: 599px\) \{\n\s+\.skx-header-in \{ height: 68px;[^}]*\}\n\s+\.skx-brand img \{ height: 48px; \}/);
+  assert.match(pageCss, /@media \(max-width: 719px\) \{\n\s+\.skx-header-in \{ height: 60px; \}\n\s+\.skx-brand img \{ height: 40px; \}/);
+});
+
+test("the ordered items sit in a highlighted card above the form", () => {
+  assert.match(dialogSource, /<div className="skx-order">\n\s+<div className="skx-label-row">\n\s+<span>আপনার পছন্দের খাবার<\/span>[\s\S]*?<\/ul>\n\s+<\/div>\n\n\s+<form/);
+  assert.match(pageCss, /\.skx-order \{[^}]*border-radius: 14px; background: rgba\(241, 229, 211, \.62\);/);
+});
+
+test("the price shares the quantity stepper's row, so both sit on one centre line", () => {
+  assert.match(dialogSource, /className=\{canEditQuantity \? "skx-item skx-item-editable" : "skx-item"\}/);
+  assert.match(dialogSource, /<\/div>\n\s+\{canEditQuantity \? \(\n\s+<div className="skx-qty"/);
+  assert.match(pageCss, /\.skx-item-editable \{ grid-template-areas: "img copy copy" "img qty price";/);
+  assert.match(pageCss, /\.skx-item \.skx-qty \{ grid-area: qty; justify-self: start; \}/);
+  assert.match(pageCss, /\.skx-item-price \{ grid-area: price; \}/);
+});
+
+test("the form starts straight at the fields, with no numbered section heading", () => {
+  assert.doesNotMatch(dialogSource, /skx-section-num|কার কাছে পৌঁছে দেব/);
+  assert.doesNotMatch(pageCss, /skx-section-(head|num)/);
 });
 
 test("the phone's back button returns to the product, where the customer was", () => {

@@ -44,11 +44,16 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #faf4ea;
 
 /* ---------- Header ---------- */
 .skx-header { background: rgba(255, 253, 247, .88); border-bottom: 1px solid var(--line); }
-.skx-header-in { max-width: 1256px; height: 84px; margin: auto; padding: 0 32px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; }
+.skx-header-in { max-width: 1256px; height: 78px; margin: auto; padding: 0 32px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; }
 .skx-back { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; width: fit-content; padding: 0; border: 0; background: transparent; font-size: 13px; font-weight: 600; color: var(--royal); }
 .skx-back svg { width: 18px; height: 18px; }
 .skx-brand { display: block; padding: 0; border: 0; background: transparent; line-height: 0; }
+/* Same logo and header height as the storefront header (.c-logoimg), so the Lift keeps the logo still. */
 .skx-brand img { display: block; width: auto; height: 58px; }
+@media (max-width: 719px) {
+  .skx-header-in { height: 60px; }
+  .skx-brand img { height: 40px; }
+}
 .skx-assure { display: flex; align-items: center; justify-content: end; gap: 8px; color: var(--muted); font-size: 12px; }
 .skx-assure svg { width: 19px; height: 19px; }
 
@@ -68,17 +73,24 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #faf4ea;
 .skx-paper-head p { font-size: 11px; margin-top: 3px; color: var(--muted); }
 .skx-serial { font-size: 10px; line-height: 1.9; text-align: right; color: var(--muted); }
 .skx-serial b { font-size: 24px; color: var(--pink); }
-.skx-label-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.skx-label-row { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; font-weight: 600; color: var(--muted); }
 
-/* Order lines */
+/* Order lines — a warm card so what's being ordered stands out from the form. */
+.skx-order { margin-top: 20px; padding: 14px 18px 2px; border-radius: 14px; background: rgba(241, 229, 211, .62); box-shadow: inset 0 0 0 1px rgba(91, 45, 23, .08); }
 .skx-items { margin: 0; padding: 0; list-style: none; }
-.skx-item { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 0; }
+.skx-item { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; grid-template-areas: "img copy price"; gap: 14px; align-items: center; padding: 16px 0; }
+/* With a stepper, the price shares its row so the two always sit on one centre line (the stepper grows on touch). */
+.skx-item-editable { grid-template-areas: "img copy copy" "img qty price"; row-gap: 8px; }
 .skx-item + .skx-item { border-top: 1px dashed var(--line); }
+.skx-item > img, .skx-item > span:first-child { grid-area: img; }
 .skx-item > img { width: 72px; height: 80px; object-fit: contain; mix-blend-mode: multiply; }
+.skx-item-copy { grid-area: copy; min-width: 0; }
+.skx-item .skx-qty { grid-area: qty; justify-self: start; }
+.skx-item-price { grid-area: price; }
 .skx-item-copy h3 { font-size: 17px; line-height: 1.55; overflow-wrap: anywhere; }
 .skx-item-copy > p { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .skx-item-price { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
-.skx-qty { margin-top: 8px; display: inline-flex; align-items: center; border: 1px solid rgba(91, 45, 23, .23); border-radius: 999px; overflow: hidden; background: rgba(255, 253, 247, .64); }
+.skx-qty { display: inline-flex; align-items: center; border: 1px solid rgba(91, 45, 23, .23); border-radius: 999px; overflow: hidden; background: rgba(255, 253, 247, .64); }
 .skx-qty button { width: 34px; min-height: 32px; border: 0; background: transparent; font-family: "Geist", sans-serif; font-size: 19px; line-height: 1; padding: 0; transition: transform 140ms var(--ease-out); }
 .skx-qty button:active { transform: scale(.94); }
 .skx-qty button:disabled { opacity: .3; }
@@ -86,10 +98,6 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #faf4ea;
 
 /* Form */
 .skx-form { width: 100%; margin-top: 20px; border-top: 1px solid var(--line); padding-top: 26px; }
-.skx-section-head { display: flex; align-items: start; gap: 11px; margin-bottom: 20px; }
-.skx-section-num { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border: 1px solid var(--royal); border-radius: 50%; font-size: 13px; font-weight: 700; color: var(--royal); }
-.skx-section-head h2 { font-size: 20px; line-height: 1.45; }
-.skx-section-head p { font-size: 12px; line-height: 1.7; color: var(--muted); margin-top: 3px; }
 .skx-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .skx-row + .skx-row, .skx-row + .skx-field { margin-top: 18px; }
 .skx-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -203,8 +211,7 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #faf4ea;
   .skx-stamp small { font-size: 8px; margin-top: 2px; }
 }
 @media (max-width: 599px) {
-  .skx-header-in { height: 68px; padding: 0 20px; gap: 12px; }
-  .skx-brand img { height: 48px; }
+  .skx-header-in { padding: 0 20px; gap: 12px; }
   .skx-back { width: 40px; height: 44px; }
   .skx-back > span, .skx-assure > span { display: none; }
   .skx-assure svg { width: 24px; height: 24px; }
@@ -222,17 +229,14 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #faf4ea;
   .skx-paper-head p { font-size: 10px; }
   .skx-serial { font-size: 8px; }
   .skx-serial b { font-size: 22px; }
-  .skx-label-row { margin-top: 17px; font-size: 10px; }
+  .skx-order { margin-top: 17px; padding: 12px 12px 0; border-radius: 12px; }
+  .skx-label-row { font-size: 10px; }
   .skx-item { grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; }
   .skx-item > img { width: 56px; height: 72px; }
   .skx-item-copy h3 { font-size: 16px; }
   .skx-item-price { font-size: 17px; }
-  .skx-qty { margin-top: 7px; }
+  .skx-item-editable { row-gap: 7px; }
   .skx-qty output { min-width: 20px; }
-  .skx-section-head { gap: 10px; margin-bottom: 18px; }
-  .skx-section-head h2 { font-size: 18px; }
-  .skx-section-head p { font-size: 10px; }
-  .skx-section-num { width: 29px; height: 29px; font-size: 12px; }
   .skx-form { margin-top: 14px; padding-top: 24px; }
   .skx-pay-note { padding: 14px 12px; gap: 10px; }
   .skx-pay-note strong { font-size: 13px; }
