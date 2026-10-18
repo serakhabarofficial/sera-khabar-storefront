@@ -88,6 +88,20 @@ test("checkout ends with a short summary of the store policies and links to them
   }
 });
 
+test("a placed order shows the Celebrate confirmation with the kraft bag (2026-10-18)", () => {
+  assert.match(dialogSource, /<OrderConfirmed order=\{confirmedOrder\} onClose=\{\(\) => resetDialog\(false\)\} \/>/);
+  // The total and first name are captured at submit time, from what the customer actually ordered.
+  assert.match(dialogSource, /firstName: name\.split\(\/\\s\+\/\)\[0\] \?\? "",\n\s+total: bundle\.price \+ selectedDeliveryCharge,/);
+  // The bag is fetched when checkout opens, so it plays straight away after the order goes through.
+  assert.match(dialogSource, /warmOrderConfirmedArt\(\);/);
+  // The sun block runs edge to edge: no top padding, and the grab handle and close button sit over it.
+  assert.match(dialogSource, /orderSubmitted \? "sko sko-is-done" : "sko"/);
+  assert.match(dialogSource, /orderSubmitted \? "sk-sheet-grab sko-grab-over" : "sk-sheet-grab"/);
+  assert.match(posterSource, /\.sko\.sko-is-done \{[^}]*padding-top: 0;/);
+  // Held orders keep their own screen, which never claims the order is confirmed.
+  assert.match(dialogSource, /<OrderHoldConfirmation \/>/);
+});
+
 test("the order form is white and sets English text in Geist (2026-10-13)", () => {
   const htmlSource = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
   assert.match(htmlSource, /family=Geist:wght@100\.\.900/);

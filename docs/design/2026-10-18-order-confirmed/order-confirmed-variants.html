@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Order Confirmed Variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Galada&family=Geist:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* Tokens from client/src/poster.css (.sk / .sko) */
+  :root {
+    --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a;
+    --card: #f1e5d3; --ink: #3a1d0f; --sub: #7a6050; --paper: #fffdf8;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    --disp: "Noto Serif Bengali", serif;
+    --body: "Geist", "Noto Serif Bengali", serif;
+  }
+  html, body { margin: 0; background: var(--rice); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+  *, *::before, *::after { box-sizing: border-box; }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; border: 0; background: none; color: inherit; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  .num { font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; }
+  .script { font-family: "Galada", cursive; font-weight: 400; }
+  .press { transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
+  .press:active { transform: scale(0.97); }
+
+  /* ---------- The storefront behind the checkout panel ---------- */
+  .ann { background: var(--sun); text-align: center; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  .ann .script { color: var(--pink); font-size: 17px; margin-right: 6px; }
+  .hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; }
+  .hd img { height: 46px; width: auto; }
+  .hd .bag { width: 40px; height: 40px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; }
+  .hd .bag svg { width: 20px; height: 20px; }
+  .pg { padding: 18px 18px 120px; max-width: 1100px; margin: 0 auto; display: grid; gap: 20px; align-items: center; }
+  @media (min-width: 860px) { .pg { grid-template-columns: 1fr 1.1fr; padding: 30px 48px 120px; } .hd { padding: 12px 48px; } }
+  .pg .script { color: var(--pink); font-size: 28px; display: inline-block; transform: rotate(-4deg); }
+  .pg h1 { margin: 0; font-family: var(--disp); font-weight: 900; color: var(--royal); font-size: clamp(46px, 9vw, 88px); line-height: 1.05; }
+  .pg p { color: var(--sub); line-height: 1.7; max-width: 40ch; }
+  .pg img { filter: drop-shadow(0 18px 18px rgba(58, 29, 15, 0.22)); }
+  .pg .reopen { margin-top: 8px; height: 46px; padding: 0 22px; border-radius: 999px; background: var(--royal); color: var(--rice); font-weight: 700; font-size: 14px; }
+
+  /* ---------- Checkout panel shell (Vaul: right panel on desktop, bottom sheet on phones) ---------- */
+  .ov { position: fixed; inset: 0; z-index: 120; background: rgba(42, 28, 20, 0.38); transition: opacity 400ms var(--drawer); }
+  .panel { position: fixed; z-index: 121; display: flex; flex-direction: column; background: #fff; color: var(--ink); outline: none; overflow: hidden;
+    left: 0; right: 0; bottom: 0; max-height: 94dvh; border-radius: 24px 24px 0 0; box-shadow: 0 -12px 32px -12px rgba(42, 28, 20, 0.35);
+    transition: transform 500ms var(--drawer); }
+  .grab { flex: none; width: 40px; height: 5px; border-radius: 5px; background: rgba(91, 45, 23, 0.25); margin: 8px auto 4px; }
+  @media (min-width: 768px) {
+    .panel { left: auto; top: 16px; right: 16px; bottom: 16px; max-height: none; width: min(520px, calc(100vw - 32px)); border-radius: 26px;
+      box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 24px 48px -16px rgba(42, 28, 20, 0.35); }
+    .grab { display: none; }
+  }
+  .closed .ov { opacity: 0; pointer-events: none; }
+  .closed .panel { transform: translateY(100%); }
+  @media (min-width: 768px) { .closed .panel { transform: translateX(calc(100% + 24px)); } }
+  .scroll { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 6px 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  @media (min-width: 768px) { .scroll { padding: 22px 28px 30px; } }
+  .x { position: absolute; z-index: 3; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f2f2f0; color: var(--royal); }
+  @media (max-width: 767px) { .x { top: 18px; } }
+  .x svg { width: 20px; height: 20px; }
+
+  /* Shared bits */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 22px; border-radius: 999px; font-weight: 700; font-size: 15px; width: 100%; }
+  .btn-royal { background: var(--royal); color: var(--rice); }
+  .btn-sun { background: var(--sun); color: var(--ink); }
+  .btn-line { background: #fff; color: var(--royal); box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.2); }
+  .btn-wa { background: #25d366; color: #fff; }
+  .btn svg, .btn img { width: 18px; height: 18px; flex: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-royal:hover { background: #4a2412; }
+    .btn-sun:hover { background: #efad12; }
+    .btn-line:hover { box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.4); }
+  }
+  /* Copy label swap: both labels share one cell, cross-fade with a touch of blur. */
+  .swap { display: inline-grid; }
+  .swap > * { grid-area: 1 / 1; transition: opacity 150ms ease-out, filter 150ms ease-out, transform 150ms var(--ease-out); }
+  .swap > :last-child { opacity: 0; filter: blur(2px); transform: translateY(4px); }
+  [data-copied] .swap > :first-child { opacity: 0; filter: blur(2px); transform: translateY(-4px); }
+  [data-copied] .swap > :last-child { opacity: 1; filter: none; transform: none; }
+
+  /* Entrance helper: rise 8px + fade. Delay set inline with --d. */
+  .rise { animation: rise 280ms var(--ease-out) both; animation-delay: var(--d, 0ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+
+  /* =================== 1 · MEMO =================== */
+  .v1 { padding-top: 8px; }
+  .v1-hello { text-align: center; padding: 10px 40px 0; }
+  .v1-hello .script { display: inline-block; color: var(--pink); font-size: 30px; line-height: 1.1; transform: rotate(-4deg); }
+  .v1-hello h2 { margin: 2px 0 0; font-family: var(--disp); font-weight: 900; font-size: 26px; line-height: 1.3; color: var(--royal); }
+  .v1-memo-w { position: relative; margin: 26px 2px 0; rotate: -0.6deg;
+    filter: drop-shadow(0 1px 1px rgba(58, 58, 62, 0.2)) drop-shadow(0 8px 12px rgba(58, 58, 62, 0.09)) drop-shadow(0 22px 28px rgba(58, 58, 62, 0.06));
+    animation: memo-in 340ms var(--ease-out) 60ms both; }
+  @keyframes memo-in { from { opacity: 0; transform: translateY(14px) rotate(1.2deg); } }
+  .tack { position: absolute; z-index: 5; top: -8px; left: 50%; width: 18px; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; --pc: #d2342a;
+    background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.95) 0 9%, rgba(255, 255, 255, 0) 26%), radial-gradient(circle at 50% 50%, var(--pc) 0 58%, color-mix(in srgb, var(--pc) 62%, #000) 100%);
+    box-shadow: inset -1.5px -2px 2px rgba(0, 0, 0, 0.25), inset 1px 1px 1px rgba(255, 255, 255, 0.35), 3px 5px 4px -1px rgba(40, 20, 8, 0.45); }
+  .memo { position: relative; background-color: #fffdf6; background-image: repeating-linear-gradient(180deg, transparent 0 25px, rgba(70, 110, 170, 0.18) 25px 26px); padding: 22px 18px 34px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), 96% 100%, 92% calc(100% - 9px), 88% 100%, 84% calc(100% - 9px), 80% 100%, 76% calc(100% - 9px), 72% 100%, 68% calc(100% - 9px), 64% 100%, 60% calc(100% - 9px), 56% 100%, 52% calc(100% - 9px), 48% 100%, 44% calc(100% - 9px), 40% 100%, 36% calc(100% - 9px), 32% 100%, 28% calc(100% - 9px), 24% 100%, 20% calc(100% - 9px), 16% 100%, 12% calc(100% - 9px), 8% 100%, 4% calc(100% - 9px), 0 100%); }
+  .memo-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 2px solid var(--royal); padding-bottom: 10px; }
+  .memo-top img { height: 38px; width: auto; }
+  .memo-top b { font-family: var(--disp); font-weight: 900; font-size: 20px; color: var(--royal); white-space: nowrap; }
+  @media (max-width: 420px) { .memo-top img { height: 28px; } .memo-top b { font-size: 17px; } }
+  .memo-no { text-align: right; font-size: 11px; color: var(--sub); line-height: 1.2; }
+  .memo-no .num { display: block; font-size: 18px; font-weight: 700; color: var(--pink); }
+  .memo-h { font-family: var(--disp); font-weight: 700; font-size: 12.5px; color: var(--pink); margin: 12px 0 0; }
+  .mrow { display: flex; align-items: baseline; gap: 8px; min-height: 26px; line-height: 26px; font-family: var(--disp); font-weight: 700; font-size: 14.5px; color: var(--royal); }
+  .mrow::after { content: ""; order: 1; flex: 1; min-width: 12px; border-bottom: 1.5px dotted rgba(58, 29, 15, 0.35); transform: translateY(-6px); }
+  .mrow small { font-weight: 500; color: var(--sub); font-size: 12.5px; }
+  .mrow em { order: 2; font-style: normal; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; }
+  .mrow.total { font-size: 17px; margin-top: 4px; }
+  .mrow.total em { color: var(--pink); font-weight: 800; }
+  .memo-to { margin-top: 12px; font-size: 13px; line-height: 26px; color: var(--ink); }
+  .memo-to b { font-family: var(--disp); color: var(--royal); }
+  .stamp { position: absolute; right: 16px; bottom: 30px; width: 96px; aspect-ratio: 1; border-radius: 50%; border: 2px solid currentColor; color: var(--pink); rotate: -14deg;
+    display: grid; place-items: center; text-align: center; font-family: var(--disp); font-weight: 700; font-size: 10.5px; line-height: 1.3;
+    box-shadow: inset 0 0 0 4px #fffdf6, inset 0 0 0 5.5px currentColor; pointer-events: none; opacity: 0.8;
+    animation: stamp 260ms cubic-bezier(0.2, 0, 0, 1) 420ms both; }
+  .stamp b { display: block; font-size: 14px; }
+  @keyframes stamp { from { opacity: 0; transform: scale(1.7); } 70% { opacity: 0.85; } }
+  .v1-note { margin: 22px 4px 0; text-align: center; font-size: 13.5px; line-height: 1.7; color: var(--sub); }
+  .v1-note b { color: var(--royal); }
+  .v1-acts { display: grid; gap: 10px; margin-top: 16px; }
+  .v1-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .v1-row .btn { height: 46px; font-size: 13.5px; font-weight: 600; }
+
+  /* =================== 2 · NEXT STEPS =================== */
+  .v2 { padding-top: 6px; }
+  .v2-top { display: flex; align-items: center; gap: 14px; padding-right: 48px; }
+  .tick { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; animation: tick-pop 320ms var(--ease-out) both; }
+  @keyframes tick-pop { from { transform: scale(0.6); opacity: 0; } }
+  .tick svg { width: 26px; height: 26px; color: var(--ink); }
+  .tick path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 260ms var(--ease-out) 180ms forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .v2-top h2 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 22px; line-height: 1.3; color: var(--royal); }
+  .ref { margin-top: 4px; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 12px; border-radius: 999px; background: #f6f6f4; font-size: 13px; color: var(--sub); }
+  .ref .num { font-weight: 700; color: var(--royal); }
+  .ref .swap { font-size: 12px; font-weight: 600; color: var(--pink); }
+  .ref svg { width: 13px; height: 13px; color: var(--pink); }
+  .steps { list-style: none; margin: 24px 0 0; padding: 0; }
+  .step { position: relative; display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding-bottom: 18px; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before { content: ""; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: #ece7df; }
+  .step:last-child::before { display: none; }
+  .step.done::before { background: var(--sun); }
+  .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 2px #e4ddd2; color: var(--sub); font-size: 12px; font-weight: 700; }
+  .step.done .dot { background: var(--sun); box-shadow: none; color: var(--ink); }
+  .step.now .dot { box-shadow: inset 0 0 0 2px var(--pink); color: var(--pink); }
+  .dot svg { width: 14px; height: 14px; }
+  .step h4 { margin: 3px 0 0; font-family: var(--disp); font-weight: 700; font-size: 15px; color: var(--royal); display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .step h4 small { font-family: var(--body); font-weight: 500; font-size: 12px; color: var(--sub); white-space: nowrap; }
+  .step.now h4 small { color: var(--pink); font-weight: 600; }
+  .step p { margin: 3px 0 0; font-size: 13px; line-height: 1.6; color: var(--sub); }
+  .step p b { color: var(--ink); font-weight: 600; }
+  .ship { margin-top: 22px; padding: 14px 16px; border-radius: 18px; background: #f6f6f4; }
+  .ship-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: var(--sub); }
+  .ship-h a { color: var(--royal); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .ship b { display: block; margin-top: 6px; font-family: var(--disp); font-size: 15px; color: var(--royal); }
+  .ship p { margin: 2px 0 0; font-size: 13px; line-height: 1.6; color: var(--ink); }
+  .bill { margin-top: 12px; border-radius: 18px; box-shadow: inset 0 0 0 1px #ece7df; }
+  .bill-h { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; text-align: left; }
+  .bill-h span { font-family: var(--disp); font-weight: 700; font-size: 14.5px; color: var(--royal); }
+  .bill-h span small { font-family: var(--body); font-weight: 500; font-size: 12px; color: var(--sub); margin-left: 6px; }
+  .bill-h em { margin-left: auto; font-style: normal; font-weight: 700; color: var(--royal); }
+  .bill-h svg { width: 16px; height: 16px; color: var(--sub); transition: transform 200ms var(--ease-out); }
+  .bill[data-open] .bill-h svg { transform: rotate(180deg); }
+  .bill-b { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 220ms var(--ease-out); }
+  .bill[data-open] .bill-b { grid-template-rows: 1fr; }
+  .bill-b > div { overflow: hidden; }
+  .bill-in { padding: 0 16px 14px; display: grid; gap: 10px; }
+  .li { display: flex; align-items: center; gap: 10px; }
+  .li .im { flex: none; width: 44px; height: 44px; border-radius: 10px; background: #f6f6f4; overflow: hidden; }
+  .li .im img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+  .li div { flex: 1; min-width: 0; font-size: 13.5px; font-family: var(--disp); font-weight: 600; color: var(--ink); line-height: 1.35; }
+  .li div small { display: block; font-family: var(--body); font-weight: 500; font-size: 11.5px; color: var(--sub); }
+  .li > b { font-size: 14px; color: var(--royal); }
+  .sum { border-top: 1.5px dotted rgba(58, 29, 15, 0.25); padding-top: 10px; display: grid; gap: 4px; font-size: 13px; color: var(--sub); }
+  .sum div { display: flex; justify-content: space-between; }
+  .sum div:last-child { font-size: 15px; font-weight: 700; color: var(--royal); }
+  .v2-foot { display: grid; gap: 10px; margin-top: 22px; }
+  .v2-help { text-align: center; font-size: 12.5px; color: var(--sub); }
+  .v2-help a { color: var(--royal); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* =================== 3 · CELEBRATE =================== */
+  .v3 { margin: -6px -18px 0; }
+  @media (min-width: 768px) { .v3 { margin: -22px -28px 0; } }
+  .v3-sun { position: relative; background: var(--sun); padding: 26px 18px 0; border-radius: 0 0 34px 34px; overflow: hidden; text-align: center; }
+  @media (max-width: 767px) { .v3-sun { margin-top: -18px; padding-top: 34px; } }
+  .v3-sun::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 120%, rgba(255, 253, 248, 0.55), transparent 60%); }
+  .v3-kick { position: relative; font-family: var(--disp); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: var(--royal); }
+  .v3-big { position: relative; display: block; margin-top: 2px; font-size: 64px; line-height: 1.15; color: var(--pink); transform: rotate(-4deg);
+    animation: v3-word 360ms var(--ease-out) 40ms both; }
+  @keyframes v3-word { from { opacity: 0; transform: rotate(-4deg) translateY(10px) scale(0.96); filter: blur(4px); } }
+  .fan { position: relative; display: flex; justify-content: center; align-items: flex-end; height: 150px; margin-top: 4px; }
+  .fan img { width: 150px; height: 150px; object-fit: contain; mix-blend-mode: multiply; filter: drop-shadow(0 12px 10px rgba(58, 29, 15, 0.18));
+    animation: fan-in 380ms var(--ease-out) both; transform-origin: 50% 100%; }
+  .fan img:nth-child(1) { rotate: -9deg; margin-right: -34px; animation-delay: 140ms; }
+  .fan img:nth-child(2) { rotate: 7deg; margin-left: -34px; animation-delay: 200ms; }
+  @keyframes fan-in { from { opacity: 0; transform: translateY(40px) scale(0.9); } }
+  .v3-body { padding: 0 18px; }
+  @media (min-width: 768px) { .v3-body { padding: 0 28px; } }
+  .v3-body h2 { margin: 22px 0 0; text-align: center; font-family: var(--disp); font-weight: 900; font-size: 23px; line-height: 1.35; color: var(--royal); }
+  .v3-body > p { margin: 6px auto 0; max-width: 34ch; text-align: center; font-size: 13.5px; line-height: 1.65; color: var(--sub); }
+  .ticket { position: relative; display: flex; align-items: center; width: 100%; margin-top: 18px; border-radius: 18px; background: var(--paper); box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.14); text-align: left; overflow: hidden; }
+  .ticket::before, .ticket::after { content: ""; position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.14); transform: translateY(-50%); }
+  .ticket::before { left: -9px; } .ticket::after { right: -9px; }
+  .ticket-l { flex: 1; padding: 14px 22px; }
+  .ticket-l small { display: block; font-size: 11.5px; color: var(--sub); }
+  .ticket-l .num { font-size: 28px; font-weight: 700; letter-spacing: 0.02em; color: var(--royal); line-height: 1.2; }
+  .ticket-r { align-self: stretch; display: grid; place-items: center; padding: 0 22px; border-left: 2px dashed rgba(91, 45, 23, 0.18); font-size: 13px; font-weight: 700; color: var(--pink); }
+  .ticket-r svg { width: 15px; height: 15px; display: inline; vertical-align: -2px; margin-right: 4px; }
+  @media (hover: hover) and (pointer: fine) { .ticket:hover { box-shadow: inset 0 0 0 1.5px rgba(91, 45, 23, 0.3); } }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .fact { padding: 12px 8px; border-radius: 16px; background: #f6f6f4; text-align: center; }
+  .fact svg { width: 20px; height: 20px; color: var(--royal); margin: 0 auto 6px; }
+  .fact b { display: block; font-family: var(--disp); font-size: 13.5px; color: var(--royal); line-height: 1.3; }
+  .fact small { display: block; margin-top: 2px; font-size: 11px; color: var(--sub); line-height: 1.35; }
+  .v3-acts { display: grid; gap: 10px; margin-top: 18px; }
+  .v3-acts .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .v3-acts .row .btn { height: 46px; font-size: 13.5px; font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise, .v1-memo-w, .stamp, .tick, .tick path, .v3-big, .fan img { animation: none !important; }
+    .tick path { stroke-dashoffset: 0; }
+    .ov, .panel, .bill-b, .bill-h svg { transition: none; }
+    .press:active { transform: none; }
+  }
+
+  /* ---------- Picker (verbatim from PICKER.md) ---------- */
+  .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10, 10, 10, 0.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(0, 0, 0, 0.24), 0 2px 6px rgba(0, 0, 0, 0.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); will-change: transform; }
+  .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1), width 250ms cubic-bezier(0.23, 1, 0.32, 1); }
+  @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } }
+  .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+  .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+  .proto-picker-item:active { transform: scale(0.97); }
+  .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+  .proto-picker-item[data-active] { color: #fff; }
+  .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+  .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+  .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+</style>
+</head>
+<body>
+  <div class="ann"><span class="script">শীতের সেরা</span>খেজুরের পাটালী এসে গেছে · ৳২৬০০+ অর্ডারে ফ্রি ডেলিভারি</div>
+  <header class="hd">
+    <img src="../../../attached_assets/sera-khabar-logo.webp" alt="সেরা খাবার" />
+    <span class="bag" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span>
+  </header>
+  <main class="pg">
+    <div>
+      <span class="script">এই শীতে</span>
+      <h1>খেজুরের পাটালী</h1>
+      <p>যশোরের গাছির হাতে জ্বাল দেওয়া খাঁটি খেজুরের রস থেকে তৈরি। ক্যাশ অন ডেলিভারি, সারা দেশে।</p>
+      <button type="button" class="reopen press" id="reopen">কনফার্মেশন আবার দেখুন</button>
+    </div>
+    <img src="/home/hero-jaggery-still-life.webp" alt="" width="960" height="640" />
+  </main>
+
+  <div id="stage"></div>
+
+  <nav class="proto-picker" aria-label="Prototype variants" data-position="top">
+    <span class="proto-picker-highlight" aria-hidden="true"></span>
+    <button class="proto-picker-item" data-active aria-current="true">Memo</button>
+    <button class="proto-picker-item">Timeline</button>
+    <button class="proto-picker-item">Celebrate</button>
+    <span class="proto-picker-divider" aria-hidden="true"></span>
+    <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+  </nav>
+
+<script>
+  // ---------- Realistic order (catalog names, sizes, prices and images from the live public catalog) ----------
+  const IMG = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/";
+  const order = {
+    ref: "1048",
+    name: "রাকিব হাসান",
+    first: "রাকিব",
+    phone: "01712-345678",
+    address: "বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা",
+    delivery: 100,
+    items: [
+      { name: "খেজুরের পাটালী গুড়", size: "১ কেজি", qty: 1, unit: 671, img: IMG + "ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/640.webp" },
+      { name: "দানাদার গুড়", size: "৫০০ গ্রাম", qty: 2, unit: 300, img: IMG + "c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/640.webp" },
+    ],
+  };
+  const subtotal = order.items.reduce((s, i) => s + i.unit * i.qty, 0);
+  const total = subtotal + order.delivery;
+  const itemCount = order.items.reduce((s, i) => s + i.qty, 0);
+  const bn = (v) => String(v).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+  const tk = (v) => "৳" + bn(v.toLocaleString("en-IN"));
+  const MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+  const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d; };
+  const eta = (() => { const a = addDays(1), b = addDays(2); return a.getMonth() === b.getMonth() ? `${bn(a.getDate())}–${bn(b.getDate())} ${MONTHS[b.getMonth()]}` : `${bn(a.getDate())} ${MONTHS[a.getMonth()]} – ${bn(b.getDate())} ${MONTHS[b.getMonth()]}`; })();
+  const wa = `https://wa.me/8801303103540?text=${encodeURIComponent(`Hello, my order number is ${order.ref}`)}`;
+
+  const I = {
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+    truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
+    cash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5v.01M17.5 14.5v.01"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+    wa: '<img src="https://cdn.reicon.dev/logos/whatsapp/original.svg" alt="" style="filter:brightness(0) invert(1)" />',
+  };
+
+  const shell = (inner) => `
+    <div class="ov" data-close></div>
+    <div class="panel" role="dialog" aria-modal="true" aria-label="অর্ডার কনফার্ম">
+      <div class="grab" aria-hidden="true"></div>
+      <button type="button" class="x press" data-close aria-label="বন্ধ করুন">${I.x}</button>
+      <div class="scroll">${inner}</div>
+    </div>`;
+
+  // ---------- 1 · Memo: the confirmation is a pinned cash memo, stamped "received" ----------
+  const v1 = () => shell(`
+    <div class="v1">
+      <div class="v1-hello rise">
+        <span class="script">ধন্যবাদ, ${order.first}!</span>
+        <h2>অর্ডারটি আমরা পেয়েছি</h2>
+      </div>
+      <div class="v1-memo-w">
+        <span class="tack" aria-hidden="true"></span>
+        <div class="memo">
+          <div class="memo-top">
+            <img src="../../../attached_assets/sera-khabar-logo.webp" alt="সেরা খাবার" />
+            <b>ক্যাশ মেমো</b>
+            <div class="memo-no">অর্ডার নং<span class="num">#${order.ref}</span></div>
+          </div>
+          <p class="memo-h">যা পাঠানো হচ্ছে</p>
+          ${order.items.map((i) => `<div class="mrow">${i.name} <small>${i.size} × ${bn(i.qty)}</small><em>${tk(i.unit * i.qty)}</em></div>`).join("")}
+          <div class="mrow"><small>ডেলিভারি চার্জ</small><em>${tk(order.delivery)}</em></div>
+          <div class="mrow total">মোট · ক্যাশ অন ডেলিভারি<em>${tk(total)}</em></div>
+          <p class="memo-h">ঠিকানা</p>
+          <div class="memo-to"><b>${order.name}</b> · <span class="num">${order.phone}</span><br />${order.address}</div>
+          <div class="stamp" aria-hidden="true"><div>সেরা খাবার<b>গৃহীত</b>${bn(new Date().getDate())} ${MONTHS[new Date().getMonth()]}</div></div>
+        </div>
+      </div>
+      <p class="v1-note rise" style="--d:520ms">আমাদের টিম শীঘ্রই <b>${order.phone}</b> নম্বরে ফোন করে অর্ডারটি কনফার্ম করবে। টাকা দেবেন পণ্য হাতে পেয়ে।</p>
+      <div class="v1-acts rise" style="--d:580ms">
+        <button type="button" class="btn btn-royal press" data-close>কেনাকাটা চালিয়ে যান</button>
+        <div class="v1-row">
+          <button type="button" class="btn btn-line press" data-copy><span class="swap"><span>অর্ডার নং কপি</span><span>কপি হয়েছে ✓</span></span></button>
+          <a class="btn btn-wa press" href="${wa}" target="_blank" rel="noopener noreferrer">${I.wa}হোয়াটসঅ্যাপ</a>
+        </div>
+      </div>
+    </div>`);
+
+  // ---------- 2 · Next steps: answers "what happens now?" with a timeline and the address to double-check ----------
+  const v2 = () => shell(`
+    <div class="v2">
+      <div class="v2-top">
+        <div class="tick" aria-hidden="true">${I.check}</div>
+        <div class="rise" style="--d:80ms">
+          <h2>অর্ডার কনফার্ম হয়েছে</h2>
+          <button type="button" class="ref press" data-copy aria-label="অর্ডার নম্বর কপি করুন">অর্ডার নং <span class="num">#${order.ref}</span>
+            <span class="swap"><span>${I.copy}</span><span>কপি ✓</span></span></button>
+        </div>
+      </div>
+      <ol class="steps">
+        <li class="step done rise" style="--d:140ms"><span class="dot">${I.check}</span><div><h4>অর্ডার গৃহীত <small>এইমাত্র</small></h4><p>${bn(itemCount)}টি পণ্য, মোট ${tk(total)}</p></div></li>
+        <li class="step now rise" style="--d:180ms"><span class="dot">২</span><div><h4>ফোনে কনফার্মেশন <small>কয়েক ঘণ্টার মধ্যে</small></h4><p>আমাদের টিম <b class="num">${order.phone}</b> নম্বরে ফোন করবে। ফোনটি ধরতে ভুলবেন না।</p></div></li>
+        <li class="step rise" style="--d:220ms"><span class="dot">৩</span><div><h4>ডেলিভারি <small>${eta}</small></h4><p>ঢাকায় ১–২ দিন, ঢাকার বাইরে ২–৩ দিন।</p></div></li>
+        <li class="step rise" style="--d:260ms"><span class="dot">৪</span><div><h4>পেমেন্ট <small>হাতে পেয়ে</small></h4><p>পণ্য দেখে ডেলিভারি ম্যানকে <b>${tk(total)}</b> ক্যাশে দিন।</p></div></li>
+      </ol>
+      <div class="ship rise" style="--d:300ms">
+        <div class="ship-h"><span>যেখানে পাঠানো হবে</span><a href="${wa}" target="_blank" rel="noopener noreferrer">ভুল থাকলে জানান</a></div>
+        <b>${order.name}</b>
+        <p><span class="num">${order.phone}</span> · ${order.address}</p>
+      </div>
+      <div class="bill rise" style="--d:330ms">
+        <button type="button" class="bill-h" data-bill aria-expanded="false"><span>অর্ডারের বিবরণ<small>${bn(itemCount)}টি পণ্য</small></span><em>${tk(total)}</em>${I.chev}</button>
+        <div class="bill-b"><div><div class="bill-in">
+          ${order.items.map((i) => `<div class="li"><span class="im"><img src="${i.img}" alt="" /></span><div>${i.name}<small>${i.size} · ${bn(i.qty)}টি</small></div><b>${tk(i.unit * i.qty)}</b></div>`).join("")}
+          <div class="sum"><div><span>পণ্য</span><span>${tk(subtotal)}</span></div><div><span>ডেলিভারি</span><span>${tk(order.delivery)}</span></div><div><span>মোট</span><span>${tk(total)}</span></div></div>
+        </div></div></div>
+      </div>
+      <div class="v2-foot rise" style="--d:360ms">
+        <button type="button" class="btn btn-royal press" data-close>কেনাকাটা চালিয়ে যান</button>
+        <p class="v2-help">প্রশ্ন আছে? <a href="tel:+8801310980289">ফোন করুন</a> বা <a href="${wa}" target="_blank" rel="noopener noreferrer">হোয়াটসঅ্যাপ করুন</a></p>
+      </div>
+    </div>`);
+
+  // ---------- 3 · Celebrate: a loud, image-led brand moment with a tear-off order ticket ----------
+  const v3 = () => shell(`
+    <div class="v3">
+      <div class="v3-sun">
+        <div class="v3-kick">অর্ডার কনফার্ম</div>
+        <span class="v3-big script">ধন্যবাদ!</span>
+        <div class="fan" aria-hidden="true">${order.items.map((i) => `<img src="${i.img}" alt="" />`).join("")}</div>
+      </div>
+      <div class="v3-body">
+        <h2 class="rise" style="--d:260ms">${order.first}, আপনার গুড় তৈরি হচ্ছে পাঠানোর জন্য</h2>
+        <p class="rise" style="--d:300ms">আমাদের টিম শীঘ্রই ফোন করে অর্ডারটি কনফার্ম করবে।</p>
+        <button type="button" class="ticket press rise" style="--d:340ms" data-copy aria-label="অর্ডার নম্বর কপি করুন">
+          <span class="ticket-l"><small>অর্ডার নম্বর</small><span class="num">#${order.ref}</span></span>
+          <span class="ticket-r"><span class="swap"><span>${I.copy}কপি</span><span>কপি হয়েছে ✓</span></span></span>
+        </button>
+        <div class="facts rise" style="--d:380ms">
+          <div class="fact">${I.phone}<b>ফোন পাবেন</b><small>কয়েক ঘণ্টার মধ্যে</small></div>
+          <div class="fact">${I.truck}<b>${eta}</b><small>ডেলিভারি</small></div>
+          <div class="fact">${I.cash}<b>${tk(total)}</b><small>হাতে পেয়ে ক্যাশে</small></div>
+        </div>
+        <div class="v3-acts rise" style="--d:420ms">
+          <button type="button" class="btn btn-sun press" data-close>আরও কিছু দেখুন</button>
+          <div class="row">
+            <a class="btn btn-line press" href="tel:+8801310980289">${I.phone}ফোন করুন</a>
+            <a class="btn btn-wa press" href="${wa}" target="_blank" rel="noopener noreferrer">${I.wa}হোয়াটসঅ্যাপ</a>
+          </div>
+        </div>
+      </div>
+    </div>`);
+
+  const variants = [v1, v2, v3];
+
+  // ---------- Variant interactions (delegated, so they survive re-mounts) ----------
+  const stage = document.getElementById("stage");
+  stage.addEventListener("click", async (e) => {
+    const close = e.target.closest("[data-close]");
+    if (close) { stage.classList.add("closed"); return; }
+    const copy = e.target.closest("[data-copy]");
+    if (copy) {
+      try { await navigator.clipboard.writeText(order.ref); } catch {}
+      copy.setAttribute("data-copied", "");
+      clearTimeout(copy._t);
+      copy._t = setTimeout(() => copy.removeAttribute("data-copied"), 1600);
+      return;
+    }
+    const bill = e.target.closest("[data-bill]");
+    if (bill) {
+      const box = bill.parentElement;
+      const open = box.toggleAttribute("data-open");
+      bill.setAttribute("aria-expanded", String(open));
+    }
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") stage.classList.add("closed"); });
+  document.getElementById("reopen").addEventListener("click", () => mount(current));
+
+  // ---------- Picker wiring (PICKER.md reference) ----------
+  const picker = document.querySelector(".proto-picker");
+  const highlight = picker.querySelector(".proto-picker-highlight");
+  const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+  const replay = picker.querySelector(".proto-picker-replay");
+  let current = 0;
+
+  function moveHighlight() {
+    const el = items[current];
+    highlight.style.width = el.offsetWidth + "px";
+    highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+  }
+  function mount(i) {
+    stage.innerHTML = "";
+    stage.classList.remove("closed");
+    requestAnimationFrame(() => { stage.innerHTML = variants[i](); });
+  }
+  function setActive(i) {
+    if (i < 0 || i >= variants.length) return;
+    current = i;
+    items.forEach((el, j) => {
+      el.toggleAttribute("data-active", j === i);
+      if (j === i) el.setAttribute("aria-current", "true");
+      else el.removeAttribute("aria-current");
+    });
+    moveHighlight();
+    const url = new URL(location);
+    url.searchParams.set("v", i + 1);
+    history.replaceState(null, "", url);
+    mount(i);
+  }
+  items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+  replay?.addEventListener("click", () => mount(current));
+  window.addEventListener("resize", moveHighlight);
+  document.addEventListener("keydown", (e) => {
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const num = parseInt(e.key, 10);
+    if (num >= 1 && num <= variants.length) setActive(num - 1);
+    else if (e.key === "ArrowRight") setActive((current + 1) % variants.length);
+    else if (e.key === "ArrowLeft") setActive((current - 1 + variants.length) % variants.length);
+    else if (e.key === "r" || e.key === "R") mount(current);
+  });
+  setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+  requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>
