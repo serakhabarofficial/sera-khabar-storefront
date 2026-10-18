@@ -137,6 +137,11 @@ test("uses the approved Skew reveal on display text without fading its parent tw
   assert.match(transition, /stopSkewReveal\(\)/);
 });
 
+test("skew reveal words leave room for Bangla vowel signs so the blur layer never clips them", () => {
+  // Padding holds ী above and ু below a tight line box; equal negative margins keep the layout.
+  assert.match(posterCss, /\[data-skew-word\] \{[^}]*padding: 0\.45em 0\.1em 0\.3em;\s*margin: -0\.45em -0\.1em -0\.3em;/);
+});
+
 test("shows every size of a product as its own card on the category shelves", () => {
   const posterCard = readFileSync(new URL("../components/poster-product-card.tsx", import.meta.url), "utf8");
   assert.match(homeSource, /bySize && product\.variants\?\.length/);

@@ -47,6 +47,11 @@
   color: inherit;
   letter-spacing: inherit;
   transform-origin: 50% 70%;
+  /* Noto Serif Bengali's ী and ু reach far outside a tight line box, and the blur layer
+     clips to the box, so they popped in when the reveal ended. Pad the box to hold the
+     whole glyph; the matching negative margins keep the layout unchanged. */
+  padding: 0.45em 0.1em 0.3em;
+  margin: -0.45em -0.1em -0.3em;
 }
 @media (prefers-reduced-motion: reduce) {
   .sk [data-skew-word] { opacity: 1 !important; filter: none !important; transform: none !important; }
