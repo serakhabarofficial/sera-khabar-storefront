@@ -542,7 +542,8 @@
 
 /* Order confirmed, "Celebrate" with the kraft bag (approved 2026-10-18, docs/design/2026-10-18-order-confirmed):
    a full-bleed sun block the bag lands in, then the order number, what happens next and ways to reach us. */
-.sko-sheet { overflow: hidden; }
+/* Keep Vaul's extended white background visible while the keyboard raises the typing sheet. */
+.sko-sheet:has(.sko-is-done) { overflow: hidden; }
 .sko.sko-is-done { position: relative; padding-top: 0; }
 .sko-is-done .sko-head-done { position: absolute; z-index: 3; top: 18px; right: 14px; padding: 0; }
 @media (min-width: 768px) { .sko-is-done .sko-head-done { top: 14px; } }

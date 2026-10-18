@@ -27,6 +27,13 @@ test("checkout is the cart's Vaul sheet: bottom sheet on phones, right panel on 
   assert.match(dialogSource, /className="sko-form"\n\s+data-vaul-no-drag/);
 });
 
+test("only the confirmation sheet clips overflow, leaving Vaul's white keyboard background intact while typing", () => {
+  // Vaul extends the sheet's background below it with ::after when the keyboard raises it.
+  // Clipping the typing sheet hides that extension and exposes the dark backdrop.
+  assert.doesNotMatch(posterSource, /\.sko-sheet\s*\{[^}]*overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/);
+  assert.match(posterSource, /\.sko-sheet:has\(\.sko-is-done\)\s*\{[^}]*overflow:\s*hidden;/);
+});
+
 test("there is no separate floating Place Order button", () => {
   assert.doesNotMatch(dialogSource, /order-floating-cta/);
   assert.doesNotMatch(dialogSource, /IntersectionObserver/);
