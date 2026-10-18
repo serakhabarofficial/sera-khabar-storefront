@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ArrowRight, ShieldCheck, X } from "lucide-react";
 import { Box as ReiconBox } from "reicon-react";
-import { useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
+import { useId, useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -129,6 +129,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const shouldReduceMotion = useReducedMotion();
+  // Every page mounts its own Layout, so a shared layoutId made the next page's dock highlight
+  // fly in from where the previous page's highlight was measured (lower, when it was scrolled).
+  // A per-instance id keeps the slide within a page and starts a new page's highlight in place.
+  const dockHighlightId = `sk-dock-highlight-${useId()}`;
   const { setIsOpen: setCartOpen, itemCount, cartPulseKey, consumeCartPulse } = useCart();
   const { data: searchableProducts = [] } = useQuery({
     queryKey: ["merchant-suite-products-listing"],
@@ -235,7 +239,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <>
                 {isActive && (
                   <motion.span
-                    layoutId="sk-dock-highlight"
+                    layoutId={dockHighlightId}
                     className="sk-dock-hl"
                     aria-hidden="true"
                     transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: [0.23, 1, 0.32, 1] }}

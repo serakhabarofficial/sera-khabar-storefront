@@ -16,7 +16,9 @@ test("keeps the compact white pill dock fixed at the bottom on phones", () => {
   // Approved 2026-10-13 ("Label"): it never hides; the active tab shows its name on a sliding highlight.
   assert.match(layoutSource, /<nav aria-label="Mobile navigation" className="sk-dock md:hidden">/);
   assert.doesNotMatch(layoutSource, /isAtPageBottom/);
-  assert.match(layoutSource, /layoutId="sk-dock-highlight"/);
+  // Each page's Layout has its own highlight id, so a new page's highlight doesn't fly in from the old one.
+  assert.match(layoutSource, /const dockHighlightId = `sk-dock-highlight-\$\{useId\(\)\}`;/);
+  assert.match(layoutSource, /layoutId=\{dockHighlightId\}/);
   assert.match(layoutSource, /duration: shouldReduceMotion \? 0 : 0\.22/);
   assert.match(layoutSource, /\{isActive && <span className="sk-dock-lbl">\{item\.label\}<\/span>\}/);
 });
