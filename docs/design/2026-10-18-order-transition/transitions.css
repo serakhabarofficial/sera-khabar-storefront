@@ -1,0 +1,55 @@
+/* Product page ⇄ Memo checkout, via same-document View Transitions.
+   The DOM swap happens immediately on tap; these rules only animate snapshots of the two pages.
+   html[data-vt] = which transition (push | lift | morph); html[data-nav] = forward | back. */
+:root { --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); }
+
+/* Header and logo are their own layers in every transition: the bar stays put and the logo
+   morphs from the product-page size to the checkout size instead of travelling with the page. */
+.hdr, .site-header { view-transition-name: site-header; }
+.hdr-logo img, .brand img { view-transition-name: site-logo; }
+.proto-picker { view-transition-name: proto-picker; }
+::view-transition-group(proto-picker) { animation: none; }
+::view-transition-group(site-header), ::view-transition-group(site-logo) { animation-duration: var(--vt-duration, 320ms); animation-timing-function: var(--vt-ease, var(--ease-out)); }
+::view-transition-old(site-header), ::view-transition-new(site-header), ::view-transition-old(site-logo), ::view-transition-new(site-logo) { animation-duration: 200ms; animation-timing-function: ease-out; }
+::view-transition-old(root), ::view-transition-new(root) { mix-blend-mode: normal; animation-fill-mode: both; }
+
+/* ---------- 1 · Push: the checkout slides in from the right, like the next screen in an app ---------- */
+html[data-vt="push"] { --vt-duration: 400ms; --vt-ease: var(--ease-drawer); }
+html[data-vt="push"]::view-transition-old(root), html[data-vt="push"]::view-transition-new(root) { animation-duration: 400ms; animation-timing-function: var(--ease-drawer); }
+html[data-vt="push"][data-nav="forward"]::view-transition-new(root) { animation-name: vt-in-from-right; }
+html[data-vt="push"][data-nav="forward"]::view-transition-old(root) { animation-name: vt-out-to-left; }
+html[data-vt="push"][data-nav="back"]::view-transition-old(root) { animation-name: vt-out-to-right; z-index: 1; }
+html[data-vt="push"][data-nav="back"]::view-transition-new(root) { animation-name: vt-in-from-left; }
+@keyframes vt-in-from-right { from { transform: translateX(100%); } }
+@keyframes vt-out-to-left { to { transform: translateX(-28%); opacity: 0.4; } }
+@keyframes vt-out-to-right { to { transform: translateX(100%); } }
+@keyframes vt-in-from-left { from { transform: translateX(-28%); opacity: 0.4; } }
+
+/* ---------- 2 · Lift: the product page steps away and the memo rises a little into place ---------- */
+html[data-vt="lift"] { --vt-duration: 300ms; --vt-ease: var(--ease-out); }
+html[data-vt="lift"][data-nav="forward"]::view-transition-old(root) { animation: 110ms ease-out both vt-fade-out; }
+html[data-vt="lift"][data-nav="forward"]::view-transition-new(root) { animation: 300ms var(--ease-out) 60ms both vt-rise; }
+html[data-vt="lift"][data-nav="back"]::view-transition-old(root) { animation: 150ms ease-out both vt-sink; }
+html[data-vt="lift"][data-nav="back"]::view-transition-new(root) { animation: 220ms ease-out 40ms both vt-fade-in; }
+@keyframes vt-rise { from { opacity: 0; transform: translateY(24px); } }
+@keyframes vt-sink { to { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- 3 · Morph: the product photo flies into the memo's cart row; the rest cross-fades ---------- */
+html[data-vt="morph"] .pp-photo, html[data-vt="morph"] .cart-item > img { view-transition-name: product-photo; }
+html[data-vt="morph"] { --vt-duration: 420ms; --vt-ease: var(--ease-in-out); }
+::view-transition-group(product-photo) { animation-duration: 420ms; animation-timing-function: var(--ease-in-out); }
+::view-transition-old(product-photo), ::view-transition-new(product-photo) { height: 100%; object-fit: contain; animation-duration: 260ms; animation-timing-function: ease-out; }
+html[data-vt="morph"]::view-transition-old(root) { animation: 120ms ease-out both vt-fade-out; }
+html[data-vt="morph"][data-nav="forward"]::view-transition-new(root) { animation: 300ms var(--ease-out) 120ms both vt-rise-small; }
+html[data-vt="morph"][data-nav="back"]::view-transition-new(root) { animation: 260ms ease-out 120ms both vt-fade-in; }
+@keyframes vt-rise-small { from { opacity: 0; transform: translateY(12px); } }
+
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+
+/* Reduced motion: nothing moves; the pages simply cross-fade. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) { animation: none !important; }
+  ::view-transition-old(*) { animation: 160ms ease-out both vt-fade-out !important; }
+  ::view-transition-new(*) { animation: 160ms ease-out both vt-fade-in !important; }
+}

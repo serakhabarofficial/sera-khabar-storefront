@@ -3,123 +3,151 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const dialogSource = readFileSync(new URL("./order-dialog.tsx", import.meta.url), "utf8");
-const cssSource = readFileSync(new URL("../index.css", import.meta.url), "utf8");
-const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
-
-test("the Place Order button shows a centred one-line label and no arrow", () => {
-  assert.match(dialogSource, /<form\s+id="order-dialog-form"/);
-  assert.match(dialogSource, /<button\n\s+type="submit"\n\s+disabled=\{orderSubmitting\}/);
-  assert.match(dialogSource, /className="sko-submit sko-press"/);
-  assert.match(dialogSource, /className="sko-submit-label">\n\s+\{orderSubmitting \? "Placing Order\.\.\. - অর্ডার হচ্ছে\.\.\." : "Place Order - অর্ডার করুন"\}/);
-  assert.match(posterSource, /\.sko-submit-label \{[^}]*white-space: nowrap; text-align: center;/);
-  // The total is shown once, in the summary above; the button repeats no price.
-  assert.doesNotMatch(dialogSource, /sko-submit-label">\n\s+৳/);
-  assert.doesNotMatch(dialogSource, /ArrowRight/);
-});
-
-test("checkout is the cart's Vaul sheet: bottom sheet on phones, right panel on desktop (2026-10-13)", () => {
-  assert.match(dialogSource, /<Drawer\.Root open=\{open\} onOpenChange=\{resetDialog\} direction=\{isMobile \? "bottom" : "right"\} repositionInputs=\{false\}>/);
-  assert.match(dialogSource, /isMobile \? "sk-sheet sko-sheet" : "sk-panel sk-panel-right sko-panel"/);
-  assert.doesNotMatch(dialogSource, /@\/components\/ui\/dialog/);
-  // The cart clears its bundle on close; the sheet keeps the last one for the exit slide.
-  assert.match(dialogSource, /const bundle = bundleProp \?\? lastBundle\.current;/);
-  // Dragging inside the form must not pull the sheet down while typing.
-  assert.match(dialogSource, /className="sko-form"\n\s+data-vaul-no-drag/);
-});
-
-test("only the confirmation sheet clips overflow, leaving Vaul's white keyboard background intact while typing", () => {
-  // Vaul extends the sheet's background below it with ::after when the keyboard raises it.
-  // Clipping the typing sheet hides that extension and exposes the dark backdrop.
-  assert.doesNotMatch(posterSource, /\.sko-sheet\s*\{[^}]*overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/);
-  assert.match(posterSource, /\.sko-sheet:has\(\.sko-is-done\)\s*\{[^}]*overflow:\s*hidden;/);
-});
-
-test("mobile checkout uses viewport-aligned sizing instead of Vaul's keyboard repositioning", () => {
-  assert.match(dialogSource, /repositionInputs=\{false\}/);
-  assert.match(dialogSource, /observeCheckoutViewport\(window, setCheckoutViewportStyle\)/);
-  assert.match(dialogSource, /style=\{isMobile \? checkoutViewportStyle : undefined\}/);
-});
-
-test("there is no separate floating Place Order button", () => {
-  assert.doesNotMatch(dialogSource, /order-floating-cta/);
-  assert.doesNotMatch(dialogSource, /IntersectionObserver/);
-  assert.doesNotMatch(dialogSource, /isMetaInAppBrowser/);
-  assert.doesNotMatch(cssSource, /order-floating-cta|order-dialog-form/);
-});
-
-test("validation errors move the customer to the field that needs fixing", () => {
-  assert.match(dialogSource, /const failField = /);
-  assert.match(dialogSource, /failField\("name", "Please enter your full name\."\)/);
-  assert.match(dialogSource, /failField\("phone", "Please enter your phone number\."\)/);
-  assert.match(dialogSource, /failField\("address", "Please enter your delivery address\."\)/);
-});
-
+const comboboxSource = readFileSync(new URL("./place-combobox.tsx", import.meta.url), "utf8");
+const pageCss = readFileSync(new URL("../checkout-page.css", import.meta.url), "utf8");
 const cartDrawerSource = readFileSync(new URL("./cart-drawer.tsx", import.meta.url), "utf8");
+const productSource = readFileSync(new URL("../pages/product.tsx", import.meta.url), "utf8");
+const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
-test("the order summary lists every item with its own image, name, quantity and price", () => {
-  assert.match(dialogSource, /lineItems\?: OrderDialogLineItem\[\]/);
-  // Single-product checkout falls back to one line built from the bundle.
+test("checkout is its own page, not a sheet (Memo, approved 2026-10-18)", () => {
+  assert.doesNotMatch(dialogSource, /from "vaul"|<Drawer\./);
+  assert.match(dialogSource, /return createPortal\(\n\s+<div className="skx">/);
+  assert.match(dialogSource, /document\.body,\n\s+\);/);
+  // The rest of the app is hidden so the document itself scrolls: no nested scroll container for the keyboard to fight.
+  assert.match(dialogSource, /root\.setAttribute\("data-sk-checkout", ""\)/);
+  assert.match(pageCss, /html\[data-sk-checkout\] #root \{ display: none !important; \}/);
+  // From the cart, Vaul must be able to finish its exit animation, or Radix keeps the page untappable.
+  assert.match(pageCss, /html\[data-sk-checkout\] \[data-vaul-drawer\],\nhtml\[data-sk-checkout\] \[data-vaul-overlay\] \{ visibility: hidden !important; \}/);
+  // The cart clears its bundle on close; the page keeps the last one while it animates away.
+  assert.match(dialogSource, /const bundle = bundleProp \?\? lastBundle\.current;/);
+});
+
+test("checkout classes use their own skx- prefix (skc- belongs to the cart drawer)", () => {
+  assert.doesNotMatch(dialogSource, /\bskc-/);
+  assert.doesNotMatch(comboboxSource, /\bskc-/);
+  assert.doesNotMatch(pageCss, /\.skc-/);
+});
+
+test("অর্ডার করুন opens checkout on the tap; the stock check runs afterwards", () => {
+  assert.match(productSource, /setOrderOpen\(true\);\n\s+void verifyOrderable\(\)\.then\(\(orderable\) => \{\n\s+if \(!orderable\) setOrderOpen\(false\);/);
+  assert.match(productSource, /<OrderDialog open=\{orderOpen\} onOpenChange=\{setOrderOpen\} bundle=\{orderBundle\} onQuantityChange=\{setQuantity\} \/>/);
+});
+
+test("the swap is instant and the browser animates it with the Lift View Transition", () => {
+  assert.match(dialogSource, /document\.startViewTransition\(\(\) => \{\n\s+flushSync\(\(\) => setShown\(targetShown\.current\)\);/);
+  assert.match(dialogSource, /root\.dataset\.skNav = open \? "forward" : "back";/);
+  assert.match(dialogSource, /running\.current\?\.skipTransition\(\);/);
+  // Forward: the product page fades out fast, the memo rises 24px.
+  assert.match(pageCss, /html\[data-sk-nav="forward"\]::view-transition-old\(root\) \{ animation: 110ms ease-out both skx-fade-out; \}/);
+  assert.match(pageCss, /html\[data-sk-nav="forward"\]::view-transition-new\(root\) \{ animation: 300ms cubic-bezier\(\.23, 1, \.32, 1\) 60ms both skx-rise; \}/);
+  assert.match(pageCss, /@keyframes skx-rise \{ from \{ opacity: 0; transform: translateY\(24px\); \} \}/);
+  // Back: the memo sinks 12px and the product page fades in.
+  assert.match(pageCss, /html\[data-sk-nav="back"\]::view-transition-old\(root\) \{ animation: 150ms ease-out both skx-sink; \}/);
+  assert.match(pageCss, /html\[data-sk-nav="back"\]::view-transition-new\(root\) \{ animation: 220ms ease-out 40ms both skx-fade-in; \}/);
+  // Header and logo morph in place; names exist only while a checkout transition runs.
+  assert.match(pageCss, /html\[data-sk-nav\] \.sk-header, html\[data-sk-nav\] \.skx-header \{ view-transition-name: sk-site-header; \}/);
+  assert.match(pageCss, /html\[data-sk-nav\] \.c-logoimg, html\[data-sk-nav\] \.skx-brand img \{ view-transition-name: sk-site-logo; \}/);
+  for (const line of pageCss.split("\n").filter((text) => text.includes("view-transition-name:"))) {
+    assert.match(line, /^html\[data-sk-nav\] /);
+  }
+});
+
+test("reduced motion turns the Lift into a plain cross-fade", () => {
+  assert.match(pageCss, /@media \(prefers-reduced-motion: reduce\) \{\n\s+html\[data-sk-nav\]::view-transition-group\(\*\) \{ animation: none !important; \}\n\s+html\[data-sk-nav\]::view-transition-old\(\*\) \{ animation: 160ms ease-out both skx-fade-out !important; \}/);
+});
+
+test("the checkout logo is a little smaller than the site header's", () => {
+  assert.match(pageCss, /\.skx-brand img \{ display: block; width: auto; height: 58px; \}/);
+  assert.match(pageCss, /@media \(max-width: 599px\) \{\n\s+\.skx-header-in \{ height: 68px;[^}]*\}\n\s+\.skx-brand img \{ height: 48px; \}/);
+});
+
+test("the phone's back button returns to the product, where the customer was", () => {
+  assert.match(dialogSource, /window\.history\.pushState\(\{ \.\.\.window\.history\.state, \[HISTORY_KEY\]: historyToken\.current \}, ""\)/);
+  // Closing from the page pops the entry it pushed, so back doesn't need pressing twice.
+  assert.match(dialogSource, /else if \(!open && historyOpen\.current && ownsHistoryEntry\(\)\) \{\n\s+window\.history\.back\(\);/);
+  assert.match(dialogSource, /window\.addEventListener\("popstate", onPopState\)/);
+  // iOS's own swipe animation is not doubled.
+  assert.match(dialogSource, /skipAnimation\.current = "hasUAVisualTransition" in event && Boolean\(event\.hasUAVisualTransition\);/);
+  assert.match(dialogSource, /const productScroll = window\.scrollY;/);
+  assert.match(dialogSource, /window\.scrollTo\(\{ top: productScroll, behavior: "instant" \}\);/);
+  // The app's route scroll handling ignores this same-path entry and checkout's own scrolling.
+  assert.match(appSource, /if \(window\.location\.pathname === currentLocation\.current\) return;/);
+  assert.match(appSource, /if \(document\.documentElement\.hasAttribute\("data-sk-checkout"\)\) return;/);
+});
+
+test("validation is in Bangla and moves the customer to the first field that needs fixing", () => {
+  assert.match(dialogSource, /errors\.name = "আপনার পুরো নাম লিখুন।"/);
+  assert.match(dialogSource, /errors\.phone = "মোবাইল নম্বর লিখুন।"/);
+  assert.match(dialogSource, /errors\.district = "জেলা বেছে নিন।"/);
+  assert.match(dialogSource, /errors\.thana = values\.district \? "থানা বেছে নিন।" : "আগে জেলা বেছে নিন।"/);
+  assert.match(dialogSource, /errors\.address = "বাড়ি, রাস্তা বা এলাকার নাম লিখুন।"/);
+  // Bangla digits typed on a Bangla keyboard still count as a phone number.
+  assert.match(dialogSource, /normalizeBdMobile\(toLatinDigits\(values\.phone\)\)/);
+  assert.match(dialogSource, /const firstInvalid = \(Object\.keys\(fieldRefs\) as CheckoutField\[\]\)\.find\(\(field\) => fieldErrors\[field\]\);/);
+});
+
+test("জেলা and থানা are search dropdowns; the address sent is street, থানা, জেলা", () => {
+  assert.match(dialogSource, /<PlaceCombobox\n\s+ref=\{fieldRefs\.district\}\n\s+kind="district"/);
+  assert.match(dialogSource, /<PlaceCombobox\n\s+ref=\{fieldRefs\.thana\}\n\s+kind="thana"/);
+  assert.match(comboboxSource, /role="combobox"/);
+  assert.match(comboboxSource, /role="listbox"/);
+  assert.match(dialogSource, /const address = composeDeliveryAddress\(current\.address, current\.thana, current\.district\);/);
+  assert.doesNotMatch(dialogSource, /কোথায় পাঠাব/);
+});
+
+test("the delivery charge stays flat; the district only sets the delivery estimate", () => {
+  assert.match(dialogSource, /const DELIVERY_CHARGE = 100;/);
+  assert.match(dialogSource, /const deliveryCharge = qualifiesForFreeDelivery \? 0 : DELIVERY_CHARGE;/);
+  assert.match(dialogSource, /const eta = deliveryWindow\(values\.district\);/);
+  assert.match(dialogSource, /paymentMethod: "cash_on_delivery",/);
+});
+
+test("the order memo lists every item; only single-product checkout gets a quantity stepper", () => {
   assert.match(dialogSource, /const lineItems: OrderDialogLineItem\[\] = bundle\?\.lineItems\?\.length/);
   assert.match(dialogSource, /\{lineItems\.map\(\(item, index\) => \(/);
   assert.match(dialogSource, /src=\{item\.image\}/);
-  assert.match(dialogSource, /Qty \{item\.quantity\}/);
-  assert.match(dialogSource, /৳\{\(item\.unitPrice \* item\.quantity\)\.toLocaleString\(\)\}/);
-  // No more collapsed "Cart Checkout" card with one image.
-  assert.doesNotMatch(dialogSource, /src=\{bundle\.images\[0\]\.src\}/);
+  assert.match(dialogSource, /money\(item\.unitPrice \* item\.quantity\)/);
+  assert.match(dialogSource, /const canEditQuantity = Boolean\(onQuantityChange\) && lineItems\.length === 1;/);
+  assert.match(dialogSource, /disabled=\{item\.quantity >= MAX_LINE_QUANTITY\}/);
 });
 
 test("cart checkout passes each cart item as its own line", () => {
   assert.match(cartDrawerSource, /lineItems: items\.map\(\(item\) => \(\{\n\s+\/\/ .*\n\s+name: item\.title\.replace\(` \(\$\{item\.size\}\)`, ""\),\n\s+details: item\.size,\n\s+quantity: item\.quantity,\n\s+unitPrice: parseCurrencyAmount\(item\.price\),\n\s+image: item\.image,/);
 });
 
-test("phone and WhatsApp order options sit below the Place Order button", () => {
+test("the order button sits in the page flow, never fixed to the bottom", () => {
+  assert.match(dialogSource, /<button type="submit" disabled=\{orderSubmitting\} className="skx-submit">/);
+  assert.doesNotMatch(pageCss, /position:\s*(fixed|sticky)/);
+  assert.doesNotMatch(dialogSource, /IntersectionObserver/);
+});
+
+test("terms stay visible under the button; policies fold away; phone and WhatsApp help is in the footer", () => {
   const submitIndex = dialogSource.indexOf('type="submit"');
-  const helpIndex = dialogSource.indexOf("আমরা সবসময় আপনাকে সাহায্য করতে প্রস্তুত");
-  const phoneIndex = dialogSource.indexOf('href="tel:+8801310980289"');
-  const whatsappIndex = dialogSource.indexOf("https://wa.me/8801303103540");
-  assert.ok(submitIndex > 0 && helpIndex > submitIndex, "help message follows the submit button");
-  assert.ok(phoneIndex > helpIndex && whatsappIndex > phoneIndex, "phone then WhatsApp follow the message");
-  assert.match(dialogSource, /অর্ডার করতে সমস্যা হচ্ছে\?/);
-  assert.match(dialogSource, /ফোনে অর্ডার/);
-  assert.match(dialogSource, /হোয়াটসএপ-এ অর্ডার/);
-  // WhatsApp opens with the customer's items already filled in.
-  assert.match(dialogSource, /const whatsappOrderText = /);
+  const termsIndex = dialogSource.indexOf("অর্ডার করে আপনি আমাদের");
+  const policyIndex = dialogSource.indexOf('<details className="skx-policy">');
+  const footerIndex = dialogSource.indexOf('<footer className="skx-footer">');
+  assert.ok(submitIndex > 0 && termsIndex > submitIndex && policyIndex > termsIndex && footerIndex > policyIndex);
+  for (const slug of ["terms-and-conditions", "refund-return-exchange"]) {
+    // A new tab, so the half-filled form is not lost.
+    assert.match(dialogSource, new RegExp(`href="/${slug}" target="_blank"`));
+  }
+  assert.match(dialogSource, /পেমেন্ট শুধু ক্যাশ অন ডেলিভারি/);
+  assert.match(dialogSource, /ডেলিভারির ২৪ ঘণ্টার মধ্যে জানান/);
+  assert.ok(dialogSource.indexOf('href="tel:+8801310980289"') > footerIndex);
+  assert.ok(dialogSource.indexOf("https://wa.me/8801303103540") > footerIndex);
   assert.match(dialogSource, /encodeURIComponent\(whatsappOrderText\)/);
 });
 
-test("checkout ends with a short summary of the store policies and links to them", () => {
-  const whatsappIndex = dialogSource.indexOf("https://wa.me/8801303103540");
-  const termsIndex = dialogSource.indexOf("অর্ডার করার আগে জেনে নিন");
-  assert.ok(termsIndex > whatsappIndex, "policy summary follows the phone/WhatsApp buttons");
-  // Every point restates the published policy pages in site-pages.ts.
-  assert.match(dialogSource, /পেমেন্ট শুধু ক্যাশ অন ডেলিভারি/);
-  assert.match(dialogSource, /ঢাকায় ১–২ দিন, ঢাকার বাইরে ২–৩ দিনে ডেলিভারি/);
-  assert.match(dialogSource, /ডেলিভারির ২৪ ঘণ্টার মধ্যে জানান/);
-  // Links open in a new tab so the half-filled form is not lost.
-  for (const slug of ["terms-and-conditions", "refund-return-exchange"]) {
-    assert.match(dialogSource, new RegExp(`href="/${slug}"\\s+target="_blank"`));
-  }
-});
-
-test("a placed order shows the Celebrate confirmation with the kraft bag (2026-10-18)", () => {
-  assert.match(dialogSource, /<OrderConfirmed order=\{confirmedOrder\} onClose=\{\(\) => resetDialog\(false\)\} \/>/);
-  // The total and first name are captured at submit time, from what the customer actually ordered.
-  assert.match(dialogSource, /firstName: name\.split\(\/\\s\+\/\)\[0\] \?\? "",\n\s+total: bundle\.price \+ selectedDeliveryCharge,/);
-  // The bag is fetched when checkout opens, so it plays straight away after the order goes through.
+test("a placed order shows the Celebrate confirmation; a held order keeps its own screen", () => {
+  assert.match(dialogSource, /<OrderConfirmed order=\{confirmedOrder\} onClose=\{close\} \/>/);
+  assert.match(dialogSource, /firstName: name\.split\(\/\\s\+\/\)\[0\] \?\? "",\n\s+total: bundle\.price \+ deliveryCharge,/);
   assert.match(dialogSource, /warmOrderConfirmedArt\(\);/);
-  // The sun block runs edge to edge: no top padding, and the grab handle and close button sit over it.
-  assert.match(dialogSource, /orderSubmitted \? "sko sko-is-done" : "sko"/);
-  assert.match(dialogSource, /orderSubmitted \? "sk-sheet-grab sko-grab-over" : "sk-sheet-grab"/);
-  assert.match(posterSource, /\.sko\.sko-is-done \{[^}]*padding-top: 0;/);
-  // Held orders keep their own screen, which never claims the order is confirmed.
   assert.match(dialogSource, /<OrderHoldConfirmation \/>/);
+  // The confirmation's styles expect the sheet's font variables and its 18px side padding.
+  assert.match(pageCss, /\.skx-done \{ --sko-body: "Geist", "Noto Serif Bengali", serif; --sko-disp: "Geist", "Noto Serif Bengali", serif;\n\s+[^}]*padding: 0 18px 24px;/);
 });
 
-test("the order form is white and sets English text in Geist (2026-10-13)", () => {
-  const htmlSource = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
-  assert.match(htmlSource, /family=Geist:wght@100\.\.900/);
-  assert.match(posterSource, /\.sko-sheet, \.sko-panel \{[^}]*background: #ffffff;/);
-  // Geist first, so Latin text uses it and Bangla falls back to the Bangla fonts.
-  assert.match(posterSource, /\.sko \{[^}]*--sko-body: "Geist", "Noto Serif Bengali", serif;[^}]*--sko-disp: "Geist", "Noto Serif Bengali", serif;/);
-  assert.doesNotMatch(posterSource, /\.sko[^{]*\{[^}]*font-family: "Noto Serif Bengali"/);
+test("typed details survive closing and reopening; a finished order starts fresh", () => {
+  assert.match(dialogSource, /if \(open && settled\.current\) \{\n\s+setValues\(emptyValues\);/);
+  assert.match(dialogSource, /if \(!nextOpen\) \{\n\s+void capture\.finalize\(\);/);
 });
