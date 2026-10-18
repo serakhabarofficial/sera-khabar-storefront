@@ -18,7 +18,7 @@ test("the Place Order button shows a centred one-line label and no arrow", () =>
 });
 
 test("checkout is the cart's Vaul sheet: bottom sheet on phones, right panel on desktop (2026-10-13)", () => {
-  assert.match(dialogSource, /<Drawer\.Root open=\{open\} onOpenChange=\{resetDialog\} direction=\{isMobile \? "bottom" : "right"\}>/);
+  assert.match(dialogSource, /<Drawer\.Root open=\{open\} onOpenChange=\{resetDialog\} direction=\{isMobile \? "bottom" : "right"\} repositionInputs=\{false\}>/);
   assert.match(dialogSource, /isMobile \? "sk-sheet sko-sheet" : "sk-panel sk-panel-right sko-panel"/);
   assert.doesNotMatch(dialogSource, /@\/components\/ui\/dialog/);
   // The cart clears its bundle on close; the sheet keeps the last one for the exit slide.
@@ -32,6 +32,12 @@ test("only the confirmation sheet clips overflow, leaving Vaul's white keyboard 
   // Clipping the typing sheet hides that extension and exposes the dark backdrop.
   assert.doesNotMatch(posterSource, /\.sko-sheet\s*\{[^}]*overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/);
   assert.match(posterSource, /\.sko-sheet:has\(\.sko-is-done\)\s*\{[^}]*overflow:\s*hidden;/);
+});
+
+test("mobile checkout uses viewport-aligned sizing instead of Vaul's keyboard repositioning", () => {
+  assert.match(dialogSource, /repositionInputs=\{false\}/);
+  assert.match(dialogSource, /observeCheckoutViewport\(window, setCheckoutViewportStyle\)/);
+  assert.match(dialogSource, /style=\{isMobile \? checkoutViewportStyle : undefined\}/);
 });
 
 test("there is no separate floating Place Order button", () => {
