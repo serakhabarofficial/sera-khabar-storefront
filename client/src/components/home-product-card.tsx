@@ -30,7 +30,7 @@ export function formatCardAmount(value: unknown) {
   return Number.isFinite(amount) ? `৳${amount.toLocaleString("en-US")}` : "৳0";
 }
 
-function isVariantInStock(variant: NonNullable<StorefrontProduct["variants"]>[number]) {
+export function isVariantInStock(variant: NonNullable<StorefrontProduct["variants"]>[number]) {
   if (variant.available === false) return false;
   return typeof variant.stock_quantity !== "number" || variant.stock_quantity > 0;
 }

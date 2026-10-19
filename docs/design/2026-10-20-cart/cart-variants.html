@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cart Variants · Stage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Serif+Bengali:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* Tokens copied from client/src/stage.css (homepage "Stage", 2026-10-19): a white page of hairline cells,
+     light serif display type in jaggery brown, the logo's orange used once per screen. */
+  :root {
+    --ink: #4a2212; --soft: #9a6a52; --line: #ecd6c8; --wash: #fdf8f4; --leaf: #f08a1c; --pill: #f5ebe2;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-io: cubic-bezier(0.77, 0, 0.175, 1);
+    --drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    --serif: "Noto Serif Bengali", serif;
+    --sans: "Geist", "Noto Sans Bengali", system-ui, sans-serif;
+  }
+  html, body { margin: 0; background: #f3ece6; color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  *, *::before, *::after { box-sizing: border-box; }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; border: 0; background: none; color: inherit; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  :focus-visible { outline: 1.5px solid var(--ink); outline-offset: 3px; }
+  .num { font-family: var(--serif); font-variant-numeric: tabular-nums; }
+  .display { margin: 0; font-family: var(--serif); font-weight: 300; line-height: 1.08; letter-spacing: -0.01em; }
+  .display b { font-weight: 600; }
+  .en { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); }
+  .press { transition: transform 160ms var(--ease-out), background-color 200ms ease, color 200ms ease, border-color 200ms ease; }
+  .press:active { transform: scale(0.97); }
+  .ic { width: 14px; height: 14px; flex: none; }
+
+  /* ---------- Picker ---------- */
+  .picker { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; padding: 12px 24px; background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(18px) saturate(180%); border-bottom: 1px solid var(--line); }
+  .picker h1 { font-size: 24px; }
+  .picker h1 small { display: block; font-family: var(--sans); font-weight: 400; font-size: 12px; color: var(--soft); margin-top: 3px; letter-spacing: 0; }
+  .tabs { position: relative; display: flex; }
+  .tab { padding: 9px 18px; font-size: 13.5px; border-radius: 999px; white-space: nowrap; }
+  .tab[aria-selected="true"] { background: var(--ink); color: #fff; }
+  .tools { display: flex; gap: 6px; }
+  .tool { height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); font-size: 12.5px; background: #fff; }
+  .brief { max-width: 1240px; margin: 18px auto 0; padding: 0 24px; color: var(--soft); font-size: 13.5px; line-height: 1.65; }
+  .brief b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Stage ---------- */
+  .stage { max-width: 1240px; margin: 14px auto 60px; padding: 0 24px; display: grid; gap: 28px; align-items: start; }
+  @media (min-width: 1100px) { .stage { grid-template-columns: 1fr 390px; } }
+  .frame-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft); margin: 0 0 8px; }
+  .desk { position: relative; height: 800px; overflow: hidden; background: #fff; border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(74, 34, 18, 0.35); }
+  .phone { position: relative; width: 390px; height: 820px; max-width: 100%; margin: 0 auto; border-radius: 46px; overflow: hidden; background: #fff; border: 10px solid #1d130d; box-shadow: 0 30px 60px -30px rgba(74, 34, 18, 0.45); }
+
+  /* The live homepage behind the overlay (announcement, header, hero) */
+  .site { position: absolute; inset: 0; }
+  .site .ann { display: flex; justify-content: center; gap: 28px; padding: 9px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--soft); white-space: nowrap; }
+  .site .ann b { color: var(--ink); font-weight: 500; }
+  .site .hd { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 8px 32px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .site .hd nav { display: flex; gap: 22px; }
+  .site .hd img { height: 48px; width: auto; justify-self: center; }
+  .site .hd .tl { justify-self: end; display: flex; align-items: center; gap: 6px; }
+  .site .hd .tl .ct { font-family: var(--serif); min-width: 18px; height: 18px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 11px; display: grid; place-items: center; padding: 0 5px; }
+  .site .top { display: grid; grid-template-columns: 1fr auto; align-items: end; padding: 44px 32px 22px; }
+  .site .top h2 { font-size: 72px; }
+  .site .top p { margin: 12px 0 0; font-family: var(--serif); font-size: 16px; color: var(--soft); }
+  .site .top .btn { padding: 14px 24px; height: auto; }
+  .site .panels { display: flex; gap: 10px; height: 330px; padding: 0 32px; }
+  .site .panels > div { flex: 1; background: var(--wash); display: grid; place-items: center; }
+  .site .panels > div:first-child { flex: 3.6; background: #b9d3dc; }
+  .site .panels img { width: 70%; mix-blend-mode: multiply; }
+  .phone .site .ann span:not(:first-child), .phone .site .hd nav, .phone .site .top .btn { display: none; }
+  .phone .site .hd { padding: 6px 16px; } .phone .site .hd img { height: 38px; }
+  .phone .site .top { padding: 26px 18px 18px; grid-template-columns: 1fr; } .phone .site .top h2 { font-size: 44px; }
+  .phone .site .panels { padding: 0 18px; height: 420px; } .phone .site .panels > div:not(:first-child) { display: none; }
+  .ov { position: absolute; inset: 0; background: rgba(40, 18, 8, 0.32); transition: opacity 400ms var(--drawer); }
+
+  /* Cart shell — desktop: a full-height column on the right edge, like another cell of the frame.
+     Phone: a bottom sheet. */
+  .cart { position: absolute; display: flex; flex-direction: column; background: #fff; color: var(--ink); overflow: hidden; transition: transform 500ms var(--drawer); }
+  .desk .cart { top: 0; right: 0; bottom: 0; width: 460px; border-left: 1px solid var(--line); box-shadow: -24px 0 48px -28px rgba(74, 34, 18, 0.35); }
+  .phone .cart { left: 0; right: 0; bottom: 0; max-height: 91%; border-radius: 20px 20px 0 0; box-shadow: 0 -12px 32px -14px rgba(74, 34, 18, 0.35); }
+  .closed .ov { opacity: 0; } .desk.closed .cart { transform: translateX(calc(100% + 30px)); } .phone.closed .cart { transform: translateY(100%); }
+  .reopen { position: absolute; left: 50%; bottom: 28px; translate: -50% 0; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+  .closed .reopen { opacity: 1; pointer-events: auto; }
+  .grab { flex: none; width: 38px; height: 4px; border-radius: 4px; background: var(--line); margin: 8px auto 0; }
+  .desk .grab { display: none; }
+
+  /* Shared pieces */
+  .row { flex: none; border-bottom: 1px solid var(--line); }
+  .pad { padding: 16px 24px 18px; }
+  .phone .pad { padding: 12px 18px 14px; }
+  .c-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px 18px; border-bottom: 1px solid var(--line); }
+  .phone .c-head { padding: 10px 18px 14px; }
+  .c-head h2 { font-size: 34px; }
+  .phone .c-head h2 { font-size: 30px; }
+  .c-head .lab { display: block; margin-top: 4px; font-size: 12.5px; color: var(--soft); }
+  .x { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); }
+  @media (hover: hover) and (pointer: fine) { .x:hover { border-color: var(--ink); } }
+  .c-scroll { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .c-scroll::-webkit-scrollbar { display: none; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: var(--ink); color: #fff; padding: 0 26px; height: 52px; font-size: 14.5px; font-weight: 500; border-radius: 2px; white-space: nowrap; }
+  .btn .arr { transition: transform 220ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .btn:hover .arr { transform: translateX(3px); } }
+  .qty { display: inline-flex; align-items: center; height: 32px; border: 1px solid var(--line); border-radius: 999px; }
+  .qty button { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; }
+  .qty span { min-width: 18px; text-align: center; font-size: 14px; }
+  @media (hover: hover) and (pointer: fine) { .qty button:hover { background: var(--wash); } }
+  .rm { font-size: 11.5px; color: var(--soft); border-bottom: 1px solid currentColor !important; padding-bottom: 1px; }
+  @media (hover: hover) and (pointer: fine) { .rm:hover { color: var(--ink); } }
+
+  /* Free-delivery line: 2px hairline track, ink fill (scaleX, on the compositor), the leaf-orange dot rides its head. */
+  .line { position: relative; height: 2px; background: var(--line); margin-top: 12px; }
+  .line > i { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transition: transform 600ms var(--ease-out); }
+  .line > u { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--leaf); transition: left 600ms var(--ease-out); }
+  .free-msg { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; color: var(--soft); }
+  .free-msg b { color: var(--ink); font-weight: 500; }
+  .free-msg > .num { font-size: 12.5px; }
+
+  /* The homepage card's "Add to cart" pill: beige, handbag, label slides up to ✓ যোগ হয়েছে. */
+  .add { height: 30px; padding: 0 11px; border-radius: 999px; display: grid; overflow: hidden; background: var(--pill); color: var(--ink); font-size: 12px; font-weight: 500; }
+  .add .l1, .add .l2 { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; transition: transform 240ms var(--ease-out), opacity 240ms var(--ease-out); }
+  .add .l2 { transform: translateY(110%); opacity: 0; }
+  .add.added { background: var(--ink); color: #fff; }
+  .add.added .l1 { transform: translateY(-110%); opacity: 0; }
+  .add.added .l2 { transform: none; opacity: 1; }
+  @media (hover: hover) and (pointer: fine) { .add:not(.added):hover { background: var(--ink); color: #fff; } }
+
+  .enter { animation: rise 340ms var(--ease-out) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); filter: blur(2px); } }
+  .leaving { opacity: 0 !important; transform: scale(0.97); filter: blur(2px); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), filter 200ms var(--ease-out); }
+  .stag > * { animation: rise 320ms var(--ease-out) both; }
+  .stag > *:nth-child(2) { animation-delay: 40ms; } .stag > *:nth-child(3) { animation-delay: 80ms; } .stag > *:nth-child(4) { animation-delay: 120ms; }
+
+  /* Footer: total and the dark square button, separated by a hairline like every Stage row. */
+  .c-foot { flex: none; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 18px; padding: 16px 24px 22px; border-top: 1px solid var(--line); background: #fff; }
+  .phone .c-foot { padding: 12px 18px 22px; gap: 14px; }
+  .c-foot .sum small { display: block; font-size: 12px; color: var(--soft); white-space: nowrap; }
+  .c-foot .sum small em { font-style: normal; color: var(--leaf); }
+  .c-foot .sum b { display: block; font-family: var(--serif); font-weight: 500; font-size: 28px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+
+  /* Item rows (ক and গ) */
+  .it { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center; padding: 14px 24px; border-bottom: 1px solid var(--line); }
+  .phone .it { padding: 12px 18px; }
+  .it .ph { width: 64px; height: 64px; background: var(--wash); display: grid; place-items: center; }
+  .it .ph img { width: 88%; mix-blend-mode: multiply; }
+  .it h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 15.5px; line-height: 1.35; }
+  .it .en { margin-top: 2px; }
+  .it .meta { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .it .r { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; align-self: start; }
+  .it .r b { font-family: var(--serif); font-weight: 500; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .it .r span { font-size: 12px; color: var(--soft); }
+  .tip { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 24px; border-bottom: 1px solid var(--line); background: var(--wash); font-size: 12.5px; color: var(--soft); }
+  .phone .tip { padding: 10px 18px; }
+  .tip b { color: var(--ink); font-weight: 500; }
+  .tip button { flex: none; font-size: 12.5px; color: var(--ink); border-bottom: 1px solid currentColor !important; padding-bottom: 1px; }
+
+  /* ===== ক · ঘর: upsell as the homepage card grid ===== */
+  .sec-h { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--line); }
+  .phone .sec-h { padding: 16px 18px; }
+  .sec-h h3 { font-size: 24px; }
+  .sec-h .lab { font-size: 12px; color: var(--soft); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .card { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 46px 12px 20px; border-bottom: 1px solid var(--line); transition: background-color 240ms ease; }
+  .card:nth-child(odd) { border-right: 1px solid var(--line); }
+  @media (hover: hover) and (pointer: fine) { .card:hover { background: var(--wash); } .card:hover .ci img { transform: scale(1.035); } }
+  .card .add { position: absolute; right: 10px; top: 10px; }
+  .card .ci { width: 100%; aspect-ratio: 1.3; display: grid; place-items: center; overflow: hidden; margin-bottom: 10px; }
+  .card .ci img { width: 70%; mix-blend-mode: multiply; transition: transform 600ms var(--ease-out); }
+  .card h4 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 14.5px; }
+  .card .en { margin-top: 3px; font-size: 10px; }
+  .card .pr { margin-top: 6px; font-size: 16px; }
+  .card .pr small { font-family: var(--sans); font-size: 11px; color: var(--soft); margin-left: 4px; }
+  .card .flag { position: static; margin-top: 8px; }
+  .flag { position: absolute; left: 10px; top: 13px; font-size: 11px; color: var(--leaf); border: 1px solid currentColor; border-radius: 999px; padding: 1px 8px; background: #fff; white-space: nowrap; }
+
+  /* ===== খ · দিন: upsell as the hero's widening day panels ===== */
+  .bars { display: flex; gap: 4px; margin-top: 12px; }
+  .bars > span { position: relative; flex: 1; height: 2px; background: var(--line); overflow: hidden; }
+  .bars > span > i { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transition: transform 500ms var(--ease-out); }
+  .bars > span:last-child > i { background: var(--leaf); }
+  .vd .its { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
+  .vd .ti { position: relative; padding: 14px 10px 14px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .vd .its > .ti:not(:nth-child(3n + 1)) { border-left: 1px solid var(--line); }
+  .vd .its > .ti:nth-child(n + 4) { border-top: 1px solid var(--line); }
+  .vd .ti .ph { width: 100%; aspect-ratio: 1.2; display: grid; place-items: center; background: var(--wash); margin-bottom: 8px; }
+  .vd .ti .ph img { width: 70%; mix-blend-mode: multiply; }
+  .vd .ti h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 13.5px; line-height: 1.3; min-height: 2.6em; display: grid; place-items: center; }
+  .vd .ti .sz { font-size: 11.5px; color: var(--soft); }
+  .vd .ti b { display: block; margin: 2px 0 8px; font-family: var(--serif); font-weight: 500; font-size: 15px; }
+  .vd .ti .qty { height: 28px; } .vd .ti .qty button { width: 26px; height: 26px; }
+  .vd .ti .upg { position: absolute; left: 6px; right: 6px; top: 8px; font-size: 10.5px; color: var(--leaf); border: 1px solid currentColor !important; border-radius: 999px; padding: 1px 4px; background: #fff; white-space: nowrap; }
+  .vd .day-h { padding: 20px 24px 14px; display: flex; justify-content: space-between; align-items: end; }
+  .phone .vd .day-h { padding: 16px 18px 12px; }
+  .vd .day-h h3 { font-size: 24px; }
+  .vd .day-h .lab { font-size: 12px; color: var(--soft); }
+  .vd .panels { display: flex; gap: 8px; height: 250px; padding: 0 24px 24px; }
+  .phone .vd .panels { padding: 0 18px 18px; height: 250px; gap: 6px; }
+  .phone .vd .pn[data-on] { flex-grow: 4.2; }
+  .vd .pn { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; background: var(--wash); text-align: left; cursor: pointer; transition: flex-grow 520ms var(--ease-io); }
+  .vd .pn[data-on] { flex-grow: 3.2; }
+  .vd .pn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 14% 12% 46%; mix-blend-mode: multiply; transition: padding 520ms var(--ease-io); }
+  .vd .pn .cap { position: absolute; left: 14px; right: 14px; bottom: 14px; }
+  .vd .pn .t { display: block; font-size: 11.5px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vd .pn .n { display: block; margin-top: 2px; font-family: var(--serif); font-weight: 600; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vd .pn:not([data-on]) .n { opacity: 0; }
+  .vd .pn .n, .vd .pn .t { transition: opacity 200ms ease; }
+  .vd .pn:not([data-on]) img { padding: 18% 8%; }
+  .vd .pn:not([data-on]) .t { opacity: 0; }
+  .vd .pn .more { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; margin-top: 8px; opacity: 0; transform: translateY(6px); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); pointer-events: none; }
+  .vd .pn[data-on] .more { opacity: 1; transform: none; transition-delay: 180ms; transition-duration: 260ms; pointer-events: auto; }
+  .vd .pn .more .num { font-size: 17px; }
+  .vd .pn .flag { opacity: 0; transition: opacity 200ms ease; }
+  .vd .pn[data-on] .flag { opacity: 1; }
+
+  /* ===== গ · ক্যাটাগরি: one featured add-on in the category-card silhouette ===== */
+  .vg .feat { padding: 20px 24px 22px; border-bottom: 1px solid var(--line); }
+  .phone .vg .feat { padding: 16px 18px 18px; }
+  .vg .feat-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .vg .feat-h h3 { font-size: 24px; }
+  .vg .feat-h .lab { font-size: 12px; color: var(--soft); }
+  .vg .cc { position: relative; display: block; height: 210px; --c: #c0662f; }
+  .vg .cc-card { position: absolute; inset: 64px 0 0 0; background: color-mix(in srgb, var(--c) 13%, #fff); border: 1px solid color-mix(in srgb, var(--c) 30%, #fff); border-radius: 22px; border-top-left-radius: 56px; transition: background-color 240ms ease; }
+  .vg .cc img { position: absolute; z-index: 2; left: -2%; top: 0; height: 180px; width: auto; max-width: 56%; object-fit: contain; filter: drop-shadow(0 14px 16px rgba(74, 34, 18, 0.16)); transition: transform 500ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .vg .cc:hover img { transform: translateY(-6px) rotate(-2deg) scale(1.03); } .vg .cc:hover .cc-card { background: color-mix(in srgb, var(--c) 20%, #fff); } }
+  .vg .cc-meta { position: absolute; z-index: 3; right: 20px; bottom: 18px; display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 2px; }
+  .vg .cc-meta .t { font-size: 12px; color: var(--leaf); }
+  .vg .cc-meta b { font-family: var(--serif); font-weight: 500; font-size: 24px; line-height: 1.2; }
+  .vg .cc-meta .buy { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .vg .cc-meta .buy .num { font-size: 19px; }
+  .vg .cc .go { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--ink) !important; display: grid; place-items: center; background: #fff; font-size: 17px; }
+  .vg .cc .go.added { background: var(--ink); color: #fff; }
+  .vg .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 16px -24px 0; padding: 0 24px; }
+  .phone .vg .chips { margin: 14px -18px 0; padding: 0 18px; }
+  .vg .chip { flex: none; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 5px 0 4px; border: 1px solid var(--line); border-radius: 999px; font-family: var(--serif); font-size: 13px; }
+  .vg .chip img { width: 32px; height: 32px; border-radius: 50%; background: var(--wash); mix-blend-mode: multiply; object-fit: contain; }
+  .vg .chip .go { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--pill); font-size: 15px; }
+  .vg .chip .go.added { background: var(--ink); color: #fff; }
+  @media (hover: hover) and (pointer: fine) { .vg .go:not(.added):hover { background: var(--ink); color: #fff; } }
+  .phone .vg .cc img { height: 140px; max-width: 48%; top: 6px; }
+  .phone .vg .cc-meta b { font-size: 20px; }
+  .phone .vg .cc-meta .en { font-size: 9.5px; }
+  .vg .free { padding: 18px 24px 20px; border-bottom: 1px solid var(--line); }
+  .phone .vg .free { padding: 14px 18px 16px; }
+  .vg .free .display { font-size: 22px; }
+
+
+  /* ===== ক · ঘর × রেফারেন্স (2026-10-20): inspired by a cart reference the owner shared — superscript count,
+     a rotating info row with dots, a size picker in each line, horizontal "goes with" cards, a tinted total band. ===== */
+  .desk .cart.vr { top: 16px; right: 16px; bottom: 16px; width: 470px; border: 0; border-radius: 22px; box-shadow: 0 0 0 1px rgba(74, 34, 18, 0.06), 0 24px 48px -16px rgba(40, 18, 8, 0.35); }
+  .vr .r-head { flex: none; display: flex; align-items: flex-start; justify-content: space-between; margin: 0 26px; padding: 24px 0 16px; border-bottom: 1px solid var(--line); }
+  .phone .vr .r-head { margin: 0 20px; padding: 12px 0 14px; }
+  .vr .r-head h2 { font-size: 34px; }
+  .vr .r-head sup { font-family: var(--serif); font-size: 14px; font-weight: 400; margin-left: 4px; vertical-align: 1.3em; }
+  .vr .r-x { width: 36px; height: 36px; display: grid; place-items: center; font-size: 20px; font-weight: 300; margin: -2px -8px 0 0; }
+  .vr .r-info { flex: none; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; margin: 0 26px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .phone .vr .r-info { margin: 0 20px; }
+  .vr .r-slides { display: grid; min-height: 52px; }
+  .vr .r-slide { grid-area: 1 / 1; transition: opacity 280ms var(--ease-out), filter 280ms var(--ease-out), transform 280ms var(--ease-out); }
+  .vr .r-slide:not([data-on]) { opacity: 0; filter: blur(2px); transform: translateY(4px); pointer-events: none; }
+  .vr .r-slide b { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+  .vr .r-slide p { margin: 3px 0 0; font-size: 13px; line-height: 1.45; color: var(--soft); }
+  .vr .r-slide p strong { color: var(--ink); font-weight: 500; }
+  .vr .r-slide .line { max-width: 260px; margin-top: 9px; }
+  .vr .r-dots { display: flex; gap: 6px; align-self: start; padding-top: 4px; }
+  .vr .r-dots button { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--ink) !important; transition: background-color 200ms ease; }
+  .vr .r-dots button[data-on] { background: var(--ink); }
+  /* Free-delivery milestone: a 6px track that fills toward a truck node at ৳২,৬০০; the node turns orange when reached. */
+  .vr .r-ms { flex: none; margin: 0 26px; padding: 16px 0 18px; border-bottom: 1px solid var(--line); }
+  .phone .vr .r-ms { margin: 0 20px; padding: 14px 0 16px; }
+  .vr .r-ms p { margin: 0 0 12px; text-align: center; font-size: 13.5px; color: var(--soft); }
+  .vr .r-ms p b { color: var(--ink); font-weight: 500; }
+  .vr .r-ms p b.leaf { color: var(--leaf); }
+  .vr .ms-track { position: relative; height: 6px; margin-right: 15px; border-radius: 99px; background: #f3e6dc; }
+  .vr .ms-track > i { position: absolute; inset: 0; border-radius: inherit; background: var(--ink); transform-origin: left; transition: transform 600ms var(--ease-out); }
+  .vr .ms-node { position: absolute; right: -15px; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--soft); box-shadow: 0 0 0 1.5px #f3e6dc; transition: background-color 300ms ease, color 300ms ease, box-shadow 300ms ease, transform 300ms var(--ease-out); }
+  .vr .ms-node svg { width: 16px; height: 16px; }
+  .vr .r-ms.done .ms-node { background: var(--leaf); color: #fff; box-shadow: none; transform: scale(1.06); }
+  .vr .ms-lab { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11.5px; color: var(--soft); }
+  .vr .ms-lab span:last-child { color: var(--ink); }
+  /* ঘর × রেফারেন্স add-ons: a swipe rail, not a squeezed grid. Desktop shows three, phones show two with the
+     next one peeking in so the row reads as scrollable. */
+  .cart.vr .m-rail { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; margin: 0 -26px; padding: 2px 26px 4px; scroll-padding: 0 26px; }
+  .cart.vr .m-rail::-webkit-scrollbar { display: none; }
+  .cart.vr .m-tile { flex: 0 0 calc((100% - 20px) / 3); min-width: 0; scroll-snap-align: start; }
+  .phone .cart.vr .m-rail { gap: 10px; margin: 0 -20px; padding: 2px 20px 4px; scroll-padding: 0 20px; }
+  .phone .cart.vr .m-tile { flex-basis: 44%; padding: 14px 10px 12px; }
+  .phone .cart.vr .m-tile h5 { font-size: 13.5px; }
+  .phone .cart.vr .m-tile .add { padding: 0 11px; font-size: 12px; }
+  .phone .cart.vr .m-tile .add .l1 { gap: 6px; }
+  .phone .cart.vr .m-tile .add .ic { width: 14px; height: 14px; }
+
+  /* Adding from the rail, in order (Emil: cause before effect, nothing jumps):
+     1. the pill presses (scale .97) and its label slides up to ✓ (240ms ease-out);
+     2. the tile folds its width shut while fading and shrinking slightly, so the tiles after it glide over (320ms ease-in-out);
+     3. the new line grows its height open in the list above (grid rows 0fr → 1fr, 380ms ease-in-out) while its
+        content fades up from a 2px blur, and the milestone bar fills;
+     4. the count and the total swap with a short blur so the change is noticed, not shouted. */
+  .cart.vr .m-tile.fold { flex-basis: 0 !important; margin-right: -10px; padding-inline: 0 !important; border-width: 0; opacity: 0; transform: scale(0.94); filter: blur(2px);
+    transition: flex-basis 320ms var(--ease-io), margin-right 320ms var(--ease-io), padding 320ms var(--ease-io), border-width 320ms var(--ease-io), opacity 180ms var(--ease-out), transform 220ms var(--ease-out), filter 220ms var(--ease-out); overflow: hidden; }
+  .cart.vr .m-tile.tin { animation: rise 320ms var(--ease-out) 120ms both; }
+  .vr .r-row { display: grid; grid-template-rows: 1fr; }
+  .vr .r-row > .r-it { min-height: 0; overflow: hidden; }
+  .vr .r-row + .r-row > .r-it { border-top: 1px solid var(--line); }
+  .vr .r-it + .r-it { border-top: 0; }
+  .vr .r-row.grow { animation: rowgrow 380ms var(--ease-io) both; }
+  .vr .r-row.grow > .r-it > * { animation: rise 300ms var(--ease-out) 140ms both; }
+  @keyframes rowgrow { from { grid-template-rows: 0fr; } }
+  .vr .tick { display: inline-block; animation: tick 260ms var(--ease-out); }
+  @keyframes tick { from { opacity: 0.35; filter: blur(2px); transform: translateY(2px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .cart.vr .m-tile.fold { transition: opacity 150ms ease; transform: none; filter: none; }
+    .vr .r-row.grow { animation: fade 200ms ease both; }
+    .vr .r-row.grow > .r-it > *, .vr .tick { animation: fade 200ms ease both; }
+  }
+  /* English cart type: Geist throughout (the storefront's Latin face); Bangla names fall back to Noto Serif Bengali. */
+  .cart.vr { font-family: "Geist", "Noto Serif Bengali", system-ui, sans-serif; }
+  .cart.vr .r-h { margin: 0; font-family: "Geist", sans-serif; font-weight: 400; letter-spacing: -0.025em; line-height: 1.1; }
+  .cart.vr .r-head .r-h { font-size: 32px; }
+  .cart.vr .r-head sup { font-family: "Geist", sans-serif; font-size: 12px; font-weight: 500; margin-left: 3px; vertical-align: 1.5em; letter-spacing: 0; }
+  .cart.vr .m-add-h .r-h { font-size: 20px; }
+  .cart.vr .r-tot .r-h { font-size: 20px; }
+  .cart.vr .r-it h3 { font-family: "Geist", sans-serif; font-weight: 500; font-size: 15.5px; letter-spacing: -0.01em; }
+  .cart.vr .r-it .sub.bn { font-family: "Noto Serif Bengali", serif; font-size: 13px; }
+  .cart.vr .r-it .price, .cart.vr .r-tot b { font-family: "Geist", sans-serif; font-variant-numeric: tabular-nums; }
+  .cart.vr .r-tot b { font-size: 21px; font-weight: 500; letter-spacing: -0.01em; }
+  .cart.vr .r-size select { font-family: "Geist", sans-serif; }
+  .cart.vr .m-tile h5 { font-family: "Geist", sans-serif; font-weight: 500; font-size: 13px; letter-spacing: -0.005em; }
+  .cart.vr .m-tile .p { font-family: "Geist", sans-serif; font-size: 12.5px; color: var(--soft); }
+  .cart.vr .ms-lab, .cart.vr .r-ms p { font-family: "Geist", sans-serif; font-variant-numeric: tabular-nums; }
+  .cart.vr .r-cta { font-size: 14.5px; letter-spacing: 0.01em; }
+  .cart.vr .en-empty h3 { font-family: "Geist", sans-serif; font-weight: 400; font-size: 26px; letter-spacing: -0.02em; margin: 0; }
+  /* "Unlocks free delivery": a round stamp pressed onto the tile's top-right corner, matching the product page's
+     saving stamp (filled disc, -12° tilt, a paper gap then a thin ring) in the cart's single orange. It presses on
+     once when a tile first becomes the free-delivery one: from 1.3× and transparent to rest, 320ms ease-out. */
+  .cart.vr .m-tile { position: relative; }
+  .r-stamp { position: absolute; z-index: 2; top: 8px; right: 8px; width: 54px; height: 54px; border-radius: 50%; display: grid; place-content: center; text-align: center;
+    background: var(--leaf); color: #fff; font-family: "Geist", sans-serif; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em; line-height: 1.25; text-transform: uppercase;
+    transform: rotate(-12deg); box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--leaf), 0 3px 6px rgba(74, 34, 18, 0.18); pointer-events: none; }
+  .r-stamp > span { display: block; }
+  .phone .r-stamp { width: 50px; height: 50px; font-size: 8px; }
+  .r-stamp.land { animation: stamp 320ms var(--ease-out) 260ms both; }
+  @keyframes stamp { from { opacity: 0; transform: rotate(-12deg) scale(1.3); } }
+  @media (prefers-reduced-motion: reduce) { .r-stamp.land { animation: fade 200ms ease both; } }
+  /* The milestone scrolls with the bag. Once it has scrolled under the header, a 2px line on the header's bottom
+     edge carries the same progress, fading in over 200ms; it fades out again when the milestone is back in view. */
+  .vr .r-head { position: relative; }
+  .vr .r-mini { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: #f3e6dc; opacity: 0; transition: opacity 200ms var(--ease-out); pointer-events: none; }
+  .vr .r-mini > i { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transition: transform 600ms var(--ease-out); }
+  .cart.vr.past .r-mini { opacity: 1; }
+  .vr .c-scroll .r-ms { padding-top: 18px; }
+  .vr .r-list { padding: 0 26px; }
+  .phone .vr .r-list { padding: 0 20px; }
+  .vr .r-it { display: grid; grid-template-columns: 112px 1fr; gap: 16px; padding: 18px 0; }
+  .phone .vr .r-it { grid-template-columns: 96px 1fr; gap: 14px; }
+  .vr .r-it + .r-it { border-top: 1px solid var(--line); }
+  .vr .r-it .ph { aspect-ratio: 1; border-radius: 6px; background: var(--wash); display: grid; place-items: center; }
+  .vr .r-it .ph img { width: 82%; mix-blend-mode: multiply; }
+  .vr .r-it .top { display: flex; justify-content: space-between; gap: 10px; }
+  .vr .r-it h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 17px; line-height: 1.3; }
+  .vr .r-it .price { font-family: var(--serif); font-weight: 500; font-size: 16px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .vr .r-it .sub { font-size: 12.5px; color: var(--soft); margin-top: 1px; }
+  .vr .r-size { position: relative; display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .vr .r-size select { appearance: none; -webkit-appearance: none; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 500; color: var(--ink); padding: 0 18px 2px 0; border-bottom: 1px solid var(--ink); border-radius: 0; cursor: pointer; }
+  .vr .r-size::after { content: ""; position: absolute; right: 2px; top: 5px; width: 6px; height: 6px; border-right: 1.3px solid var(--ink); border-bottom: 1.3px solid var(--ink); transform: rotate(45deg); pointer-events: none; }
+  .vr .r-size.one select { border-bottom-color: transparent; padding-right: 0; cursor: default; }
+  .vr .r-size.one::after { display: none; }
+  .vr .r-note { margin: 6px 0 0; font-size: 12.5px; color: var(--soft); }
+  .vr .r-note button { color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  .vr .r-ctl { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .vr .r-qty { display: inline-flex; align-items: center; height: 34px; border: 1px solid var(--ink); border-radius: 4px; }
+  .vr .r-qty button { width: 34px; height: 32px; display: grid; place-items: center; font-size: 16px; }
+  .vr .r-qty span { min-width: 22px; text-align: center; font-size: 14px; }
+  @media (hover: hover) and (pointer: fine) { .vr .r-qty button:hover { background: var(--wash); } }
+  .vr .r-rm { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--soft); }
+  .vr .r-rm svg { width: 14px; height: 14px; }
+  @media (hover: hover) and (pointer: fine) { .vr .r-rm:hover { color: var(--ink); } }
+  .vr .r-add { padding: 8px 0 24px; }
+  .vr .r-add h4 { margin: 0 26px 14px; font-size: 24px; }
+  .phone .vr .r-add h4 { margin: 0 20px 12px; }
+  .vr .r-rail { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 0 26px; scroll-snap-type: x mandatory; scroll-padding: 26px; overscroll-behavior-x: contain; }
+  .phone .vr .r-rail { padding: 0 20px; scroll-padding: 20px; }
+  .vr .r-rail::-webkit-scrollbar { display: none; }
+  .vr .r-card { flex: none; width: 290px; display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 10px; border-radius: 6px; background: var(--wash); scroll-snap-align: start; }
+  .phone .vr .r-card { width: 270px; }
+  .vr .r-card .ph { aspect-ratio: 1; border-radius: 4px; background: #fff; display: grid; place-items: center; }
+  .vr .r-card .ph img { width: 80%; mix-blend-mode: multiply; transition: transform 500ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .vr .r-card:hover .ph img { transform: scale(1.05); } }
+  .vr .r-card .bd { display: flex; flex-direction: column; min-width: 0; }
+  .vr .r-card .t { display: flex; justify-content: space-between; gap: 8px; }
+  .vr .r-card h5 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 15px; line-height: 1.3; }
+  .vr .r-card .p { font-family: var(--serif); font-size: 14px; white-space: nowrap; }
+  .vr .r-card .d { margin-top: 2px; font-size: 12px; line-height: 1.4; color: var(--soft); }
+  .vr .r-card .d em { font-style: normal; color: var(--leaf); }
+  .vr .r-go { margin-top: auto; align-self: flex-start; display: grid; overflow: hidden; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+  .vr .r-go > span { grid-area: 1 / 1; display: inline-flex; align-items: center; gap: 8px; transition: transform 240ms var(--ease-out), opacity 240ms var(--ease-out); }
+  .vr .r-go > span i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; transition: transform 220ms var(--ease-out); }
+  .vr .r-go .l2 { transform: translateY(110%); opacity: 0; }
+  .vr .r-go.added .l1 { transform: translateY(-110%); opacity: 0; }
+  .vr .r-go.added .l2 { transform: none; opacity: 1; }
+  @media (hover: hover) and (pointer: fine) { .vr .r-go:hover .l1 i { transform: translateX(3px); } }
+  .vr .r-foot { flex: none; padding: 20px 26px 22px; background: #faf5f0; }
+  .phone .vr .r-foot { padding: 16px 20px 22px; }
+  .vr .r-tot { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .vr .r-tot h3 { margin: 0; font-size: 22px; }
+  .vr .r-tot small { display: block; margin-top: 3px; font-size: 12.5px; color: var(--soft); }
+  .vr .r-tot small em { font-style: normal; color: var(--leaf); }
+  .vr .r-tot b { font-family: var(--serif); font-weight: 500; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .vr .r-cta { width: 100%; height: 50px; border-radius: 6px; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; font-weight: 500; }
+  .vr .r-cta i { width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); transition: transform 220ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .vr .r-cta:hover i { transform: translateX(4px); } }
+
+  /* ===== ক · ঘর মাঝামাঝি: the calm spacing of the minimal pass, with ঘর's character back ===== */
+  .vm .m-head { flex: none; display: flex; align-items: flex-start; justify-content: space-between; padding: 28px 28px 0; }
+  .phone .vm .m-head { padding: 12px 20px 0; }
+  .vm .m-head h2 { font-size: 36px; }
+  .phone .vm .m-head h2 { font-size: 31px; }
+  .vm .m-head .lab { display: block; margin-top: 6px; font-size: 12.5px; color: var(--soft); }
+  .vm .m-x { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); font-size: 14px; }
+  @media (hover: hover) and (pointer: fine) { .vm .m-x:hover { border-color: var(--ink); } }
+  .vm .m-free { flex: none; margin: 18px 28px 0; padding: 14px 16px 16px; border-radius: 12px; background: var(--wash); }
+  .phone .vm .m-free { margin: 14px 20px 0; }
+  .vm .m-free.done .free-msg b { color: var(--leaf); }
+  .vm .m-list { padding: 8px 28px 0; }
+  .phone .vm .m-list { padding: 6px 20px 0; }
+  .vm .m-it { display: grid; grid-template-columns: 72px 1fr auto; gap: 14px; align-items: center; padding: 12px 0; }
+  .vm .m-it + .m-it { border-top: 1px solid var(--line); }
+  .vm .m-it .ph { width: 72px; height: 72px; border-radius: 12px; background: var(--wash); display: grid; place-items: center; }
+  .vm .m-it .ph img { width: 86%; mix-blend-mode: multiply; }
+  .vm .m-it h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 15.5px; line-height: 1.35; }
+  .vm .m-it .sz { display: block; margin-top: 1px; font-size: 12.5px; color: var(--soft); }
+  .vm .m-it .ctl { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .vm .m-it .r { align-self: start; padding-top: 2px; font-family: var(--serif); font-weight: 500; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .vm .m-tip { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -2px 0 12px 86px; padding: 8px 10px 8px 12px; border-radius: 10px; background: var(--wash); font-size: 12.5px; color: var(--soft); }
+  .vm .m-tip b { color: var(--ink); font-weight: 500; }
+  .vm .m-tip button { flex: none; font-size: 12px; font-weight: 500; color: var(--ink); background: #fff; padding: 5px 10px; border-radius: 999px; box-shadow: 0 0 0 1px var(--line); }
+  :is(.vm, .vr) .m-add { padding: 22px 28px 26px; border-top: 1px solid var(--line); margin-top: 6px; }
+  .phone :is(.vm, .vr) .m-add { padding: 18px 20px 22px; }
+  .vr .m-add { margin: 0 26px; padding: 22px 0 26px; }
+  .phone .vr .m-add { margin: 0 20px; padding: 18px 0 22px; }
+  :is(.vm, .vr) .m-add-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  :is(.vm, .vr) .m-add-h h4 { margin: 0; font-size: 22px; }
+  :is(.vm, .vr) .m-add-h span { font-size: 12px; color: var(--soft); }
+  :is(.vm, .vr) .m-rail { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  :is(.vm, .vr) .m-tile { display: flex; flex-direction: column; align-items: center; padding: 12px 8px 10px; border-radius: 14px; border: 1px solid var(--line); text-align: center; transition: background-color 240ms ease; }
+  @media (hover: hover) and (pointer: fine) { :is(.vm, .vr) .m-tile:hover { background: var(--wash); } :is(.vm, .vr) .m-tile:hover img { transform: scale(1.04); } }
+  .vr .m-tile { border-radius: 6px; }
+  :is(.vm, .vr) .m-tile img { width: 74%; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; transition: transform 500ms var(--ease-out); }
+  :is(.vm, .vr) .m-tile h5 { margin: 6px 0 0; font-family: var(--serif); font-weight: 400; font-size: 12.5px; line-height: 1.3; min-height: 2.6em; display: grid; place-items: center; }
+  :is(.vm, .vr) .m-tile .p { font-size: 14px; margin: 2px 0 8px; }
+  :is(.vm, .vr) .m-tile .hint { display: block; margin: -6px 0 8px; font-size: 10.5px; color: var(--leaf); }
+  :is(.vm, .vr) .m-tile .add { width: 100%; }
+  .phone :is(.vm, .vr) .m-rail { gap: 8px; }
+  .phone :is(.vm, .vr) .m-tile { padding: 10px 6px 8px; }
+  .phone :is(.vm, .vr) .m-tile .add { padding: 0 6px; font-size: 11.5px; }
+  .phone :is(.vm, .vr) .m-tile .add .l1 { gap: 4px; }
+  .phone :is(.vm, .vr) .m-tile .add .ic { width: 13px; height: 13px; }
+  .vm .m-foot { flex: none; padding: 16px 28px 24px; background: #fff; border-top: 1px solid var(--line); }
+  .phone .vm .m-foot { padding: 12px 20px 22px; }
+  .vm .m-sub { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--soft); margin-bottom: 4px; }
+  .vm .m-sub em { font-style: normal; color: var(--leaf); }
+  .vm .m-tot { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .vm .m-tot small { display: block; font-size: 12px; color: var(--soft); }
+  .vm .m-tot small em { font-style: normal; color: var(--leaf); }
+  .vm .m-tot span { font-size: 14px; }
+  .vm .m-tot b { font-family: var(--serif); font-weight: 500; font-size: 26px; font-variant-numeric: tabular-nums; }
+  .vm .m-foot .btn { width: 100%; height: 54px; }
+
+  .empty { text-align: center; padding: 56px 24px; }
+  .empty svg { width: 46px; height: 46px; color: var(--soft); margin: 0 auto 10px; }
+  .empty h3 { font-size: 28px; }
+  .empty p { margin: 8px 0 18px; color: var(--soft); font-size: 13.5px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .enter, .stag > * { animation: fade 200ms ease both !important; }
+    @keyframes fade { from { opacity: 0; } }
+    .press:active { transform: none; }
+    .cart { transition-duration: 1ms; }
+    .line > i, .line > u, .bars > span > i, .vd .pn { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="picker">
+    <h1 class="display">কার্ট <b>রিডিজাইন</b><small>Stage cart · 2026-10-20 · everything is clickable</small></h1>
+    <div class="tabs" role="tablist">
+      <button class="tab press" role="tab" data-v="vr">ক · ঘর × রেফারেন্স (English)</button>
+      <button class="tab press" role="tab" data-v="vm">ক · ঘর মাঝামাঝি</button>
+      <button class="tab press" role="tab" data-v="vk">ক · ঘর (আগের)</button>
+      <button class="tab press" role="tab" data-v="vd">খ · দিন</button>
+      <button class="tab press" role="tab" data-v="vg">গ · ক্যাটাগরি</button>
+    </div>
+    <div class="tools">
+      <button class="tool press" id="reset">রিসেট</button>
+      <button class="tool press" id="toggle">খুলুন / বন্ধ</button>
+      <button class="tool press" id="empty">খালি</button>
+    </div>
+  </div>
+  <p class="brief" id="brief"></p>
+  <div class="stage">
+    <div><p class="frame-label">Desktop · edge column</p><div class="desk" id="desk"></div></div>
+    <div><p class="frame-label">Phone · bottom sheet</p><div class="phone" id="phone"></div></div>
+  </div>
+
+<script>
+  // Real catalog (client/src/lib/generated-storefront-products.ts) and policy (site-pages.ts).
+  const IMG = (p, i) => `https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/${p}/${i}/960.webp`;
+  const CUT = "../2026-10-13-homepage/cutouts/";
+  const P = {
+    patali: { bn: "খেজুরের পাটালী গুড়", en: "Date Palm Patali", img: IMG("ebe47c6f-a8f0-4cb2-b675-81a64d70e704", "4d94a939-d0c4-43ed-aaf7-72bf7f920aeb"), cut: CUT + "g-patali.webp", c: "#c0662f", sizes: { "৫০০ গ্রাম": 350, "১ কেজি": 671 } },
+    dana: { bn: "দানাদার গুড়", en: "Granulated Jaggery", img: IMG("c1eae1fc-d16a-4724-9080-5e86fb7e5701", "2a02541f-49c2-407a-b491-dab0b39a7169"), cut: CUT + "g-dana.webp", c: "#c0662f", sizes: { "৫০০ গ্রাম": 300, "১ কেজি": 560 } },
+    achar: { bn: "আমসত্ত্ব আচার", en: "Mango Leather Pickle", img: IMG("38fc78e0-2256-4182-8722-6023db8c8662", "0ff7b2d1-e5cf-4298-9c0f-149329d8b237"), cut: CUT + "achar-cut.webp", c: "#e2547a", sizes: { "৫০০ গ্রাম": 350, "১ কেজি": 700 } },
+    jhola: { bn: "খেজুরের ঝোলা গুড়", en: "Liquid Date Jaggery", img: IMG("245c778e-1f3d-4797-82f1-f26425d6fdb4", "7ad5c840-8b97-4676-b57a-6e82c3b3f519"), cut: CUT + "g-jhola.webp", c: "#c0662f", sizes: { "৫০০ গ্রাম": 380, "১ কেজি": 720 } },
+    bori: { bn: "হোমমেড কুমড়ো বড়ি", en: "Homemade Pumpkin Bori", img: IMG("4061bd9c-4908-4e43-9caa-7587c4caa1d1", "41e4d871-04da-41d0-ac91-f4de112fd452"), cut: CUT + "bori-cut.webp", c: "#e2547a", sizes: { "১ কেজি": 700, "২ কেজি": 1300 } },
+    choco: { bn: "চকলেট বীজ গুড়", en: "Chocolate Seed Jaggery", img: IMG("c6e71b12-cef2-4f25-bec4-576a910323f8", "de7a7d92-fefc-48fa-9dfa-3ee3e735d70a"), c: "#c0662f", sizes: { "১ কেজি": 550 } },
+    gol: { bn: "গোল পাটালি", en: "Round Patali Jaggery", img: IMG("43390440-8e8b-497d-b8ca-462409a17a9a", "2748a413-bc15-44cc-adb6-22ad75cf4379"), c: "#c0662f", sizes: { "১ কেজি": 450 } },
+    foil: { bn: "ফয়েল পাটালি", en: "Foil-Wrapped Patali", img: IMG("6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d", "651267ca-a6e1-4c6c-9d28-bd1b6c716dd5"), c: "#c0662f", sizes: { "১ কেজি": 470 } },
+  };
+  const FREE_AT = 2600, DELIVERY = 100;
+  // What a গুড় buyer adds next, phrased like the hero's day captions.
+  const PAIR = { patali: "শীতের পিঠায়", dana: "চা আর পায়েসে", achar: "দুপুরের ভাতের পাশে", jhola: "সকালের রুটিতে ঢেলে", bori: "মাছের ঝোলে", choco: "নতুন স্বাদের গুড়", gol: "উপহারে", foil: "সাজিয়ে রাখার মতো" };
+  const UPSELL = [["jhola", "৫০০ গ্রাম"], ["bori", "১ কেজি"], ["choco", "১ কেজি"], ["gol", "১ কেজি"], ["foil", "১ কেজি"]];
+  const BAG = `<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="m237.9 198.36l-14.25-120a14.06 14.06 0 0 0-14-12.36H174v-2a46 46 0 0 0-92 0v2H46.33a14.06 14.06 0 0 0-14 12.36l-14.25 120a14 14 0 0 0 14 15.64h191.84a14 14 0 0 0 14-15.64ZM94 64a34 34 0 0 1 68 0v2H94Zm131.5 137.3a2.07 2.07 0 0 1-1.58.7H32.08a2.07 2.07 0 0 1-1.58-.7a1.92 1.92 0 0 1-.49-1.53l14.26-120A2 2 0 0 1 46.33 78H82v26a6 6 0 0 0 12 0V78h68v26a6 6 0 0 0 12 0V78h35.67a2 2 0 0 1 2.06 1.77l14.26 120a1.92 1.92 0 0 1-.49 1.53"/></svg>`;
+
+  const bn = (n) => String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+  const tk = (n) => "৳" + bn(Number(n).toLocaleString("en-IN"));
+  const START = () => [{ k: "patali", size: "১ কেজি", q: 1 }, { k: "dana", size: "৫০০ গ্রাম", q: 2 }, { k: "achar", size: "৫০০ গ্রাম", q: 1 }];
+  const frames = {};
+  let variant = ["vr", "vm", "vk", "vd", "vg"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "vr";
+
+  function totals(items) {
+    const sub = items.reduce((s, i) => s + P[i.k].sizes[i.size] * i.q, 0);
+    const left = Math.max(0, FREE_AT - sub);
+    return { sub, left, ship: left ? DELIVERY : 0, total: sub + (left ? DELIVERY : 0), pct: Math.min(1, sub / FREE_AT), count: items.reduce((s, i) => s + i.q, 0) };
+  }
+  // Not already in the bag; the one that alone unlocks free delivery (or comes closest) leads, flagged.
+  function suggestions(items, left) {
+    const list = UPSELL.filter(([k]) => !items.some((i) => i.k === k)).map(([k, size]) => ({ k, size, price: P[k].sizes[size] }));
+    if (left > 0 && list.length) {
+      const unlock = list.filter((s) => s.price >= left).sort((a, b) => a.price - b.price)[0];
+      const best = unlock || [...list].sort((a, b) => b.price - a.price)[0];
+      best.flag = unlock ? "এটায় ডেলিভারি ফ্রি" : "ফ্রি ডেলিভারির কাছে";
+      list.sort((a, b) => (b.flag ? 1 : 0) - (a.flag ? 1 : 0));
+    }
+    return list;
+  }
+  // Two 500 g packs cost more than one 1 kg pack.
+  function upgrade(items) {
+    for (const [idx, i] of items.entries()) {
+      const s = P[i.k].sizes;
+      if (i.size === "৫০০ গ্রাম" && s["১ কেজি"] && i.q >= 2 && s["৫০০ গ্রাম"] * 2 > s["১ কেজি"]) return { idx, save: s["৫০০ গ্রাম"] * 2 - s["১ কেজি"] };
+    }
+    return null;
+  }
+
+  /* ---------- Shared templates ---------- */
+  const head = (t) => `<div class="grab" aria-hidden="true"></div><div class="c-head"><div><h2 class="display">আপনার <b>ব্যাগ</b></h2><span class="lab">${bn(t.count)}টি পণ্য · ক্যাশ অন ডেলিভারি</span></div><button class="x press" data-act="close" aria-label="বন্ধ করুন">✕</button></div>`;
+  const foot = (t) => `<div class="c-foot"><div class="sum"><small>মোট · ডেলিভারি ${t.ship ? tk(t.ship) : "<em>ফ্রি</em>"}</small><b>${tk(t.total)}</b></div><button class="btn press">অর্ডার করুন <span class="arr">→</span></button></div>`;
+  const qty = (idx, q) => `<div class="qty"><button class="press" data-act="dec" data-i="${idx}" aria-label="কমান">−</button><span class="num">${bn(q)}</span><button class="press" data-act="inc" data-i="${idx}" aria-label="বাড়ান">+</button></div>`;
+  const freeText = (t) => t.left ? `আর <b class="num">${tk(t.left)}</b> হলে ডেলিভারি ফ্রি` : `<b>ডেলিভারি ফ্রি</b> — ${tk(DELIVERY)} বাঁচল`;
+  const line = (t) => `<div class="line"><i data-pct="${t.pct}"></i><u></u></div>`;
+  const pill = (s) => `<button class="add press" data-act="add" data-k="${s.k}" data-s="${s.size}"><span class="l1">${BAG}Add to cart</span><span class="l2">✓ যোগ হয়েছে</span></button>`;
+  const empty = () => `<div class="empty stag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><h3 class="display">ব্যাগ <b>খালি</b></h3><p>শীতের প্রথম খেজুরের গুড় এসে গেছে।</p><button class="btn press" data-act="close">কেনাকাটা করুন <span class="arr">→</span></button></div>`;
+  const rows = (f, up) => f.items.map((i, idx) => `<div class="it ${f.fresh === i.k ? "enter" : ""}">
+      <div class="ph"><img src="${P[i.k].img}" alt="" /></div>
+      <div><h3>${P[i.k].bn}</h3><div class="en">${P[i.k].en}</div><div class="meta">${qty(idx, i.q)}<button class="rm" data-act="rm" data-i="${idx}">বাদ দিন</button></div></div>
+      <div class="r"><b>${tk(P[i.k].sizes[i.size] * i.q)}</b><span>${i.size}</span></div></div>
+      ${up && up.idx === idx ? `<div class="tip"><span>দুটো ৫০০ গ্রামের বদলে ১ কেজি নিলে <b class="num">${tk(up.save)}</b> কম</span><button class="press" data-act="upgrade" data-i="${idx}">১ কেজি নিন</button></div>` : ""}`).join("");
+
+  /* ---------- ক · ঘর ---------- */
+  function vk(f, t) {
+    const up = upgrade(f.items), sug = suggestions(f.items, t.left).slice(0, 4);
+    if (!f.items.length) return head(t) + `<div class="c-scroll">${empty()}</div>`;
+    return head(t) + `<div class="row pad"><div class="free-msg"><span>${freeText(t)}</span><span class="num">${tk(t.sub)} / ${tk(FREE_AT)}</span></div>${line(t)}</div>
+      <div class="c-scroll"><div class="stag"><div>${rows(f, up)}</div>
+      ${sug.length ? `<div><div class="sec-h"><h3 class="display">সাথে <b>নিন</b></h3><span class="lab">একই প্যাকেটে আসবে</span></div><div class="grid">${sug.map((s) => `
+        <div class="card" data-card="${s.k}">${pill(s)}<div class="ci"><img src="${P[s.k].img}" alt="" /></div>
+        <h4>${P[s.k].bn}</h4><div class="en">${P[s.k].en}</div><div class="pr num">${tk(s.price)}<small>${s.size}</small></div>${s.flag ? `<span class="flag">${s.flag}</span>` : ""}</div>`).join("")}</div></div>` : ""}
+      </div></div>` + foot(t);
+  }
+
+  /* ---------- খ · দিন ---------- */
+  function vd(f, t) {
+    const up = upgrade(f.items), sug = suggestions(f.items, t.left).slice(0, 4);
+    if (!f.items.length) return head(t) + `<div class="c-scroll">${empty()}</div>`;
+    const seg = 4, per = FREE_AT / seg;
+    const bars = Array.from({ length: seg }, (_, n) => `<span><i data-pct="${Math.max(0, Math.min(1, (t.sub - n * per) / per))}"></i></span>`).join("");
+    const on = Math.max(0, Math.min(f.on ?? 0, sug.length - 1));
+    return head(t) + `<div class="row pad"><div class="free-msg"><span>${freeText(t)}</span><span class="num">${tk(t.sub)} / ${tk(FREE_AT)}</span></div><div class="bars">${bars}</div></div>
+      <div class="c-scroll"><div class="stag"><div class="its">${f.items.map((i, idx) => `<div class="ti ${f.fresh === i.k ? "enter" : ""}">
+          ${up && up.idx === idx ? `<button class="upg press" data-act="upgrade" data-i="${idx}">১ কেজিতে ${tk(up.save)} কম</button>` : ""}
+          <div class="ph"><img src="${P[i.k].img}" alt="" /></div><h3>${P[i.k].bn}</h3><span class="sz">${i.size}</span><b>${tk(P[i.k].sizes[i.size] * i.q)}</b>${qty(idx, i.q)}</div>`).join("")}</div>
+      ${sug.length ? `<div><div class="day-h"><h3 class="display">সারাদিনের <b>সঙ্গী</b></h3><span class="lab">ছুঁয়ে দেখুন</span></div><div class="panels">${sug.map((s, n) => `
+        <div class="pn" data-card="${s.k}" data-act="pick" data-n="${n}" ${n === on ? "data-on" : ""}>${s.flag ? `<span class="flag">${s.flag}</span>` : ""}<img src="${P[s.k].img}" alt="" />
+        <div class="cap"><span class="t">${PAIR[s.k]}</span><span class="n">${P[s.k].bn}</span><div class="more"><span class="num">${tk(s.price)}</span>${pill(s)}</div></div></div>`).join("")}</div></div>` : ""}
+      </div></div>` + foot(t);
+  }
+
+  /* ---------- গ · ক্যাটাগরি ---------- */
+  function vg(f, t) {
+    const up = upgrade(f.items), [hero, ...rest] = suggestions(f.items, t.left);
+    if (!f.items.length) return head(t) + `<div class="c-scroll">${empty()}</div>`;
+    return head(t) + `<div class="c-scroll"><div class="stag">
+      <div class="free"><p class="display">${t.left ? `আর <b class="num">${tk(t.left)}</b>, তারপর ডেলিভারি <b>ফ্রি</b>` : `ডেলিভারি <b>ফ্রি</b> হয়ে গেছে`}</p>${line(t)}</div>
+      ${hero ? `<div class="feat"><div class="feat-h"><h3 class="display">এর সাথে <b>মানায়</b></h3><span class="lab">${PAIR[hero.k]}</span></div>
+        <div class="cc" data-card="${hero.k}" style="--c:${P[hero.k].c}"><span class="cc-card"></span><img src="${P[hero.k].cut || P[hero.k].img}" alt="" />
+        <div class="cc-meta">${hero.flag ? `<span class="t">${hero.flag}</span>` : ""}<b>${P[hero.k].bn}</b><span class="en">${P[hero.k].en} · ${hero.size}</span>
+        <div class="buy"><span class="num">${tk(hero.price)}</span><button class="go press" data-act="add" data-k="${hero.k}" data-s="${hero.size}" aria-label="যোগ করুন">+</button></div></div></div>
+        ${rest.length ? `<div class="chips">${rest.map((s) => `<div class="chip" data-card="${s.k}"><img src="${P[s.k].img}" alt="" />${P[s.k].bn} <span class="num">${tk(s.price)}</span><button class="go press" data-act="add" data-k="${s.k}" data-s="${s.size}" aria-label="যোগ করুন">+</button></div>`).join("")}</div>` : ""}</div>` : ""}
+      <div>${rows(f, up)}</div>
+      </div></div>` + foot(t);
+  }
+
+
+  /* ---------- ক · ঘর × রেফারেন্স ---------- */
+  const TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg>`;
+  // English cart (2026-10-20): English labels and Latin digits; product names lead in English with the Bangla
+  // name underneath. Prices keep the ৳ sign.
+  const tkE = (n) => "৳" + Number(n).toLocaleString("en-IN");
+  const SIZE_EN = { "৫০০ গ্রাম": "500 g", "১ কেজি": "1 kg", "২ কেজি": "2 kg" };
+  function vr(f, t) {
+    const up = upgrade(f.items), sug = suggestions(f.items, t.left);
+    const top = `<div class="grab" aria-hidden="true"></div><div class="r-head"><h2 class="r-h">Bag<sup class="${f.prevCount != null && f.prevCount !== t.count ? "tick" : ""}">${t.count}</sup></h2><button class="r-x press" data-act="close" aria-label="Close">✕</button>${f.items.length ? `<span class="r-mini" aria-hidden="true"><i data-pct="${t.pct}"></i></span>` : ""}</div>`;
+    if (!f.items.length) return top + `<div class="c-scroll"><div class="empty en-empty stag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><h3>Your bag is empty</h3><p>This winter's first date palm jaggery is here.</p><button class="btn press" data-act="close">Continue shopping <span class="arr">→</span></button></div></div>`;
+    const TRUCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/></svg>`;
+    return top + `<div class="c-scroll"><div class="stag"><div class="r-ms ${t.left ? "" : "done"}"><p>${t.left ? `Add <b>${tkE(t.left)}</b> more for <b>free delivery</b>` : `You've unlocked <b class="leaf">free delivery</b>`}</p>
+        <div class="ms-track"><i data-pct="${t.pct}"></i><span class="ms-node">${TRUCK}</span></div>
+        <div class="ms-lab"><span>${tkE(t.sub)}</span><span>${tkE(FREE_AT)}</span></div></div>
+      <div class="r-list">${f.items.map((i, idx) => {
+        const sizes = Object.keys(P[i.k].sizes);
+        return `<div class="r-row ${f.fresh === i.k ? "grow" : ""}"><div class="r-it">
+          <div class="ph"><img src="${P[i.k].img}" alt="" /></div>
+          <div><div class="top"><h3>${P[i.k].en}</h3><span class="price">${tkE(P[i.k].sizes[i.size] * i.q)}</span></div>
+            <div class="sub bn">${P[i.k].bn}</div>
+            <label class="r-size ${sizes.length < 2 ? "one" : ""}"><select data-size="${idx}" aria-label="Size" ${sizes.length < 2 ? "disabled" : ""}>${sizes.map((z) => `<option value="${z}" ${z === i.size ? "selected" : ""}>${SIZE_EN[z]}</option>`).join("")}</select></label>
+            <p class="r-note">${up && up.idx === idx ? `Save ${tkE(up.save)} with the 1 kg pack · <button data-act="upgrade" data-i="${idx}">Switch</button>` : `${tkE(P[i.k].sizes[i.size])} each`}</p>
+            <div class="r-ctl"><div class="r-qty"><button class="press" data-act="dec" data-i="${idx}" aria-label="Decrease">−</button><span>${i.q}</span><button class="press" data-act="inc" data-i="${idx}" aria-label="Increase">+</button></div>
+            <button class="r-rm" data-act="rm" data-i="${idx}">${TRASH}Remove</button></div></div></div></div>`;
+      }).join("")}</div>
+      ${sug.length ? `<div class="m-add"><div class="m-add-h"><h4 class="r-h">Add to your order</h4><span>Ships in the same box</span></div><div class="m-rail">${sug.map((s) => `
+        <div class="m-tile ${f.prevSug && !f.prevSug.includes(s.k) ? "tin" : ""}" data-card="${s.k}">${s.flag === "এটায় ডেলিভারি ফ্রি" ? `<span class="r-stamp ${f.prevStamp !== s.k ? "land" : ""}" aria-label="Unlocks free delivery"><span>Free</span><span>delivery</span></span>` : ""}<img src="${P[s.k].img}" alt="" /><h5>${P[s.k].en}</h5><span class="p">${tkE(s.price)} · ${SIZE_EN[s.size]}</span>
+        <button class="add press" data-act="add" data-k="${s.k}" data-s="${s.size}"><span class="l1">${BAG}Add</span><span class="l2">✓ Added</span></button></div>`).join("")}</div></div>` : ""}
+      </div></div>
+      <div class="r-foot"><div class="r-tot"><div><h3 class="r-h">Total</h3><small>${t.ship ? `Incl. ${tkE(t.ship)} delivery` : `<em>Free delivery</em>`} · Cash on delivery</small></div><b class="${f.prevTotal != null && f.prevTotal !== t.total ? "tick" : ""}">${tkE(t.total)}</b></div>
+        <button class="r-cta press">Place order</button></div>`;
+  }
+
+  /* ---------- ক · ঘর মাঝামাঝি ---------- */
+  function vm(f, t) {
+    const up = upgrade(f.items), sug = suggestions(f.items, t.left).slice(0, 3);
+    const top = `<div class="grab" aria-hidden="true"></div><div class="m-head"><div><h2 class="display">আপনার <b>ব্যাগ</b></h2><span class="lab">${bn(t.count)}টি পণ্য · ক্যাশ অন ডেলিভারি</span></div><button class="m-x press" data-act="close" aria-label="বন্ধ করুন">✕</button></div>`;
+    if (!f.items.length) return top + `<div class="c-scroll">${empty()}</div>`;
+    return top + `<div class="m-free ${t.left ? "" : "done"}"><div class="free-msg"><span>${freeText(t)}</span><span class="num">${tk(t.sub)} / ${tk(FREE_AT)}</span></div>${line(t)}</div>
+      <div class="c-scroll"><div class="stag"><div class="m-list">${f.items.map((i, idx) => `<div class="m-it ${f.fresh === i.k ? "enter" : ""}">
+          <div class="ph"><img src="${P[i.k].img}" alt="" /></div>
+          <div><h3>${P[i.k].bn}</h3><span class="sz">${i.size}</span><div class="ctl">${qty(idx, i.q)}<button class="rm" data-act="rm" data-i="${idx}">বাদ দিন</button></div></div>
+          <div class="r">${tk(P[i.k].sizes[i.size] * i.q)}</div></div>
+          ${up && up.idx === idx ? `<div class="m-tip"><span>১ কেজি প্যাকে <b class="num">${tk(up.save)}</b> কম</span><button class="press" data-act="upgrade" data-i="${idx}">বদলে নিন</button></div>` : ""}`).join("")}</div>
+      ${sug.length ? `<div class="m-add"><div class="m-add-h"><h4 class="display">সাথে <b>নিন</b></h4><span>একই প্যাকেটে আসবে</span></div><div class="m-rail">${sug.map((s) => `
+        <div class="m-tile" data-card="${s.k}"><img src="${P[s.k].img}" alt="" /><h5>${P[s.k].bn}</h5><span class="p num">${tk(s.price)}</span>${s.flag === "এটায় ডেলিভারি ফ্রি" ? `<span class="hint">ডেলিভারি ফ্রি হবে</span>` : ""}
+        <button class="add press" data-act="add" data-k="${s.k}" data-s="${s.size}"><span class="l1">${BAG}যোগ করুন</span><span class="l2">✓ যোগ হয়েছে</span></button></div>`).join("")}</div></div>` : ""}
+      </div></div>
+      <div class="m-foot"><div class="m-tot"><span>মোট<small>${t.ship ? `ডেলিভারি ${tk(t.ship)} সহ` : `ডেলিভারি <em>ফ্রি</em>`}</small></span><b>${tk(t.total)}</b></div><button class="btn press">অর্ডার করুন <span class="arr">→</span></button></div>`;
+  }
+
+  const TEMPLATES = { vr, vm, vk, vd, vg };
+  const BRIEFS = {
+    vr: "<b>ক · ঘর × রেফারেন্স — English</b> — the same cart in English: English labels and Latin digits (৳ kept), product names lead in English with the Bangla name underneath, type in Geist (the storefront's Latin face). Milestone bar, size picker, swipe rail of add-ons and the smooth add sequence are unchanged.",
+    vm: "<b>ক · ঘর মাঝামাঝি</b> — between the old ঘর and the minimal pass. Keeps the minimal spacing and plain item list, and brings back the bold-word title, a soft free-delivery box with amounts and the orange dot, photos on rounded wash squares, the outlined quantity pill, the 1 kg saving as a small chip, three outlined add-on tiles each with the homepage's beige <i>যোগ করুন</i> pill, and a subtotal / delivery / total breakdown above the button.",
+    vk: "<b>ক · ঘর</b> — the cart becomes one more column of the homepage's hairline frame: full height on the right edge, rows split by hairlines, items on wash squares. The free-delivery line is a 2px rule whose moving dot is the logo's orange (the one orange on screen). Upsell is the homepage product grid itself — same cards, same beige <i>Add to cart</i> pill, two across — with the card that unlocks free delivery flagged.",
+    vd: "<b>খ · দিন</b> — borrows the homepage hero. Free delivery is the hero's story bars (four ৳৬৫০ segments, the last one orange). Items sit in a 3-across hairline grid with the 1 kg saving on the card. Upsell is the hero's day panels: tap one and it widens, showing when you'd eat it (“সকালের রুটিতে ঢেলে”) and the Add to cart pill.",
+    vg: "<b>গ · ক্যাটাগরি</b> — the most upsell-forward. Free delivery is a light-serif sentence (“আর ৳৯৭৯, তারপর ডেলিভারি <b>ফ্রি</b>”). Right under it, one featured add-on in the homepage category-card silhouette — cut-out photo rising out of a pale tinted card, round outlined button — with the others as pills. Your items follow below.",
+  };
+
+  /* ---------- Render + interaction ---------- */
+  function render(id) {
+    const f = frames[id], t = totals(f.items), prev = f.pct ?? t.pct;
+    const prevBars = f.prevBars ? [...f.prevBars] : null;
+    const cart = f.el.querySelector(".cart");
+    const keepTop = f.opening ? 0 : cart.querySelector(".c-scroll")?.scrollTop ?? 0;
+    const keepLeft = f.opening ? 0 : cart.querySelector(".m-rail")?.scrollLeft ?? 0;
+    cart.className = `cart ${variant}`;
+    cart.innerHTML = TEMPLATES[variant](f, t);
+    // A redraw must not move anything the shopper is looking at: restore both scroll positions, and only
+    // play the section stagger when the cart opens (not on every quantity tap).
+    if (!f.opening) cart.querySelectorAll(".stag").forEach((x) => x.classList.remove("stag"));
+    const sc = cart.querySelector(".c-scroll"); if (sc) sc.scrollTop = keepTop;
+    const rl = cart.querySelector(".m-rail"); if (rl) rl.scrollLeft = keepLeft;
+    f.opening = false;
+    if (sc && cart.querySelector(".r-ms")) {
+      const ms = cart.querySelector(".r-ms");
+      const check = () => cart.classList.toggle("past", sc.scrollTop > ms.offsetTop + ms.offsetHeight - 8);
+      sc.addEventListener("scroll", check, { passive: true }); check();
+    }
+    f.prevSug = [...cart.querySelectorAll(".m-tile[data-card]")].map((x) => x.dataset.card);
+    f.prevCount = t.count; f.prevTotal = t.total;
+    f.prevStamp = cart.querySelector(".r-stamp")?.closest("[data-card]")?.dataset.card ?? null;
+    // Bars grow from where they were (scaleX on the compositor); the dot follows the line's head.
+    const grow = (el, prop, from, to) => {
+      el.style.transition = "none"; el.style[prop] = from;
+      requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transition = ""; el.style[prop] = to; }));
+    };
+    cart.querySelectorAll(".line > i, .ms-track > i, .r-mini > i").forEach((bar) => grow(bar, "transform", `scaleX(${prev})`, `scaleX(${t.pct})`));
+    cart.querySelectorAll(".line > u").forEach((dot) => grow(dot, "left", `${prev * 100}%`, `${t.pct * 100}%`));
+    const segs = [...cart.querySelectorAll(".bars [data-pct]")];
+    segs.forEach((bar, n) => grow(bar, "transform", `scaleX(${prevBars ? prevBars[n] : bar.dataset.pct})`, `scaleX(${bar.dataset.pct})`));
+    f.prevBars = segs.map((b) => b.dataset.pct);
+    f.pct = t.pct; f.fresh = null;
+    f.el.querySelector(".site .ct").textContent = variant === "vr" ? t.count : bn(t.count);
+  }
+  function setup(id) {
+    const el = document.getElementById(id);
+    el.innerHTML = `<div class="site"><div class="ann"><span><b class="num">৳২,৬০০+</b> অর্ডারে <b>ফ্রি ডেলিভারি</b></span><span>সারা দেশে <b>ক্যাশ অন ডেলিভারি</b></span><span>ঢাকায় <b>১–২ দিনে</b></span></div>
+      <div class="hd"><nav><span>সব পণ্য</span><span>খেজুরের গুড়</span><span>হোমমেড</span></nav><img src="../../../attached_assets/sera-khabar-leaf-logo.webp" alt="" /><span class="tl">${BAG} ব্যাগ <span class="ct num"></span></span></div>
+      <div class="top"><div><h2 class="display">খেজুরের<br>খাঁটি <b>গুড়</b></h2><p>শীতের ভোরের রস, মাটির চুলায় জ্বাল।</p></div><span class="btn">অর্ডার করুন →</span></div>
+      <div class="panels"><div></div><div><img src="${P.jhola.img}" alt="" /></div><div><img src="${P.choco.img}" alt="" /></div><div><img src="${P.patali.img}" alt="" /></div></div></div>
+      <div class="ov" data-act="close"></div><div class="cart"></div><button class="reopen btn press" data-act="open">ব্যাগ খুলুন</button>`;
+    frames[id] = { el, items: START(), on: 0, slide: 0 };
+    el.addEventListener("change", (e) => {
+      const sel = e.target.closest("select[data-size]"); if (!sel) return;
+      const f = frames[id], it = f.items[Number(sel.dataset.size)];
+      const same = f.items.find((x) => x !== it && x.k === it.k && x.size === sel.value);
+      if (same) { same.q += it.q; f.items.splice(f.items.indexOf(it), 1); } else it.size = sel.value;
+      f.fresh = it.k; render(id);
+    });
+    // The info row steps on every 4.5s like the hero; touching a dot stops it.
+    setInterval(() => { const f = frames[id]; if (variant !== "vr" || f.paused || el.classList.contains("closed")) return; f.slide = ((f.slide || 0) + 1) % 3; showSlide(f); }, 4500);
+    el.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-act]"); if (!b) return;
+      const f = frames[id], i = Number(b.dataset.i), act = b.dataset.act;
+      if (act === "close") return el.classList.add("closed");
+      if (act === "open") { el.classList.remove("closed"); f.opening = true; f.prevSug = null; return render(id); }
+      if (act === "pick") {
+        // Day panels: widen the tapped one in place (flex-grow transition), no re-render.
+        f.on = Number(b.dataset.n);
+        b.parentElement.querySelectorAll(".pn").forEach((p) => p.toggleAttribute("data-on", p === b));
+        return;
+      }
+      if (act === "slide") { f.slide = Number(b.dataset.n); f.paused = true; return showSlide(f); }
+      if (act === "inc") f.items[i].q = Math.min(10, f.items[i].q + 1);
+      if (act === "dec") { f.items[i].q -= 1; if (!f.items[i].q) f.items.splice(i, 1); }
+      if (act === "rm") f.items.splice(i, 1);
+      if (act === "upgrade") {
+        // Each pair of 500 g packs becomes one 1 kg pack; an odd one stays as 500 g.
+        const it = f.items[i], kilos = Math.floor(it.q / 2), odd = it.q % 2;
+        const kg = f.items.find((x) => x.k === it.k && x.size === "১ কেজি");
+        if (kg) kg.q += kilos; else f.items.splice(i + 1, 0, { k: it.k, size: "১ কেজি", q: kilos });
+        if (odd) it.q = 1; else f.items.splice(i, 1);
+        f.fresh = it.k;
+      }
+      if (act === "add") {
+        if (b.classList.contains("added")) return;
+        // Label slides to ✓ first, then the card folds away and the line rises into the bag: cause, then effect.
+        b.classList.add("added"); if (b.classList.contains("go")) b.textContent = "✓";
+        const card = b.closest("[data-card]");
+        if (card?.classList.contains("m-tile") && variant === "vr") {
+          // Freeze the tile's current width, then let it fold shut so its neighbours glide into the gap.
+          setTimeout(() => { card.style.flexBasis = card.offsetWidth + "px"; card.offsetWidth; card.classList.add("fold"); }, 380);
+          setTimeout(() => { f.items.push({ k: b.dataset.k, size: b.dataset.s, q: 1 }); f.fresh = b.dataset.k; render(id); }, 720);
+          return;
+        }
+        setTimeout(() => card?.classList.add("leaving"), 450);
+        setTimeout(() => { f.items.push({ k: b.dataset.k, size: b.dataset.s, q: 1 }); f.fresh = b.dataset.k; f.on = 0; render(id); }, 660);
+        return;
+      }
+      render(id);
+    });
+    render(id);
+  }
+  function showSlide(f) {
+    f.el.querySelectorAll(".r-slide").forEach((x, n) => x.toggleAttribute("data-on", n === f.slide));
+    f.el.querySelectorAll(".r-dots button").forEach((x, n) => x.toggleAttribute("data-on", n === f.slide));
+  }
+  function choose(v) {
+    variant = v; history.replaceState(null, "", "#" + v);
+    document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.v === v)));
+    document.getElementById("brief").innerHTML = BRIEFS[v];
+    Object.keys(frames).forEach((id) => { Object.assign(frames[id], { opening: true, prevBars: null, prevSug: null, prevCount: null, prevTotal: null }); frames[id].el.classList.remove("closed"); render(id); });
+  }
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => choose(t.dataset.v)));
+  document.getElementById("reset").onclick = () => Object.keys(frames).forEach((id) => { Object.assign(frames[id], { items: START(), pct: null, prevBars: null, on: 0 }); frames[id].el.classList.remove("closed"); render(id); });
+  document.getElementById("empty").onclick = () => Object.keys(frames).forEach((id) => { frames[id].items = []; render(id); });
+  document.getElementById("toggle").onclick = () => Object.keys(frames).forEach((id) => { const el = frames[id].el; el.classList.toggle("closed"); if (!el.classList.contains("closed")) render(id); });
+  setup("desk"); setup("phone"); choose(variant);
+  // Preview helper: ?demo taps the first add-on in the phone cart so the add sequence can be captured.
+  if (location.search.includes("demo")) setTimeout(() => document.querySelector("#phone .m-tile .add")?.click(), 600); if (location.search.includes("demo")) setTimeout(() => document.querySelectorAll("#phone .c-scroll").forEach((x) => (x.scrollTop = x.scrollHeight)), 2200);
+  if (location.search.includes("bottom")) setTimeout(() => document.querySelectorAll(".c-scroll").forEach((x) => (x.scrollTop = x.scrollHeight)), 400);
+</script>
+</body>
+</html>

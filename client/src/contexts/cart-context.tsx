@@ -55,6 +55,7 @@ interface CartContextType {
     addToCart: (product: AddToCartProduct, size: string, quantity?: number) => void;
     removeFromCart: (itemId: string) => void;
     updateQuantity: (itemId: string, quantity: number) => void;
+    swapVariant: (itemId: string, product: AddToCartProduct, size: string, quantity: number, keep?: number) => void;
     clearCart: () => void;
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
@@ -191,6 +192,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
     };
 
+    // Changes a bag row to another size of the same product without moving it in the bag. `keep` units of the
+    // old size stay on their own row just before it (switching an odd number of 500 g packs to 1 kg). If the
+    // bag already holds the new size, that row takes the quantity instead. A swap is not an add, so it shows no
+    // notice and sends no add_to_cart event.
+    const swapVariant = (itemId: string, product: AddToCartProduct, size: string, quantity: number, keep = 0) => {
+        const nextId = `${product.id}-${size}`;
+        setItems(prevItems => {
+            const index = prevItems.findIndex(item => item.id === itemId);
+            if (index === -1) return prevItems;
+            const old = prevItems[index];
+            const rest = prevItems.filter((_, i) => i !== index);
+            const kept = keep > 0 ? [{ ...old, quantity: keep }] : [];
+            if (rest.some(item => item.id === nextId)) {
+                const merged = rest.map(item =>
+                    item.id === nextId ? { ...item, quantity: Math.min(MAX_LINE_QUANTITY, item.quantity + quantity) } : item
+                );
+                return [...merged.slice(0, index), ...kept, ...merged.slice(index)];
+            }
+            const swapped: CartItem = {
+                id: nextId,
+                productId: product.id,
+                productUuid: product.productUuid,
+                variantId: product.variantId,
+                title: product.title,
+                price: product.price,
+                image: product.image,
+                size,
+                quantity: Math.min(MAX_LINE_QUANTITY, quantity),
+                analyticsItem: product.analyticsItem,
+            };
+            return [...rest.slice(0, index), ...kept, swapped, ...rest.slice(index)];
+        });
+    };
+
     const clearCart = () => {
         setItems([]);
     };
@@ -208,6 +243,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 addToCart,
                 removeFromCart,
                 updateQuantity,
+                swapVariant,
                 clearCart,
                 isOpen,
                 setIsOpen,

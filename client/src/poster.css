@@ -347,69 +347,138 @@
 .sk-cart-sheet { padding-bottom: env(safe-area-inset-bottom, 0px); }
 /* The cart is white throughout (2026-10-20); its cards stand out by outline and shadow. */
 .sk-cart-sheet, .sk-panel-right { background: #fff; }
-/* Cart, "এক নজরে" (approved 2026-10-19, docs/design/2026-10-19-cart-sheet/cart-variants.html):
-   dense rows with a remove button on each, an "এর সাথে যোগ করুন" rail, and one dark bar with the total. */
-.skc { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; overflow: hidden; color: #3a1d0f; font-family: "Geist", "Noto Serif Bengali", serif; }
+/* Cart, "ঘর × রেফারেন্স — English" (approved 2026-10-20, docs/design/2026-10-20-cart/cart-variants.html):
+   the homepage Stage palette (jaggery ink, hairlines, the logo's orange once), English copy, a free-delivery
+   milestone that scrolls with the bag, a size picker on every row, and an "Add to your order" swipe rail.
+   Motion follows Emil Kowalski: press feedback, custom ease-out curves, hover only with a pointer, fades under reduced motion. */
+.skc { --skc-ink: #4a2212; --skc-soft: #9a6a52; --skc-line: #ecd6c8; --skc-wash: #fdf8f4; --skc-leaf: #f08a1c; --skc-pill: #f5ebe2; --skc-track: #f3e6dc;
+  --skc-ease: cubic-bezier(0.23, 1, 0.32, 1); --skc-pad: 20px;
+  position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; overflow: hidden; color: var(--skc-ink); font-family: "Geist", "Noto Serif Bengali", sans-serif; -webkit-font-smoothing: antialiased; }
+@media (min-width: 768px) { .skc { --skc-pad: 26px; } }
+/* Scoped resets; component rules that set a background or colour repeat the .skc scope to outrank them. */
+.skc button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .skc-inner { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.skc-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 20px 12px; }
-@media (min-width: 768px) { .skc-head { padding: 22px 24px 14px; } }
-.skc-title { margin: 0; display: flex; align-items: baseline; gap: 8px; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 22px; line-height: 1.2; color: #5b2d17; }
-.skc-count { font-weight: 600; font-size: 14px; color: #7a6050; }
-.skc-close { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+
+/* Header: "Bag" with the count as a superscript; a 2px progress line fades in on its edge once the milestone scrolls away. */
+.skc-head { position: relative; flex: none; display: flex; align-items: flex-start; justify-content: space-between; margin: 0 var(--skc-pad); padding: 4px 0 14px; border-bottom: 1px solid var(--skc-line); }
+@media (min-width: 768px) { .skc-head { padding: 24px 0 16px; } }
+.skc-title { margin: 0; font-family: "Geist", sans-serif; font-weight: 400; font-size: 32px; line-height: 1.1; letter-spacing: -0.025em; }
+.skc-title sup { display: inline-block; margin-left: 3px; font-size: 12px; font-weight: 500; letter-spacing: 0; vertical-align: 1.5em; font-variant-numeric: tabular-nums; }
+.skc-close { flex: none; width: 36px; height: 36px; margin: -2px -8px 0 0; display: grid; place-items: center; transition: transform 160ms var(--skc-ease); }
+.skc-mini { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--skc-track); opacity: 0; pointer-events: none; transition: opacity 200ms var(--skc-ease); }
+.skc-mini.on { opacity: 1; }
+.skc-mini i { position: absolute; inset: 0; background: var(--skc-ink); }
+
 .skc-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .skc-body::-webkit-scrollbar { display: none; }
-.skc-list { margin: 0; padding: 2px 0 0; list-style: none; }
-/* Each item is its own raised card. The li animates its height, so it has no padding (a padded box
-   can't fold to 0 and jumps at the end); the gap is the card's margin, kept inside by overflow: hidden. */
+
+/* Free-delivery milestone: a 6px track filling toward a truck at the threshold; the truck turns orange when reached. */
+.skc-ms { margin: 0 var(--skc-pad); padding: 16px 0 18px; border-bottom: 1px solid var(--skc-line); }
+.skc-ms p { margin: 0 0 12px; text-align: center; font-size: 13.5px; color: var(--skc-soft); font-variant-numeric: tabular-nums; }
+.skc-ms p b { color: var(--skc-ink); font-weight: 500; }
+.skc-ms p b.skc-leaf { color: var(--skc-leaf); }
+.skc-ms-track { position: relative; height: 6px; margin-right: 15px; border-radius: 99px; background: var(--skc-track); }
+.skc-ms-track i { position: absolute; inset: 0; border-radius: inherit; background: var(--skc-ink); }
+.skc-ms-node { position: absolute; right: -15px; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--skc-soft); box-shadow: 0 0 0 1.5px var(--skc-track);
+  transition: background-color 300ms ease, color 300ms ease, box-shadow 300ms ease, transform 300ms var(--skc-ease); }
+.skc-ms-node svg { width: 16px; height: 16px; stroke-width: 1.5; }
+.skc-ms.done .skc-ms-node { background: var(--skc-leaf); color: #fff; box-shadow: none; transform: scale(1.06); }
+.skc-ms-lab { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11.5px; color: var(--skc-soft); font-variant-numeric: tabular-nums; }
+.skc-ms-lab span:last-child { color: var(--skc-ink); }
+
+/* Bag rows. Animated boxes carry no padding: a padded box can't fold to 0 and jumps at the end. */
+.skc-list { margin: 0; padding: 0; list-style: none; }
 .skc-item { overflow: hidden; }
-.skc-row { display: grid; grid-template-columns: 68px minmax(0, 1fr) auto 36px; align-items: center; gap: 10px; margin: 2px 12px 8px; padding: 10px 6px 10px 10px; border-radius: 22px; background: #fff; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.1), 0 1px 2px rgba(58, 29, 15, 0.06), 0 4px 10px -4px rgba(58, 29, 15, 0.12); }
-@media (min-width: 768px) { .skc-row { gap: 12px; margin-inline: 16px; padding: 12px 8px 12px 12px; } }
-.skc-img { width: 68px; height: 68px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.06); }
-.skc-img img { width: 100%; height: 100%; object-fit: cover; }
+.skc-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; margin: 0 var(--skc-pad); padding: 18px 0; }
+@media (min-width: 768px) { .skc-row { grid-template-columns: 112px minmax(0, 1fr); gap: 16px; } }
+.skc-item + .skc-item .skc-row { border-top: 1px solid var(--skc-line); }
+.skc-img { aspect-ratio: 1; border-radius: 6px; background: var(--skc-wash); display: grid; place-items: center; overflow: hidden; }
+.skc-img img { width: 82%; height: auto; mix-blend-mode: multiply; }
 .skc-info { min-width: 0; }
-.skc-info h3 { margin: 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 800; font-size: 16px; line-height: 1.3; color: #5b2d17; overflow-wrap: anywhere; }
-.skc-meta { margin-top: 3px; font-size: 13px; color: #7a6050; }
-.skc-price { font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 800; font-size: 15.5px; color: #e2547a; }
-.skc-qty { display: inline-flex; align-items: center; height: 36px; padding: 0 3px; border-radius: 999px; background: #faf4ea; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.1); }
-.skc-qty button { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; border: 0; background: none; color: #5b2d17; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease; }
+.skc-top { display: flex; justify-content: space-between; gap: 10px; }
+.skc-info h3 { margin: 0; font-family: "Geist", sans-serif; font-weight: 500; font-size: 15.5px; line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.skc-price { flex: none; font-family: "Geist", sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; font-size: 16px; }
+.skc-bn { margin-top: 2px; font-family: "Noto Serif Bengali", serif; font-size: 13px; color: var(--skc-soft); }
+.skc-size { position: relative; display: inline-flex; margin-top: 10px; font-size: 13px; font-weight: 500; }
+.skc-size select { appearance: none; -webkit-appearance: none; margin: 0; padding: 0 18px 2px 0; border: 0; border-bottom: 1px solid var(--skc-ink); border-radius: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+.skc-size:not(.one)::after { content: ""; position: absolute; right: 2px; top: 5px; width: 6px; height: 6px; border-right: 1.3px solid currentColor; border-bottom: 1.3px solid currentColor; transform: rotate(45deg); pointer-events: none; }
+.skc-note { margin: 6px 0 0; font-size: 12.5px; color: var(--skc-soft); font-variant-numeric: tabular-nums; }
+.skc-note button { color: var(--skc-ink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--skc-line); }
+.skc-ctl { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.skc-qty { display: inline-flex; align-items: center; height: 34px; border: 1px solid var(--skc-ink); border-radius: 4px; }
+.skc-qty button { width: 34px; height: 32px; display: grid; place-items: center; transition: transform 160ms var(--skc-ease), background-color 160ms ease; }
 .skc-qty button:disabled { opacity: 0.35; cursor: default; }
-.skc-qty span { min-width: 22px; text-align: center; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; color: #5b2d17; }
-.skc-remove { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 0; background: none; color: #7a6050; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease, color 160ms ease; }
-.skc-remove svg { width: 17px; height: 17px; stroke-width: 1.8; }
-.skc-add { padding: 18px 0 14px; }
-.skc-add h4 { margin: 0 20px 10px; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 16px; color: #5b2d17; }
-@media (min-width: 768px) { .skc-add h4 { margin-inline: 24px; } }
-.skc-rail { display: flex; gap: 6px; margin: 0; padding: 0 18px; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: 18px; scrollbar-width: none; }
-.skc-rail::-webkit-scrollbar { display: none; }
-@media (min-width: 768px) { .skc-rail { padding-inline: 22px; scroll-padding-inline: 22px; } }
-/* The slot animates its width, so the card's 2px of room for its outline is margin, not slot padding. */
-.skc-card-slot { flex: none; width: 136px; scroll-snap-align: start; overflow: hidden; }
-/* Folds the whole rail away when its last card goes; no padding, so it folds to exactly 0. */
+.skc-qty span { min-width: 22px; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+.skc-remove { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--skc-soft); transition: color 160ms ease, transform 160ms var(--skc-ease); }
+.skc-remove svg { width: 14px; height: 14px; stroke-width: 1.5; }
+
+/* "Add to your order": a swipe rail. JS sizes the slots (three on desktop, two plus a peek on phones). */
 .skc-add-fold { overflow: hidden; }
-.skc-card { width: 132px; margin: 2px 2px 8px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.1), 0 1px 2px rgba(58, 29, 15, 0.06), 0 4px 10px -4px rgba(58, 29, 15, 0.12); }
-.skc-card-ph { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.06); }
-.skc-card-ph img { width: 100%; height: 100%; object-fit: cover; }
-.skc-plus { position: absolute; right: 6px; bottom: 6px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 0; background: #5b2d17; color: #fff; box-shadow: 0 0 0 2px #fff; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease; }
-.skc-card h5 { margin: 8px 2px 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 700; font-size: 13px; line-height: 1.3; color: #3a1d0f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.skc-card-price { display: block; margin: 2px 2px 0; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13.5px; color: #5b2d17; }
-.skc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 240px; padding: 40px 24px 48px; text-align: center; color: #5b2d17; }
-.skc-empty h3 { margin: 8px 0 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 22px; color: #5b2d17; }
-.skc-empty p { margin: 0 0 12px; font-size: 14px; color: #7a6050; }
-.skc-browse { display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 26px; border-radius: 999px; border: 0; background: #f6b826; color: #3a1d0f; font-weight: 700; font-size: 15.5px; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
-.skc-browse i, .skc-checkout i { width: 8px; height: 8px; border-radius: 50%; background: #e2547a; }
-.skc-foot { flex: none; padding: 6px 12px 12px; }
-@media (min-width: 768px) { .skc-foot { padding: 6px 16px 16px; } }
-.skc-bar { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 10px 10px 20px; border-radius: 26px; background: #4a2212; color: #fffdf8; overflow: hidden; }
-.skc-bar-line { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: rgba(255, 253, 248, 0.14); }
-.skc-bar-line i { position: absolute; inset: 0; background: #f6b826; }
-.skc-bar small { display: block; font-size: 12px; line-height: 1.4; color: rgba(255, 253, 248, 0.72); }
-.skc-bar small b { color: #f6b826; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; }
-.skc-total { display: block; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 800; font-size: 24px; line-height: 1.2; }
-.skc-checkout { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; border: 0; background: #f6b826; color: #3a1d0f; font-weight: 700; font-size: 16px; white-space: nowrap; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
-.skc-close:active, .skc-checkout:active, .skc-browse:active { transform: scale(0.97); }
-.skc-qty button:active, .skc-remove:active, .skc-plus:active { transform: scale(0.9); }
-@media (hover: hover) and (pointer: fine) { .skc-qty button:not(:disabled):hover { background: #f1e5d3; } .skc-remove:hover { background: #fbe3df; color: #e2547a; } }
-@media (prefers-reduced-motion: reduce) { .skc-close:active, .skc-checkout:active, .skc-browse:active, .skc-qty button:active, .skc-remove:active, .skc-plus:active { transform: none; } }
+.skc-add { margin: 0 var(--skc-pad); padding: 22px 0 24px; border-top: 1px solid var(--skc-line); }
+.skc-add-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.skc-add h4 { margin: 0; font-family: "Geist", sans-serif; font-weight: 400; font-size: 20px; letter-spacing: -0.025em; }
+.skc-add-head span { font-size: 12px; color: var(--skc-soft); }
+.skc-rail { display: flex; gap: 10px; margin: 0 calc(-1 * var(--skc-pad)); padding: 2px var(--skc-pad) 4px; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--skc-pad); scrollbar-width: none; }
+.skc-rail::-webkit-scrollbar { display: none; }
+.skc-card-slot { flex: none; scroll-snap-align: start; overflow: hidden; }
+.skc-card { position: relative; display: flex; flex-direction: column; align-items: center; height: 100%; padding: 12px 8px 10px; border: 1px solid var(--skc-line); border-radius: 6px; background: #fff; text-align: center; transition: background-color 240ms ease; }
+@media (max-width: 767px) { .skc-card { padding: 14px 10px 12px; } }
+.skc-card-ph { width: 74%; aspect-ratio: 1; display: grid; place-items: center; }
+.skc-card-ph img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; transition: transform 500ms var(--skc-ease); }
+.skc-card h5 { margin: 6px 0 0; min-height: 2.6em; display: grid; place-items: center; font-family: "Geist", sans-serif; font-weight: 500; font-size: 13px; line-height: 1.3; letter-spacing: -0.005em; }
+.skc-card-price { margin: 2px 0 8px; font-size: 12.5px; color: var(--skc-soft); font-variant-numeric: tabular-nums; }
+/* The homepage card's beige pill: handbag + Add, sliding up to "✓ Added". */
+.skc .skc-plus { width: 100%; height: 30px; margin-top: auto; padding: 0 10px; border-radius: 999px; display: grid; overflow: hidden; background: var(--skc-pill); font-size: 12px; font-weight: 500;
+  transition: transform 160ms var(--skc-ease), background-color 200ms ease, color 200ms ease; }
+.skc-plus .l1, .skc-plus .l2 { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; transition: transform 240ms var(--skc-ease), opacity 240ms var(--skc-ease); }
+.skc-plus .l2 { transform: translateY(110%); opacity: 0; }
+.skc .skc-plus.added { background: var(--skc-ink); color: #fff; }
+.skc-plus.added .l1 { transform: translateY(-110%); opacity: 0; }
+.skc-plus.added .l2 { transform: none; opacity: 1; }
+.skc-plus-ic { width: 14px; height: 14px; flex: none; }
+/* "Unlocks free delivery": a round stamp on the card's corner, like the product page's saving stamp, in the cart's orange.
+   It presses on once (from 1.3x) when a card first earns it. */
+.skc-stamp { position: absolute; z-index: 2; top: 8px; right: 8px; width: 52px; height: 52px; border-radius: 50%; display: grid; place-content: center; text-align: center;
+  background: var(--skc-leaf); color: #fff; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em; line-height: 1.25; text-transform: uppercase;
+  transform: rotate(-12deg); box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--skc-leaf), 0 3px 6px rgba(74, 34, 18, 0.18); pointer-events: none; animation: skc-stamp 320ms var(--skc-ease) 260ms both; }
+.skc-stamp > span { display: block; }
+@keyframes skc-stamp { from { opacity: 0; transform: rotate(-12deg) scale(1.3); } }
+
+/* Empty bag */
+.skc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 260px; padding: 48px 24px; text-align: center; }
+.skc-empty svg { color: var(--skc-soft); }
+.skc-empty h3 { margin: 8px 0 0; font-family: "Geist", sans-serif; font-weight: 400; font-size: 26px; letter-spacing: -0.02em; }
+.skc-empty p { margin: 0 0 14px; font-size: 13.5px; color: var(--skc-soft); }
+.skc-browse { height: 48px; padding: 0 26px; border-radius: 6px; background: var(--skc-ink) !important; color: #fff !important; font-size: 14px; font-weight: 500; transition: transform 160ms var(--skc-ease); }
+
+/* Total band */
+.skc-foot { flex: none; padding: 16px var(--skc-pad) 20px; background: #faf5f0; }
+@media (min-width: 768px) { .skc-foot { padding: 20px var(--skc-pad) 22px; } }
+.skc-sum { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.skc-sum h3 { margin: 0; font-family: "Geist", sans-serif; font-weight: 400; font-size: 20px; line-height: 1.15; letter-spacing: -0.025em; }
+.skc-sum small { display: block; margin-top: 3px; font-size: 12.5px; color: var(--skc-soft); font-variant-numeric: tabular-nums; }
+.skc-sum small em { font-style: normal; color: var(--skc-leaf); }
+.skc-total { display: inline-block; font-family: "Geist", sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; font-size: 21px; letter-spacing: -0.01em; }
+.skc-checkout { width: 100%; height: 50px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: var(--skc-ink) !important; color: #fff !important; font-size: 14.5px; font-weight: 500; letter-spacing: 0.01em; transition: transform 160ms var(--skc-ease); }
+
+/* A changed count or total swaps with a short blur, so it's noticed rather than shouted. */
+.skc-tick { animation: skc-tick 260ms var(--skc-ease); }
+@keyframes skc-tick { from { opacity: 0.35; filter: blur(2px); transform: translateY(2px); } }
+
+.skc-close:active, .skc-checkout:active, .skc-browse:active, .skc-plus:active { transform: scale(0.97); }
+.skc-qty button:active, .skc-remove:active { transform: scale(0.94); }
+@media (hover: hover) and (pointer: fine) {
+  .skc-qty button:not(:disabled):hover { background: var(--skc-wash); }
+  .skc-remove:hover { color: var(--skc-ink); }
+  .skc-card:hover { background: var(--skc-wash); }
+  .skc-card:hover .skc-card-ph img { transform: scale(1.04); }
+  .skc .skc-plus:not(.added):hover { background: var(--skc-ink); color: #fff; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skc-close:active, .skc-checkout:active, .skc-browse:active, .skc-plus:active, .skc-qty button:active, .skc-remove:active { transform: none; }
+  .skc-stamp, .skc-tick { animation: skc-fade 200ms ease both; }
+  @keyframes skc-fade { from { opacity: 0; } }
+}
 
 .sk-sheet-grab { flex: none; width: 40px; height: 5px; border-radius: 5px; background: rgba(91, 45, 23, 0.25); margin: 8px auto 4px; }
 /* Phone menu, "Cards" (approved 2026-10-13, docs/design/2026-10-13-homepage/mobile-menu-variants.html):

@@ -41,3 +41,18 @@ test("the product page names its product in the card and hides its phone row on 
   assert.ok(productSource.indexOf("useDockContactProduct(") < productSource.indexOf("if (isLoading) {"));
   assert.match(posterCss, /@media \(max-width: 767px\) \{ \.skp-or, \.skp-help \{ display: none; \} \}/);
 });
+
+test("the phone menu ends with the seal card: ringing phone, Call and WhatsApp pills, no numbers on show (2026-10-20)", () => {
+  const dock = readFileSync(new URL("./dock-contact.tsx", import.meta.url), "utf8");
+  const layout = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
+  const stage = readFileSync(new URL("../stage.css", import.meta.url), "utf8");
+  assert.match(layout, /<MenuContactCard style=\{\{ "--i": 6 \} as CSSProperties\} \/>/);
+  const card = dock.slice(dock.indexOf("export function MenuContactCard"), dock.indexOf("export const DOCK_CONTACT_CARD_ID"));
+  assert.match(card, /<RingingPhoneIcon still=\{still\} \/>/);
+  assert.match(card, /<path d=\{SEAL_EDGE\} \/>/);
+  assert.match(card, /সরাসরি <b>অর্ডার<\/b>/);
+  assert.match(card, /href=\{PHONE_HREF\}/);
+  // The numbers are only in the buttons' accessible names.
+  assert.doesNotMatch(card, />[০-৯]{5}-[০-৯]{6}</);
+  assert.match(stage, /\.stm-contact \{[^}]*background: var\(--st-wash\);/);
+});
