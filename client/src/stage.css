@@ -62,38 +62,61 @@
 .st-head h1 { font-size: clamp(38px, 4.8vw, 66px); }
 .st-lab { font-size: 12.5px; color: var(--st-soft); }
 
-/* Hero: centred type, the jaggery still life on a stage, prices pinned to each product */
-.st-hero { text-align: center; padding: clamp(48px, 7vw, 96px) var(--st-pad) clamp(36px, 4vw, 56px); }
-.st-hero h1 { font-size: clamp(44px, 6.6vw, 96px); margin-top: 14px; }
-.st-hero-sub { font-family: var(--st-serif); font-size: 17px; color: var(--st-soft); margin: 16px 0 0; }
-.st-hero-cta { display: flex; justify-content: center; align-items: center; gap: 22px; margin-top: 30px; flex-wrap: wrap; }
-.st-stage { position: relative; width: min(960px, 100%); margin: clamp(28px, 4vw, 52px) auto 0; }
-.st-photo { position: relative; }
-.st-photo img { width: 100%; }
-/* The drip loop (HeroDrip) covers the photo exactly; hidden until its first frame plays, so nothing flashes. */
-.st-photo video { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
-.st-photo video[data-playing] { opacity: 1; }
-.st-ground { position: absolute; left: 12%; right: 12%; bottom: 2%; height: 9%; border-radius: 50%; background: radial-gradient(closest-side, rgba(74, 34, 18, 0.16), transparent); filter: blur(6px); z-index: -1; }
-.st-spot { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; display: grid; place-items: center; z-index: 2; }
-.st .st-spot-dot { position: relative; width: 16px; height: 16px; border-radius: 50%; background: var(--st-ink); border: 3px solid #fff; box-shadow: 0 1px 6px rgba(74, 34, 18, 0.35); transition: transform 160ms var(--st-ease-out); }
-.st-spot-dot::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 1px solid #fff; opacity: 0; animation: st-ping 1600ms var(--st-ease-out) 2; animation-delay: calc(1200ms + var(--d, 0ms)); }
-@keyframes st-ping { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
-.st-spot:active .st-spot-dot { transform: scale(0.85); }
-.st-pop { position: absolute; bottom: calc(100% + 6px); left: 50%; translate: -50% 0; min-width: 150px; padding: 10px 14px; text-align: left; white-space: nowrap;
-  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border: 1px solid var(--st-line); box-shadow: 0 8px 24px rgba(74, 34, 18, 0.12);
-  transform-origin: bottom center; opacity: 0; transform: translateY(4px) scale(0.96); pointer-events: none;
-  transition: opacity 180ms var(--st-ease-out), transform 180ms var(--st-ease-out); }
-.st-pop b { display: block; font-family: var(--st-serif); font-weight: 500; font-size: 14.5px; }
-.st-pop .num { font-size: 16px; }
-.st-pop em { font-style: normal; font-size: 12px; color: var(--st-soft); margin-left: 10px; }
-.st-spot[data-open] .st-pop,
-.st-spot:focus-within .st-pop { opacity: 1; transform: none; pointer-events: auto; }
-@media (hover: hover) and (pointer: fine) {
-  .st-spot:hover .st-pop { opacity: 1; transform: none; pointer-events: auto; }
-  .st-spot:hover .st-spot-dot { transform: scale(1.2); }
+/* Hero (approved 2026-10-19, "দিন"): the day from dawn sap to noon patali. Four panels; the active one widens
+   and steps on by itself, with story bars that fill while it shows. On phones a time line picks one panel. */
+.st-day-top { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; padding: clamp(28px, 5vw, 64px) var(--st-pad) 28px; }
+.st-day-top h1 { font-size: clamp(44px, 6.4vw, 88px); }
+.st-day-sub { margin: 14px 0 0; font-family: var(--st-serif); font-size: 17px; color: var(--st-soft); }
+.st-day-panels { display: flex; gap: 10px; height: clamp(360px, 36vw, 470px); padding: 0 var(--st-pad) var(--st-pad); }
+.st-day-pn { position: relative; display: block; flex: 1 1 0; min-width: 0; overflow: hidden; background: var(--st-wash); text-align: left; cursor: pointer; transition: flex-grow 560ms var(--st-ease-in-out); }
+.st-day-pn[data-on] { flex-grow: 3.6; }
+.st-day-pn > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 12% 8% 26%; mix-blend-mode: multiply; }
+.st-day-pn > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.st-day-pn.is-film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(40, 18, 8, 0.62), rgba(40, 18, 8, 0) 55%); pointer-events: none; }
+.st-day-cap { position: absolute; left: 20px; right: 20px; bottom: 20px; z-index: 1; }
+.st-day-pn.is-film .st-day-cap { color: #fff; }
+.st-day-t { display: block; font-size: 12px; color: var(--st-soft); }
+.st-day-pn.is-film .st-day-t { color: rgba(255, 255, 255, 0.78); }
+.st-day-n { display: block; margin-top: 3px; font-family: var(--st-serif); font-size: 20px; font-weight: 600; white-space: nowrap; }
+.st-day-more { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 400ms var(--st-ease-out), opacity 300ms var(--st-ease-out); }
+.st-day-pn[data-on] .st-day-more { grid-template-rows: 1fr; opacity: 1; transition-delay: 180ms; }
+.st-day-more > span { overflow: hidden; }
+.st-day-more p { margin: 6px 0 0; font-size: 14px; color: var(--st-soft); }
+.st-day-pn.is-film .st-day-more p { color: rgba(255, 255, 255, 0.85); }
+.st-day-more .num { display: inline-block; margin-top: 10px; font-size: 18px; }
+.st-day-more em { font-style: normal; font-size: 13px; margin-left: 12px; border-bottom: 1px solid currentColor; }
+.st-day-bars { position: absolute; top: 16px; left: 16px; right: 16px; z-index: 2; display: flex; gap: 6px; opacity: 0; transition: opacity 200ms var(--st-ease-out); }
+.st-day-pn[data-on] .st-day-bars { opacity: 1; }
+.st-day-bars i { flex: 1; height: 2px; background: rgba(74, 34, 18, 0.16); overflow: hidden; }
+.st-day-pn.is-film .st-day-bars i { background: rgba(255, 255, 255, 0.35); }
+.st-day-bars i::after { content: ""; display: block; height: 100%; background: var(--st-ink); transform: scaleX(0); transform-origin: left; }
+.st-day-pn.is-film .st-day-bars i::after { background: #fff; }
+.st-day-bars i[data-done]::after { transform: scaleX(1); }
+.st-day-bars i[data-run]::after { animation: st-day-fill var(--dur) linear forwards; }
+.st-day-panels[data-held] .st-day-bars i[data-run]::after { animation-play-state: paused; }
+@keyframes st-day-fill { to { transform: scaleX(1); } }
+.st-day-line { display: none; }
+@media (max-width: 760px) {
+  .st-day-top { grid-template-columns: 1fr; padding-bottom: 18px; }
+  .st-day-top .st-btn { justify-self: start; }
+  .st-day-line { display: block; position: relative; height: 96px; margin: 0 var(--st-pad) 8px; }
+  .st-day-line::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--st-line); }
+  .st-day-fill { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--st-ink); transform-origin: left; transition: transform 560ms var(--st-ease-in-out); }
+  .st .st-day-line button { position: absolute; top: 0; bottom: 0; width: 44px; margin-left: -22px; }
+  .st-day-dot { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; border: 1px solid var(--st-ink); background: #fff; transition: background-color 200ms ease, border-color 200ms ease; }
+  .st-day-line button[data-past] .st-day-dot { background: var(--st-ink); }
+  .st-day-line button[data-on] .st-day-dot { background: var(--st-leaf); border-color: var(--st-leaf); }
+  .st-day-lb { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; text-align: center; font-size: 13px; font-weight: 600; color: var(--st-ink); }
+  .st-day-lb small { display: block; font-size: 11px; font-weight: 400; color: var(--st-soft); }
+  .st-day-line button:nth-of-type(odd) .st-day-lb { bottom: calc(50% + 12px); }
+  .st-day-line button:nth-of-type(even) .st-day-lb { top: calc(50% + 12px); }
+  .st-day-line button:first-of-type .st-day-lb { left: 22px; transform: none; text-align: left; }
+  .st-day-line button:last-of-type .st-day-lb { left: 22px; transform: translateX(-100%); text-align: right; }
+  .st-day-line button[data-on] .st-day-lb { color: #c2410c; }
+  .st-day-panels { height: auto; aspect-ratio: 4 / 5; gap: 0; }
+  .st-day-pn { flex: 0 0 0; opacity: 0; transition: opacity 300ms var(--st-ease-out); }
+  .st-day-pn[data-on] { flex: 1 1 100%; opacity: 1; }
 }
-.st-hint { margin: 18px 0 0; font-size: 12.5px; color: var(--st-soft); }
 
 /* Categories: the live card silhouette (photo rising out of an offset card), on pale tints */
 .st-cats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -390,8 +413,9 @@ main:has(.st, .skp) { background-color: #fff !important; }
   .st-mq-track { animation: none; width: auto; flex-wrap: wrap; justify-content: center; }
   .st-mq-set { flex-wrap: wrap; justify-content: center; row-gap: 10px; }
   .st-mq-set + .st-mq-set { display: none; }
-  .st-spot-dot::after { animation: none; }
-  .st-photo video { display: none; }
+  .st-day-pn,
+  .st-day-more,
+  .st-day-fill { transition: none; }
   .st-tabs-over { transition: none; }
   .st-card-img img,
   .st-cc img,

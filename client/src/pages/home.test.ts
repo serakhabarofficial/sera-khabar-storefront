@@ -44,17 +44,22 @@ test("loads the Bengali faces the design uses", () => {
   assert.match(homeSource, /BanglaNumber/);
 });
 
-test("stages the jaggery still life with the drip loop and catalog-priced hotspots", () => {
-  assert.match(homeSource, /<h1 className="display" data-load-step="">\s*খাঁটি খেজুরের <b>গুড়<\/b>/);
-  assert.match(homeSource, /<div className="st-photo" data-page-settle="">\s*<img\s+src="\/home\/hero-jaggery-still-life\.webp"[\s\S]*?<HeroDrip \/>\s*<\/div>/);
-  for (const file of ["hero-jaggery-still-life.webp", "hero-jaggery-still-life-640.webp", "hero-jaggery-drip-1.webm"]) {
-    assert.ok(existsSync(new URL(`../../public/home/${file}`, import.meta.url)), file);
-  }
-  // The map holds positions in the photo only; each dot reads its product and price from the catalog.
-  const spots = homeSource.slice(homeSource.indexOf("const HERO_SPOTS"), homeSource.indexOf("] as const;", homeSource.indexOf("const HERO_SPOTS")));
-  assert.doesNotMatch(spots, /price|৳/);
-  assert.match(homeSource, /const product = products\.find\(\(item\) => item\.slug === spot\.slug\);/);
-  assert.match(homeSource, /const \{ price \} = getStartingOption\(product\);/);
+test("tells the day from dawn sap to noon patali, opening on the dawn clip from Cloudflare R2", () => {
+  assert.match(homeSource, /<h1 className="display" data-load-step="">\s*খেজুরের\s*<br \/>\s*খাঁটি <b>গুড়<\/b>/);
+  assert.match(homeSource, /const DAY_MEDIA_ORIGIN = "https:\/\/pub-cfecc6eab1f44552a42789747b613cb7\.r2\.dev";/);
+  assert.match(homeSource, /src: `\$\{DAY_MEDIA_ORIGIN\}\/hero\/dawn-v2\.mp4`/);
+  // The clip is muted, inline and looping, and only plays while its panel shows.
+  assert.match(homeSource, /src=\{DAY_DAWN\.src\}\s+poster=\{DAY_DAWN\.poster\}\s+muted\s+autoPlay=\{!shouldReduceMotion\}\s+loop\s+playsInline/);
+  assert.match(homeSource, /if \(active === 0 && !shouldReduceMotion\) video\.play\(\)/);
+  // Steps on by itself, but never under reduced motion or while the pointer rests on a panel.
+  assert.match(homeSource, /if \(shouldReduceMotion \|\| held \|\| steps\.length < 2\) return;/);
+  // Product panels hold only the story; name, photo and price come from the live catalog, and a missing product drops out.
+  const steps = homeSource.slice(homeSource.indexOf("const DAY_STEPS"), homeSource.indexOf("];", homeSource.indexOf("const DAY_STEPS")));
+  assert.doesNotMatch(steps, /price|৳\d|[০-৯]{3}/);
+  assert.match(homeSource, /const product = products\.find\(\(item\) => item\.slug === step\.slug\);\s*return product \? \[\{ \.\.\.step, product \}\] : \[\];/);
+  assert.match(homeSource, /const \{ price \} = getStartingOption\(step\.product\);/);
+  assert.match(homeSource, /const image = getProductImageSet\(step\.product\);/);
+  assert.match(stageCss, /\.st-day-pn\[data-on\] \{ flex-grow: 3\.6; \}/);
 });
 
 test("keeps the live category cards' content in the Stage card", () => {
