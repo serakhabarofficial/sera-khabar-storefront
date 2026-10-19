@@ -1,6 +1,7 @@
 import Layout from "@/components/layout";
 import { HeroDrip } from "@/components/hero-drip";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
+import StageTabs from "@/components/stage-tabs";
 import {
   fetchStorefrontProducts,
   getProductImageSet,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/storefront-products";
 import { useQuery } from "@tanstack/react-query";
 import { useReducedMotion } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import {
@@ -224,38 +225,6 @@ function ProductsSection({ products, failed }: { products: StorefrontProduct[]; 
   ];
   const [activeSlug, setActiveSlug] = useState("");
   const active = tabs.find((tab) => tab.slug === activeSlug) ?? tabs[0];
-  const tabsRef = useRef<HTMLDivElement>(null);
-
-  // The dark highlight is a clipped copy of the tab row, so text and fill change as one surface.
-  useLayoutEffect(() => {
-    const root = tabsRef.current;
-    if (!root) return;
-    const place = () => {
-      const button = root.querySelector<HTMLButtonElement>(`[data-tab="${active.slug || "all"}"]`);
-      if (!button) return;
-      root.style.setProperty("--l", `${button.offsetLeft}px`);
-      root.style.setProperty("--r", `${root.offsetWidth - button.offsetLeft - button.offsetWidth}px`);
-    };
-    place();
-    window.addEventListener("resize", place);
-    return () => window.removeEventListener("resize", place);
-  }, [active.slug, tabs.length]);
-
-  const tabButtons = (interactive: boolean) =>
-    tabs.map((tab) => (
-      <button
-        key={tab.slug || "all"}
-        type="button"
-        data-tab={tab.slug || "all"}
-        role={interactive ? "tab" : undefined}
-        aria-selected={interactive ? tab === active : undefined}
-        tabIndex={interactive ? undefined : -1}
-        className={interactive ? "press" : undefined}
-        onClick={interactive ? () => setActiveSlug(tab.slug) : undefined}
-      >
-        {tab.label}
-      </button>
-    ));
 
   return (
     <section>
@@ -267,14 +236,12 @@ function ProductsSection({ products, failed }: { products: StorefrontProduct[]; 
         </div>
         <div className="st-cell st-mid">
           {tabs.length > 2 ? (
-            <div className="st-tabs" ref={tabsRef}>
-              <div className="st-tabs-list" role="tablist" aria-label="ক্যাটাগরি">
-                {tabButtons(true)}
-              </div>
-              <div className="st-tabs-over" aria-hidden="true">
-                <div className="st-tabs-list">{tabButtons(false)}</div>
-              </div>
-            </div>
+            <StageTabs
+              tabs={tabs.map((tab) => ({ key: tab.slug, label: tab.label }))}
+              activeKey={active.slug}
+              onSelect={setActiveSlug}
+              label="ক্যাটাগরি"
+            />
           ) : null}
         </div>
         <div className="st-cell st-end">
