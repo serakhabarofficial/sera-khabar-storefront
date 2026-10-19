@@ -51,7 +51,7 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #fff; }
 .skx-brand { display: block; padding: 0; border: 0; background: transparent; line-height: 0; }
 /* Same logo and header height as the storefront header (.c-logoimg), so the Lift keeps the logo still. */
 .skx-brand img { display: block; width: auto; height: 58px; }
-@media (max-width: 719px) {
+@media (max-width: 860px) {
   .skx-header-in { height: 60px; }
   .skx-brand img { height: 40px; }
 }
@@ -262,7 +262,7 @@ html[data-sk-checkout], html[data-sk-checkout] body { background-color: #fff; }
    The swap itself is instant; these rules only animate snapshots. html[data-sk-nav] exists only while a
    checkout transition runs, so nothing else on the site gets a view-transition-name. The header and logo
    get their own layers: the bar stays put and the logo resizes instead of travelling with the page. */
-html[data-sk-nav] .sk-header, html[data-sk-nav] .skx-header { view-transition-name: sk-site-header; }
+html[data-sk-nav] .sk-header, html[data-sk-nav] .stc-head, html[data-sk-nav] .skx-header { view-transition-name: sk-site-header; }
 html[data-sk-nav] .c-logoimg, html[data-sk-nav] .skx-brand img { view-transition-name: sk-site-logo; }
 html[data-sk-nav]::view-transition-group(sk-site-header),
 html[data-sk-nav]::view-transition-group(sk-site-logo) { animation-duration: 300ms; animation-timing-function: cubic-bezier(.23, 1, .32, 1); }

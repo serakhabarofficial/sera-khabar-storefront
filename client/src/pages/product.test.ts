@@ -137,12 +137,18 @@ test("autoplays every on-screen reel as a muted loop and taps in sound", () => {
 // Product page redesign (approved 2026-10-13, docs/design/2026-10-13-product-page): "Classic" layout,
 // Chips details as the footer cash memo, Calendar delivery estimate.
 test("lays out photo, then title, price, sizes, quantity and order on the poster palette", () => {
-  for (const cls of ["skp-photo", "skp-info", "skp-pill", "skp-ticks", "skp-price", "skp-sizes", "skp-buyrow"]) {
+  for (const cls of ["skp-photo", "skp-info", "skp-ticks", "skp-price", "skp-sizes", "skp-buyrow"]) {
     assert.match(productSource, new RegExp(`className="${cls}`));
   }
   // Sizes come before quantity, like the approved mockup.
   assert.ok(productSource.indexOf('className="skp-sizes') < productSource.indexOf('className="skp-buyrow'));
   assert.match(posterSource, /\.skp \{[^}]*--rice: #faf4ea;/);
+});
+
+test("keeps the product title without the English/weight badge or origin tagline beneath it", () => {
+  assert.match(productSource, /<h1 data-load-step="">\{titleBn\}<\/h1>\s*\{product\.description \?/);
+  assert.doesNotMatch(productSource, /className="skp-pill"/);
+  assert.doesNotMatch(productSource, /className="skp-tag script"/);
 });
 
 test("size cards show the size, the price and only real savings, with no per-kg line", () => {
@@ -170,6 +176,17 @@ test("keeps phone and WhatsApp ordering under অথবা, then the calendar de
   assert.match(productSource, /হোয়াটসঅ্যাপে অর্ডার/);
   assert.match(productSource, /আপনার দরজায় পৌঁছাবে/);
   assert.match(productSource, /ঢাকায় ১–২ দিন · ঢাকার বাইরে ২–৩ দিন/);
+});
+
+test("phone ordering uses the supplied white mobile-phone SVG", () => {
+  const phoneLink = productSource.match(/<a href="tel:\+8801310980289"[\s\S]*?<\/a>/)?.[0] ?? "";
+  // The narrow phone needs an optically larger, tightly cropped canvas beside the round WhatsApp mark.
+  assert.match(phoneLink, /<svg[^>]*width="18"[^>]*height="24"[^>]*viewBox="7 1 11 22"/);
+  assert.match(productSource, /<img src="https:\/\/cdn\.reicon\.dev\/logos\/whatsapp\/original\.svg" alt="" width=\{18\} height=\{18\}/);
+  assert.match(phoneLink, /aria-hidden="true"/);
+  assert.match(phoneLink, /<path fill="#ffffff" d="M15 2a1 1 0 0 0-1 1v3h-4/);
+  assert.match(phoneLink, /ফোনে অর্ডার/);
+  assert.doesNotMatch(phoneLink, /<Phone\b/);
 });
 
 test("details are chips that switch one footer-style cash memo", () => {

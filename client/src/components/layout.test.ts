@@ -83,6 +83,14 @@ test("uses the Stage wordmark footer with the Arc Labs signature", () => {
   }
 });
 
+test("the footer credit is compact and separates the text from its highlighted logo", () => {
+  const stageSource = readFileSync(new URL("../stage.css", import.meta.url), "utf8");
+  assert.match(layoutSource, /<small>Designed &amp; Engineered by<\/small>\s*<span className="stc-arc-divider" aria-hidden="true" \/>\s*<img src="\/arc-credit\.webp"/);
+  assert.match(stageSource, /\.stc-arc img \{[^}]*width: 84px;[^}]*height: auto;/);
+  assert.match(stageSource, /\.stc-arc-divider \{[^}]*width: 1px;[^}]*height: 22px;[^}]*background: var\(--st-line\);/);
+  assert.match(stageSource, /\.stc-arc small \{[^}]*font-size: 10px;[^}]*white-space: nowrap;/);
+});
+
 test("desktop menu is the same Cards menu in a left panel (2026-10-13)", () => {
   // One Vaul drawer serves both: a bottom sheet on phones, a floating left panel on desktop.
   assert.match(layoutSource, /<Drawer\.Root open=\{isOpen\} onOpenChange=\{setIsOpen\} direction=\{isMobile \? "bottom" : "left"\}>/);
