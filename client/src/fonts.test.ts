@@ -41,7 +41,7 @@ test("no stylesheet declares a retired Latin face", () => {
 
 test("the Bengali faces are all still present", () => {
   // Geist covers Latin only, so every Bangla face has to survive the swap.
-  assert.match(html, /family=Noto\+Serif\+Bengali:wght@400;500;600;700;800;900/);
+  assert.match(html, /family=Noto\+Serif\+Bengali:wght@300;400;500;600;700;800;900/);
   assert.match(html, /family=Galada/);
 
   assert.match(indexCss, /font-family: 'GaretBook';/);

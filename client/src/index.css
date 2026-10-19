@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./poster.css";
+@import "./stage.css";
 
 @font-face {
   font-family: 'IhtishamDeshlipi';

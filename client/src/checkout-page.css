@@ -8,10 +8,11 @@ html[data-sk-checkout] #root { display: none !important; }
 html[data-sk-checkout] [data-vaul-drawer],
 html[data-sk-checkout] [data-vaul-overlay] { visibility: hidden !important; }
 html[data-sk-checkout] .skx { pointer-events: auto; }
-html[data-sk-checkout], html[data-sk-checkout] body { background-color: #faf4ea; }
+html[data-sk-checkout], html[data-sk-checkout] body { background-color: #fff; }
 
 .skx {
-  --rice: #faf4ea;
+  /* White page, as on the Stage homepage (2026-10-19); the dot grid keeps the memo paper distinct. */
+  --rice: #fff;
   --paper: #fffdf7;
   --royal: #5b2d17;
   --sun: #f6b826;

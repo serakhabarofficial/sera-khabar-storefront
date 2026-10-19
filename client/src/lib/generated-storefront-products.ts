@@ -2,28 +2,142 @@ import type { StorefrontProduct } from "./storefront-products";
 
 export const generatedStorefrontProducts: StorefrontProduct[] = [
   {
+    "id": "6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d",
+    "name": "ফয়েল পাটালি | Foil-Wrapped Patali Jaggery",
+    "slug": "foil-wrapped-patali-jaggery",
+    "description": "খেজুরের রস থেকে তৈরি ঐতিহ্যবাহী পাটালি গুড়, যা ফয়েল মোড়কে সুন্দরভাবে সংরক্ষিত। এর সমৃদ্ধ স্বাদ, মনমাতানো ঘ্রাণ ও প্রাকৃতিক মিষ্টতা পিঠা, পায়েস এবং বিভিন্ন মিষ্টান্ন তৈরিতে এনে দেয় বিশেষ স্বাদ।",
+    "url": null,
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d/651267ca-a6e1-4c6c-9d28-bd1b6c716dd5/960.webp",
+    "images": [
+      {
+        "id": "a436b14e-cd1a-410e-a1d2-68184855bc88",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d/651267ca-a6e1-4c6c-9d28-bd1b6c716dd5/960.webp",
+        "sources": {
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d/651267ca-a6e1-4c6c-9d28-bd1b6c716dd5/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d/651267ca-a6e1-4c6c-9d28-bd1b6c716dd5/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d/651267ca-a6e1-4c6c-9d28-bd1b6c716dd5/960.webp"
+        },
+        "alt_text": "ফয়েল পাটালি | Foil-Wrapped Patali Jaggery",
+        "sort_order": 1,
+        "is_primary": true
+      }
+    ],
+    "image_urls": [
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/6e2bfe36-9e46-4eeb-b248-d8a3bfc1416d/651267ca-a6e1-4c6c-9d28-bd1b6c716dd5/960.webp"
+    ],
+    "price": 470,
+    "compare_at_price": 650,
+    "available": true,
+    "variants": [
+      {
+        "id": "61fc841f-bcd4-4271-921d-4030d31d5d25",
+        "attributes": {
+          "size": "১ কেজি"
+        },
+        "price": 470,
+        "available": true
+      }
+    ]
+  },
+  {
+    "id": "43390440-8e8b-497d-b8ca-462409a17a9a",
+    "name": "গোল পাটালি | Round Patali Jaggery",
+    "slug": "round-patali-jaggery",
+    "description": "খেজুরের রস থেকে তৈরি গোল আকৃতির ঐতিহ্যবাহী পাটালি গুড়। এর মোলায়েম মিষ্টতা, মনমাতানো ঘ্রাণ ও সমৃদ্ধ স্বাদ পিঠা, পুলি, পায়েসসহ নানা মিষ্টান্নে এনে দেয় শীতের গ্রামবাংলার চিরচেনা স্বাদের অনুভূতি।",
+    "url": null,
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/960.webp",
+    "images": [
+      {
+        "id": "4bda2474-61ac-4772-9928-57578d1737df",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/960.webp",
+        "sources": {
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/960.webp"
+        },
+        "alt_text": "গোল পাটালি | Round Patali Jaggery",
+        "sort_order": 1,
+        "is_primary": true
+      }
+    ],
+    "image_urls": [
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/960.webp"
+    ],
+    "price": 450,
+    "compare_at_price": 650,
+    "available": true,
+    "variants": [
+      {
+        "id": "dd8d27ef-3427-499d-9341-248f727a4c56",
+        "attributes": {
+          "size": "১ কেজি"
+        },
+        "price": 450,
+        "available": true
+      }
+    ]
+  },
+  {
+    "id": "c6e71b12-cef2-4f25-bec4-576a910323f8",
+    "name": "চকলেট বীজ গুড় | Chocolate Seed Jaggery",
+    "slug": "chocolate-seed-jaggery",
+    "description": "খেজুরের রস থেকে তৈরি বিশেষ আকৃতির চকলেট বীজ গুড়। এর আকর্ষণীয় গঠন, মনমাতানো ঘ্রাণ ও প্রাকৃতিক মিষ্টতা প্রতিটি কামড়ে এনে দেয় গ্রামবাংলার ঐতিহ্যবাহী স্বাদের এক অনন্য ও আনন্দময় অভিজ্ঞতা।",
+    "url": null,
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/960.webp",
+    "images": [
+      {
+        "id": "683188e9-bdf0-4385-82b6-272791b88b52",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/960.webp",
+        "sources": {
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/960.webp"
+        },
+        "alt_text": "চকলেট বীজ গুড় | Chocolate Seed Jaggery",
+        "sort_order": 1,
+        "is_primary": true
+      }
+    ],
+    "image_urls": [
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/960.webp"
+    ],
+    "price": 550,
+    "compare_at_price": 750,
+    "available": true,
+    "variants": [
+      {
+        "id": "6da429b9-74ed-43d7-bbe5-4928d6796f27",
+        "attributes": {
+          "size": "১ কেজি"
+        },
+        "price": 550,
+        "available": true
+      }
+    ]
+  },
+  {
     "id": "c1eae1fc-d16a-4724-9080-5e86fb7e5701",
     "name": "দানাদার গুড় | Granulated Jaggery",
     "slug": "granulated-jaggery",
     "description": "খেজুরের রস থেকে তৈরি দানাদার গুড়ের প্রতিটি দানায় রয়েছে প্রাকৃতিক মিষ্টতা ও মনমাতানো ঘ্রাণ। ঝরঝরে গঠন ও সমৃদ্ধ স্বাদের এই গুড় পিঠা, পায়েস এবং প্রতিদিনের মিষ্টান্ন তৈরিতে দারুণ উপযোগী।",
     "url": null,
-    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0/960.webp",
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/960.webp",
     "images": [
       {
-        "id": "f57f1019-c0f6-458a-906b-00314394143a",
-        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0/960.webp",
+        "id": "2967a070-07c9-49ec-90b6-05660aab2c02",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/960.webp",
         "sources": {
-          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0/320.webp",
-          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0/640.webp",
-          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0/960.webp"
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/960.webp"
         },
         "alt_text": "দানাদার গুড় | Granulated Jaggery",
-        "sort_order": 0,
+        "sort_order": 1,
         "is_primary": true
       }
     ],
     "image_urls": [
-      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/d89e6ceb-dc27-4b9e-aceb-663a6234b1e0/960.webp"
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/c1eae1fc-d16a-4724-9080-5e86fb7e5701/2a02541f-49c2-407a-b491-dab0b39a7169/960.webp"
     ],
     "price": 300,
     "compare_at_price": null,
@@ -53,23 +167,23 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
     "slug": "liquid-date-jaggery",
     "description": "তাজা খেজুরের রস থেকে তৈরি ঘন, সুগন্ধি ও মিষ্টি ঝোলা গুড়। এর মোলায়েম ঘনত্ব ও মনভোলানো স্বাদ পিঠা, পুলি, পায়েস কিংবা রুটির সঙ্গে এনে দেয় শীতের গ্রামবাংলার ঐতিহ্যবাহী স্বাদ।",
     "url": null,
-    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192/960.webp",
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/7ad5c840-8b97-4676-b57a-6e82c3b3f519/960.webp",
     "images": [
       {
-        "id": "8eaf39c2-e6ce-4b21-a9b4-d6e15f59c587",
-        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192/960.webp",
+        "id": "212a4a38-3e87-4e50-a512-75132787c6a1",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/7ad5c840-8b97-4676-b57a-6e82c3b3f519/960.webp",
         "sources": {
-          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192/320.webp",
-          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192/640.webp",
-          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192/960.webp"
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/7ad5c840-8b97-4676-b57a-6e82c3b3f519/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/7ad5c840-8b97-4676-b57a-6e82c3b3f519/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/7ad5c840-8b97-4676-b57a-6e82c3b3f519/960.webp"
         },
-        "alt_text": "খেজুরের ঝোলা গুড় |  Liquid Date Jaggery",
-        "sort_order": 0,
+        "alt_text": "খেজুরের ঝোলা গুড় | Liquid Date Jaggery",
+        "sort_order": 1,
         "is_primary": true
       }
     ],
     "image_urls": [
-      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/815fe669-e82b-47ec-bf83-a48453290192/960.webp"
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/245c778e-1f3d-4797-82f1-f26425d6fdb4/7ad5c840-8b97-4676-b57a-6e82c3b3f519/960.webp"
     ],
     "price": 380,
     "compare_at_price": null,
@@ -99,23 +213,23 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
     "slug": "date-palm-patali",
     "description": "খাঁটি খেজুরের রস থেকে ঐতিহ্যবাহী পদ্ধতিতে তৈরি সুস্বাদু পাটালি গুড়। এর মনমাতানো ঘ্রাণ, প্রাকৃতিক মিষ্টতা ও অনন্য স্বাদ পিঠা, পায়েসসহ নানা মিষ্টান্নে এনে দেয় গ্রামবাংলার চিরচেনা স্বাদের এক অসাধারণ অনুভূতি।",
     "url": null,
-    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2/960.webp",
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/960.webp",
     "images": [
       {
-        "id": "b01e9b61-b015-4bbd-bbed-3b078dbb2d3b",
-        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2/960.webp",
+        "id": "54dfe1e2-ee30-4a08-9212-cdb632917b5c",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/960.webp",
         "sources": {
-          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2/320.webp",
-          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2/640.webp",
-          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2/960.webp"
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/960.webp"
         },
         "alt_text": "খেজুরের পাটালী গুড় | Date Palm Patali",
-        "sort_order": 0,
+        "sort_order": 1,
         "is_primary": true
       }
     ],
     "image_urls": [
-      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/ec6b9966-5dd7-4628-ad57-d27eea927ce2/960.webp"
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/ebe47c6f-a8f0-4cb2-b675-81a64d70e704/4d94a939-d0c4-43ed-aaf7-72bf7f920aeb/960.webp"
     ],
     "price": 350,
     "compare_at_price": null,

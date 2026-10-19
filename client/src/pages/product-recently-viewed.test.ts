@@ -7,7 +7,7 @@ const productSource = readFileSync(new URL("./product.tsx", import.meta.url), "u
 test("tracks resolved product views and renders the detail-page Recently Viewed section", () => {
   assert.match(productSource, /import RecentlyViewed from "@\/components\/recently-viewed"/);
   assert.match(productSource, /recordRecentlyViewedSlug\(window\.localStorage, product\.slug\)/);
-  assert.match(productSource, /<RecentlyViewed products=\{relatedSource\} excludeSlug=\{product\?\.slug\} \/>/);
+  assert.match(productSource, /<RecentlyViewed products=\{relatedSource\} excludeSlug=\{product\?\.slug\} look="stage" \/>/);
   assert.match(productSource, /আরও দেখুন/);
-  assert.match(productSource, /<PosterProductCard key=\{p\.slug\} product=\{p\} \/>/);
+  assert.match(productSource, /<PosterProductCard key=\{p\.slug\} product=\{p\} look="stage" \/>/);
 });

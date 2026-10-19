@@ -100,12 +100,12 @@ const STRIP_ITEMS = ["ক্যাশ অন ডেলিভারি", "সা�
 
 function ProductSkeleton() {
   return (
-    <div className="min-h-screen bg-brand-ivory">
+    <div className="min-h-screen bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-12">
-        <div className="lg:col-span-7 bg-brand-ivory p-[10px] md:p-16 xl:p-20">
+        <div className="lg:col-span-7 bg-white p-[10px] md:p-16 xl:p-20">
           <div className="mx-auto aspect-square w-full max-w-[1080px] animate-pulse rounded-[8px] bg-[#ededed]" />
         </div>
-        <div className="lg:col-span-5 flex flex-col gap-5 bg-brand-ivory p-8 md:p-16">
+        <div className="lg:col-span-5 flex flex-col gap-5 bg-white p-8 md:p-16">
           <div className="h-9 w-2/3 animate-pulse rounded bg-[#ededed]" />
           <div className="h-6 w-1/3 animate-pulse rounded bg-[#ededed]" />
           <div className="mt-4 h-12 w-1/2 animate-pulse rounded-[4px] bg-[#ededed]" />
@@ -581,7 +581,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   if (!product || !orderBundle) {
     return (
       <Layout>
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-brand-ivory px-6 text-center">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-white px-6 text-center">
           <h1 className="text-2xl font-semibold text-black">Product not found</h1>
           <p className="max-w-md text-sm text-black/60">
             This product is no longer available. Browse fresh mangoes, honey, ghee and more.
@@ -1030,22 +1030,28 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
         )}
       </div>
 
-      {/* আরও দেখুন: the homepage product cards */}
-      <section className="sk skp-more">
-        <div className="wrap">
-          <div className="skp-hh" data-reveal="">
-            <h2>আরও দেখুন</h2>
-            <span className="script">যা খুঁজছেন</span>
+      {/* আরও দেখুন: the homepage's Stage product cells */}
+      <section className="st">
+        <div className="st-frame">
+          <div className="st-row st-head">
+            <div className="st-cell">
+              <h2 className="display">
+                আরও <b>দেখুন</b>
+              </h2>
+            </div>
+            <div className="st-cell">
+              <span className="st-lab">যা খুঁজছেন</span>
+            </div>
           </div>
-          <div className="c-list">
+          <div className="st-row st-grid">
             {relatedProducts.map((p) => (
-              <PosterProductCard key={p.slug} product={p} />
+              <PosterProductCard key={p.slug} product={p} look="stage" />
             ))}
           </div>
         </div>
       </section>
 
-      <RecentlyViewed products={relatedSource} excludeSlug={product?.slug} />
+      <RecentlyViewed products={relatedSource} excludeSlug={product?.slug} look="stage" />
 
       <OrderDialog open={orderOpen} onOpenChange={setOrderOpen} bundle={orderBundle} onQuantityChange={setQuantity} />
     </Layout>

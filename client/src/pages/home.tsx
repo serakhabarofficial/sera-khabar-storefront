@@ -1,36 +1,47 @@
 import Layout from "@/components/layout";
-import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
-import { PaperClip } from "@/components/paper-clip";
+import { HeroDrip } from "@/components/hero-drip";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
-import SkewReveal from "@/components/skew-reveal";
 import {
   fetchStorefrontProducts,
-  getProductImage,
+  getProductImageSet,
   STOREFRONT_CATALOG_QUERY_OPTIONS,
   STOREFRONT_POLL_INTERVAL_MS,
   type StorefrontProduct,
 } from "@/lib/storefront-products";
 import { useQuery } from "@tanstack/react-query";
-import { useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import {
   getFeaturedCollection,
   getProductsForCollection,
-  groupProductsByTabs,
+  getTopSellingProducts,
   HOMEPAGE_AD_PRODUCT_SLUG,
   HOMEPAGE_CATEGORIES,
-  HOMEPAGE_OFFER_PRODUCT_SLUG,
-  HOMEPAGE_SHELVES,
 } from "@/lib/featured-collections";
-import { BanglaNumber, toBanglaDigits, withNumeralDigits } from "@/lib/bangla-digits";
+import { BanglaNumber, toBanglaDigits } from "@/lib/bangla-digits";
 import { CONTACT_DETAILS, POLICY_FACTS } from "@/lib/site-pages";
 
-// Approved homepage redesign (2026-10-13): "Market Poster" in tamarind + turmeric.
-// Spec and mockup: docs/design/2026-10-13-homepage/. Styles live in client/src/poster.css.
+// Approved homepage redesign (2026-10-19): "Stage", direction দিক ১ · মঞ্চ. A white page of hairline cells.
+// Styles live in client/src/stage.css; the shared header, menu and footer are in components/layout.tsx.
 
 const WHATSAPP_ORDER_HREF = `${CONTACT_DETAILS.whatsappHref}?text=${encodeURIComponent("আমসত্ত্ব আচার অর্ডার করতে চাই")}`;
+const FREE_DELIVERY = toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold.toLocaleString("en-IN"));
+// "1–2 days" and "2–3 days" become "১–২" and "২–৩"; the fastest and slowest give the nationwide range.
+const DHAKA_DAYS = toBanglaDigits(POLICY_FACTS.dhakaDeliveryDays.replace(" days", ""));
+const OUTSIDE_DAYS = toBanglaDigits(POLICY_FACTS.outsideDhakaDeliveryDays.replace(" days", ""));
+const DELIVERY_RANGE = `${DHAKA_DAYS.split("–")[0]}–${OUTSIDE_DAYS.split("–").pop()}`;
+
+// Where each product sits in /home/hero-jaggery-still-life.webp (percent of the photo). Prices are never
+// stored here: each dot reads its product from the live catalog and is skipped if that product is gone.
+const HERO_SPOTS = [
+  { slug: "round-patali-jaggery", x: 14, y: 52 },
+  { slug: "granulated-jaggery", x: 30, y: 30 },
+  { slug: "liquid-date-jaggery", x: 49, y: 28 },
+  { slug: "chocolate-seed-jaggery", x: 68, y: 30 },
+  { slug: "foil-wrapped-patali-jaggery", x: 88, y: 44 },
+  { slug: "date-palm-patali", x: 77, y: 72 },
+] as const;
 
 function productsInCollection(products: StorefrontProduct[], slug: string) {
   const collection = getFeaturedCollection(slug);
@@ -39,387 +50,382 @@ function productsInCollection(products: StorefrontProduct[], slug: string) {
 
 // Cheapest orderable size, for "থেকে শুরু" prices.
 function getStartingOption(product: StorefrontProduct) {
-  const options = (product.variants ?? [])
-    .filter((variant) => variant.available !== false && Number.isFinite(Number(variant.price)))
-    .map((variant) => ({ price: Number(variant.price), size: String(variant.attributes?.size ?? "") }))
-    .sort((a, b) => a.price - b.price);
+  const options = getSizeOptions(product);
   return options[0] ?? { price: Number(product.price), size: "" };
 }
 
-// Homepage hero (approved 2026-10-14, "Memo" in docs/design/2026-10-14-hero/poster-variants.html): the
-// season's গুড় written up on the footer's cash memo, clipped like the checkout memo. Sizes and prices come from the live
-// catalog, so a price change in the dashboard shows here without a deploy.
-function MemoHero({ product }: { product?: StorefrontProduct }) {
-  const sizes = (product?.variants ?? [])
+function getSizeOptions(product: StorefrontProduct) {
+  return (product.variants ?? [])
     .filter((variant) => variant.available !== false && Number.isFinite(Number(variant.price)))
-    .map((variant) => ({ size: String(variant.attributes?.size ?? ""), price: Number(variant.price) }))
+    .map((variant) => ({ price: Number(variant.price), size: String(variant.attributes?.size ?? "") }))
     .sort((a, b) => a.price - b.price);
-  const href = product ? `/product/${product.slug}` : "/products";
+}
+
+function StageHero({ products }: { products: StorefrontProduct[] }) {
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const spots = HERO_SPOTS.flatMap((spot) => {
+    const product = products.find((item) => item.slug === spot.slug);
+    return product ? [{ ...spot, product }] : [];
+  });
+
+  // A tap anywhere else closes the open price.
+  useEffect(() => {
+    if (!openSlug) return;
+    const close = () => setOpenSlug(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [openSlug]);
 
   return (
-    <div className="wrap">
-      <section className="mh">
-        <div className="memo-w mh-w">
-          <PaperClip layer="back" />
-          <div className="memo">
-            <div className="memo-top">
-              <img src={headerLogo} alt="সেরা খাবার" decoding="async" />
-              <div className="memo-title">
-                <b>শীতের প্রথম ব্যাচ</b>
-                <span>রাজশাহী থেকে সরাসরি আপনার ঘরে।</span>
-              </div>
-              <div className="memo-no">
-                নং <span className="num">{toBanglaDigits(String(new Date().getFullYear()))}</span>
-                <br />
-                তারিখ: আজ
-              </div>
-            </div>
-            <div className="mh-body">
-              <div>
-                <SkewReveal className="script mh-kick">এ বছরের নতুন</SkewReveal>
-                <SkewReveal as="h1" className="mh-title" delay={70}>খেজুরের পাটালী</SkewReveal>
-                {sizes.length ? (
-                  <div className="mh-rows" data-load-step="">
-                    {sizes.map((option) => (
-                      <Link key={option.size} href={href} className="memo-row">
-                        {option.size}
-                        <em>৳<BanglaNumber value={option.price} /></em>
-                      </Link>
-                    ))}
-                    <div className="memo-row">
-                      ডেলিভারি (৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}+ অর্ডারে)
-                      <em>ফ্রি</em>
-                    </div>
-                  </div>
-                ) : null}
-                <div className="mh-ctas" data-load-step="">
-                  <Link href={href} className="btn-royal press">
-                    এখনই অর্ডার করুন <span aria-hidden="true">→</span>
-                  </Link>
-                </div>
-              </div>
-              <div className="mh-art">
-                <div className="stampc" aria-hidden="true">
-                  ক্যাশ অন
-                  <br />
-                  ডেলিভারি
-                  <br />· সারা দেশে ·
-                </div>
-                <img
-                  src="/home/hero-jaggery-still-life.webp"
-                  srcSet="/home/hero-jaggery-still-life-640.webp 640w, /home/hero-jaggery-still-life.webp 960w"
-                  sizes="(min-width: 860px) 620px, 100vw"
-                  alt="সেরা খাবারের দানাদার, ঝোলা ও বীজ গুড় এবং খেজুরের পাটালী"
-                  width={960}
-                  height={640}
-                  fetchPriority="high"
-                  decoding="async"
-                  data-page-settle=""
-                />
-              </div>
-            </div>
+    <section className="st-row">
+      <div className="st-hero">
+        <div className="st-lab" data-load-step="">শীতের প্রথম ব্যাচ এসেছে</div>
+        <h1 className="display" data-load-step="">
+          খাঁটি খেজুরের <b>গুড়</b>
+        </h1>
+        <p className="st-hero-sub" data-load-step="">রাজশাহী থেকে সরাসরি। চিনি নেই, রং নেই।</p>
+        <div className="st-hero-cta" data-load-step="">
+          <Link href="/collection/jaggery" className="st-btn press">
+            এখনই অর্ডার করুন <span className="arr" aria-hidden="true">→</span>
+          </Link>
+          <Link href="/products" className="st-lnk">সব পণ্য দেখুন</Link>
+        </div>
+        <div className="st-stage">
+          {/* The load settle scales this wrapper, so the drip overlay stays on the photo throughout. */}
+          <div className="st-photo" data-page-settle="">
+            <img
+              src="/home/hero-jaggery-still-life.webp"
+              srcSet="/home/hero-jaggery-still-life-640.webp 640w, /home/hero-jaggery-still-life.webp 960w"
+              sizes="(min-width: 1000px) 960px, 100vw"
+              alt="সেরা খাবারের দানাদার, ঝোলা ও বীজ গুড়, গোল পাটালি, ফয়েল পাটালি আর খেজুরের পাটালী"
+              width={960}
+              height={640}
+              fetchPriority="high"
+              decoding="async"
+            />
+            <HeroDrip />
           </div>
-          <PaperClip layer="front" />
+          {spots.map(({ slug, x, y, product }, index) => {
+            const { bangla } = splitProductName(product.name);
+            const { price } = getStartingOption(product);
+            return (
+              <div
+                key={slug}
+                className="st-spot"
+                style={{ left: `${x}%`, top: `${y}%`, "--d": `${index * 90}ms` } as CSSProperties}
+                data-open={openSlug === slug || undefined}
+              >
+                <button
+                  type="button"
+                  className="st-spot-dot"
+                  aria-label={`${bangla}, ৳${toBanglaDigits(price)}`}
+                  aria-expanded={openSlug === slug}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setOpenSlug(openSlug === slug ? null : slug);
+                  }}
+                />
+                <Link href={`/product/${slug}`} className="st-pop" onClick={(event) => event.stopPropagation()}>
+                  <b>{bangla}</b>
+                  <span className="num">৳<BanglaNumber value={price} /></span>
+                  <em>দেখুন →</em>
+                </Link>
+              </div>
+            );
+          })}
+          <div className="st-ground" aria-hidden="true" />
         </div>
-      </section>
-    </div>
-  );
-}
-
-function ProductGrid({ products, bySize = false }: { products: StorefrontProduct[]; bySize?: boolean }) {
-  if (!products.length) {
-    return (
-      <div className="c-list">
-        <p className="c-empty">নতুন পণ্য শীঘ্রই আসছে।</p>
-      </div>
-    );
-  }
-  return (
-    <div className="c-list">
-      {products.flatMap((product) =>
-        // Shelves show each size (e.g. ৫০০ গ্রাম and ১ কেজি) as its own card.
-        bySize && product.variants?.length
-          ? product.variants.map((variant) => (
-              <PosterProductCard key={`${product.id || product.slug}-${variant.id}`} product={product} variant={variant} />
-            ))
-          : [<PosterProductCard key={product.id || product.slug} product={product} />],
-      )}
-    </div>
-  );
-}
-
-function CategoryCards() {
-  return (
-    <section className="cx-sec">
-      <div className="wrap">
-        <SkewReveal as="h2">আমাদের ক্যাটাগরিসমূহ</SkewReveal>
-        <SkewReveal className="script sub">যা খুঁজছেন</SkewReveal>
-        <div className="fr-grid">
-          {HOMEPAGE_CATEGORIES.map((category, index) => (
-            <Link
-              key={category.slug}
-              href={`/collection/${category.slug}`}
-              className={`fr fr-${category.slug}${category.wide ? " wide" : ""}${category.light ? " light" : ""}`}
-              style={{ "--c": category.color } as CSSProperties}
-              data-reveal=""
-            >
-              <span className="fr-card" />
-              <img src={category.image} alt="" loading="eager" decoding="async" />
-              <span className="fr-name">{category.name}</span>
-              <span className="fr-go" aria-hidden="true">→</span>
-              <span className="fr-no" aria-hidden="true">
-                <span>{toBanglaDigits(String(index + 1).padStart(2, "0"))}</span>
-              </span>
-            </Link>
-          ))}
-        </div>
+        {spots.length ? <p className="st-hint">বিন্দুতে চাপ দিয়ে দাম দেখুন</p> : null}
       </div>
     </section>
   );
 }
 
-function AllProductsSection({ products, failed }: { products: StorefrontProduct[]; failed: boolean }) {
-  const chips = [
-    { slug: "", label: "সব", products },
+function CategoryCards({ products }: { products: StorefrontProduct[] }) {
+  return (
+    <section>
+      <div className="st-row st-head">
+        <div className="st-cell">
+          <h2 className="display">
+            আমাদের <b>ক্যাটাগরিসমূহ</b>
+          </h2>
+        </div>
+        <div className="st-cell">
+          <span className="st-lab">যা খুঁজছেন</span>
+        </div>
+      </div>
+      <div className="st-row st-cats">
+        {HOMEPAGE_CATEGORIES.map((category, index) => {
+          const count = productsInCollection(products, category.slug).length;
+          return (
+            <div key={category.slug} className="st-cell">
+              <Link
+                href={`/collection/${category.slug}`}
+                className="st-cc"
+                // The jaggery card is dark brown in the catalog palette; like the live cards, it tints from sand instead.
+                style={{ "--c": category.light ? "#C8935E" : category.color } as CSSProperties}
+                data-reveal=""
+              >
+                <span className="st-cc-card" />
+                <img src={category.image} alt="" loading="lazy" decoding="async" />
+                <span className="st-cc-meta">
+                  <span className="st-cc-n num">{toBanglaDigits(String(index + 1).padStart(2, "0"))}</span>
+                  <b>{category.name}</b>
+                  <span className="st-cc-en">
+                    {category.en} · {count ? `${toBanglaDigits(count)}টি পণ্য` : "শীঘ্রই"}
+                  </span>
+                </span>
+                <span className="st-cc-go" aria-hidden="true">→</span>
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function PromiseRibbon() {
+  const items = [
+    "১০০% খাঁটি খেজুরের রস",
+    "০ গ্রাম চিনি বা রং",
+    `${DELIVERY_RANGE} দিনে ডেলিভারি, সারা দেশে`,
+    `৳০ ডেলিভারি চার্জ, ৳${FREE_DELIVERY}+ অর্ডারে`,
+  ];
+  // Doubled so one set always spans the screen; the second copy makes the loop seamless.
+  const set = [...items, ...items];
+  return (
+    <section className="st-mq" aria-label="আমাদের প্রতিশ্রুতি">
+      <div className="st-mq-track">
+        {[0, 1].map((copy) => (
+          <div key={copy} className="st-mq-set" aria-hidden={copy === 1 || undefined}>
+            {set.map((item, index) => (
+              <span key={`${item}-${index}`} style={{ display: "contents" }}>
+                <span>{item}</span>
+                <img src="/home/leaf-mark.webp" alt="" />
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProductsSection({ products, failed }: { products: StorefrontProduct[]; failed: boolean }) {
+  const tabs = [
+    { slug: "", label: "সব", products: getTopSellingProducts(products) },
     ...HOMEPAGE_CATEGORIES.map((category) => ({
       slug: category.slug,
       label: category.name,
       products: productsInCollection(products, category.slug),
-    })).filter((chip) => chip.products.length > 0),
+    })).filter((tab) => tab.products.length > 0),
   ];
   const [activeSlug, setActiveSlug] = useState("");
-  const active = chips.find((chip) => chip.slug === activeSlug) ?? chips[0];
+  const active = tabs.find((tab) => tab.slug === activeSlug) ?? tabs[0];
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  // The dark highlight is a clipped copy of the tab row, so text and fill change as one surface.
+  useLayoutEffect(() => {
+    const root = tabsRef.current;
+    if (!root) return;
+    const place = () => {
+      const button = root.querySelector<HTMLButtonElement>(`[data-tab="${active.slug || "all"}"]`);
+      if (!button) return;
+      root.style.setProperty("--l", `${button.offsetLeft}px`);
+      root.style.setProperty("--r", `${root.offsetWidth - button.offsetLeft - button.offsetWidth}px`);
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [active.slug, tabs.length]);
+
+  const tabButtons = (interactive: boolean) =>
+    tabs.map((tab) => (
+      <button
+        key={tab.slug || "all"}
+        type="button"
+        data-tab={tab.slug || "all"}
+        role={interactive ? "tab" : undefined}
+        aria-selected={interactive ? tab === active : undefined}
+        tabIndex={interactive ? undefined : -1}
+        className={interactive ? "press" : undefined}
+        onClick={interactive ? () => setActiveSlug(tab.slug) : undefined}
+      >
+        {tab.label}
+      </button>
+    ));
 
   return (
-    <section className="c-sec">
-      <div className="wrap">
-        <div className="c-sec-head">
-          <SkewReveal as="h2">আমাদের পণ্য</SkewReveal>
-          {chips.length > 2 ? (
-            <div className="c-tabs" role="tablist" aria-label="ক্যাটাগরি">
-              {chips.map((chip) => (
-                <button
-                  key={chip.slug || "all"}
-                  type="button"
-                  role="tab"
-                  aria-selected={chip === active}
-                  className={`chip press${chip === active ? " on" : ""}`}
-                  onClick={() => setActiveSlug(chip.slug)}
-                >
-                  {chip.label}
-                </button>
-              ))}
+    <section>
+      <div className="st-row st-shop-head">
+        <div className="st-cell">
+          <h2 className="display">
+            সেরা <b>বিক্রি</b>
+          </h2>
+        </div>
+        <div className="st-cell st-mid">
+          {tabs.length > 2 ? (
+            <div className="st-tabs" ref={tabsRef}>
+              <div className="st-tabs-list" role="tablist" aria-label="ক্যাটাগরি">
+                {tabButtons(true)}
+              </div>
+              <div className="st-tabs-over" aria-hidden="true">
+                <div className="st-tabs-list">{tabButtons(false)}</div>
+              </div>
             </div>
           ) : null}
         </div>
+        <div className="st-cell st-end">
+          <Link href="/products" className="st-lnk">সব পণ্য →</Link>
+        </div>
+      </div>
+      <div className="st-row st-grid" key={active.slug || "all"}>
         {failed ? (
-          <div className="c-list">
-            <p className="c-empty">এই মুহূর্তে পণ্য দেখানো যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।</p>
-          </div>
+          <p className="st-empty">এই মুহূর্তে পণ্য দেখানো যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।</p>
+        ) : active.products.length ? (
+          active.products.map((product) => (
+            <PosterProductCard key={product.id || product.slug} product={product} look="stage" />
+          ))
         ) : (
-          <ProductGrid key={active.slug || "all"} products={active.products} />
+          <p className="st-empty">নতুন পণ্য শীঘ্রই আসছে।</p>
         )}
-        <div className="c-rule" />
       </div>
     </section>
   );
 }
 
-function CategoryShelf({ title, groups }: { title: string; groups: ReturnType<typeof groupProductsByTabs> }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const active = groups[activeIndex] ?? groups[0];
-  const showTabs = groups.length > 1;
-
+function JaggeryStory() {
   return (
-    <section className="c-sec">
-      <div className="wrap">
-        <div className="c-sec-head">
-          <SkewReveal as="h2">{title}</SkewReveal>
-          {showTabs ? (
-            <div className="c-tabs" role="tablist" aria-label={title}>
-              {groups.map((group, index) => (
-                <button
-                  key={group.label}
-                  type="button"
-                  role="tab"
-                  aria-selected={group === active}
-                  className={`chip press${group === active ? " on" : ""}`}
-                  onClick={() => setActiveIndex(index)}
-                >
-                  {group.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-        <ProductGrid
-          key={active.label}
-          bySize
-          products={showTabs ? active.products : groups.flatMap((group) => group.products)}
-        />
-        <div className="c-rule" />
+    <section className="st-row st-story">
+      <div className="st-cell st-story-art" data-reveal="">
+        <img src="/home/jaggery-ad.webp" alt="মাটির পাত্রে খেজুরের ঝোলা গুড় আর পাটালী" loading="lazy" decoding="async" data-reveal-img="" />
       </div>
-    </section>
-  );
-}
-
-function OfferBand({ product }: { product: StorefrontProduct }) {
-  const { price, size } = getStartingOption(product);
-  const { bangla } = splitProductName(product.name);
-  const image = getProductImage(product);
-
-  return (
-    <Link href={`/product/${product.slug}`} className="c-offer" data-reveal="">
-      {image ? <img className="float f1" src={image} alt="" loading="lazy" decoding="async" /> : null}
-      <img className="float f2" src="/home/hero-bori.webp" alt="" loading="lazy" decoding="async" />
-      <div className="c-big">৳{toBanglaDigits(price)}</div>
-      <span className="c-ribbon">{withNumeralDigits(`${bangla}, ${size ? `${size} ` : ""}থেকে শুরু`)}</span>
-    </Link>
-  );
-}
-
-// "Signboard" ad for the আমসত্ত্ব আচার (the hero already sells the winter পাটালী): a giant yellow
-// "আচার" behind the bowl, lit by a warm spotlight (approved 2026-10-14, a mix of the "Glow" and "Big word"
-// variants in docs/design/2026-10-14-hero/achar-board-variants.html). Priced from the catalog; if the
-// product is not published, the button takes the order on WhatsApp.
-function AcharAdBoard({ product }: { product?: StorefrontProduct }) {
-  const startingPrice = product ? getStartingOption(product).price : null;
-
-  return (
-    <section className="ad-board">
-      <div className="wrap ad-b-in">
-        <SkewReveal className="script ad-tag">টক-ঝাল-মিষ্টি</SkewReveal>
-        <h2 className="ad-b-title">
-          <SkewReveal className="ad-b-pre">আমসত্ত্ব</SkewReveal>
-          <SkewReveal className="ad-b-word">আচার</SkewReveal>
+      <div className="st-cell">
+        <div className="st-lab" data-reveal="">আমাদের গল্প</div>
+        <h2 className="display" data-reveal="">
+          রস থেকে <b>পাটালী</b>
         </h2>
-        <div className="ad-b-art">
-          {startingPrice != null && Number.isFinite(startingPrice) ? (
-            <span className="ad-b-stamp">
-              <span>
-                <b>৳<BanglaNumber value={startingPrice} /></b>
-                <small>থেকে শুরু</small>
-              </span>
-            </span>
-          ) : null}
-          <img className="ad-b-img" src="/home/achar-ad.webp" alt="আমসত্ত্ব আচার" width={880} height={880} loading="lazy" decoding="async" />
+        <p data-reveal="">
+          শীতের ভোরে রাজশাহীর গাছিরা খেজুরের রস নামান। সেদিনই সেই রস জ্বাল দিয়ে আমরা গুড় আর পাটালী বানাই, যেভাবে
+          আমাদের দাদি-নানিরা বানাতেন।
+        </p>
+        <div className="st-steps">
+          <div className="st-step" data-reveal="">
+            <span className="num">১</span>
+            <div>
+              <b>ভোরে রস সংগ্রহ</b>
+              <small>রাতভর জমা হওয়া টাটকা রস, সূর্য ওঠার আগেই।</small>
+            </div>
+          </div>
+          <div className="st-step" data-reveal="">
+            <span className="num">২</span>
+            <div>
+              <b>ধীরে জ্বাল</b>
+              <small>বড় কড়াইয়ে ঘণ্টার পর ঘণ্টা, কোনো চিনি বা রং ছাড়া।</small>
+            </div>
+          </div>
+          <div className="st-step" data-reveal="">
+            <span className="num">৩</span>
+            <div>
+              <b>আপনার দরজায়</b>
+              <small>
+                ঢাকায় {DHAKA_DAYS} দিন, সারা দেশে {OUTSIDE_DAYS} দিনে।
+              </small>
+            </div>
+          </div>
         </div>
-        <p className="ad-b-lede">খাঁটি আমসত্ত্বে তৈরি, মিষ্টি-টক-ঝালের দারুণ সমন্বয়।</p>
-        <div className="ad-b-buy">
+      </div>
+    </section>
+  );
+}
+
+// The আমসত্ত্ব আচার ad, priced from the catalog; if the product is not published, the button takes the
+// order on WhatsApp.
+function AcharAd({ product }: { product?: StorefrontProduct }) {
+  const options = product ? getSizeOptions(product) : [];
+  const startingPrice = options[0]?.price;
+
+  return (
+    <section className="st-row st-ad">
+      <div className="st-cell st-ad-copy">
+        <span className="st-ad-tag" data-reveal="">টক-ঝাল-মিষ্টি</span>
+        <h2 className="st-ad-title" data-reveal="">
+          <span className="st-ad-pre">আমসত্ত্ব</span>
+          <span className="st-ad-word">আচার</span>
+        </h2>
+        <p className="st-ad-lede" data-reveal="">খাঁটি আমসত্ত্বে তৈরি, মিষ্টি-টক-ঝালের দারুণ সমন্বয়।</p>
+        <div className="st-ad-buy" data-reveal="">
           {product ? (
-            <Link href={`/product/${product.slug}`} className="btn-sun press">
-              এখনই অর্ডার করুন <i />
+            <Link href={`/product/${product.slug}`} className="st-btn press">
+              এখনই অর্ডার করুন <span className="arr" aria-hidden="true">→</span>
             </Link>
           ) : (
-            <a href={WHATSAPP_ORDER_HREF} target="_blank" rel="noopener noreferrer" className="btn-sun press">
-              এখনই অর্ডার করুন <i />
+            <a href={WHATSAPP_ORDER_HREF} target="_blank" rel="noopener noreferrer" className="st-btn press">
+              এখনই অর্ডার করুন <span className="arr" aria-hidden="true">→</span>
             </a>
           )}
+          {options.length ? (
+            <span className="st-ad-sizes">
+              {options.map((option, index) => (
+                <span key={option.size}>
+                  {index ? " · " : ""}
+                  {option.size} <span className="num">৳<BanglaNumber value={option.price} /></span>
+                </span>
+              ))}
+            </span>
+          ) : null}
         </div>
+      </div>
+      <div className="st-cell st-ad-art">
+        <div className="st-ad-glow" aria-hidden="true" />
+        <img src="/home/achar-ad.webp" alt="আমসত্ত্ব আচার" width={880} height={880} loading="lazy" decoding="async" data-reveal="" />
+        {startingPrice != null ? (
+          <span className="st-stamp" data-reveal="">
+            <b className="num">৳<BanglaNumber value={startingPrice} /></b>
+            <small>থেকে শুরু</small>
+          </span>
+        ) : null}
       </div>
     </section>
   );
 }
 
-// Answers come from POLICY_FACTS so they never disagree with checkout and the policy pages.
-// Storage and wholesale answers are placeholders until the owner confirms them.
-const FAQS = [
-  [
-    "অর্ডার করলে কত দিনে পাবো?",
-    `ঢাকার ভেতরে ${POLICY_FACTS.dhakaDeliveryDays.replace(" days", "")} দিনে, ঢাকার বাইরে ${POLICY_FACTS.outsideDhakaDeliveryDays.replace(" days", "")} দিনে পৌঁছে যায়।`,
-  ],
-  [
-    "ডেলিভারি চার্জ কত?",
-    `সারাদেশে ডেলিভারি চার্জ ৳${POLICY_FACTS.deliveryCharge}। ৳${POLICY_FACTS.freeDeliveryThreshold} বা তার বেশি অর্ডারে ডেলিভারি ফ্রি।`,
-  ],
-  ["টাকা কীভাবে দেবো?", "ক্যাশ অন ডেলিভারি। পণ্য হাতে পেয়ে, দেখে তারপর টাকা দিন।"],
-  [
-    "পণ্য ভাঙা বা খারাপ এলে কী করবো?",
-    "ডেলিভারির সময়ই খুলে দেখুন। সমস্যা থাকলে ছবি তুলে হোয়াটসঅ্যাপে পাঠান, আমরা বদলে দেবো।",
-  ],
-  [
-    "গুড় আর আচার কত দিন ভালো থাকে?",
-    "পাটালী গুড় ফ্রিজে কয়েক মাস ভালো থাকে। আচার শুকনো চামচে তুলুন আর ঠান্ডা, শুকনো জায়গায় রাখুন।",
-  ],
-  ["পাইকারি অর্ডার করা যায়?", "হ্যাঁ। পরিমাণ জানিয়ে কল বা হোয়াটসঅ্যাপ করুন, আমরা দাম জানিয়ে দেবো।"],
-] as const;
-
-function FaqChat() {
-  const shouldReduceMotion = useReducedMotion();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
-  const typingTimer = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(typingTimer.current), []);
-
-  const ask = (index: number) => {
-    setActiveIndex(index);
-    window.clearTimeout(typingTimer.current);
-    if (shouldReduceMotion) {
-      setIsTyping(false);
-      return;
-    }
-    setIsTyping(true);
-    typingTimer.current = window.setTimeout(() => setIsTyping(false), 650);
-  };
-  const [question, answer] = FAQS[activeIndex];
-
+function HomemadeFeature({ products }: { products: StorefrontProduct[] }) {
+  const featured = products.slice(0, 2);
+  if (!featured.length) return null;
   return (
-    <section className="wrap fq">
-      <div className="fq-ctr">
-        <SkewReveal className="script fq-kick">প্রশ্ন আছে?</SkewReveal>
-        <SkewReveal as="h2">সাধারণ জিজ্ঞাসা</SkewReveal>
+    <section>
+      <div className="st-row st-head">
+        <div className="st-cell">
+          <h2 className="display">
+            ঘরে <b>তৈরি</b>
+          </h2>
+        </div>
+        <div className="st-cell">
+          <Link href="/collection/homemade" className="st-lnk">হোমমেড সব →</Link>
+        </div>
       </div>
-      <div className="ch-card" data-reveal="">
-        <div className="ch-head">
-          <span className="ch-av">
-            <img src="/home/leaf-mark.webp" alt="" />
-            <i />
-          </span>
-          <span className="ch-who">
-            <b>সেরা খাবার</b>
-            <small>অনলাইন · সাধারণত কয়েক সেকেন্ডে উত্তর দেয়</small>
-          </span>
-        </div>
-        <div className="ch-thread" aria-live="polite" key={activeIndex}>
-          <div className="ch-row me">
-            <div className="bub me">{question}</div>
-            <small className="ch-meta">
-              এইমাত্র <b>✓✓</b>
-            </small>
-          </div>
-          <div className="ch-row shop">
-            <img className="av" src="/home/leaf-mark.webp" alt="" />
-            {isTyping ? (
-              <div className="bub shop typing" aria-label="লিখছে">
-                <i />
-                <i />
-                <i />
+      <div className="st-row st-feat">
+        {featured.map((product) => {
+          const { bangla } = splitProductName(product.name);
+          const { src, srcSet } = getProductImageSet(product);
+          const { price } = getStartingOption(product);
+          return (
+            <div key={product.slug} className="st-cell st-fe" data-reveal="">
+              <Link href={`/product/${product.slug}`} aria-label={bangla}>
+                {src ? <img src={src} srcSet={srcSet} sizes={srcSet ? "(min-width: 860px) 300px, 45vw" : undefined} alt={product.name} loading="lazy" decoding="async" /> : null}
+              </Link>
+              <div>
+                <h3 className="display">{bangla}</h3>
+                {product.description ? <p>{product.description}</p> : null}
+                <Link href={`/product/${product.slug}`} className="st-lnk">
+                  ৳<BanglaNumber value={price} /> থেকে →
+                </Link>
               </div>
-            ) : (
-              <div className="bub shop">{withNumeralDigits(answer)}</div>
-            )}
-          </div>
-        </div>
-        <div className="ch-quick">
-          <span>প্রশ্ন বেছে নিন</span>
-          <div className="ch-chips">
-            {FAQS.map(([faqQuestion], index) => (
-              <button
-                key={faqQuestion}
-                type="button"
-                className={`press${index === activeIndex ? " on" : ""}`}
-                aria-pressed={index === activeIndex}
-                onClick={() => ask(index)}
-              >
-                {faqQuestion}
-              </button>
-            ))}
-          </div>
-        </div>
-        <a className="ch-input press" href={CONTACT_DETAILS.whatsappHref} target="_blank" rel="noopener noreferrer">
-          <span>অন্য প্রশ্ন? হোয়াটসঅ্যাপে লিখুন…</span>
-          <i aria-hidden="true">➤</i>
-        </a>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -440,54 +446,32 @@ export default function Home() {
       ? { ...product, compare_at_price: snapshotProduct.compare_at_price }
       : product;
   });
-  const offerProduct = homepageProducts.find((product) => product.slug === HOMEPAGE_OFFER_PRODUCT_SLUG);
-  const jaggeryProducts = productsInCollection(homepageProducts, "jaggery");
-  const shelves = HOMEPAGE_SHELVES.map((shelf) => ({
-    ...shelf,
-    groups: groupProductsByTabs(productsInCollection(homepageProducts, shelf.slug), shelf.tabs),
-  }));
-  const renderShelf = (slug: string) => {
-    const shelf = shelves.find((item) => item.slug === slug);
-    return shelf && shelf.groups.length ? <CategoryShelf key={slug} title={shelf.title} groups={shelf.groups} /> : null;
-  };
 
   return (
     <Layout>
-      <div className="sk">
-        {/* Hero Section */}
-        <MemoHero product={jaggeryProducts.find((product) => product.name.includes("পাটালী"))} />
+      <div className="st">
+        <div className="st-frame">
+          {/* Hero Section */}
+          <StageHero products={homepageProducts} />
 
-        {/* Categories Section */}
-        <CategoryCards />
+          {/* Categories Section */}
+          <CategoryCards products={homepageProducts} />
 
-        {/* Products Section */}
-        <AllProductsSection products={homepageProducts} failed={isCatalogError && catalogProducts.length === 0} />
+          {/* Promise Ribbon */}
+          <PromiseRibbon />
 
-        {/* Offer Section */}
-        {offerProduct ? <OfferBand product={offerProduct} /> : null}
+          {/* Products Section */}
+          <ProductsSection products={homepageProducts} failed={isCatalogError && catalogProducts.length === 0} />
 
-        {/* Story Section */}
-        <div className="wrap">
-          <section className="c-story">
-            <SkewReveal as="h2" className="script">রাজশাহীর রান্নাঘরের গল্প</SkewReveal>
-            <p data-reveal="">
-              <b>সেরা খাবার</b> শুরু হয়েছিল পরিবারের পুরনো রেসিপি থেকে। প্রতিটি বড়ি রোদে শুকানো, প্রতিটি আচার ছোট হাঁড়িতে
-              জ্বাল দেওয়া। আমরা যতটুকু বানাই, ততটুকুই বিক্রি করি।
-            </p>
-          </section>
+          {/* Story Section */}
+          <JaggeryStory />
+
+          {/* Achar Ad */}
+          <AcharAd product={homepageProducts.find((product) => product.slug === HOMEPAGE_AD_PRODUCT_SLUG)} />
+
+          {/* Homemade Section */}
+          <HomemadeFeature products={productsInCollection(homepageProducts, "homemade")} />
         </div>
-
-        {/* Jaggery Shelf */}
-        {renderShelf("jaggery")}
-
-        {/* Achar Ad */}
-        <AcharAdBoard product={homepageProducts.find((product) => product.slug === HOMEPAGE_AD_PRODUCT_SLUG)} />
-
-        {/* Homemade Shelf */}
-        {renderShelf("homemade")}
-
-        {/* FAQ Section */}
-        <FaqChat />
       </div>
     </Layout>
   );
