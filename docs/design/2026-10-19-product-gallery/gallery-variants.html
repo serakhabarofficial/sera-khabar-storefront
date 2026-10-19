@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Product gallery — thumbnails (mobile) · one big + grid (desktop)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Noto+Serif+Bengali:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { min-height: 100vh; background: #e8e2d9; font-family: "Geist", "Noto Serif Bengali", serif; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  img { display: block; max-width: 100%; }
+
+  /* Harness: caption + view toggles above the frame (not part of the design). */
+  #stage { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 84px 24px 40px; }
+  .cap { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Serif Bengali", sans-serif; color: #4b3a2f; }
+  .cap b { font-size: 14px; color: #2a1c14; }
+  .seg { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(42, 28, 20, 0.08); }
+  .seg button { height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; color: #6b5444; }
+  .seg button[aria-pressed="true"] { background: #fff; color: #2a1c14; box-shadow: 0 1px 2px rgba(42, 28, 20, 0.12); }
+
+  /* Site tokens (poster.css .skp) */
+  .skp { --rice: #faf4ea; --royal: #5b2d17; --sun: #f6b826; --pink: #e2547a; --card: #f1e5d3; --ink: #3a1d0f; --sub: #7a6050; --paper: #fffdf8; --rose: #e9a9a0; --butter: #fdf0cf;
+    --out: cubic-bezier(0.23, 1, 0.32, 1); --disp: "Noto Serif Bengali", serif;
+    --soft: 0 0 0 1px rgba(58, 29, 15, 0.06), 0 1px 2px rgba(58, 29, 15, 0.04), 0 4px 8px -2px rgba(58, 29, 15, 0.05), 0 14px 28px -8px rgba(58, 29, 15, 0.08);
+    background: var(--rice); color: var(--ink); }
+  .skp .num { font-variant-numeric: tabular-nums; font-weight: 700; font-family: "Geist", "Noto Serif Bengali", serif; }
+  .press { transition: transform 160ms var(--out); }
+  .press:active { transform: scale(0.97); }
+
+  /* Frames */
+  .phone { position: relative; width: 390px; height: 820px; border-radius: 46px; overflow: hidden; background: var(--rice);
+    box-shadow: 0 0 0 10px #1c1410, 0 0 0 11px #3a2a20, 0 40px 80px -20px rgba(42, 28, 20, 0.45); }
+  .phone .scr { height: 100%; overflow-y: auto; scrollbar-width: none; padding-bottom: 40px; }
+  .phone .scr::-webkit-scrollbar { display: none; }
+  .desk { position: relative; width: min(1280px, calc(100vw - 48px)); height: calc(100vh - 150px); min-height: 620px; border-radius: 14px; overflow: hidden; background: var(--rice);
+    box-shadow: 0 0 0 1px rgba(42, 28, 20, 0.14), 0 40px 80px -24px rgba(42, 28, 20, 0.4); display: flex; flex-direction: column; }
+  .desk .bar { flex: none; height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: #f3ede5; border-bottom: 1px solid #e3d8cb; font: 12px -apple-system, sans-serif; color: #8a7666; }
+  .desk .bar i { width: 11px; height: 11px; border-radius: 50%; background: #dccfc1; }
+  .desk .bar span { margin: 0 auto; padding: 4px 16px; border-radius: 7px; background: #fff; }
+  .desk .scr { flex: 1; overflow-y: auto; }
+  @media (max-width: 760px) { #stage { padding: 76px 0 0; } .phone { width: 100vw; height: calc(100dvh - 130px); border-radius: 0; box-shadow: none; } }
+
+  /* Page chrome */
+  .hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-bottom: 1px solid #ecd6c8; background: #fff; }
+  .hd .menu { width: 38px; height: 38px; border-radius: 50%; border: 1px solid #ecd6c8; display: grid; place-items: center; }
+  .hd .menu::before { content: ""; width: 14px; height: 6px; border-block: 1.5px solid var(--royal); }
+  .hd img { height: 40px; width: auto; }
+  .hd .bag { font-family: var(--disp); font-weight: 600; font-size: 14px; color: var(--royal); display: flex; gap: 6px; align-items: center; }
+  .hd .bag b { width: 20px; height: 20px; border-radius: 50%; background: var(--royal); color: #fff; font-size: 11px; display: grid; place-items: center; }
+  .crumb { display: flex; gap: 6px; padding: 10px 18px 0; font-family: var(--disp); font-weight: 700; font-size: 13px; color: var(--sub); }
+  .crumb a { color: var(--royal); font-weight: 600; }
+  .m-body { display: flex; flex-direction: column; gap: 18px; padding: 12px 18px 0; }
+
+  /* Product info (copied from .skp-info) */
+  .info { display: flex; flex-direction: column; gap: 14px; }
+  .info h1 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 34px; line-height: 1.2; color: var(--royal); }
+  .price .num { font-size: 40px; line-height: 1; color: var(--royal); }
+  .lbl { display: block; font-family: var(--disp); font-weight: 700; font-size: 16px; color: var(--royal); }
+  .sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 12px; }
+  .size { display: flex; align-items: center; gap: 10px; padding: 16px 12px 12px; border-radius: 18px; background: var(--paper); box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); text-align: left; }
+  .size[aria-pressed="true"] { background: var(--butter); box-shadow: inset 0 0 0 2px var(--royal); }
+  .size img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+  .size b { display: block; font-family: var(--disp); font-weight: 900; font-size: 18px; color: var(--royal); }
+  .size .num { display: block; font-size: 17px; color: var(--royal); }
+  .buy { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+  .qty { display: inline-flex; align-items: center; height: 56px; padding: 0 6px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); }
+  .qty button { width: 40px; height: 40px; border-radius: 50%; font-size: 20px; color: var(--royal); }
+  .qty output { min-width: 28px; text-align: center; font-size: 18px; }
+  .cod { display: flex; align-items: center; justify-content: center; gap: 10px; height: 56px; border-radius: 999px; background: var(--sun); font-weight: 700; font-size: 16px; font-family: var(--disp); }
+  .cod i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+  .cart { height: 56px; border-radius: 999px; color: var(--royal); box-shadow: inset 0 0 0 1.5px var(--royal); font-weight: 700; font-size: 15px; font-family: var(--disp); }
+  .note { padding: 18px; border-radius: 20px; background: var(--paper); box-shadow: var(--soft); font-family: var(--disp); color: var(--sub); font-size: 14px; line-height: 1.7; }
+  .note b { display: block; color: var(--royal); font-size: 20px; margin-bottom: 4px; }
+
+  /* Photo panel overlays (copied from .skp-photo) */
+  .photo { position: relative; border-radius: 28px; overflow: hidden; background: #fff; }
+  .chip { position: absolute; z-index: 3; top: 16px; left: 16px; padding: 4px 12px; border-radius: 999px; background: var(--rose); font-family: var(--disp); font-weight: 700; font-size: 13px; pointer-events: none; }
+  .seal { position: absolute; z-index: 3; top: 14px; right: 14px; width: 82px; height: 82px; border-radius: 50%; background: var(--paper); box-shadow: var(--soft); display: grid; place-items: center; text-align: center; transform: rotate(-10deg); pointer-events: none; }
+  .seal > span { width: 70px; height: 70px; border-radius: 50%; border: 1.5px dashed var(--pink); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
+  .seal b { font-family: var(--disp); font-weight: 900; font-size: 13px; color: var(--royal); }
+  .seal small { font-size: 10px; font-weight: 700; color: var(--pink); }
+
+  /* Phone swipe track (native scroll-snap; the site uses Embla) */
+  .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .track::-webkit-scrollbar { display: none; }
+  .slide { flex: 0 0 100%; aspect-ratio: 1; scroll-snap-align: start; }
+  .slide img, .tile img, .th img { width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+
+  /* ── 1 · পাশের সারি: thumbnails ride down the photo's left edge ── */
+  .rail { position: absolute; z-index: 2; left: 12px; top: 58px; bottom: 12px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; scrollbar-width: none; padding: 3px; }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail .th { flex: none; width: 46px; height: 46px; border-radius: 12px; overflow: hidden; background: #fff;
+    box-shadow: 0 0 0 2px #fff, 0 3px 10px rgba(58, 29, 15, 0.22); opacity: 0.82; transform: scale(0.92);
+    transition: transform 220ms var(--out), opacity 160ms ease, box-shadow 160ms ease; }
+  .rail .th[aria-current="true"] { opacity: 1; transform: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--royal), 0 3px 10px rgba(58, 29, 15, 0.22); }
+  .rail .th:active { transform: scale(0.88); }
+
+  /* ── 2 · নিচের সারি: a strip under the photo, one ring slides to the chosen photo ── */
+  .count { position: absolute; z-index: 2; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(255, 253, 248, 0.9); box-shadow: var(--soft); font-size: 12.5px; color: var(--royal); }
+  .strip { position: relative; display: flex; gap: 8px; margin-top: 10px; padding: 2px; overflow-x: auto; scrollbar-width: none; }
+  .strip::-webkit-scrollbar { display: none; }
+  .strip .th { position: relative; flex: none; width: 64px; height: 64px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.08); transition: transform 160ms var(--out); }
+  .strip .th img { opacity: 0.7; transition: opacity 160ms ease; }
+  .strip .th[aria-current="true"] img { opacity: 1; }
+  .strip .th:active { transform: scale(0.95); }
+  .ring { position: absolute; z-index: 1; left: 0; top: 0; border-radius: 18px; box-shadow: inset 0 0 0 2px var(--royal), inset 0 0 0 4px var(--rice); pointer-events: none; will-change: transform; }
+  .ring.live { transition: transform 260ms var(--out); }
+
+  /* ── 3 · ক্যাপসুল: round thumbnails in a glass capsule where the dots were ── */
+  .capsule { position: absolute; z-index: 2; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 6px; padding: 5px; border-radius: 999px;
+    background: rgba(255, 253, 248, 0.72); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); box-shadow: var(--soft); }
+  .capsule .th { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; background: #fff; transform: scale(0.8); opacity: 0.75;
+    transition: transform 240ms var(--out), opacity 160ms ease, box-shadow 160ms ease; }
+  .capsule .th[aria-current="true"] { transform: none; opacity: 1; box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--royal); }
+
+  /* Desktop page */
+  .d-crumb { padding: 18px 48px 0; }
+  .dtop { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; padding: 22px 48px 64px; align-items: start; }
+  .dleft { display: flex; flex-direction: column; gap: 26px; }
+  .dinfo { position: sticky; top: 24px; }
+  .dinfo .info h1 { font-size: 40px; }
+  .tile { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 24px; overflow: hidden; background: #fff; cursor: zoom-in; }
+  .tile img { transition: transform 600ms var(--out); }
+  @media (hover: hover) and (pointer: fine) { .tile:hover img { transform: scale(1.035); } }
+
+  /* ── 1 desktop: the big photo, then the rest in a two-up grid ── */
+  .ga { display: flex; flex-direction: column; gap: 12px; }
+  .ga .big { border-radius: 28px; }
+  .ga-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ga-grid .tile:last-child:nth-child(odd) { grid-column: span 2; aspect-ratio: 2 / 1; }
+
+  /* ── 2 desktop: one big viewer, every photo as a thumbnail under it ── */
+  .gc-view { position: relative; aspect-ratio: 1; border-radius: 28px; overflow: hidden; background: #fff; }
+  .gc-view .layer { position: absolute; inset: 0; opacity: 0; transition: opacity 240ms ease; }
+  .gc-view .layer[data-on] { opacity: 1; }
+  .gc-view .layer img { width: 100%; height: 100%; object-fit: cover; }
+  .nav { position: absolute; z-index: 3; top: 50%; width: 44px; height: 44px; margin-top: -22px; border-radius: 50%; background: rgba(255, 253, 248, 0.92); box-shadow: var(--soft);
+    display: grid; place-items: center; color: var(--royal); font-size: 18px; opacity: 0; transition: opacity 160ms ease, transform 160ms var(--out); }
+  .nav.prev { left: 14px; } .nav.next { right: 14px; }
+  .gc-view:hover .nav, .nav:focus-visible { opacity: 1; }
+  .nav:active { transform: scale(0.94); }
+  .gc-view .count { bottom: 14px; right: 14px; }
+  .gc-thumbs { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px; }
+  .gc-thumbs .th { position: relative; aspect-ratio: 1; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.08); }
+  .gc-thumbs .th img { opacity: 0.7; transition: opacity 160ms ease, transform 600ms var(--out); }
+  .gc-thumbs .th[aria-current="true"] img, .gc-thumbs .th:hover img { opacity: 1; }
+
+  /* ── 3 desktop: a mosaic — big photo across two columns, the rest fill in beside and below ── */
+  .gb { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .gb .big { grid-column: span 2; grid-row: span 2; border-radius: 28px; }
+  .gb .tile { border-radius: 20px; }
+  .gb-row { display: grid; gap: 12px; margin-top: 12px; }
+  .gb-row .tile { aspect-ratio: 4 / 3; border-radius: 20px; }
+  .gb .seal { width: 72px; height: 72px; } .gb .seal > span { width: 61px; height: 61px; } .gb .seal b { font-size: 11.5px; }
+
+  /* Lightbox (desktop variants 1 and 3) */
+  .lb { position: absolute; inset: 38px 0 0; z-index: 20; display: grid; place-items: center; background: rgba(42, 28, 20, 0.86); opacity: 0; visibility: hidden;
+    transition: opacity 160ms ease, visibility 0s linear 160ms; }
+  .lb[data-open] { opacity: 1; visibility: visible; transition: opacity 200ms ease; }
+  .lb .x:focus-visible, .lb .nav:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.6); outline-offset: 2px; }
+  .lb figure { margin: 0; height: calc(100% - 120px); max-width: 72%; aspect-ratio: 1; border-radius: 24px; overflow: hidden; background: #fff; transform: scale(0.96); transition: transform 160ms ease-out; }
+  .lb[data-open] figure { transform: none; transition: transform 260ms var(--out); }
+  .lb figure img { width: 100%; height: 100%; object-fit: cover; }
+  .lb .x, .lb .nav { position: absolute; opacity: 1; }
+  .lb .x { top: 18px; right: 18px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 253, 248, 0.14); color: #fff; font-size: 20px; }
+  .lb .nav { background: rgba(255, 253, 248, 0.14); color: #fff; box-shadow: none; }
+  .lb .nav.prev { left: 24px; } .lb .nav.next { right: 24px; }
+  .lb .lbc { position: absolute; bottom: 20px; color: rgba(255, 255, 255, 0.8); font-size: 13px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skp *, .skp *::before, .skp *::after { transition-duration: 0.01ms !important; }
+    .rail .th, .capsule .th, .lb figure { transform: none !important; }
+  }
+
+  /* Picker (verbatim, PICKER.md) */
+  .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10, 10, 10, 0.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(0, 0, 0, 0.24), 0 2px 6px rgba(0, 0, 0, 0.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); will-change: transform; }
+  .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1), width 250ms cubic-bezier(0.23, 1, 0.32, 1); }
+  @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } }
+  .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+  .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+  .proto-picker-item:active { transform: scale(0.97); }
+  .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+  .proto-picker-item[data-active] { color: #fff; }
+  .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+  .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+  .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+</style>
+</head>
+<body>
+<nav class="proto-picker" data-position="top" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">পাশের সারি</button>
+  <button class="proto-picker-item">নিচের সারি</button>
+  <button class="proto-picker-item">ক্যাপসুল + মোজাইক</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+<div id="stage"></div>
+
+<script>
+const LOGO = "../../../attached_assets/sera-khabar-leaf-logo.webp";
+const B = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/";
+// The first three are the live আমসত্ত্ব আচার photos; the last two stand in to show a five-photo product.
+const PHOTOS = [
+  "38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/",
+  "38fc78e0-2256-4182-8722-6023db8c8662/688b8813-a874-4c22-b20e-52f1e20aa3d8/",
+  "38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/",
+  "43390440-8e8b-497d-b8ca-462409a17a9a/2748a413-bc15-44cc-adb6-22ad75cf4379/",
+  "c6e71b12-cef2-4f25-bec4-576a910323f8/de7a7d92-fefc-48fa-9dfa-3ee3e735d70a/",
+].map((p) => B + p);
+const src = (p, w) => `${p}${w}.webp`;
+const bn = (n) => String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const params = new URLSearchParams(location.search);
+const state = { view: params.get("view") === "desk" ? "desk" : "phone", n: params.get("n") === "5" ? 5 : 3 };
+const imgs = () => PHOTOS.slice(0, state.n);
+const alt = (i) => `আমসত্ত্ব আচার${i ? ` ${bn(i + 1)}` : ""}`;
+
+const overlays = `<span class="chip">হোমমেড</span><span class="seal" aria-hidden="true"><span><b>ক্যাশ অন</b><b>ডেলিভারি</b><small>সারা দেশে</small></span></span>`;
+const thumb = (p, i, cls = "th") => `<button type="button" class="${cls}" data-go="${i}" aria-label="ছবি ${bn(i + 1)}"><img src="${src(p, 320)}" alt="" draggable="false"></button>`;
+const track = (list) => `<div class="track" data-track>${list.map((p, i) => `<div class="slide"><img src="${src(p, 960)}" alt="${alt(i)}" draggable="false" ${i ? 'loading="lazy"' : ""}></div>`).join("")}</div>`;
+const tile = (p, i, cls = "tile") => `<button type="button" class="${cls}" data-open="${i}" aria-label="${alt(i)} বড় করে দেখুন">${i === 0 ? overlays : ""}<img src="${src(p, 960)}" alt="${alt(i)}" draggable="false"></button>`;
+
+function info() {
+  const t = src(PHOTOS[0], 320);
+  return `<div class="info">
+    <h1>আমসত্ত্ব আচার</h1>
+    <div class="price"><span class="num">৳৩৫০</span></div>
+    <div><span class="lbl">পরিমাণ বেছে নিন</span>
+      <div class="sizes">
+        <button class="size press" aria-pressed="true"><img src="${t}" alt=""><span><b>৫০০ গ্রাম</b><span class="num">৳৩৫০</span></span></button>
+        <button class="size press" aria-pressed="false"><img src="${t}" alt=""><span><b>১ কেজি</b><span class="num">৳৭০০</span></span></button>
+      </div></div>
+    <div class="buy"><div class="qty"><button aria-label="কমান">−</button><output class="num">১</output><button aria-label="বাড়ান">+</button></div><button class="cod press">অর্ডার করুন <i></i></button></div>
+    <button class="cart press">কার্টে রাখুন</button>
+  </div>`;
+}
+const note = `<div class="note"><b>বিস্তারিত</b>রোদে শুকানো পাকা আমের পাতলা পরত, ঝাল-মিষ্টি মশলায় মাখানো। কোনো কৃত্রিম রং নেই।</div>`;
+
+function phonePage(gallery) {
+  return `<div class="phone"><div class="scr skp">
+    <header class="hd"><span class="menu"></span><img src="${LOGO}" alt="সেরা খাবার"><span class="bag">ব্যাগ <b>১</b></span></header>
+    <nav class="crumb"><a>হোম</a>›<a>হোমমেড</a>›<span>আমসত্ত্ব আচার</span></nav>
+    <div class="m-body">${gallery}${info()}${note}</div>
+  </div></div>`;
+}
+function deskPage(gallery) {
+  return `<div class="desk"><div class="bar"><i></i><i></i><i></i><span>serakhabar.com/product/mango-leather-pickle</span></div>
+    <div class="scr skp">
+      <header class="hd" style="padding:12px 48px"><span class="menu"></span><img src="${LOGO}" alt="সেরা খাবার"><span class="bag">ব্যাগ <b>১</b></span></header>
+      <nav class="crumb d-crumb"><a>হোম</a>›<a>হোমমেড</a>›<span>আমসত্ত্ব আচার</span></nav>
+      <div class="dtop"><div class="dleft">${gallery}${note}</div><div class="dinfo">${info()}</div></div>
+    </div>
+    <div class="lb" role="dialog" aria-label="ছবি" aria-hidden="true">
+      <figure><img alt=""></figure>
+      <button class="x" aria-label="বন্ধ করুন">✕</button>
+      <button class="nav prev" aria-label="আগের ছবি">←</button><button class="nav next" aria-label="পরের ছবি">→</button>
+      <span class="lbc num"></span>
+    </div>
+  </div>`;
+}
+
+// Swipe track + thumbnail buttons. `update(i)` repaints the variant's own indicator.
+function wireTrack(scope, update) {
+  const tr = scope.querySelector("[data-track]");
+  let cur = -1, lock = 0;
+  const set = (i) => { if (i !== cur) { cur = i; update(i); } };
+  tr.addEventListener("scroll", () => { if (!lock) set(Math.round(tr.scrollLeft / tr.clientWidth)); }, { passive: true });
+  const unlock = () => { clearTimeout(lock); lock = 0; };
+  tr.addEventListener("scrollend", unlock);
+  scope.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => {
+    const i = +b.dataset.go;
+    clearTimeout(lock); lock = setTimeout(unlock, 600);
+    tr.scrollTo({ left: i * tr.clientWidth, behavior: RM ? "auto" : "smooth" });
+    set(i);
+  }));
+  set(0);
+}
+const mark = (els, i) => els.forEach((el, j) => el.setAttribute("aria-current", String(j === i)));
+// Keep the chosen thumbnail in view by scrolling only its own row.
+function reveal(t, axis) {
+  const row = t?.parentElement; if (!row) return;
+  const opts = { behavior: RM ? "auto" : "smooth" };
+  if (axis === "y") opts.top = t.offsetTop - (row.clientHeight - t.offsetHeight) / 2;
+  else opts.left = t.offsetLeft - (row.clientWidth - t.offsetWidth) / 2;
+  row.scrollTo(opts);
+}
+
+// Sliding ring under a set of thumbnails (variant 2, phone and desktop).
+function wireRing(box, thumbs) {
+  const ring = box.querySelector(".ring");
+  return (i) => {
+    const t = thumbs[i];
+    ring.style.width = `${t.offsetWidth}px`; ring.style.height = `${t.offsetHeight}px`;
+    ring.style.transform = `translate(${t.offsetLeft}px, ${t.offsetTop}px)`;
+    requestAnimationFrame(() => ring.classList.add("live"));
+  };
+}
+
+let lbKeys = null;
+function wireLightbox(scope) {
+  const lb = scope.querySelector(".lb"); const img = lb.querySelector("img"); const c = lb.querySelector(".lbc");
+  const list = imgs(); let i = 0;
+  const show = (k) => { i = (k + list.length) % list.length; img.src = src(list[i], 960); img.alt = alt(i); c.textContent = `${bn(i + 1)} / ${bn(list.length)}`; };
+  const open = (k) => { show(k); lb.setAttribute("data-open", ""); lb.setAttribute("aria-hidden", "false"); lb.querySelector(".x").focus({ preventScroll: true }); };
+  const close = () => { lb.removeAttribute("data-open"); lb.setAttribute("aria-hidden", "true"); };
+  scope.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => open(+b.dataset.open)));
+  lb.querySelector(".x").addEventListener("click", close);
+  lb.addEventListener("click", (e) => { if (e.target === lb) close(); });
+  lb.querySelector(".prev").addEventListener("click", () => show(i - 1));
+  lb.querySelector(".next").addEventListener("click", () => show(i + 1));
+  // While open, Esc and ←/→ belong to the lightbox, not the picker.
+  lbKeys = (e) => {
+    if (!lb.hasAttribute("data-open")) return;
+    if (e.key === "Escape") close(); else if (e.key === "ArrowLeft") show(i - 1); else if (e.key === "ArrowRight") show(i + 1); else return;
+    e.stopImmediatePropagation(); e.preventDefault();
+  };
+}
+window.addEventListener("keydown", (e) => lbKeys?.(e), true);
+
+const variants = [
+  {
+    name: "পাশের সারি", axis: "ফোন: ছবির বাঁ পাশে থাম্বনেইলের সারি (আপনার রেফারেন্সের মতো) · ডেস্কটপ: বড় ছবি, নিচে বাকিগুলো দুই কলামে",
+    phone: (l) => `<div class="photo">${overlays}${track(l)}${l.length > 1 ? `<div class="rail">${l.map((p, i) => thumb(p, i)).join("")}</div>` : ""}</div>`,
+    wirePhone: (s) => { const th = [...s.querySelectorAll(".rail .th")]; wireTrack(s, (i) => { mark(th, i); reveal(th[i], "y"); }); },
+    desk: (l) => `<div class="ga">${tile(l[0], 0, "tile big")}${l.length > 1 ? `<div class="ga-grid">${l.slice(1).map((p, i) => tile(p, i + 1)).join("")}</div>` : ""}</div>`,
+    wireDesk: (s) => wireLightbox(s),
+  },
+  {
+    name: "নিচের সারি", axis: "ফোন: ছবির নিচে থাম্বনেইলের সারি, একটা রিং পছন্দের ছবিতে সরে যায় · ডেস্কটপ: একটা বড় ছবি, নিচে সব ছবির গ্রিড — চাপলে বড়টা বদলায়",
+    phone: (l) => `<div><div class="photo">${overlays}${track(l)}<span class="count num" data-count></span></div>${l.length > 1 ? `<div class="strip"><span class="ring" aria-hidden="true"></span>${l.map((p, i) => thumb(p, i)).join("")}</div>` : ""}</div>`,
+    wirePhone: (s) => {
+      const th = [...s.querySelectorAll(".strip .th")]; const ring = wireRing(s.querySelector(".strip"), th); const c = s.querySelector("[data-count]"); const n = th.length;
+      wireTrack(s, (i) => { mark(th, i); ring(i); c.textContent = `${bn(i + 1)} / ${bn(n)}`; reveal(th[i], "x"); });
+    },
+    desk: (l) => `<div class="gc"><div class="gc-view">${overlays}${l.map((p, i) => `<div class="layer"${i ? "" : " data-on"}><img src="${src(p, 960)}" alt="${alt(i)}" draggable="false"></div>`).join("")}
+        <button class="nav prev" aria-label="আগের ছবি">←</button><button class="nav next" aria-label="পরের ছবি">→</button><span class="count num" data-count></span></div>
+        <div class="gc-thumbs"><span class="ring" aria-hidden="true"></span>${l.map((p, i) => thumb(p, i)).join("")}</div></div>`,
+    wireDesk: (s) => {
+      const layers = [...s.querySelectorAll(".gc-view .layer")]; const th = [...s.querySelectorAll(".gc-thumbs .th")]; const ring = wireRing(s.querySelector(".gc-thumbs"), th);
+      const c = s.querySelector("[data-count]"); let cur = 0;
+      const go = (k) => { cur = (k + th.length) % th.length; layers.forEach((L, j) => L.toggleAttribute("data-on", j === cur)); mark(th, cur); ring(cur); c.textContent = `${bn(cur + 1)} / ${bn(th.length)}`; };
+      th.forEach((b, i) => b.addEventListener("click", () => go(i)));
+      s.querySelector(".gc-view .prev").addEventListener("click", () => go(cur - 1));
+      s.querySelector(".gc-view .next").addEventListener("click", () => go(cur + 1));
+      go(0); onResize = () => ring(cur);
+    },
+  },
+  {
+    name: "ক্যাপসুল + মোজাইক", axis: "ফোন: ডটের জায়গায় কাচের ক্যাপসুলে গোল থাম্বনেইল · ডেস্কটপ: মোজাইক — বড় ছবি দুই কলাম জুড়ে, বাকিগুলো পাশে আর নিচে",
+    phone: (l) => `<div class="photo">${overlays}${track(l)}${l.length > 1 ? `<div class="capsule">${l.map((p, i) => thumb(p, i)).join("")}</div>` : ""}</div>`,
+    wirePhone: (s) => { const th = [...s.querySelectorAll(".capsule .th")]; wireTrack(s, (i) => mark(th, i)); },
+    desk: (l) => {
+      const side = l.slice(1, 3), rest = l.slice(3);
+      return `<div><div class="gb">${tile(l[0], 0, "tile big")}${side.map((p, i) => tile(p, i + 1)).join("")}</div>${rest.length ? `<div class="gb-row" style="grid-template-columns:repeat(${Math.min(rest.length, 3)},1fr)">${rest.map((p, i) => tile(p, i + 3)).join("")}</div>` : ""}</div>`;
+    },
+    wireDesk: (s) => wireLightbox(s),
+  },
+];
+
+let onResize = null;
+const stage = document.getElementById("stage");
+function render(i) {
+  const v = variants[i]; const l = imgs();
+  onResize = null; lbKeys = null;
+  const seg = (k, opts) => `<span class="seg" role="group">${opts.map(([val, label]) => `<button data-k="${k}" data-val="${val}" aria-pressed="${String(state[k]) === String(val)}">${label}</button>`).join("")}</span>`;
+  stage.innerHTML = `<div class="cap"><span><b>${v.name}</b> — ${v.axis}</span>${seg("view", [["phone", "ফোন"], ["desk", "ডেস্কটপ"]])}${seg("n", [[3, "৩টি ছবি"], [5, "৫টি ছবি"]])}</div>
+    ${state.view === "phone" ? phonePage(v.phone(l)) : deskPage(v.desk(l))}`;
+  stage.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+    state[b.dataset.k] = b.dataset.k === "n" ? +b.dataset.val : b.dataset.val;
+    const url = new URL(location); url.searchParams.set(b.dataset.k, b.dataset.val); history.replaceState(null, "", url);
+    mount(current);
+  }));
+  const frame = stage.querySelector(".phone, .desk");
+  if (state.view === "phone") { if (l.length > 1) v.wirePhone(frame); } else v.wireDesk(frame);
+}
+
+// Picker wiring (PICKER.md); mount() renders then wires the variant.
+const picker = document.querySelector(".proto-picker");
+const highlight = picker.querySelector(".proto-picker-highlight");
+const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+const replay = picker.querySelector(".proto-picker-replay");
+let current = 0;
+function moveHighlight() {
+  const el = items[current];
+  highlight.style.width = el.offsetWidth + "px";
+  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+}
+function mount(i) {
+  stage.innerHTML = "";
+  requestAnimationFrame(() => render(i));
+}
+function setActive(i) {
+  if (i < 0 || i >= variants.length) return;
+  current = i;
+  items.forEach((el, j) => {
+    el.toggleAttribute("data-active", j === i);
+    if (j === i) el.setAttribute("aria-current", "true");
+    else el.removeAttribute("aria-current");
+  });
+  moveHighlight();
+  const url = new URL(location);
+  url.searchParams.set("v", i + 1);
+  history.replaceState(null, "", url);
+  mount(i);
+}
+items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+replay?.addEventListener("click", () => mount(current));
+window.addEventListener("resize", () => { moveHighlight(); onResize?.(); });
+document.addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const num = parseInt(e.key, 10);
+  if (num >= 1 && num <= variants.length) setActive(num - 1);
+  else if (e.key === "ArrowRight") setActive((current + 1) % variants.length);
+  else if (e.key === "ArrowLeft") setActive((current - 1 + variants.length) % variants.length);
+  else if (e.key === "r" || e.key === "R") mount(current);
+});
+setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>

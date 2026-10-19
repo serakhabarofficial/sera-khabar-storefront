@@ -1,6 +1,5 @@
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ShieldCheck, X } from "lucide-react";
-import { Box as ReiconBox } from "reicon-react";
 import { useId, useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -8,6 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
+import { DockContactCard, DockContactSeal } from "@/components/dock-contact";
 import { PageContentTransition } from "@/components/page-transition";
 import { Drawer } from "vaul";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -123,6 +123,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   // Every page mounts its own Layout, so a shared layoutId made the next page's dock highlight
   // fly in from where the previous page's highlight was measured (lower, when it was scrolled).
@@ -144,13 +145,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       ? "search"
       : location === "/"
         ? "home"
-        : location === "/products" || location.startsWith("/product/") || location.startsWith("/collection/")
-          ? "products"
-          : null;
+        : null;
 
-  const openSearch = () => setIsSearchOpen(true);
-  const openMenu = () => setIsOpen(true);
+  const openSearch = () => {
+    setIsContactOpen(false);
+    setIsSearchOpen(true);
+  };
+  const openMenu = () => {
+    setIsContactOpen(false);
+    setIsOpen(true);
+  };
+  const openCart = () => {
+    setIsContactOpen(false);
+    setCartOpen(true);
+  };
   const goHome = (event: MouseEvent<HTMLAnchorElement>) => {
+    setIsContactOpen(false);
     setIsOpen(false);
     setIsSearchOpen(false);
     if (location === "/") {
@@ -220,15 +230,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </header>
       </div>
 
-      {/* Mobile bottom navigation: compact white pill, always at the bottom (approved 2026-10-13, "Label") */}
+      {/* Mobile bottom navigation: compact white pill, always at the bottom (approved 2026-10-13, "Label").
+          Order (2026-10-19): হোম · মেনু · contact seal · খুঁজুন · ব্যাগ, with the seal exactly in the middle. */}
       <nav aria-label="Mobile navigation" className="sk-dock md:hidden">
+        <DockContactCard open={isContactOpen} onOpenChange={setIsContactOpen} />
         <div className="sk-dock-pill">
           {[
             { key: "home", label: "হোম", href: "/", icon: <HomeDuotoneIcon className="h-5 w-5" /> },
-            { key: "products", label: "পণ্য", href: "/products", icon: <ReiconBox size={20} color="currentColor" weight="Outline" /> },
-            { key: "search", label: "খুঁজুন", onClick: openSearch, icon: <SearchIcon className="h-5 w-5" /> },
             { key: "menu", label: "মেনু", onClick: openMenu, icon: <MenuLinesIcon className="h-5 w-5" /> },
+            { key: "contact" },
+            { key: "search", label: "খুঁজুন", onClick: openSearch, icon: <SearchIcon className="h-5 w-5" /> },
           ].map((item) => {
+            if (item.key === "contact") {
+              return <DockContactSeal key="contact" open={isContactOpen} onOpenChange={setIsContactOpen} />;
+            }
             const isActive = item.key === activeDockKey;
             const content = (
               <>
@@ -250,6 +265,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
+                onClick={() => setIsContactOpen(false)}
                 className={`sk-dock-item${isActive ? " is-active" : ""}`}
               >
                 {content}
@@ -269,7 +285,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
-            onClick={() => setCartOpen(true)}
+            onClick={openCart}
             onAnimationEnd={() => { if (cartPulseKey > 0) consumeCartPulse(); }}
             className={`sk-dock-cart${cartPulseKey > 0 ? " cart-dock-pulse" : ""}`}
           >

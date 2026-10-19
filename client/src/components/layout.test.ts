@@ -28,7 +28,7 @@ test("keeps the compact white pill dock fixed at the bottom on phones", () => {
 
 test("uses the existing icons in the mobile dock", () => {
   const dockSource = layoutSource.slice(layoutSource.indexOf('className="sk-dock md:hidden"'));
-  for (const icon of ["<HomeDuotoneIcon", "<ReiconBox", "<SearchIcon", "<MenuLinesIcon", "<BagIcon"]) {
+  for (const icon of ["<HomeDuotoneIcon", "<SearchIcon", "<MenuLinesIcon", "<BagIcon"]) {
     assert.ok(dockSource.includes(icon), icon);
   }
 });
@@ -198,9 +198,21 @@ test("no gap below the footer on phones: one dock clearance and a cream canvas",
   assert.match(posterSource, /@media \(max-width: 767px\) \{ html:has\(footer\.sk\), html:has\(footer\.sk\) body \{ background-color: #faf4ea; \} \}/);
 });
 
-test("the dock keeps a tab selected on product and collection pages", () => {
-  // Product, collection and search pages belong to the shop, so the পণ্য tab stays active there.
-  assert.match(layoutSource, /location === "\/products" \|\| location\.startsWith\("\/product\/"\) \|\| location\.startsWith\("\/collection\/"\)/);
+test("the dock reads হোম · মেনু · contact seal · খুঁজুন · ব্যাগ", () => {
+  // 2026-10-19: the পণ্য tab gave way to the contact seal; সব পণ্য stays in the menu.
+  const dockSource = layoutSource.slice(layoutSource.indexOf('className="sk-dock md:hidden"'));
+  const order = ['label: "হোম"', 'label: "মেনু"', '{ key: "contact" }', 'label: "খুঁজুন"', "sk-dock-cart"].map((part) => dockSource.indexOf(part));
+  assert.ok(order.every((index) => index > -1), String(order));
+  assert.deepEqual([...order].sort((a, b) => a - b), order);
+  assert.doesNotMatch(layoutSource, /label: "পণ্য"/);
+  assert.match(dockSource, /<DockContactCard open=\{isContactOpen\} onOpenChange=\{setIsContactOpen\} \/>/);
+  assert.match(dockSource, /<DockContactSeal key="contact" open=\{isContactOpen\} onOpenChange=\{setIsContactOpen\} \/>/);
+});
+
+test("opening the menu, search or cart closes the contact card", () => {
+  for (const fn of ["openSearch", "openMenu", "openCart"]) {
+    assert.match(layoutSource, new RegExp(`const ${fn} = \\(\\) => \\{\\n    setIsContactOpen\\(false\\);`), fn);
+  }
 });
 
 test("tapping the logo on the homepage scrolls back to the top", () => {

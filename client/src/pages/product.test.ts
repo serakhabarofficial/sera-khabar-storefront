@@ -145,8 +145,9 @@ test("lays out photo, then title, price, sizes, quantity and order on the poster
   assert.match(posterSource, /\.skp \{[^}]*--rice: #faf4ea;/);
 });
 
-test("keeps the product title without the English/weight badge or origin tagline beneath it", () => {
-  assert.match(productSource, /<h1 data-load-step="">\{titleBn\}<\/h1>\s*\{product\.description \?/);
+test("keeps the product title without a description, English/weight badge or origin tagline beneath it", () => {
+  assert.match(productSource, /<h1 data-load-step="">\{titleBn\}<\/h1>/);
+  assert.doesNotMatch(productSource, /className="skp-lede"/);
   assert.doesNotMatch(productSource, /className="skp-pill"/);
   assert.doesNotMatch(productSource, /className="skp-tag script"/);
 });
@@ -161,21 +162,20 @@ test("size cards show the size, the price and only real savings, with no per-kg 
 });
 
 test("a single size spans the row and is not offered as a choice", () => {
-  assert.match(productSource, /bundles\.length > 1 \? "সাইজ বেছে নিন" : "সাইজ"/);
+  assert.match(productSource, /bundles\.length > 1 \? "পরিমাণ বেছে নিন" : "পরিমাণ"/);
   assert.match(posterSource, /\.skp-sizes\[data-count="1"\] \{ grid-template-columns: minmax\(0, 1fr\); \}/);
 });
 
-test("keeps phone and WhatsApp ordering under অথবা, then the calendar delivery estimate", () => {
+test("keeps phone and WhatsApp ordering under অথবা, with no calendar delivery estimate", () => {
   const order = productSource.indexOf("ক্যাশ অন ডেলিভারিতে অর্ডার");
   const or = productSource.indexOf(">অথবা<");
   const phone = productSource.indexOf('href="tel:+8801310980289"');
   const whatsapp = productSource.indexOf("https://wa.me/8801303103540");
-  const calendar = productSource.indexOf('className="skp-cal"');
-  assert.ok(order > 0 && or > order && phone > or && whatsapp > phone && calendar > whatsapp);
+  assert.ok(order > 0 && or > order && phone > or && whatsapp > phone);
   assert.match(productSource, /ফোনে অর্ডার/);
   assert.match(productSource, /হোয়াটসঅ্যাপে অর্ডার/);
-  assert.match(productSource, /আপনার দরজায় পৌঁছাবে/);
-  assert.match(productSource, /ঢাকায় ১–২ দিন · ঢাকার বাইরে ২–৩ দিন/);
+  assert.doesNotMatch(productSource, /className="skp-cal"/);
+  assert.doesNotMatch(productSource, /আপনার দরজায় পৌঁছাবে/);
 });
 
 test("phone ordering uses the supplied white mobile-phone SVG", () => {
@@ -207,4 +207,33 @@ test("related products use the homepage Stage product cell", () => {
 
 test("the breadcrumb uses the title font", () => {
   assert.match(posterSource, /\.skp-crumb \{[^}]*font-family: var\(--disp\);/);
+});
+
+// Gallery "ক্যাপসুল + মোজাইক" (approved 2026-10-19, docs/design/2026-10-19-product-gallery).
+const mosaicSource = readFileSync(new URL("../components/product-mosaic.tsx", import.meta.url), "utf8");
+
+test("phones pick a photo from round thumbnails in a capsule instead of dots", () => {
+  assert.match(productSource, /className="skp-capsule"/);
+  assert.doesNotMatch(productSource, /className="skp-dots"/);
+  assert.match(productSource, /onClick=\{\(\) => goToImage\(idx\)\}[\s\S]*?aria-current=\{activeImage === idx\}/);
+  assert.match(posterSource, /\.skp-capsule button\[aria-current="true"\] \{[^}]*transform: none;/);
+});
+
+test("desktop shows every photo as a mosaic that opens a lightbox", () => {
+  // Only products with more than one photo swap the carousel for the mosaic.
+  assert.match(productSource, /const hasMosaic = displayGallery\.length > 1;/);
+  assert.match(productSource, /<ProductMosaic images=\{displayGallery\}/);
+  assert.match(posterSource, /@container skp \(min-width: 760px\) \{\s*\.skp-media\[data-mosaic\] > \.skp-photo \{ display: none; \}\s*\.skp-mosaic \{ display: block; \}/);
+  assert.match(posterSource, /\.skp-tile-big \{[^}]*grid-column: span 2; grid-row: span 2;/);
+  // The chip and cash-on-delivery seal ride on the big photo, the same markup as the phone panel.
+  assert.match(mosaicSource, /\{idx === 0 \? badges : null\}/);
+  assert.match(mosaicSource, /<Dialog\.Content[\s\S]*?onKeyDown=/);
+  assert.match(mosaicSource, /event\.key === "ArrowLeft"\) step\(-1\)/);
+  // Radix waits for the exit only when its animation name differs from the entrance.
+  assert.match(posterSource, /\.skp-lb\[data-state="closed"\] \{ animation: skp-lb-out/);
+});
+
+test("desktop keeps the price and order buttons in view beside the tall mosaic", () => {
+  assert.match(posterSource, /\.skp-info \{ position: sticky; top: 96px; \}/);
+  assert.doesNotMatch(posterSource, /\.skp-left \{[^}]*position: sticky/);
 });

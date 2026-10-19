@@ -109,6 +109,9 @@ test("sections reveal as they reach the screen, not when the page mounts", () =>
   assert.match(home, /className="st-day-panels"\s+data-page-settle=""/);
   assert.match(read("../components/poster-product-card.tsx"), /<article className="c-card" data-reveal="">/);
   assert.match(read("../pages/product.tsx"), /className="skp-gallery" data-page-settle=""/);
+  // Desktop settles the photo mosaic instead, so the page settles whichever target is on screen.
+  assert.match(read("../components/product-mosaic.tsx"), /className="skp-mosaic"[^>]*data-page-settle=""/);
+  assert.match(read("../components/page-transition.tsx"), /querySelectorAll\("\[data-page-settle\]"\)\)\.find\(\(el\) => el\.getClientRects\(\)\.length > 0\)/);
 });
 
 test("revealing product photos keep blending into the card instead of flashing white", () => {

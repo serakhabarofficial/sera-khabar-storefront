@@ -12,6 +12,8 @@ import PosterProductCard, { splitProductName } from "@/components/poster-product
 import RecentlyViewed from "@/components/recently-viewed";
 import { useCart } from "@/contexts/cart-context";
 import Layout from "@/components/layout";
+import { useDockContactProduct } from "@/components/dock-contact";
+import { ProductMosaic } from "@/components/product-mosaic";
 import OrderDialog, { type OrderDialogBundle } from "@/components/order-dialog";
 import { toGoogleAnalyticsItem, trackGoogleEcommerceEvent } from "@/lib/google-analytics";
 import { getProductDetailSections } from "@/lib/product-details";
@@ -78,15 +80,6 @@ function useReveal() {
 
 function getMerchantSlug(slug: string) {
   return slug || "";
-}
-
-// Delivery estimate: tomorrow to three days out (Dhaka 1–2 days, outside Dhaka 2–3 days).
-const BANGLA_MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
-const BANGLA_WEEKDAYS = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
-function addDays(days: number) {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date;
 }
 
 // The last details page restates the published delivery and payment policy (site-pages.ts).
@@ -570,6 +563,14 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
           : undefined,
       } : null;
 
+  // The phone dock's contact card names what is being viewed and pre-fills the WhatsApp message.
+  useDockContactProduct(product ? {
+    name: splitProductName(product.name).bangla,
+    whatsappName: product.name,
+    size: selectedBundle.title === "Default" ? null : selectedBundle.title,
+    quantity,
+  } : null);
+
   if (isLoading) {
     return (
       <Layout>
@@ -598,7 +599,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   const sizeOffers = getSizeOffers(bundles);
   const collection = FEATURED_COLLECTIONS.find((item) => (item.productSlugs as readonly string[]).includes(product.slug));
   const collectionBn = collection ? collection.label.split("-")[1] ?? collection.label : null;
-  // The first section with a short list gives the three ✓ highlights under the description.
+  // The first section with a short list gives the three ✓ highlights under the title.
   const highlights = (detailSections.find((section) => section.label !== "Options" && section.details?.length)?.details ?? []).slice(0, 3);
   const memoSections = [
     ...detailSections.filter((section) => section.label !== "Options" && (section.body?.length || section.details?.length)),
@@ -607,8 +608,19 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   const activeMemo = memoSections[Math.min(openSection, memoSections.length - 1)];
   const isDeliveryMemo = activeMemo === memoSections[memoSections.length - 1];
   const totalAmount = selectedBundle.amount * quantity;
-  const deliveryFrom = addDays(1);
-  const deliveryTo = addDays(3);
+  const hasMosaic = displayGallery.length > 1;
+  const photoBadges = (
+    <>
+      {collectionBn ? <span className="skp-chip">{collectionBn}</span> : null}
+      <span className="skp-seal" aria-hidden="true">
+        <span>
+          <b>ক্যাশ অন</b>
+          <b>ডেলিভারি</b>
+          <small>সারা দেশে</small>
+        </span>
+      </span>
+    </>
+  );
 
   return (
     <Layout>
@@ -627,16 +639,11 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
         <div className="skp-top skp-w">
           <div className="skp-left">
+            {/* Phones swipe one photo at a time; desktop shows every photo at once as a mosaic */}
+            <div className="skp-media" data-mosaic={hasMosaic ? "" : undefined}>
             {/* Photo panel: the catalog photo's white background blends into the cream card */}
             <div className="skp-photo">
-              {collectionBn ? <span className="skp-chip">{collectionBn}</span> : null}
-              <span className="skp-seal" aria-hidden="true">
-                <span>
-                  <b>ক্যাশ অন</b>
-                  <b>ডেলিভারি</b>
-                  <small>সারা দেশে</small>
-                </span>
-              </span>
+              {photoBadges}
               {displayGallery.length ? (
                 <div ref={galleryRef} className="skp-gallery" data-page-settle="">
                   <div className="skp-gallery-track">
@@ -662,18 +669,34 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                 <div className="skp-noimg">No image</div>
               )}
               {displayGallery.length > 1 ? (
-                <div className="skp-dots">
+                <div className="skp-capsule">
                   {displayGallery.map((url, idx) => (
                     <button
                       key={url}
                       type="button"
                       onClick={() => goToImage(idx)}
-                      aria-label={`Go to product image ${idx + 1}`}
+                      aria-label={`ছবি ${toBanglaDigits(idx + 1)}`}
                       aria-current={activeImage === idx}
-                    />
+                    >
+                      <img
+                        src={url}
+                        srcSet={srcSetFor[url]}
+                        sizes={srcSetFor[url] ? "38px" : undefined}
+                        alt=""
+                        width={38}
+                        height={38}
+                        draggable={false}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </button>
                   ))}
                 </div>
               ) : null}
+            </div>
+            {hasMosaic ? (
+              <ProductMosaic images={displayGallery} srcSetFor={srcSetFor} name={product.name} badges={photoBadges} />
+            ) : null}
             </div>
 
             {/* Details: homepage shelf chips switch one footer-style cash memo */}
@@ -738,7 +761,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
           <div className="skp-info">
             <h1 data-load-step="">{titleBn}</h1>
-            {product.description ? <p className="skp-lede" data-load-step="">{product.description}</p> : null}
             {highlights.length ? (
               <ul className="skp-ticks">
                 {highlights.map((item) => (
@@ -757,7 +779,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
             {selectedBundle.title !== "Default" ? (
               <div>
-                <span className="skp-lbl">{bundles.length > 1 ? "সাইজ বেছে নিন" : "সাইজ"}</span>
+                <span className="skp-lbl">{bundles.length > 1 ? "পরিমাণ বেছে নিন" : "পরিমাণ"}</span>
                 <div className="skp-sizes" data-count={bundles.length}>
                   {bundles.map((bundle, idx) => (
                     <button
@@ -878,26 +900,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                 <img src="https://cdn.reicon.dev/logos/whatsapp/original.svg" alt="" width={18} height={18} />
                 হোয়াটসঅ্যাপে অর্ডার
               </a>
-            </div>
-
-            {/* Delivery estimate as a tear-off calendar page (approved 2026-10-13) */}
-            <div className="skp-cal" role="group" aria-label="আনুমানিক ডেলিভারি">
-              <div className="skp-leaf">
-                <div className="skp-leaf-mon">{BANGLA_MONTHS[deliveryTo.getMonth()]}</div>
-                <div className="skp-leaf-d">
-                  <span className="num">{toBanglaDigits(deliveryFrom.getDate())}</span>
-                  <em>–</em>
-                  <span className="num">{toBanglaDigits(deliveryTo.getDate())}</span>
-                </div>
-                <span className="skp-leaf-wd">
-                  {BANGLA_WEEKDAYS[deliveryFrom.getDay()]} – {BANGLA_WEEKDAYS[deliveryTo.getDay()]}
-                </span>
-              </div>
-              <div className="skp-cal-txt">
-                <span className="script">আজ অর্ডার করলে</span>
-                <b>আপনার দরজায় পৌঁছাবে</b>
-                <small>ঢাকায় ১–২ দিন · ঢাকার বাইরে ২–৩ দিন</small>
-              </div>
             </div>
           </div>
         </div>

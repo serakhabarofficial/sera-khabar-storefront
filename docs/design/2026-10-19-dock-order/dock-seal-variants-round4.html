@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dock contact seal — card, current vs fixed (round 4)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Galada&family=Geist:wght@100..900&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal: #5b2d17; --deep: #4a2212; --sun: #f6b826; --pink: #e2547a; --ink: #3a1d0f; --sub: #7a6050;
+    --dock-ic: #9a6a52; --hair: #ecd6c8; --wa: #25d366; --butter: #fff6df; --memo: #fffaf1;
+    --out: cubic-bezier(0.23, 1, 0.32, 1);
+    --drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    --pop: cubic-bezier(0.34, 1.36, 0.64, 1);
+    --disp: "Noto Serif Bengali", serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { min-height: 100vh; background: #e9e4dd; font-family: "Geist", "Noto Sans Bengali", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+  .num { font-family: "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; }
+
+  /* Harness */
+  #stage { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 84px 16px 40px; }
+  .cap { max-width: 420px; text-align: center; }
+  .cap b { display: block; font-family: var(--disp); font-weight: 900; font-size: 18px; color: var(--royal); }
+  .cap > span { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.6; color: var(--sub); }
+  .tray { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 12px; }
+  .tray small { width: 100%; font-size: 12px; color: var(--sub); }
+  .tray button { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--royal);
+    box-shadow: inset 0 0 0 1px var(--hair); transition: background-color 160ms ease, color 160ms ease, transform 160ms var(--out); }
+  .tray button:active { transform: scale(0.94); }
+  .tray button[aria-pressed="true"] { background: var(--royal); color: var(--sun); box-shadow: none; }
+  .tray svg { width: 20px; height: 20px; }
+  .phone { position: relative; width: 390px; height: 800px; border-radius: 46px; overflow: hidden; background: #fff;
+    box-shadow: 0 0 0 10px #1d1410, 0 0 0 11px #3b2c25, 0 40px 80px -30px rgba(29, 20, 16, 0.6); isolation: isolate; }
+  @media (max-width: 480px) {
+    #stage { padding: 0; gap: 0; }
+    .cap { display: none; }
+    .phone { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+  }
+  .scroller { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .scroller::-webkit-scrollbar { display: none; }
+
+  /* Product page (current, without the phone/WhatsApp row) */
+  .ann { padding: 9px 16px; text-align: center; font-size: 12.5px; color: var(--sub); border-bottom: 1px solid var(--hair); }
+  .ann b { color: var(--royal); }
+  .hd { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 58px; padding: 0 16px; border-bottom: 1px solid var(--hair); }
+  .hd .menu { display: grid; gap: 5px; width: 22px; } .hd .menu i { display: block; height: 1.4px; background: var(--royal); } .hd .menu i + i { width: 14px; }
+  .hd .logo { font-family: var(--disp); font-weight: 900; font-size: 21px; color: var(--royal); }
+  .hd .bag { justify-self: end; font-size: 13px; font-weight: 600; color: var(--royal); }
+  .crumb { display: flex; gap: 7px; padding: 14px 16px 10px; font-size: 12.5px; color: var(--sub); }
+  .photo { position: relative; margin: 0 16px; border-radius: 22px; background: #f7f1e8; aspect-ratio: 1; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .chip { position: absolute; top: 14px; left: 14px; padding: 5px 12px; border-radius: 999px; background: #fff; font-family: var(--disp); font-weight: 700; font-size: 12px; color: var(--royal); }
+  .info { display: flex; flex-direction: column; gap: 16px; padding: 22px 16px 0; }
+  .info h1 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 34px; line-height: 1.25; color: var(--royal); }
+  .ticks { margin: -4px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+  .ticks li::before { content: "✓"; margin-right: 8px; color: var(--pink); font-weight: 700; }
+  .price { font-size: 30px; font-weight: 700; color: var(--royal); }
+  .lbl { display: block; margin-bottom: 8px; font-family: var(--disp); font-weight: 700; font-size: 14px; color: var(--royal); }
+  .sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .size { display: flex; align-items: center; gap: 10px; padding: 14px 12px; border-radius: 18px; text-align: left; box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); }
+  .size[aria-pressed="true"] { background: var(--butter); box-shadow: inset 0 0 0 2px var(--royal); }
+  .size b { display: block; font-family: var(--disp); font-weight: 900; font-size: 17px; color: var(--royal); }
+  .size .num { font-size: 15px; color: var(--royal); }
+  .buyrow { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+  .qty { display: inline-flex; align-items: center; height: 56px; padding: 0 6px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); }
+  .qty button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; color: var(--royal); }
+  .qty output { min-width: 26px; text-align: center; font-size: 18px; }
+  .cod { display: flex; align-items: center; justify-content: center; gap: 10px; height: 56px; border-radius: 999px; background: var(--sun); font-weight: 700; font-size: 16px; }
+  .cod i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+  .cartbtn { height: 56px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--royal); font-weight: 700; font-size: 15px; color: var(--royal); }
+  .strip { margin: 30px 0 0; padding: 12px 0; overflow: hidden; white-space: nowrap; background: var(--royal); color: #fff; font-family: var(--disp); font-weight: 700; font-size: 14px; }
+  .strip span { margin: 0 14px; } .strip span::after { content: "✦"; margin-left: 28px; color: var(--sun); }
+  .details { padding: 28px 16px 0; }
+  .details h2 { margin: 0 0 12px; font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--royal); }
+  .memo { padding: 18px; border-radius: 18px; background: var(--memo); box-shadow: inset 0 0 0 1px var(--hair); font-size: 14px; line-height: 1.75; }
+  .memo p { margin: 0 0 10px; }
+  .memo .row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px dashed rgba(58, 29, 15, 0.2); }
+  .memo .row em { font-style: normal; color: var(--pink); font-weight: 700; }
+  .more { padding: 30px 16px 140px; }
+  .more h2 { margin: 0 0 12px; font-family: var(--disp); font-weight: 900; font-size: 22px; color: var(--royal); }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { border-radius: 18px; background: #f7f1e8; aspect-ratio: 0.8; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .card b { font-family: var(--disp); font-weight: 900; font-size: 15px; color: var(--royal); }
+  .card span { font-size: 13px; color: var(--sub); }
+
+  /* Dock: হোম · মেনু · [সিল] · খুঁজুন · ব্যাগ — the seal sits exactly in the middle */
+  .dock { position: absolute; z-index: 30; left: 12px; right: 12px; bottom: 14px; }
+  .pill { position: relative; z-index: 2; height: 60px; padding: 5px; display: grid; grid-template-columns: 1fr 1fr 76px 1fr 1fr; align-items: center; gap: 2px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.86); -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid var(--hair); box-shadow: 0 10px 30px -12px rgba(74, 34, 18, 0.28); }
+  .it { position: relative; height: 48px; display: grid; place-items: center; border-radius: 999px; color: var(--dock-ic); }
+  .it svg { width: 22px; height: 22px; }
+  .bagb { position: relative; justify-self: end; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 999px; background: var(--deep); color: #fff; }
+  .bagb svg { width: 21px; height: 21px; }
+  .badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; display: grid; place-items: center; border-radius: 999px;
+    background: #f08a1c; color: #fff; box-shadow: 0 0 0 2px #fff; font-family: var(--disp); font-weight: 600; font-size: 12.5px; }
+  .press { transition: transform 160ms var(--out); }
+  .press:active { transform: scale(0.97); }
+  .scrim { position: absolute; inset: 0; z-index: 25; background: rgba(58, 29, 15, 0.24); opacity: 0; pointer-events: none; transition: opacity 220ms ease; }
+  .phone.open .scrim { opacity: 1; pointer-events: auto; }
+  .wa-ic { width: 20px; height: 20px; filter: brightness(0) invert(1); }
+
+  /* The seal — shared by every variant; colours come from each variant */
+  .seal { position: absolute; z-index: 4; left: 50%; top: 50%; width: 66px; height: 66px; margin: -41px 0 0 -33px; transition: transform 320ms var(--out); }
+  .seal-pop { position: absolute; inset: 0; animation: seal-in 620ms var(--out) 420ms both; }
+  @keyframes seal-in { from { transform: scale(0.4) rotate(-120deg); opacity: 0; } 60% { opacity: 1; } to { transform: none; opacity: 1; } }
+  .seal-btn { position: absolute; inset: 0; display: grid; place-items: center; color: var(--seal-ic); }
+  .seal-btn svg.shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+    filter: drop-shadow(0 8px 12px rgba(74, 34, 18, 0.34)); transform: rotate(var(--r0, 0deg)); transition: transform 460ms var(--out); }
+  .phone:not(.open) .seal-btn:active svg.shape { transform: rotate(calc(var(--r0, 0deg) + 14deg)) scale(0.94); transition-duration: 180ms; }
+  .phone.open .seal-btn svg.shape { transform: rotate(calc(var(--r0, 0deg) + 77deg)); }
+  .ci, .cx { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity 160ms ease, transform 260ms var(--out); }
+  .ci svg { width: 27px; height: 27px; }
+  .cx { opacity: 0; transform: rotate(-70deg) scale(0.5); }
+  .phone.open .ci { opacity: 0; transform: rotate(70deg) scale(0.5); }
+  .phone.open .cx { opacity: 1; transform: none; }
+
+  /* ——— 1 · পাখা / Fan: a medallion; two tilted order cards fan out of it ——— */
+  .v1 { --seal-ic: var(--sun); }
+  .fp { position: absolute; z-index: 3; left: 50%; bottom: 80px; width: 162px; height: 60px; margin-left: -81px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 9px;
+    border-radius: 22px; color: #fff; box-shadow: 0 16px 30px -14px rgba(58, 29, 15, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    opacity: 0; pointer-events: none; transform: translateY(46px) scale(0.3); transition: transform 200ms var(--out), opacity 140ms ease; }
+  .fp.call { background: var(--royal); transform-origin: 100% 100%; }
+  .fp.wa { background: #1fae55; transform-origin: 0 100%; }
+  .fp .ico { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 15px; background: rgba(255, 255, 255, 0.16); }
+  .fp span { display: grid; line-height: 1.25; } .fp b { font-family: var(--disp); font-weight: 700; font-size: 15px; } .fp small { font-size: 12px; opacity: 0.85; }
+  .phone.open .fp { opacity: 1; pointer-events: auto; transition: transform 440ms var(--pop), opacity 180ms ease; }
+  .phone.open .fp.call { transform: translate(-86px, -14px) rotate(-5deg); }
+  .phone.open .fp.wa { transform: translate(86px, -14px) rotate(5deg); transition-delay: 55ms; }
+
+  /* ——— 2 · কার্ড / Card: the old telephone rings, then a card opens out of the seal in a circle ——— */
+  .v2 { --seal-ic: var(--butter); }
+  .phone.open .v2 .ci svg { animation: ring 460ms ease-in-out; }
+  .phone.open .v2 .ci, .phone.open .v2 .cx { transition-delay: 300ms; }
+  @keyframes ring { 0%, 100% { transform: rotate(0); } 14% { transform: rotate(-18deg); } 28% { transform: rotate(15deg); } 42% { transform: rotate(-12deg); } 57% { transform: rotate(9deg); } 71% { transform: rotate(-5deg); } }
+  .cr { position: absolute; z-index: 3; left: 0; right: 0; bottom: 84px; padding: 20px 18px 8px; border-radius: 28px; background: var(--memo);
+    border: 1px solid var(--hair); box-shadow: 0 30px 60px -24px rgba(74, 34, 18, 0.5);
+    clip-path: circle(0px at 50% calc(100% + 46px)); visibility: hidden; transition: clip-path 220ms var(--out), visibility 0s linear 220ms; }
+  .phone.open .cr { clip-path: circle(150% at 50% calc(100% + 46px)); visibility: visible; transition: clip-path 520ms var(--drawer) 120ms, visibility 0s 120ms; }
+  .m-in { opacity: 0; transform: translateY(10px); transition: opacity 120ms ease, transform 120ms var(--out); }
+  .phone.open .m-in { opacity: 1; transform: none; transition: opacity 240ms ease 220ms, transform 300ms var(--out) 220ms; }
+  .phone.open .m-row.r1 { transition-delay: 270ms; } .phone.open .m-row.r2 { transition-delay: 320ms; }
+  .m-head { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 12px; border-bottom: 2px solid var(--royal); }
+  .m-head b { display: block; font-family: var(--disp); font-weight: 900; font-size: 23px; color: var(--royal); line-height: 1.2; }
+  .m-head small { display: block; font-size: 12.5px; color: var(--sub); }
+  .m-head .script { font-family: "Galada", cursive; font-size: 18px; color: var(--pink); transform: rotate(-4deg); }
+  .m-row { display: flex; align-items: center; gap: 12px; padding: 13px 2px; }
+  .m-row + .m-row { border-top: 1px dashed rgba(58, 29, 15, 0.25); }
+  .m-row .ico { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: #fff; }
+  .m-row.r1 .ico { background: var(--royal); } .m-row.r2 .ico { background: var(--wa); }
+  .m-row span { flex: 1; display: grid; }
+  .m-row b { font-family: var(--disp); font-weight: 700; font-size: 16px; color: var(--royal); }
+  .m-row small { font-size: 13px; color: var(--sub); }
+  .m-row i { font-style: normal; font-size: 18px; color: var(--royal); }
+
+  /* ——— 3 · দুভাগ / Split: phone + chat icon; the seal splits into a phone half and a WhatsApp half ——— */
+  .v3 { --seal-ic: #fff; }
+  .sp { position: absolute; z-index: 3; bottom: 82px; width: calc(50% - 4px); height: 70px; display: flex; align-items: center; gap: 10px; color: #fff;
+    box-shadow: 0 16px 30px -14px rgba(58, 29, 15, 0.6); opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: clip-path 200ms var(--out), transform 200ms var(--out), opacity 120ms ease 80ms; }
+  .sp.call { right: calc(50% + 4px); padding: 0 10px 0 12px; border-radius: 35px 12px 12px 35px; background: var(--royal);
+    clip-path: inset(0 0 0 100% round 35px 12px 12px 35px); }
+  .sp.wa { left: calc(50% + 4px); flex-direction: row-reverse; text-align: right; padding: 0 12px 0 10px; border-radius: 12px 35px 35px 12px; background: #1fae55;
+    clip-path: inset(0 100% 0 0 round 12px 35px 35px 12px); }
+  .sp .ico { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+  .sp span { display: grid; line-height: 1.25; } .sp b { font-family: var(--disp); font-weight: 700; font-size: 15.5px; } .sp small { font-size: 12px; opacity: 0.85; }
+  .sp > * { transition: transform 200ms var(--out); }
+  .sp.call > * { transform: translateX(16px); } .sp.wa > * { transform: translateX(-16px); }
+  .phone.open .sp { opacity: 1; pointer-events: auto; transform: none; transition: clip-path 420ms var(--drawer), transform 420ms var(--drawer), opacity 0s; }
+  .phone.open .sp.call { clip-path: inset(0 0 0 0 round 35px 12px 12px 35px); }
+  .phone.open .sp.wa { clip-path: inset(0 0 0 0 round 12px 35px 35px 12px); }
+  .phone.open .sp > * { transform: none; transition: transform 460ms var(--out) 60ms; }
+
+  /* ——— 4 · ডকেই / In-dock: a hand-drawn sticker; the dock itself turns into the order bar ——— */
+  .v4 { --seal-ic: var(--royal); --r0: -8deg; }
+  .v4 .pill { display: block; }
+  .face { position: absolute; inset: 5px; display: grid; grid-template-columns: 1fr 1fr 76px 1fr 1fr; align-items: center; gap: 2px; }
+  .face.b { grid-template-columns: 1fr 76px 1fr; gap: 0; }
+  .face > * { transition: transform 300ms var(--out), opacity 200ms ease; transition-delay: calc(var(--i, 0) * 30ms); }
+  .face.b > * { transform: translateY(80%); opacity: 0; pointer-events: none; }
+  .phone.open .face.a > * { transform: translateY(-80%); opacity: 0; pointer-events: none; }
+  .phone.open .face.b > * { transform: none; opacity: 1; pointer-events: auto; }
+  .face.b a { display: flex; align-items: center; justify-content: center; gap: 7px; height: 48px; border-radius: 999px; font-family: var(--disp); font-weight: 700; font-size: 14.5px; color: #fff; white-space: nowrap; }
+  .face.b .call { background: var(--royal); } .face.b .wa { background: #1fae55; }
+  .face.b .wa-ic { width: 18px; height: 18px; }
+  .phone.open .v4 .seal { transform: translateY(8px) scale(0.84); }
+
+  /* ——— ঠিক করা / Fixed: the seal sits inside the dock; the card uses the site's Stage look (menu sheet) ——— */
+  .scrim.site { background: rgba(42, 28, 20, 0.38); }
+  .vf { --seal-ic: #fffdf8; }
+  .vf .seal { width: 50px; height: 50px; margin: -25px 0 0 -25px; }
+  .vf .seal-btn svg.shape { filter: drop-shadow(0 3px 6px rgba(74, 34, 18, 0.26)); }
+  .vf .ci svg { width: 23px; height: 23px; }
+  .vf .cx svg { width: 19px; height: 19px; }
+  .phone.open .vf .ci svg { animation: ring 460ms ease-in-out; }
+  .phone.open .vf .ci, .phone.open .vf .cx { transition-delay: 300ms; }
+  .cf { position: absolute; z-index: 3; left: 0; right: 0; bottom: 74px; padding: 22px 20px 6px; border-radius: 24px; background: #fff; color: #4a2212;
+    box-shadow: 0 0 0 1px #ecd6c8, 0 24px 48px -16px rgba(42, 28, 20, 0.35);
+    clip-path: circle(0px at 50% calc(100% + 44px)); visibility: hidden; transition: clip-path 220ms var(--out), visibility 0s linear 220ms; }
+  .phone.open .cf { clip-path: circle(150% at 50% calc(100% + 44px)); visibility: visible; transition: clip-path 520ms var(--drawer) 120ms, visibility 0s 120ms; }
+  .cf-head { padding-bottom: 16px; }
+  .cf-head h3 { margin: 0; font-family: var(--disp); font-weight: 300; font-size: 30px; line-height: 1.15; letter-spacing: -0.01em; }
+  .cf-head h3 b { font-weight: 600; }
+  .cf-head small { display: block; margin-top: 6px; font-size: 12.5px; color: #9a6a52; }
+  .cf-rows { border-top: 1px solid #ecd6c8; }
+  .cf-row { display: grid; grid-template-columns: 42px 1fr 20px; align-items: center; gap: 12px; padding: 14px 2px; border-bottom: 1px solid #ecd6c8; }
+  .cf-row:last-child { border-bottom: 0; }
+  .cf-row:active { background: #fdf8f4; }
+  .cf-ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; border: 1px solid #ecd6c8; color: #4a2212; }
+  .cf-ic img { width: 20px; height: 20px; }
+  .cf-row b { display: block; font-family: var(--disp); font-weight: 500; font-size: 18px; line-height: 1.35; }
+  .cf-row small { font-size: 13.5px; color: #9a6a52; }
+  .cf-row i { font-style: normal; text-align: right; }
+  .cf-in { opacity: 0; transform: translateY(10px); transition: opacity 120ms ease, transform 120ms var(--out); }
+  .phone.open .cf-in { opacity: 1; transform: none; transition: opacity 260ms ease, transform 320ms var(--out); transition-delay: calc(220ms + var(--i, 0) * 45ms); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .phone *, .phone *::before, .phone *::after { transition-duration: 0.01ms !important; transition-delay: 0s !important; animation: none !important; }
+  }
+
+  /* Picker (verbatim spec) */
+  .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10, 10, 10, 0.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(0, 0, 0, 0.24), 0 2px 6px rgba(0, 0, 0, 0.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); will-change: transform; }
+  .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1), width 250ms cubic-bezier(0.23, 1, 0.32, 1); }
+  @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } }
+  .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+  .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+  .proto-picker-item:active { transform: scale(0.97); }
+  .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+  .proto-picker-item[data-active] { color: #fff; }
+  .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+  .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+  .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<nav class="proto-picker" data-position="top" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">এখনকার</button>
+  <button class="proto-picker-item">ঠিক করা</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+const TEL = "tel:+8801310980289";
+const WA = "https://wa.me/8801303103540?text=" + encodeURIComponent("Hello, I'd like to order: আমসত্ত্ব আচার | Mango Leather Pickle (২৫০ গ্রাম)");
+const WA_IMG = (s = 20) => `<img class="wa-ic" style="width:${s}px;height:${s}px" src="https://cdn.reicon.dev/logos/whatsapp/original.svg" alt="">`;
+const PHOTO = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/960.webp";
+
+// Contact icons from Iconify (icones.js.org), inlined so they take the seal's colour.
+const ICONS = {
+  "line-md:phone-call-loop": '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="62" d="M8 3c0.5 0 2.5 4.5 2.5 5c0 1 -1.5 2 -2 3c-0.5 1 0.5 2 1.5 3c0.39 0.39 2 2 3 1.5c1 -0.5 2 -2 3 -2c0.5 0 5 2 5 2.5c0 2 -1.5 3.5 -3 4c-1.5 0.5 -2.5 0.5 -4.5 0c-2 -0.5 -3.5 -1 -6 -3.5c-2.5 -2.5 -3 -4 -3.5 -6c-0.5 -2 -0.5 -3 0 -4.5c0.5 -1.5 2 -3 4 -3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="62;0"/><animateTransform attributeName="transform" dur="4s" keyTimes="0;0.024;0.047;0.071;0.095;0.118;0.142;0.165;0.189;1" repeatCount="indefinite" type="rotate" values="0 12 12;15 12 12;0 12 12;-12 12 12;0 12 12;12 12 12;0 12 12;-15 12 12;0 12 12;0 12 12"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M15.76 8.28c-0.5 -0.51 -1.1 -0.93 -1.76 -1.24M15.76 8.28c0.49 0.49 0.9 1.08 1.2 1.72"><animate attributeName="stroke-dashoffset" begin="0.7s" dur="4s" keyTimes="0;0.101;0.203;1" repeatCount="indefinite" values="6;0;6;6"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M18.67 5.35c-1 -1 -2.26 -1.73 -3.670 -2.1M18.67 5.35c0.99 1 1.72 2.25 2.08 3.65"><animate attributeName="stroke-dashoffset" begin="1s" dur="4s" keyTimes="0;0.101;0.203;1" repeatCount="indefinite" values="8;0;8;8"/></path></g></svg>',
+  "mdi:phone-classic": '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71s.11.53.29.71l2.48 2.48a1.01 1.01 0 0 0 1.41.01c.79-.74 1.690-1.36 2.66-1.85c.33-.16.56-.5.56-.9v-3.1C8.85 5.25 10.39 5 12 5c1.59 0 3.14.25 4.59.72v3.1c0 .39.23.74.56.9c.98.49 1.850 1.12 2.67 1.85c.18.18.43.28.68.28c.3 0 .55-.11.73-.29l2.48-2.48c.18-.18.29-.43.29-.71s-.12-.52-.3-.7A16.97 16.97 0 0 0 12 3M9 7v3s-6 5-6 8v4h18v-4c0-3-6-8-6-8V7h-2v2h-2V7zm3 5a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 1.5A2.5 2.5 0 0 0 9.5 16a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5"/></svg>',
+  "solar:call-chat-rounded-bold-duotone": '<svg viewBox="0 0 24 24"><g fill="currentColor"><path d="M17 12C19.7614 12 22 9.76142 22 7C22 4.23858 19.7614 2 17 2C14.2386 2 12 4.23858 12 7C12 7.79984 12.1878 8.55582 12.5217 9.22624C12.6105 9.4044 12.64 9.60803 12.5886 9.80031L12.2908 10.9133C12.1615 11.3965 12.6035 11.8385 13.0867 11.7092L14.1997 11.4114C14.392 11.36 14.5956 11.3895 14.7738 11.4783C15.4442 11.8122 16.2002 12 17 12Z"/><path d="M8.03759 7.31617L8.6866 8.4791C9.2723 9.52858 9.03718 10.9053 8.11471 11.8278C8.11471 11.8278 8.11471 11.8278 8.11471 11.8278C8.11459 11.8279 6.99588 12.9468 9.02451 14.9755C11.0525 17.0035 12.1714 15.8861 12.1722 15.8853C12.1722 15.8853 12.1722 15.8853 12.1722 15.8853C13.0947 14.9628 14.4714 14.7277 15.5209 15.3134L16.6838 15.9624C18.2686 16.8468 18.4557 19.0692 17.0628 20.4622C16.2258 21.2992 15.2004 21.9505 14.0669 21.9934C12.1588 22.0658 8.91828 21.5829 5.6677 18.3323C2.41713 15.0817 1.93421 11.8412 2.00655 9.93309C2.04952 8.7996 2.7008 7.77423 3.53781 6.93723C4.93076 5.54428 7.15317 5.73144 8.03759 7.31617Z" opacity=".55"/></g></svg>',
+  "streamline-freehand:phone-actions-ringing": '<svg viewBox="0 0 24 24"><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M17.82 19.837c-.17-.24-.4-.47-.57-.68c-.37-.471-.751-.942-1.152-1.382a12 12 0 0 0-.87-.871a5.4 5.4 0 0 0-.762-.641a1.7 1.7 0 0 0-.82-.3a1.250 1.250 0 0 0-.671.18c-.47.27-1.111.91-1.702 1.311q-.18.125-.38.21c-.07 0-.15.07-.2 0L7.477 13.930c-.43-.47-1-1-1.541-1.642a3.6 3.6 0 0 1-.701-1.171c-.05-.16.08-.33.23-.52c.41-.521 1.131-1.062 1.542-1.592c.242-.235.412-.534.49-.861a.77.77 0 0 0-.1-.5c-.12-.201-.33-.391-.43-.532L5.216 4.830a.31.31 0 1 0-.48.38l1.721 2.303l.4.53c-.14.33-.368.614-.66.821q-.775.64-1.442 1.392a1.26 1.26 0 0 0-.28 1.091c.176.531.451 1.024.811 1.452c.49.64 1.101 1.231 1.532 1.722l3.093 3.804a1.1 1.1 0 0 0 1.252.34a6.4 6.4 0 0 0 1.722-1.12c.19-.15.38-.301.54-.401s.17 0 .17-.07a.76.76 0 0 1 .35.19c.191.14.361.32.521.46s.531.531.781.811s.741.881 1.091 1.332c.14.17.32.35.471.55q.09.114.14.25c.14.431-.24.772-.63 1.072a5.3 5.3 0 0 1-1.602.801a8.56 8.56 0 0 1-6.007-.5a15 15 0 0 1-4.936-3.935a10.93 10.93 0 0 1-2.913-6.858C.751 8.094 2.203 5.511 3.784 4.740a.35.35 0 0 0 .16-.46a.34.34 0 0 0-.46-.17C1.712 4.940 0 7.752 0 11.266a11.9 11.9 0 0 0 3.003 7.489A15.9 15.9 0 0 0 8.210 23.020a9.53 9.53 0 0 0 6.808.61a6 6 0 0 0 2.373-1.311a1.94 1.94 0 0 0 .66-2.002a2 2 0 0 0-.23-.481m-3.395-7.688a.35.35 0 0 0 .42-.26a3.4 3.4 0 0 0 0-2.343a2.9 2.9 0 0 0-.54-.91a2.7 2.7 0 0 0-.86-.631a3.3 3.3 0 0 0-2.333-.25a.303.303 0 0 0 .07.6c.61.014 1.2.224 1.682.6q.295.213.54.481a2.8 2.8 0 0 1 .771 2.333a.34.34 0 0 0 .25.38"/><path d="M18.02 6.802a6.8 6.8 0 0 0-2.462-2.162a5.95 5.95 0 0 0-3.004-.571a6.3 6.3 0 0 0-2.813.861a.304.304 0 1 0 .28.54a5.5 5.5 0 0 1 2.553-.54a5 5 0 0 1 2.433.7a6 6 0 0 1 2.002 1.843a7.2 7.2 0 0 1 1.011 1.632a4.870 4.870 0 0 1-.24 4.475a.34.34 0 0 0 .09.48a.35.35 0 0 0 .48-.08a5.67 5.67 0 0 0 .672-5.226a7.4 7.4 0 0 0-1.002-1.952"/><path d="M23.897 7.463a7.3 7.3 0 0 0-.46-1.622a9.3 9.3 0 0 0-.771-1.472a9.6 9.6 0 0 0-2.794-2.823A9.7 9.7 0 0 0 16.179.135A12.56 12.56 0 0 0 8.630 1.396a.31.31 0 0 0 .018.57a.3.3 0 0 0 .232-.01a11.9 11.9 0 0 1 7.138-.83a9.2 9.2 0 0 1 3.244 1.381A8.9 8.9 0 0 1 21.695 5q.41.603.7 1.272q.294.657.44 1.361a10.8 10.8 0 0 1 .111 3.174a10.2 10.2 0 0 1-.81 3.083l-1.252 2.123a.35.35 0 0 0 .14.47a.35.35 0 0 0 .47-.14l1.352-2.112a10.9 10.9 0 0 0 1.001-3.304a11.9 11.9 0 0 0 .05-3.464"/></g></svg>',
+  "hugeicons:telephone": '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4.74 14.369l1.954-1.387a5.3 5.3 0 0 1 1.746-.823c.732-.195 1.06-.595 1.06-1.448c0-2.165 5-2.395 5 0c0 .853.328 1.253 1.06 1.447c.642.172 1.2.435 1.746.824l1.954 1.386c.883.628 1.295.931 1.524 1.414c.216.454.216.986.216 2.05c0 1.914 0 2.871-.536 3.484c-.649.743-2.336.68-3.372.68H6.908c-1.036 0-2.689.103-3.372-.68C3 20.703 3 19.746 3 17.832c0-1.064 0-1.596.216-2.05c.23-.482.64-.786 1.524-1.414Z"/><path d="M14 17a2 2 0 1 1-4 0a2 2 0 0 1 4 0Z"/><path stroke-linejoin="round" d="M6.96 3.698c-1.318.376-2.266.843-3.134 1.407c-1.373.892-1.962 2.499-1.8 4.05c.068.656.595.97 1.205.8c.464-.13.928-.255 1.389-.391c1.347-.4 1.664-.886 1.851-2.265zm0 0c3.259-.93 6.821-.93 10.080 0m0 0c1.318.376 2.266.843 3.134 1.407c1.373.892 1.962 2.499 1.8 4.050c-.068.656-.595.97-1.205.8c-.463-.13-.928-.255-1.389-.391c-1.347-.4-1.664-.886-1.851-2.265z"/></g></svg>',
+  "streamline-plump:customer-support-7-solid": '<svg viewBox="0 0 48 48"><path fill="currentColor" fill-rule="evenodd" d="M13 19.5a8 8 0 0 1 4.023-6.943Q17.002 11.238 17 9.5c0-2.551.044-4.405.09-5.645c.043-1.2.854-2.187 2.05-2.285c.51-.041 1.128-.07 1.86-.07s1.35.029 1.86.07c1.196.098 2.007 1.085 2.05 2.285c.046 1.24.09 3.094.09 5.645q-.001 1.738-.023 3.057A8 8 0 1 1 13 19.5m14.995-8.49Q28 10.3 28 9.5c0-2.585-.044-4.476-.091-5.755a5.6 5.6 0 0 0-.183-1.224c7.348 2.504 12.663 9.335 12.829 17.423l3.880 5.410c.693.967.62 2.38-.505 3.069c-.853.52-2.099 1.127-3.771 1.570l-.576 6.830a3.5 3.5 0 0 1-3.917 3.180l-2.520-.312v2.917c0 1.507-.981 2.870-2.519 3.155c-1.851.345-4.884.737-9.098.737s-7.246-.392-9.098-.737c-1.537-.286-2.520-1.648-2.520-3.155V35.250C5.407 31.808 2.5 26.407 2.5 20.333c0-7.824 4.820-14.530 11.677-17.375q-.07.39-.086.787C14.044 5.024 14 6.915 14 9.5q0 .8.005 1.510A10.98 10.98 0 0 0 10 19.5c0 5.866 4.592 10.660 10.377 10.983C23.645 33.517 28.400 35.500 33 35.500a1.5 1.5 0 0 0 0-3c-2.922 0-5.969-.983-8.462-2.581C28.878 28.446 32 24.337 32 19.500a10.98 10.98 0 0 0-4.005-8.490" clip-rule="evenodd"/></svg>',
+  "hugeicons:contact-02": '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10c0-3.771 0-5.657 1.172-6.828S8.229 2 12 2h1.5c3.771 0 5.657 0 6.828 1.172S21.5 6.229 21.5 10v4c0 3.771 0 5.657-1.172 6.828S17.271 22 13.5 22H12c-3.771 0-5.657 0-6.828-1.172S4 17.771 4 14z"/><path stroke-linejoin="round" d="M9.8 11.974c-.427-.744-.633-1.351-.757-1.967c-.184-.91.237-1.8.933-2.368c.295-.24.632-.158.806.155l.393.705c.311.558.467.838.436 1.134c-.03.296-.24.537-.66 1.020zm0 0a10.36 10.36 0 0 0 3.726 3.726m0 0c.744.427 1.351.633 1.967.757c.91.184 1.8-.237 2.368-.933c.24-.295.158-.632-.155-.806l-.704-.393c-.56-.311-.839-.467-1.135-.436c-.296.03-.537.24-1.020.66z"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 6H2.5M5 12H2.5M5 18H2.5"/></g></svg>',
+  "mage:phone-ringing-loud-fill": '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21.988 18.053c.012.254-.026.509-.113.749a1.9 1.9 0 0 1-.41.677c-.382.314-.86.487-1.354.492h-2.729a1.49 1.49 0 0 1-1.661-1.457V17.490a.67.67 0 0 0-.062-.36a.8.8 0 0 0-.164-.235a2.4 2.4 0 0 0-1.026-.246a19 19 0 0 0-2.051-.236c-1.183-.082-2.370.030-3.518.328a.56.56 0 0 0-.298.123a.6.6 0 0 0-.174.215a3.5 3.5 0 0 0-.072.954a1.8 1.8 0 0 1-.051.729a2 2 0 0 1-.339.666c-.338.329-.79.512-1.261.513H4.510q-.513.030-1.026 0a1.5 1.5 0 0 1-.636-.184a1.8 1.8 0 0 1-.492-.41a2.3 2.3 0 0 1-.339-1.396a4.470 4.470 0 0 1 1.488-3.323a9.050 9.050 0 0 1 3.077-1.877q.412-.165.840-.277a15.8 15.8 0 0 1 4.340-.595c1.844-.074 3.686.190 5.436.780c.952.339 1.847.820 2.656 1.425a5.370 5.370 0 0 1 1.960 2.452c.122.496.180 1.006.174 1.518m-6.380-7.930a.76.76 0 0 1-.544-.225a4.5 4.5 0 0 0-1.405-.944a4.430 4.430 0 0 0-3.323 0a4.6 4.6 0 0 0-1.416.944a.76.76 0 0 1-1.087 0a.77.77 0 0 1 0-1.088a5.890 5.890 0 0 1 8.318 0a.76.76 0 0 1 0 1.088a.75.75 0 0 1-.543.225"/><path fill="currentColor" d="M17.772 7.960a.76.76 0 0 1-.544-.226a7.420 7.420 0 0 0-8.062-1.600a7.3 7.3 0 0 0-2.410 1.600a.76.76 0 0 1-1.087 0a.77.77 0 0 1 0-1.087a8.934 8.934 0 0 1 12.688.030a.76.76 0 0 1 0 1.088a.75.75 0 0 1-.585.195"/></svg>',
+  "hugeicons:call-ringing-04": '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"><path stroke-linejoin="round" d="M14 3v3m5-1l-2 2m4 3h-3"/><path d="m9.158 5.712l-.402-.906c-.264-.592-.395-.888-.592-1.115a2 2 0 0 0-.928-.603C6.949 3 6.624 3 5.976 3c-.948 0-1.422 0-1.820.182a2.120 2.120 0 0 0-1.061 1.169c-.143.413-.102.838-.020 1.689q1.310 13.575 14.885 14.885c.850.082 1.276.123 1.690-.020a2.120 2.120 0 0 0 1.168-1.060c.182-.399.182-.873.182-1.821c0-.649 0-.973-.088-1.260a2 2 0 0 0-.603-.928c-.227-.197-.523-.328-1.115-.592l-.906-.402c-.642-.285-.962-.428-1.288-.459a2 2 0 0 0-.919.128c-.305.119-.575.343-1.114.793c-.537.447-.805.670-1.133.790a2.160 2.160 0 0 1-.982.101c-.345-.050-.610-.192-1.139-.475c-1.646-.880-2.553-1.787-3.433-3.433c-.283-.530-.424-.794-.475-1.140a2.160 2.160 0 0 1 .1-.980c.12-.329.344-.597.791-1.134c.450-.540.674-.809.793-1.114c.114-.292.158-.607.128-.919c-.031-.325-.174-.646-.459-1.288Z"/></g></svg>',
+};
+
+const I = {
+  home: '<svg viewBox="0 0 24 24" fill="none"><path d="M3.5 10.2 12 3.8l8.5 6.4V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 15.5c1.7 1.3 4.3 1.3 6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none"><path d="M11.5 21a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19Z M22 22l-2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 9.5h14M5 14.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  bag: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 9a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-6 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75A2.25 2.25 0 0 0 9.75 5v.254q.626-.005 1.355-.004h1.79q.73-.001 1.355.004V5A2.25 2.25 0 0 0 12 2.75m3.75 2.557V5a3.75 3.75 0 0 0-7.5 0v.307q-.202.014-.391.035c-.878.095-1.613.293-2.265.74a5 5 0 0 0-.63.516c-.566.552-.905 1.234-1.17 2.076c-.257.819-.465 1.859-.727 3.166l-.019.095c-.376 1.883-.673 3.367-.758 4.549c-.088 1.208.034 2.223.606 3.104q.288.442.664.81c.752.734 1.724 1.052 2.925 1.204c1.176.148 2.69.148 4.61.148h1.81c1.921 0 3.434 0 4.61-.148c1.201-.152 2.174-.47 2.925-1.204a4.8 4.8 0 0 0 .664-.81c.572-.88.694-1.896.607-3.104c-.086-1.182-.382-2.666-.76-4.549l-.018-.095c-.261-1.307-.47-2.347-.727-3.166c-.265-.842-.604-1.524-1.17-2.076a5 5 0 0 0-.63-.516c-.652-.447-1.387-.645-2.265-.74a11 11 0 0 0-.39-.035M8.02 6.833c-.747.08-1.208.233-1.578.486a3.3 3.3 0 0 0-.431.354c-.321.313-.56.735-.786 1.451c-.23.733-.424 1.693-.695 3.052c-.39 1.948-.667 3.34-.744 4.416c-.077 1.062.052 1.693.368 2.179q.196.302.454.554c.415.405 1.008.655 2.065.789c1.07.135 2.49.136 4.476.136h1.703c1.986 0 3.404-.001 4.475-.136c1.057-.134 1.65-.384 2.065-.789a3.3 3.3 0 0 0 .454-.554c.316-.486.445-1.117.369-2.18c-.078-1.076-.355-2.467-.744-4.415c-.272-1.359-.465-2.32-.696-3.052c-.225-.716-.465-1.138-.786-1.451a3 3 0 0 0-.43-.354c-.37-.253-.832-.405-1.579-.486c-.763-.082-1.743-.083-3.129-.083H11.15c-1.386 0-2.366.001-3.13.083"/></svg>',
+  phone: '<svg width="16" height="22" viewBox="7 1 11 22" aria-hidden="true"><path fill="currentColor" d="M15 2a1 1 0 0 0-1 1v3h-4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h5c1.11 0 2-.89 2-2V8c0-.74-.4-1.38-1-1.72V3a1 1 0 0 0-1-1m-5 6h5v5h-5zm0 7h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1z"/></svg>',
+  x: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+};
+
+// A scalloped seal outline: a circle whose radius ripples n times around.
+function scallop(cx, cy, R, a, n) {
+  let d = "";
+  for (let k = 0; k <= 280; k++) {
+    const t = (k / 280) * Math.PI * 2, r = R + a * Math.cos(n * t);
+    d += (k ? "L" : "M") + (cx + r * Math.cos(t)).toFixed(2) + " " + (cy + r * Math.sin(t)).toFixed(2);
+  }
+  return d + "Z";
+}
+const EDGE = scallop(33, 33, 29.5, 2.1, 14);
+
+let iconChoice = null; // null = the variant's own icon
+const iconFor = (v) => ICONS[iconChoice || v.icon];
+
+const it = (label, icon, i = 0) => `<button class="it press" style="--i:${i}" aria-label="${label}">${icon}</button>`;
+const bag = (i = 4) => `<button class="bagb press" style="--i:${i}" aria-label="Cart, 2 items">${I.bag}<span class="badge">২</span></button>`;
+const seal = (v) => `
+  <div class="seal"><div class="seal-pop">
+    <button class="seal-btn" data-toggle aria-label="যোগাযোগ: ফোন বা হোয়াটসঅ্যাপ" aria-expanded="false">
+      <svg class="shape" viewBox="0 0 66 66" aria-hidden="true">${v.shape}</svg>
+      <span class="ci">${iconFor(v)}</span><span class="cx">${I.x}</span>
+    </button>
+  </div></div>`;
+const navRow = () => `${it("হোম", I.home, 0)}${it("মেনু", I.menu, 1)}<span></span>${it("খুঁজুন", I.search, 3)}${bag()}`;
+
+function page() {
+  return `
+  <div class="scroller">
+    <div class="ann">সারা দেশে <b>ক্যাশ অন ডেলিভারি</b></div>
+    <div class="hd"><span class="menu"><i></i><i></i></span><span class="logo">সেরা খাবার</span><span class="bag">ব্যাগ <span class="num">২</span></span></div>
+    <div class="crumb"><span>হোম</span>›<span>হোমমেড</span>›<span>আমসত্ত্ব আচার</span></div>
+    <div class="photo"><span class="chip">হোমমেড</span><img src="${PHOTO}" alt="আমসত্ত্ব আচার"></div>
+    <div class="info">
+      <h1>আমসত্ত্ব আচার</h1>
+      <ul class="ticks"><li>খাঁটি আমসত্ত্ব দিয়ে তৈরি</li><li>মিষ্টি, টক ও ঝালের সমন্বয়</li><li>বাছাই করা মসলা</li></ul>
+      <div class="price num">৳৩৫০</div>
+      <div><span class="lbl">পরিমাণ বেছে নিন</span>
+        <div class="sizes">
+          <button class="size" aria-pressed="true"><span><b>২৫০ গ্রাম</b><span class="num">৳৩৫০</span></span></button>
+          <button class="size" aria-pressed="false"><span><b>৫০০ গ্রাম</b><span class="num">৳৭০০</span></span></button>
+        </div>
+      </div>
+      <div class="buyrow">
+        <div class="qty"><button aria-label="কমান">−</button><output class="num">১</output><button aria-label="বাড়ান">+</button></div>
+        <button class="cod press">অর্ডার করুন <i></i></button>
+      </div>
+      <button class="cartbtn press">কার্টে রাখুন</button>
+    </div>
+    <div class="strip"><span>ক্যাশ অন ডেলিভারি</span><span>সারাদেশে ডেলিভারি</span><span>রাজশাহী থেকে</span></div>
+    <div class="details">
+      <h2>বিস্তারিত</h2>
+      <div class="memo">
+        <p>খাঁটি আমসত্ত্ব দিয়ে তৈরি সুস্বাদু আচার, যেখানে মিষ্টি, টক ও ঝালের রয়েছে দারুণ সমন্বয়।</p>
+        <div class="row"><span>খাঁটি আমসত্ত্ব</span><em>✓</em></div>
+        <div class="row"><span>বাছাই করা মসলা</span><em>✓</em></div>
+      </div>
+    </div>
+    <div class="more">
+      <h2>আরও দেখুন</h2>
+      <div class="cards">
+        <div class="card"><b>খেজুরের গুড়</b><span class="num">৳৪৫০</span></div>
+        <div class="card"><b>আমের আচার</b><span class="num">৳৩০০</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const variants = [
+  {
+    cap: ["১ · এখনকার (Current)", "রাউন্ড ৩-এর কার্ড, অ্যানিমেটেড আইকনসহ। সিলটা ডকের ওপরে উঁচু হয়ে বেরিয়ে থাকে, আর কার্ডটা ক্রিম পোস্টার স্টাইলের।"],
+    icon: "line-md:phone-call-loop",
+    shape: `<path fill="#5b2d17" d="${EDGE}"/><circle cx="33" cy="33" r="23" fill="none" stroke="#f6b826" stroke-opacity=".75" stroke-width="1.1" stroke-dasharray="2.2 2.6"/>`,
+    dock: (v) => `
+      <div class="scrim" data-close></div>
+      <div class="dock v2">
+        <div class="cr" role="dialog" aria-label="যোগাযোগ">
+          <div class="m-head m-in"><span><b>যোগাযোগ</b><small>আমসত্ত্ব আচার · ২৫০ গ্রাম × <span class="num">১</span></small></span><span class="script">সরাসরি অর্ডার</span></div>
+          <a class="m-row r1 m-in press" href="${TEL}"><span class="ico">${I.phone}</span><span><b>ফোনে অর্ডার</b><small class="num">০১৩১০-৯৮০২৮৯</small></span><i>→</i></a>
+          <a class="m-row r2 m-in press" href="${WA}" target="_blank" rel="noopener"><span class="ico">${WA_IMG(20)}</span><span><b>হোয়াটসঅ্যাপে অর্ডার</b><small class="num">০১৩০৩-১০৩৫৪০</small></span><i>→</i></a>
+        </div>
+        <div class="pill">${navRow()}${seal(v)}</div>
+      </div>`,
+  },
+  {
+    cap: ["২ · ঠিক করা (Fixed)", "সিলটা এখন পুরোপুরি ডকের ভেতরে, ব্যাগ বোতামের মতো একই বাদামি রঙে। ফোন আইকনটা কয়েক সেকেন্ড পরপর নিজে থেকে বেজে ওঠে। কার্ডটা সাইটের মেনু শিটের মতো: সাদা, পাতলা দাগ, সেরিফ শিরোনাম।"],
+    icon: "line-md:phone-call-loop",
+    shape: `<path fill="#4a2212" d="${EDGE}"/><circle cx="33" cy="33" r="23" fill="none" stroke="#f6b826" stroke-opacity=".8" stroke-width="1.4" stroke-dasharray="2.4 2.8"/>`,
+    dock: (v) => `
+      <div class="scrim site" data-close></div>
+      <div class="dock vf">
+        <div class="cf" role="dialog" aria-label="যোগাযোগ">
+          <div class="cf-head cf-in"><h3><b>সরাসরি</b> অর্ডার</h3><small>আমসত্ত্ব আচার · ২৫০ গ্রাম × <span class="num">১</span></small></div>
+          <div class="cf-rows">
+            <a class="cf-row cf-in" style="--i:1" href="${TEL}"><span class="cf-ic">${I.phone}</span><span><b>ফোনে অর্ডার</b><small class="num">০১৩১০-৯৮০২৮৯</small></span><i>→</i></a>
+            <a class="cf-row cf-in" style="--i:2" href="${WA}" target="_blank" rel="noopener"><span class="cf-ic"><img src="https://cdn.reicon.dev/logos/whatsapp/original.svg" alt=""></span><span><b>হোয়াটসঅ্যাপে অর্ডার</b><small class="num">০১৩০৩-১০৩৫৪০</small></span><i>↗</i></a>
+          </div>
+        </div>
+        <div class="pill">${navRow()}${seal(v)}</div>
+      </div>`,
+  },
+];
+
+const TRAY = Object.keys(ICONS);
+function tray(v) {
+  const active = iconChoice || v.icon;
+  return `<div class="tray"><small>আইকন বদলে দেখুন (icones.js.org থেকে)</small>${TRAY.map((id) =>
+    `<button data-icon="${id}" title="${id}" aria-label="${id}" aria-pressed="${id === active}">${ICONS[id]}</button>`).join("")}</div>`;
+}
+
+function wireToggle(phone) {
+  const btn = phone.querySelector("[data-toggle]");
+  const set = (open) => { phone.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open)); };
+  btn.addEventListener("click", () => set(!phone.classList.contains("open")));
+  phone.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", () => set(false)));
+  const onKey = (e) => { if (e.key === "Escape") set(false); };
+  document.addEventListener("keydown", onKey);
+  return () => document.removeEventListener("keydown", onKey);
+}
+
+// Picker wiring (reference behaviour)
+const stage = document.getElementById("stage");
+const picker = document.querySelector(".proto-picker");
+const highlight = picker.querySelector(".proto-picker-highlight");
+const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+const replay = picker.querySelector(".proto-picker-replay");
+let current = 0, cleanup = null;
+
+stage.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-icon]");
+  if (!b) return;
+  iconChoice = b.dataset.icon;
+  stage.querySelectorAll("[data-icon]").forEach((el) => el.setAttribute("aria-pressed", String(el === b)));
+  const ci = stage.querySelector(".ci");
+  if (ci) ci.innerHTML = ICONS[iconChoice];
+});
+
+function moveHighlight() {
+  const el = items[current];
+  highlight.style.width = el.offsetWidth + "px";
+  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+}
+function mount(i) {
+  if (cleanup) { cleanup(); cleanup = null; }
+  stage.innerHTML = "";
+  requestAnimationFrame(() => {
+    const v = variants[i];
+    stage.innerHTML = `<div class="cap"><b>${v.cap[0]}</b><span>${v.cap[1]}</span>${tray(v)}</div><div class="phone">${page()}${v.dock(v)}</div>`;
+    cleanup = wireToggle(stage.querySelector(".phone"));
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) stage.querySelectorAll("svg").forEach((s) => s.pauseAnimations?.());
+  });
+}
+function setActive(i) {
+  if (i < 0 || i >= variants.length) return;
+  current = i;
+  iconChoice = null;
+  items.forEach((el, j) => {
+    el.toggleAttribute("data-active", j === i);
+    if (j === i) el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current");
+  });
+  moveHighlight();
+  const url = new URL(location);
+  url.searchParams.set("v", i + 1);
+  history.replaceState(null, "", url);
+  mount(i);
+}
+items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+replay?.addEventListener("click", () => mount(current));
+window.addEventListener("resize", moveHighlight);
+document.addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const num = parseInt(e.key, 10);
+  if (num >= 1 && num <= variants.length) setActive(num - 1);
+  else if (e.key === "ArrowRight") setActive((current + 1) % variants.length);
+  else if (e.key === "ArrowLeft") setActive((current - 1 + variants.length) % variants.length);
+  else if (e.key === "r" || e.key === "R") mount(current);
+});
+setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>
