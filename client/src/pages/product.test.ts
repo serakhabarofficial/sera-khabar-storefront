@@ -215,13 +215,19 @@ const mosaicSource = readFileSync(new URL("../components/product-mosaic.tsx", im
 test("phones pick a photo from round thumbnails in a capsule instead of dots", () => {
   assert.match(productSource, /className="skp-capsule"/);
   assert.doesNotMatch(productSource, /className="skp-dots"/);
-  assert.match(productSource, /onClick=\{\(\) => api\?\.scrollTo\(idx\)\}[\s\S]*?aria-current=\{active === idx\}/);
+  assert.match(productSource, /onClick=\{\(\) => goTo\(idx\)\}[\s\S]*?aria-current=\{active === idx\}/);
   assert.match(posterSource, /\.skp-capsule button\[aria-current="true"\] \{[^}]*transform: none;/);
 });
 
 test("the phone gallery swipe stays smooth on real phones", () => {
-  // The active photo lives in GalleryCapsule, so a swipe doesn't re-render the whole page.
-  assert.match(productSource, /<GalleryCapsule api=\{galleryApi\} images=\{displayGallery\} srcSetFor=\{srcSetFor\} \/>/);
+  // The active photo lives in PhoneGallery, so a swipe doesn't re-render the whole page.
+  assert.match(productSource, /<PhoneGallery key=\{displayGallery\.join\(" "\)\} images=\{displayGallery\}/);
+  assert.match(productSource, /className="skp-gallery" data-page-settle="" onScroll=/);
+  // The photos scroll natively instead of being moved by JavaScript, so Chrome on iPhone and
+  // the Facebook/Messenger browsers (which inject their own scripts) swipe as smoothly as Safari.
+  assert.doesNotMatch(productSource, /galleryApi/);
+  assert.match(posterSource, /\.skp-gallery \{[^}]*overflow-x: auto;[^}]*scroll-snap-type: x mandatory;/);
+  assert.match(posterSource, /\.skp-slide \{[^}]*scroll-snap-align: start;/);
   assert.doesNotMatch(productSource, /setActiveImage/);
   // No backdrop blur over the moving photos.
   const capsule = posterSource.slice(posterSource.indexOf(".skp-capsule {")).split("}")[0];

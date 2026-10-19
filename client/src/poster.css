@@ -682,9 +682,11 @@
 
 /* Photo panel */
 .skp-photo { position: relative; border-radius: 28px; overflow: hidden; }
-.skp-gallery { overflow: hidden; }
-.skp-gallery-track { display: flex; touch-action: pan-y; }
-.skp-slide { flex: 0 0 100%; min-width: 0; }
+/* Native scroll-snap: the OS scrolls the photos, so the swipe never waits on page scripts. */
+.skp-gallery { overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.skp-gallery::-webkit-scrollbar { display: none; }
+.skp-gallery-track { display: flex; }
+.skp-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
 .skp-slide img { width: 100%; height: auto; user-select: none; }
 .skp-noimg { aspect-ratio: 1; background: var(--card); display: grid; place-items: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--sub); }
 .skp-chip { position: absolute; z-index: 2; top: 16px; left: 16px; padding: 4px 12px; border-radius: 999px; background: var(--rose); font-family: var(--disp); font-weight: 700; font-size: 13px; color: var(--ink); }
