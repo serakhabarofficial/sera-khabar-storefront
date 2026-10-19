@@ -86,16 +86,17 @@ test("drives every product section from the live catalog", () => {
 });
 
 test("tells the jaggery story beside the founder's reel, served from Cloudflare R2", () => {
-  assert.match(homeSource, /const FOUNDER_REEL = \{ src: "\/media\/story\/founder-reel-v1\.mp4", poster: "\/media\/story\/founder-reel-v1\.jpg" \};/);
+  assert.match(homeSource, /const FOUNDER_REEL_ORIGIN = "https:\/\/pub-cfecc6eab1f44552a42789747b613cb7\.r2\.dev";/);
+  assert.match(homeSource, /src: `\$\{FOUNDER_REEL_ORIGIN\}\/story\/founder-reel-v1\.mp4`/);
   // Muted, looping and inline, so phones play it with no tap; it plays only while on screen.
-  assert.match(homeSource, /<video\s+ref=\{videoRef\}\s+src=\{FOUNDER_REEL\.src\}\s+poster=\{FOUNDER_REEL\.poster\}\s+muted\s+loop\s+playsInline/);
+  assert.match(homeSource, /<video\s+ref=\{videoRef\}\s+src=\{FOUNDER_REEL\.src\}\s+poster=\{FOUNDER_REEL\.poster\}\s+muted\s+autoPlay=\{!shouldReduceMotion\}\s+loop\s+playsInline/);
   assert.match(homeSource, /if \(entry\?\.isIntersecting\) video\.play\(\)/);
   assert.match(homeSource, /aria-label=\{muted \? "শব্দ চালু করুন" : "শব্দ বন্ধ করুন"\}/);
-  const vercel = JSON.parse(readFileSync(new URL("../../../vercel.json", import.meta.url), "utf8"));
-  assert.deepEqual(vercel.rewrites[0], {
-    source: "/media/:path*",
-    destination: "https://pub-cfecc6eab1f44552a42789747b613cb7.r2.dev/:path*",
-  });
+  // A refused autoplay shows the play button rather than a frozen poster.
+  assert.match(homeSource, /\{paused && \(shouldReduceMotion \|\| blocked\) \? \(/);
+  // Never proxied through a Vercel rewrite: its cache served one partial byte range to every request.
+  const vercel = readFileSync(new URL("../../../vercel.json", import.meta.url), "utf8");
+  assert.doesNotMatch(vercel, /r2\.dev/);
   // Square and flat, as approved: no rounded corners or shadow on the reel.
   const reel = stageCss.match(/\.st-reel \{([^}]+)\}/)?.[1] ?? "";
   assert.doesNotMatch(reel, /border-radius|box-shadow/);

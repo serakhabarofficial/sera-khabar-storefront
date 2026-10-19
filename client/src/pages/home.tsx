@@ -297,26 +297,35 @@ function ProductsSection({ products, failed }: { products: StorefrontProduct[]; 
 }
 
 // The founder's reel (approved 2026-10-19, "রিল"): a 9:16 clip from the date-palm garden, stored in the Cloudflare
-// R2 bucket sera-khabar-media and served at /media/ (vercel.json). It plays muted, looping and inline with no tap,
-// only while on screen; the speaker button turns the sound on. Reduced-motion visitors get the poster and a play
-// button instead of autoplay. Rename the file (…-v2.mp4) when the clip changes, so no cache serves the old one.
-const FOUNDER_REEL = { src: "/media/story/founder-reel-v1.mp4", poster: "/media/story/founder-reel-v1.jpg" };
+// R2 bucket sera-khabar-media and loaded straight from R2, which answers the browser's byte-range requests. (A
+// Vercel rewrite cached one partial range and served it for every request, so the video never loaded.) It plays
+// muted, looping and inline with no tap, only while on screen; the speaker button turns the sound on. Reduced-motion
+// visitors, and browsers that refuse autoplay, get the poster and a play button. Rename the file (…-v2.mp4) when the
+// clip changes, so no cache serves the old one.
+const FOUNDER_REEL_ORIGIN = "https://pub-cfecc6eab1f44552a42789747b613cb7.r2.dev";
+const FOUNDER_REEL = {
+  src: `${FOUNDER_REEL_ORIGIN}/story/founder-reel-v1.mp4`,
+  poster: `${FOUNDER_REEL_ORIGIN}/story/founder-reel-v1.jpg`,
+};
 
 function FounderReel() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const barRef = useRef<HTMLElement>(null);
   const [muted, setMuted] = useState(true);
   const [paused, setPaused] = useState(true);
+  const [blocked, setBlocked] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    // iOS Safari only autoplays a video whose muted state is set before it plays.
+    video.defaultMuted = true;
     video.muted = true;
     if (shouldReduceMotion) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) video.play()?.catch(() => setPaused(true));
+        if (entry?.isIntersecting) video.play()?.catch(() => setBlocked(true));
         else video.pause();
       },
       { threshold: 0.25 },
@@ -345,11 +354,15 @@ function FounderReel() {
         src={FOUNDER_REEL.src}
         poster={FOUNDER_REEL.poster}
         muted
+        autoPlay={!shouldReduceMotion}
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
         aria-label="সেরা খাবারের প্রতিষ্ঠাতা রাজশাহীর খেজুর বাগানে গুড় তৈরির গল্প বলছেন"
-        onPlay={() => setPaused(false)}
+        onPlay={() => {
+          setPaused(false);
+          setBlocked(false);
+        }}
         onPause={() => setPaused(true)}
       />
       <div className="st-reel-top">
@@ -363,8 +376,8 @@ function FounderReel() {
         </div>
       </div>
       <p className="st-reel-foot">রাজশাহীর খেজুর বাগান থেকে, গুড় তৈরির গল্প</p>
-      {paused && shouldReduceMotion ? (
-        <button type="button" className="st-reel-play press" aria-label="ভিডিও চালু করুন" onClick={() => videoRef.current?.play()}>
+      {paused && (shouldReduceMotion || blocked) ? (
+        <button type="button" className="st-reel-play press" aria-label="ভিডিও চালু করুন" onClick={() => videoRef.current?.play()?.catch(() => {})}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
         </button>
       ) : null}
