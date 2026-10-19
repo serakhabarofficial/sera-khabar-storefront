@@ -9,6 +9,7 @@ import {
   type StorefrontProduct,
 } from "@/lib/storefront-products";
 import { useQuery } from "@tanstack/react-query";
+import { useReducedMotion } from "framer-motion";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
@@ -295,13 +296,110 @@ function ProductsSection({ products, failed }: { products: StorefrontProduct[]; 
   );
 }
 
+// The founder's reel (approved 2026-10-19, "রিল"): a 9:16 clip from the date-palm garden, stored in the Cloudflare
+// R2 bucket sera-khabar-media and served at /media/ (vercel.json). It plays muted, looping and inline with no tap,
+// only while on screen; the speaker button turns the sound on. Reduced-motion visitors get the poster and a play
+// button instead of autoplay. Rename the file (…-v2.mp4) when the clip changes, so no cache serves the old one.
+const FOUNDER_REEL = { src: "/media/story/founder-reel-v1.mp4", poster: "/media/story/founder-reel-v1.jpg" };
+
+function FounderReel() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const barRef = useRef<HTMLElement>(null);
+  const [muted, setMuted] = useState(true);
+  const [paused, setPaused] = useState(true);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    if (shouldReduceMotion) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) video.play()?.catch(() => setPaused(true));
+        else video.pause();
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [shouldReduceMotion]);
+
+  // The progress bar follows the clip's own clock, and only animates while it plays.
+  useEffect(() => {
+    if (paused) return;
+    let frame = 0;
+    const tick = () => {
+      const video = videoRef.current;
+      if (video?.duration && barRef.current) barRef.current.style.transform = `scaleX(${video.currentTime / video.duration})`;
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [paused]);
+
+  return (
+    <div className="st-reel" data-reveal="">
+      <video
+        ref={videoRef}
+        src={FOUNDER_REEL.src}
+        poster={FOUNDER_REEL.poster}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label="সেরা খাবারের প্রতিষ্ঠাতা রাজশাহীর খেজুর বাগানে গুড় তৈরির গল্প বলছেন"
+        onPlay={() => setPaused(false)}
+        onPause={() => setPaused(true)}
+      />
+      <div className="st-reel-top">
+        <div className="st-reel-prog" aria-hidden="true">
+          <i ref={barRef} />
+        </div>
+        <div className="st-reel-who">
+          <img src="/home/leaf-mark.webp" alt="" />
+          <b>সেরা খাবার</b>
+          <span>· প্রতিষ্ঠাতার কথা</span>
+        </div>
+      </div>
+      <p className="st-reel-foot">রাজশাহীর খেজুর বাগান থেকে, গুড় তৈরির গল্প</p>
+      {paused && shouldReduceMotion ? (
+        <button type="button" className="st-reel-play press" aria-label="ভিডিও চালু করুন" onClick={() => videoRef.current?.play()}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
+        </button>
+      ) : null}
+      <button
+        type="button"
+        className="st-reel-snd press"
+        aria-pressed={!muted}
+        aria-label={muted ? "শব্দ চালু করুন" : "শব্দ বন্ধ করুন"}
+        onClick={() => {
+          const video = videoRef.current;
+          if (!video) return;
+          video.muted = !video.muted;
+          setMuted(video.muted);
+          if (video.paused) video.play()?.catch(() => {});
+        }}
+      >
+        {muted ? (
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" /><path d="m22 9-6 6M16 9l6 6" /></svg>
+        ) : (
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /></svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
 function JaggeryStory() {
+  const steps = [
+    ["১", "ভোরে রস সংগ্রহ", "রাতভর জমা হওয়া টাটকা রস, সূর্য ওঠার আগেই।"],
+    ["২", "ধীরে জ্বাল", "বড় কড়াইয়ে ঘণ্টার পর ঘণ্টা, কোনো চিনি বা রং ছাড়া।"],
+    ["৩", "আপনার দরজায়", `ঢাকায় ${DHAKA_DAYS} দিন, সারা দেশে ${OUTSIDE_DAYS} দিনে।`],
+  ];
   return (
     <section className="st-row st-story">
-      <div className="st-cell st-story-art" data-reveal="">
-        <img src="/home/jaggery-ad.webp" alt="মাটির পাত্রে খেজুরের ঝোলা গুড় আর পাটালী" loading="lazy" decoding="async" data-reveal-img="" />
-      </div>
-      <div className="st-cell">
+      <div className="st-cell st-story-copy">
         <div className="st-lab" data-reveal="">আমাদের গল্প</div>
         <h2 className="display" data-reveal="">
           রস থেকে <b>পাটালী</b>
@@ -310,31 +408,19 @@ function JaggeryStory() {
           শীতের ভোরে রাজশাহীর গাছিরা খেজুরের রস নামান। সেদিনই সেই রস জ্বাল দিয়ে আমরা গুড় আর পাটালী বানাই, যেভাবে
           আমাদের দাদি-নানিরা বানাতেন।
         </p>
-        <div className="st-steps">
-          <div className="st-step" data-reveal="">
-            <span className="num">১</span>
-            <div>
-              <b>ভোরে রস সংগ্রহ</b>
-              <small>রাতভর জমা হওয়া টাটকা রস, সূর্য ওঠার আগেই।</small>
-            </div>
-          </div>
-          <div className="st-step" data-reveal="">
-            <span className="num">২</span>
-            <div>
-              <b>ধীরে জ্বাল</b>
-              <small>বড় কড়াইয়ে ঘণ্টার পর ঘণ্টা, কোনো চিনি বা রং ছাড়া।</small>
-            </div>
-          </div>
-          <div className="st-step" data-reveal="">
-            <span className="num">৩</span>
-            <div>
-              <b>আপনার দরজায়</b>
-              <small>
-                ঢাকায় {DHAKA_DAYS} দিন, সারা দেশে {OUTSIDE_DAYS} দিনে।
-              </small>
-            </div>
-          </div>
-        </div>
+        <ul className="st-story-list">
+          {steps.map(([n, title, text]) => (
+            <li key={n} data-reveal="">
+              <span className="num">{n}</span>
+              <span>
+                <b>{title}</b> — <span className="st-soft">{text}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="st-cell st-story-art">
+        <FounderReel />
       </div>
     </section>
   );
