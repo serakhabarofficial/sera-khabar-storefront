@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore, type CSSProperties } from "react";
-import { X } from "lucide-react";
+import { Phone, X } from "lucide-react";
 import { useReducedMotion } from "framer-motion";
 import { toBanglaDigits } from "@/lib/bangla-digits";
 
@@ -87,6 +87,46 @@ function HandsetIcon() {
     <svg width="16" height="22" viewBox="7 1 11 22" aria-hidden="true" focusable="false">
       <path fill="currentColor" d="M15 2a1 1 0 0 0-1 1v3h-4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h5c1.11 0 2-.89 2-2V8c0-.74-.4-1.38-1-1.72V3a1 1 0 0 0-1-1m-5 6h5v5h-5zm0 7h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1z" />
     </svg>
+  );
+}
+
+// The phone menu's contact card (chosen 2026-10-20, "গ · সিল কার্ড", docs/design/2026-10-20-menu-contact/): a warm card
+// fronted by the dock's seal with the same ringing phone, then Call and WhatsApp as two pills. The numbers live in
+// the buttons' accessible names rather than as visible text.
+export function MenuContactCard({ style }: { style?: CSSProperties }) {
+  const still = Boolean(useReducedMotion());
+  return (
+    <div className="stm-contact" style={style}>
+      <span className="stm-seal" aria-hidden="true">
+        <svg className="sk-contact-shape" viewBox="0 0 66 66" focusable="false">
+          <path d={SEAL_EDGE} />
+          <circle cx="33" cy="33" r="23" />
+        </svg>
+        <span className="sk-contact-ic">
+          <RingingPhoneIcon still={still} />
+        </span>
+      </span>
+      <p className="display stm-contact-title">
+        সরাসরি <b>অর্ডার</b>
+      </p>
+      <p className="stm-contact-sub">কল বা মেসেজ, যেটা সহজ</p>
+      <div className="stm-contact-acts">
+        <a href={PHONE_HREF} className="stm-contact-call press" aria-label={`কল করুন: ${toBanglaDigits("01310-980289")}`}>
+          <Phone size={17} strokeWidth={1.6} aria-hidden="true" />
+          কল করুন
+        </a>
+        <a
+          href={`https://api.whatsapp.com/send/?phone=${WHATSAPP_NUMBER}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="press"
+          aria-label={`হোয়াটসঅ্যাপ: ${toBanglaDigits("01303-103540")}`}
+        >
+          <img src={WHATSAPP_LOGO} alt="" width={19} height={19} />
+          হোয়াটসঅ্যাপ
+        </a>
+      </div>
+    </div>
   );
 }
 

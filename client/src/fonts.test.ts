@@ -61,7 +61,8 @@ test("numerals use Geist with a Bangla fallback, and Atma is retired", () => {
   assert.match(posterCss, /\.sk \.c-price \{[^}]*font-variant-numeric: tabular-nums;/);
 
   const numeralRules = posterSource_numeralRules();
-  assert.ok(numeralRules.length >= 18, `expected the numeral face across every rule, found ${numeralRules.length}`);
+  // 15 since the English cart (2026-10-20): its prices are Latin digits in plain Geist, so the cart's rules left this set.
+  assert.ok(numeralRules.length >= 15, `expected the numeral face across every rule, found ${numeralRules.length}`);
   for (const rule of numeralRules) {
     assert.match(rule, /font-family: "Geist", "Noto Serif Bengali", serif;/);
   }

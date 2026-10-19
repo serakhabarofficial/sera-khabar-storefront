@@ -7,7 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
-import { DockContactCard, DockContactSeal } from "@/components/dock-contact";
+import { DockContactCard, DockContactSeal, MenuContactCard } from "@/components/dock-contact";
 import { BagIcon } from "@/components/bag-icon";
 import { PageContentTransition } from "@/components/page-transition";
 import { Drawer } from "vaul";
@@ -399,16 +399,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                 ))}
               </nav>
-              <div className="stm-contact" style={{ "--i": 6 } as CSSProperties}>
-                <a href="tel:+8801310980289" className="press">
-                  <span>কল করুন</span>
-                  <b className="num">০১৩১০-৯৮০২৮৯</b>
-                </a>
-                <a href={CONTACT_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer" className="press">
-                  <span>হোয়াটসঅ্যাপ</span>
-                  <b className="num">০১৩০৩-১০৩৫৪০</b>
-                </a>
-              </div>
+              <MenuContactCard style={{ "--i": 6 } as CSSProperties} />
             </div>
           </Drawer.Content>
         </Drawer.Portal>

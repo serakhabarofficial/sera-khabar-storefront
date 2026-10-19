@@ -7,43 +7,74 @@ const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "ut
 
 const rule = (selector: string) => posterSource.slice(posterSource.indexOf(`${selector} {`)).split("}")[0];
 
-test("the cart uses Geist with the Bengali fallback face", () => {
-  assert.match(posterSource, /\.skc \{[^}]*font-family: "Geist", "Noto Serif Bengali", serif;/);
-  for (const selector of [".skc-title", ".skc-info h3", ".skc-empty h3", ".skc-add h4"]) {
-    assert.match(rule(selector), /font-family: "Geist", "Noto Serif Bengali", serif;/);
+test("the cart uses Geist, with Noto Serif Bengali only as the fallback for Bangla names (2026-10-20)", () => {
+  assert.match(posterSource, /\.skc \{[^}]*font-family: "Geist", "Noto Serif Bengali", sans-serif;/s);
+  for (const selector of [".skc-title", ".skc-info h3", ".skc-add h4", ".skc-sum h3", ".skc-empty h3"]) {
+    assert.match(rule(selector), /font-family: "Geist", sans-serif;/, selector);
   }
+  assert.match(rule(".skc-bn"), /font-family: "Noto Serif Bengali", serif;/);
   const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
   assert.match(html, /family=Geist:wght@100\.\.900/);
   assert.match(html, /family=Noto\+Serif\+Bengali:wght@300;400;500;600;700;800;900/);
 });
 
-test("cart prices and quantity digits use the numeral face", () => {
-  for (const selector of [".skc-price", ".skc-qty span", ".skc-total", ".skc-card-price"]) {
-    assert.match(rule(selector), /font-family: "Geist", "Noto Serif Bengali", serif;/);
-    assert.match(rule(selector), /tabular-nums/);
+test("cart prices and quantities use tabular Latin digits with the taka sign", () => {
+  for (const selector of [".skc-price", ".skc-qty span", ".skc-total", ".skc-card-price", ".skc-ms-lab"]) {
+    assert.match(rule(selector), /tabular-nums/, selector);
   }
+  assert.match(cartDrawerSource, /const formatAmount = \(amount: number\) => `৳\$\{amount\.toLocaleString\("en-IN"\)\}`;/);
+  assert.doesNotMatch(cartDrawerSource, /toBanglaDigits|formatTaka/);
 });
 
-test("the cart speaks Bangla like the rest of the store (2026-10-19, এক নজরে)", () => {
-  assert.match(cartDrawerSource, /<Drawer\.Title className="sr-only">ব্যাগ<\/Drawer\.Title>/);
-  assert.match(cartDrawerSource, /ব্যাগ এখনও খালি/);
-  assert.match(cartDrawerSource, /অর্ডার <i aria-hidden="true" \/>/);
-  assert.doesNotMatch(cartDrawerSource, /Your cart|Proceed to Checkout|Continue Shopping/);
+test("the cart speaks English (2026-10-20, ঘর × রেফারেন্স — English)", () => {
+  assert.match(cartDrawerSource, /<Drawer\.Title className="sr-only">Bag<\/Drawer\.Title>/);
+  assert.match(cartDrawerSource, /Your bag is empty/);
+  assert.match(cartDrawerSource, /Place order\s*<\/button>/);
+  assert.match(cartDrawerSource, /Add <b>\{formatAmount\(freeDeliveryLeft\)\}<\/b> more for <b>free delivery<\/b>/);
+  assert.doesNotMatch(cartDrawerSource, /ব্যাগ এখনও খালি|এর সাথে যোগ করুন|অর্ডার <i/);
+  // Rows lead with the English product name and keep the Bangla one beneath.
+  assert.match(cartDrawerSource, /<h3>\{english\}<\/h3>/);
+  assert.match(cartDrawerSource, /\{bangla && <div className="skc-bn">\{bangla\}<\/div>\}/);
 });
 
-test("every cart row has its own always-visible remove button", () => {
+test("every cart row has its own always-visible Remove button", () => {
   const row = cartDrawerSource.slice(cartDrawerSource.indexOf('className="skc-row"'), cartDrawerSource.indexOf("</motion.li>"));
-  assert.match(row, /onClick=\{\(\) => removeFromCart\(item\.id\)\} aria-label=\{`\$\{name\} বাদ দিন`\}/);
-  assert.match(rule(".skc-remove"), /width: 36px; height: 36px;/);
+  assert.match(row, /onClick=\{\(\) => removeFromCart\(item\.id\)\} aria-label=\{`Remove \$\{english\}`\}/);
   assert.doesNotMatch(rule(".skc-remove"), /opacity: 0|display: none/);
 });
 
-test("the add-on rail is titled এর সাথে যোগ করুন and only offers sellable products", () => {
-  assert.match(cartDrawerSource, /<h4 id="skc-add-title">এর সাথে যোগ করুন<\/h4>/);
-  assert.doesNotMatch(cartDrawerSource, /এর সাথে নিন|সবাই নেয়/);
+test("each row can switch size in place, and offers the bigger pack when it is cheaper", () => {
+  assert.match(cartDrawerSource, /<label className="skc-size">\s*<select/);
+  assert.match(cartDrawerSource, /swapVariant\(item\.id, toCartProduct\(product, option\), option\.label, quantity, keep\)/);
+  // Switching two 500 g packs to one 1 kg pack keeps an odd one as 500 g.
+  assert.match(cartDrawerSource, /changeSize\(item, upgrade\.option, Math\.floor\(item\.quantity \/ 2\), item\.quantity % 2\)/);
+  // Rows are keyed by product, so a size switch updates the row instead of folding it out and in.
+  assert.match(cartDrawerSource, /return `\$\{item\.productUuid\}:\$\{n\}`;/);
+  const cartContext = readFileSync(new URL("../contexts/cart-context.tsx", import.meta.url), "utf8");
+  assert.match(cartContext, /const swapVariant = \(itemId: string, product: AddToCartProduct, size: string, quantity: number, keep = 0\) =>/);
+});
+
+test("the add-on rail is titled Add to your order and only offers sellable products", () => {
+  assert.match(cartDrawerSource, /<h4 id="skc-add-title">Add to your order<\/h4>/);
   assert.match(cartDrawerSource, /if \(product\.available === false \|\| !productUuid \|\| !variantId\) continue;/);
   // Sideways scrolling inside the drawer must not drag it shut.
   assert.match(cartDrawerSource, /<ul className="skc-rail" data-vaul-no-drag>/);
+  // The homepage's beige pill, with the header's handbag.
+  assert.match(cartDrawerSource, /<span className="l1"><BagIcon className="skc-plus-ic" \/>Add<\/span>/);
+});
+
+test("the add-on that alone unlocks free delivery wears a round stamp", () => {
+  assert.match(cartDrawerSource, /suggestions\.filter\(\(suggestion\) => suggestion\.amount >= freeDeliveryLeft\)/);
+  assert.match(cartDrawerSource, /aria-label="Unlocks free delivery"/);
+  assert.match(rule(".skc-stamp"), /border-radius: 50%;/);
+  assert.match(rule(".skc-stamp"), /transform: rotate\(-12deg\);/);
+});
+
+test("the free-delivery milestone scrolls with the bag and hands over to a line on the header", () => {
+  const body = cartDrawerSource.slice(cartDrawerSource.indexOf('className="skc-body"'));
+  assert.match(body, /<div ref=\{milestoneRef\} className=\{`skc-ms/);
+  assert.match(cartDrawerSource, /new IntersectionObserver\(\(\[entry\]\) => setPastMilestone\(!entry\.isIntersecting\), \{ root: body \}\)/);
+  assert.match(cartDrawerSource, /className=\{`skc-mini\$\{pastMilestone \? " on" : ""\}`\}/);
 });
 
 test("the free-delivery line follows checkout's rule", () => {
@@ -51,9 +82,10 @@ test("the free-delivery line follows checkout's rule", () => {
   assert.match(cartDrawerSource, /bundleHasFreeDeliveryProduct\(cartOrder\)/);
 });
 
-test("shows taka amounts with the taka sign, not the BDT code", () => {
-  assert.match(cartDrawerSource, /formatTaka\(subtotal\)/);
-  assert.doesNotMatch(cartDrawerSource, /BDT \{subtotal/);
+test("shows the total with the taka sign, including delivery like checkout does", () => {
+  assert.match(cartDrawerSource, /formatAmount\(total\)/);
+  assert.match(cartDrawerSource, /const total = subtotal \+ \(freeDeliveryLeft > 0 \? POLICY_FACTS\.deliveryCharge : 0\);/);
+  assert.doesNotMatch(cartDrawerSource, /BDT \{/);
 });
 
 test("desktop cart is the same Vaul drawer as phones, as a floating right panel (2026-10-13)", () => {
@@ -62,17 +94,17 @@ test("desktop cart is the same Vaul drawer as phones, as a floating right panel 
   assert.doesNotMatch(cartDrawerSource, /SheetContent/);
 });
 
-test("the whole cart is white, on phones and desktop (2026-10-20)", () => {
+test("the whole cart is white, with the total on a warm band (2026-10-20)", () => {
   assert.match(posterSource, /\.sk-cart-sheet, \.sk-panel-right \{ background: #fff; \}/);
   assert.match(rule(".skc-card"), /background: #fff;/);
-  assert.match(rule(".skc-row"), /background: #fff;/);
+  assert.match(rule(".skc-foot"), /background: #faf5f0;/);
 });
 
 test("adding from the rail moves the product into the bag with a fold-away animation", () => {
   assert.match(cartDrawerSource, /if \(inCart\.has\(productUuid\)\) continue;/);
   const rail = cartDrawerSource.slice(cartDrawerSource.indexOf('<ul className="skc-rail"'), cartDrawerSource.indexOf("</ul>", cartDrawerSource.indexOf('<ul className="skc-rail"')));
   assert.match(rail, /<AnimatePresence initial=\{false\}>/);
-  assert.match(rail, /\{\.\.\.railFold\}/);
+  assert.match(rail, /\{\.\.\.railFold\(tileWidth\)\}/);
   // Animated boxes carry no padding: a padded box can't fold to 0 and jumps at the end.
   assert.doesNotMatch(rule(".skc-card-slot"), /padding/);
   assert.doesNotMatch(rule(".skc-item"), /padding/);
