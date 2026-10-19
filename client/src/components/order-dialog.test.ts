@@ -70,6 +70,14 @@ test("the checkout header matches the Stage logo sizes and its 860px mobile brea
 test("the ordered items sit in a highlighted card above the form", () => {
   assert.match(dialogSource, /<div className="skx-order">\n\s+<div className="skx-label-row">\n\s+<span>আপনার পছন্দের খাবার<\/span>[\s\S]*?<\/ul>\n\s+<\/div>\n\n\s+<form/);
   assert.match(pageCss, /\.skx-order \{[^}]*border-radius: 14px; background: rgba\(241, 229, 211, \.62\);/);
+  // Plain white page, header, memo paper and fields, like the rest of the site (no dot grid).
+  const skxStart = pageCss.indexOf("\n.skx {");
+  const skx = pageCss.slice(skxStart, pageCss.indexOf("}", skxStart));
+  assert.match(skx, /--rice: #fff;/);
+  assert.match(skx, /--paper: #fff;/);
+  assert.doesNotMatch(skx, /background-image/);
+  assert.match(pageCss, /\.skx-header \{ background: #fff;/);
+  assert.doesNotMatch(pageCss, /#fffefa/);
 });
 
 test("the price shares the quantity stepper's row, so both sit on one centre line", () => {
