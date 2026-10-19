@@ -1,7 +1,7 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { flushSync } from "react-dom";
-import useEmblaCarousel from "embla-carousel-react";
+import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import "@videojs/react/video/skin.css";
 import { Gesture, PlayButton } from "@videojs/react";
 import { Video, VideoPlayer, VideoSkin } from "@videojs/react/video";
@@ -91,6 +91,50 @@ const DELIVERY_POINTS = [
 ];
 const STRIP_ITEMS = ["ক্যাশ অন ডেলিভারি", "সারাদেশে ডেলিভারি", `৳${toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}+ অর্ডারে ফ্রি ডেলিভারি`, "রাজশাহী থেকে", "সেরা খাবার"];
 
+// Owns the "which photo" state, so a swipe re-renders these few buttons instead of
+// the whole product page. That page-wide re-render landed on the first frames of
+// every slide and dropped ~4 frames (67-83ms) at 4x CPU throttle.
+function GalleryCapsule({ api, images, srcSetFor }: { api: UseEmblaCarouselType[1]; images: string[]; srcSetFor: Record<string, string> }) {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    const sync = () => setActive(api.selectedScrollSnap());
+    sync();
+    api.on("select", sync);
+    api.on("reInit", sync);
+    return () => {
+      api.off("select", sync);
+      api.off("reInit", sync);
+    };
+  }, [api]);
+
+  return (
+    <div className="skp-capsule">
+      {images.map((url, idx) => (
+        <button
+          key={url}
+          type="button"
+          onClick={() => api?.scrollTo(idx)}
+          aria-label={`ছবি ${toBanglaDigits(idx + 1)}`}
+          aria-current={active === idx}
+        >
+          <img
+            src={url}
+            srcSet={srcSetFor[url]}
+            sizes={srcSetFor[url] ? "38px" : undefined}
+            alt=""
+            width={38}
+            height={38}
+            draggable={false}
+            decoding="async"
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ProductSkeleton() {
   return (
     <div className="min-h-screen bg-white">
@@ -154,7 +198,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   const [quantity, setQuantity] = useState(1);
   const [availabilityBlocked, setAvailabilityBlocked] = useState(false);
 
-  const [activeImage, setActiveImage] = useState(0);
   const [currentReel, setCurrentReel] = useState(0);
   // The Video.js player (with sound) mounts only after a tap. Until then every reel
   // plays as a plain muted loop while the section is on screen.
@@ -173,6 +216,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
     containScroll: false,
     loop: false,
     skipSnaps: false,
+    duration: 30,
   });
   const [reelRef, reelApi] = useEmblaCarousel({
     align: "start",
@@ -523,24 +567,8 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   }, [isLoading, product, selectedBundle.amount, displayImage, displayGallery]);
 
   useEffect(() => {
-    if (!galleryApi) return;
-
-    const syncActiveImage = () => setActiveImage(galleryApi.selectedScrollSnap());
-
-    galleryApi.scrollTo(0, true);
-    syncActiveImage();
-    galleryApi.on("select", syncActiveImage);
-    galleryApi.on("reInit", syncActiveImage);
-
-    return () => {
-      galleryApi.off("select", syncActiveImage);
-      galleryApi.off("reInit", syncActiveImage);
-    };
+    galleryApi?.scrollTo(0, true);
   }, [galleryApi, displayGallery.length]);
-
-  const goToImage = (idx: number) => {
-    galleryApi?.scrollTo(idx);
-  };
 
   const orderBundle: OrderDialogBundle | null = product ? {
         title: product.name,
@@ -657,8 +685,10 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                           width={1080}
                           height={1080}
                           draggable={false}
-                          loading={idx === 0 ? "eager" : "lazy"}
-                          fetchPriority={idx === 0 ? "high" : undefined}
+                          // Off-screen slides are clipped, so lazy ones would only start loading
+                          // and decoding mid-swipe. The first few load up front, at low priority.
+                          loading={idx < 3 ? "eager" : "lazy"}
+                          fetchPriority={idx === 0 ? "high" : "low"}
                           decoding="async"
                         />
                       </div>
@@ -669,29 +699,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
                 <div className="skp-noimg">No image</div>
               )}
               {displayGallery.length > 1 ? (
-                <div className="skp-capsule">
-                  {displayGallery.map((url, idx) => (
-                    <button
-                      key={url}
-                      type="button"
-                      onClick={() => goToImage(idx)}
-                      aria-label={`ছবি ${toBanglaDigits(idx + 1)}`}
-                      aria-current={activeImage === idx}
-                    >
-                      <img
-                        src={url}
-                        srcSet={srcSetFor[url]}
-                        sizes={srcSetFor[url] ? "38px" : undefined}
-                        alt=""
-                        width={38}
-                        height={38}
-                        draggable={false}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </button>
-                  ))}
-                </div>
+                <GalleryCapsule api={galleryApi} images={displayGallery} srcSetFor={srcSetFor} />
               ) : null}
             </div>
             {hasMosaic ? (
