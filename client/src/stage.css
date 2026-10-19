@@ -189,20 +189,25 @@
 .st-card-pr s { font-size: 13px; color: var(--st-soft); margin-left: 6px; }
 .st-card-pr small { font-family: var(--st-sans); font-size: 11.5px; color: var(--st-soft); margin-left: 4px; }
 .st-card-sold { position: absolute; left: 14px; top: 14px; font-size: 11.5px; padding: 2px 9px; border: 1px solid var(--st-line); border-radius: 999px; color: var(--st-soft); background: #fff; }
-/* Quick add: revealed under a pointer, always shown on touch */
-.st-add { position: absolute; right: 14px; top: 14px; z-index: 2; width: 34px; height: 34px; border: 1px solid var(--st-line) !important; border-radius: 50%; display: grid; place-items: center; background: #fff !important; overflow: hidden;
-  transition: opacity 200ms var(--st-ease-out), transform 200ms var(--st-ease-out), background-color 200ms ease, color 200ms ease; }
-.st-add:active { transform: scale(0.92); }
-.st-add:disabled { opacity: 0.35; cursor: default; }
+/* Add to cart (2026-10-20): a soft beige pill with the header's handbag, in the card's top-right corner, always shown.
+   Scoped under .st-card so it outranks the Stage button reset (.st button). */
+.st-card .st-add { position: absolute; right: 12px; top: 12px; z-index: 2; height: 30px; padding: 0 11px; border-radius: 999px; display: grid; overflow: hidden;
+  background: #f5ebe2; color: var(--st-ink); font-family: var(--st-sans); font-size: 12px; font-weight: 500;
+  transition: transform 160ms var(--st-ease-out), background-color 200ms ease, color 200ms ease; }
+.st-card .st-add:disabled { opacity: 0.45; cursor: default; }
 .st-add .l1,
-.st-add .l2 { grid-area: 1 / 1; transition: transform 240ms var(--st-ease-out), opacity 240ms var(--st-ease-out); }
+.st-add .l2 { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
+  transition: transform 240ms var(--st-ease-out), opacity 240ms var(--st-ease-out); }
+.st-add-ico { width: 14px; height: 14px; flex: none; }
 .st-add .l2 { transform: translateY(110%); opacity: 0; }
+.st-card .st-add.added { background: var(--st-ink); color: #fff; }
 .st-add.added .l1 { transform: translateY(-110%); opacity: 0; }
 .st-add.added .l2 { transform: none; opacity: 1; }
 @media (hover: hover) and (pointer: fine) {
-  .st-add:not(.added):not(:focus-visible) { opacity: 0; transform: scale(0.92); }
-  .st-card:hover .st-add { opacity: 1; transform: none; }
-  .st-add:not(:disabled):hover { background: var(--st-ink) !important; color: #fff; border-color: var(--st-ink) !important; }
+  .st-card .st-add:not(:disabled):hover { background: var(--st-ink); color: #fff; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-add .l1, .st-add .l2 { transform: none !important; transition: opacity 200ms ease; }
 }
 
 /* Recently viewed: the same cells in a snapping row */
