@@ -51,8 +51,13 @@ test("tells the day from dawn sap to noon patali, opening on the dawn clip from 
   // The clip is muted, inline and looping, and only plays while its panel shows.
   assert.match(homeSource, /src=\{DAY_DAWN\.src\}\s+poster=\{DAY_DAWN\.poster\}\s+muted\s+autoPlay=\{!shouldReduceMotion\}\s+loop\s+playsInline/);
   assert.match(homeSource, /if \(active === 0 && !shouldReduceMotion\) video\.play\(\)/);
-  // Steps on by itself, but never under reduced motion or while the pointer rests on a panel.
-  assert.match(homeSource, /if \(shouldReduceMotion \|\| held \|\| steps\.length < 2\) return;/);
+  // The story bar is the clock: it fills smoothly, and its end opens the next moment. Hover pauses it; reduced motion has none.
+  assert.match(homeSource, /data-run=\{\(bar === active && !shouldReduceMotion && steps\.length > 1\) \|\| undefined\}\s*onAnimationEnd=\{bar === active \? next : undefined\}/);
+  assert.match(homeSource, /style=\{\{ "--dur": `\$\{duration\}ms` \} as CSSProperties\}/);
+  assert.match(stageCss, /\.st-day-panels\[data-held\] \.st-day-bars i\[data-run\]::after \{ animation-play-state: paused; \}/);
+  // Phones slide the next moment in like a story, and the time line fills from dot to dot.
+  assert.match(stageCss, /\.st-day-pn\[data-prev\] \{ z-index: 1; transform: translateX\(-28%\);/);
+  assert.match(stageCss, /\.st-day-fill\[data-run\] \{ animation: st-day-line var\(--dur\) linear forwards; \}/);
   // Product panels hold only the story; name, photo and price come from the live catalog, and a missing product drops out.
   const steps = homeSource.slice(homeSource.indexOf("const DAY_STEPS"), homeSource.indexOf("];", homeSource.indexOf("const DAY_STEPS")));
   assert.doesNotMatch(steps, /price|৳\d|[০-৯]{3}/);

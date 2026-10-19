@@ -95,13 +95,18 @@
 .st-day-bars i[data-run]::after { animation: st-day-fill var(--dur) linear forwards; }
 .st-day-panels[data-held] .st-day-bars i[data-run]::after { animation-play-state: paused; }
 @keyframes st-day-fill { to { transform: scaleX(1); } }
+/* Each moment's photo or clip settles in from a slight zoom as it opens, as a story frame does. */
+.st-day-pn[data-on] > img,
+.st-day-pn[data-on] > video { animation: st-day-in 900ms var(--st-ease-out); }
+@keyframes st-day-in { from { transform: scale(1.06); } }
 .st-day-line { display: none; }
 @media (max-width: 760px) {
   .st-day-top { grid-template-columns: 1fr; padding-bottom: 18px; }
   .st-day-top .st-btn { justify-self: start; }
   .st-day-line { display: block; position: relative; height: 96px; margin: 0 var(--st-pad) 8px; }
   .st-day-line::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--st-line); }
-  .st-day-fill { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--st-ink); transform-origin: left; transition: transform 560ms var(--st-ease-in-out); }
+  .st-day-fill { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--st-ink); transform-origin: left; }
+  .st-day-fill[data-run] { animation: st-day-line var(--dur) linear forwards; }
   .st .st-day-line button { position: absolute; top: 0; bottom: 0; width: 44px; margin-left: -22px; }
   .st-day-dot { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; border: 1px solid var(--st-ink); background: #fff; transition: background-color 200ms ease, border-color 200ms ease; }
   .st-day-line button[data-past] .st-day-dot { background: var(--st-ink); }
@@ -113,10 +118,16 @@
   .st-day-line button:first-of-type .st-day-lb { left: 22px; transform: none; text-align: left; }
   .st-day-line button:last-of-type .st-day-lb { left: 22px; transform: translateX(-100%); text-align: right; }
   .st-day-line button[data-on] .st-day-lb { color: #c2410c; }
-  .st-day-panels { height: auto; aspect-ratio: 4 / 5; gap: 0; }
-  .st-day-pn { flex: 0 0 0; opacity: 0; transition: opacity 300ms var(--st-ease-out); }
-  .st-day-pn[data-on] { flex: 1 1 100%; opacity: 1; }
+  /* Story slide: the next moment comes in from the right over the last, which eases left and dims. */
+  .st-day-panels { position: relative; display: block; height: auto; aspect-ratio: 4 / 5; padding: 0; margin: 0 var(--st-pad) var(--st-pad); overflow: hidden; }
+  .st-day-pn { position: absolute; inset: 0; transform: translateX(100%); transition: none; }
+  .st-day-pn[data-on] { z-index: 2; transform: none; transition: transform 520ms var(--st-ease-in-out); }
+  .st-day-pn[data-prev] { z-index: 1; transform: translateX(-28%); transition: transform 520ms var(--st-ease-in-out); }
+  .st-day-pn[data-prev]::before { content: ""; position: absolute; inset: 0; z-index: 3; background: #1e0d06; opacity: 0.35; animation: st-day-dim 520ms var(--st-ease-in-out); }
+  .st-day-panels[data-reduced] .st-day-pn { transition: none; }
 }
+@keyframes st-day-line { from { transform: scaleX(var(--from)); } to { transform: scaleX(var(--to)); } }
+@keyframes st-day-dim { from { opacity: 0; } }
 
 /* Categories: the live card silhouette (photo rising out of an offset card), on pale tints */
 .st-cats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -414,8 +425,10 @@ main:has(.st, .skp) { background-color: #fff !important; }
   .st-mq-set { flex-wrap: wrap; justify-content: center; row-gap: 10px; }
   .st-mq-set + .st-mq-set { display: none; }
   .st-day-pn,
-  .st-day-more,
-  .st-day-fill { transition: none; }
+  .st-day-more { transition: none; }
+  .st-day-pn[data-on] > img,
+  .st-day-pn[data-on] > video,
+  .st-day-pn[data-prev]::before { animation: none; }
   .st-tabs-over { transition: none; }
   .st-card-img img,
   .st-cc img,
