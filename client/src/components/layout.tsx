@@ -69,6 +69,11 @@ const MEMO_SHOP_LINKS = [
 // Every help page, listed in the footer's "সহায়তা ও নীতিমালা" column.
 const CONTACT_WHATSAPP_HREF = "https://api.whatsapp.com/send/?phone=8801303103540";
 
+// Routes rendered in the white Stage design (.st / .skp roots).
+export function isStagePage(path: string) {
+  return path === "/" || /^\/(products|collection\/[^/]+|product\/[^/]+)\/?$/.test(path);
+}
+
 const POLICY_LINKS = [
   ["গোপনীয়তা নীতি", "/privacy-policy"],
   ["রিফান্ড ও রিটার্ন", "/refund-return-exchange"],
@@ -410,7 +415,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <CartAddedToast />
 
       {/* Subtle Depth moves content only; fixed navigation and drawers stay outside. */}
-      <main className="flex-grow overflow-hidden bg-[#faf4ea]">
+      {/* Stage pages (home, all products, collections, product) keep <main> white so short pages don't show cream
+          above the footer. Decided from the route: a CSS main:has(.st, .skp) rule did the same but made every
+          element added or removed anywhere (cart rows, rail cards) restyle the whole page, which stuttered on Chrome iOS. */}
+      <main className={`flex-grow overflow-hidden ${isStagePage(location) ? "bg-white" : "bg-[#faf4ea]"}`}>
         <PageContentTransition>{children}</PageContentTransition>
       </main>
 
