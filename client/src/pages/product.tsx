@@ -101,35 +101,79 @@ function PhoneGallery({ images, srcSetFor, name }: { images: string[]; srcSetFor
   const stripRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
+  const touching = useRef(false);
+  const startIndex = useRef(0);
+  const settleTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(settleTimer.current), []);
+
   const syncActive = (el: HTMLDivElement) => setActive(Math.round(el.scrollLeft / Math.max(el.clientWidth, 1)));
   const goTo = (idx: number) => {
     const el = stripRef.current;
     el?.scrollTo({ left: idx * el.clientWidth, behavior: reduceMotion ? "auto" : "smooth" });
   };
+  // Backup for scroll-snap: some iPhone browsers can leave the strip resting between two
+  // photos. Once the scroll has stopped and no finger is down, finish the move: one photo
+  // in the swipe's direction if it went past 15%, otherwise back. A clean snap is a no-op.
+  const finishSwipe = () => {
+    const el = stripRef.current;
+    if (!el || touching.current) return;
+    const width = el.clientWidth;
+    if (!width) return;
+    const at = el.scrollLeft / width;
+    if (Math.abs(at - Math.round(at)) < 0.01) return;
+    const from = startIndex.current;
+    const moved = at - from;
+    const target = moved > 0.15 ? from + 1 : moved < -0.15 ? from - 1 : from;
+    goTo(Math.max(0, Math.min(images.length - 1, target)));
+  };
+  const scheduleFinish = () => {
+    window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(finishSwipe, 140);
+  };
+  const onTouchStart = () => {
+    touching.current = true;
+    window.clearTimeout(settleTimer.current);
+    const el = stripRef.current;
+    if (el) startIndex.current = Math.round(el.scrollLeft / Math.max(el.clientWidth, 1));
+  };
+  const onTouchEnd = () => {
+    touching.current = false;
+    scheduleFinish();
+  };
 
   return (
     <>
-      <div ref={stripRef} className="skp-gallery" data-page-settle="" onScroll={(e) => syncActive(e.currentTarget)}>
-        <div className="skp-gallery-track">
-          {images.map((url, idx) => (
-            <div key={url} className="skp-slide">
-              <img
-                src={url}
-                srcSet={srcSetFor[url]}
-                sizes={srcSetFor[url] ? "(min-width: 760px) 560px, 92vw" : undefined}
-                alt={idx === 0 ? name : `${name} ${idx + 1}`}
-                width={1080}
-                height={1080}
-                draggable={false}
-                // Off-screen slides are clipped, so lazy ones would only start loading
-                // and decoding mid-swipe. The first few load up front, at low priority.
-                loading={idx < 3 ? "eager" : "lazy"}
-                fetchPriority={idx === 0 ? "high" : "low"}
-                decoding="async"
-              />
-            </div>
-          ))}
-        </div>
+      <div
+        ref={stripRef}
+        className="skp-gallery"
+        data-page-settle=""
+        onScroll={(e) => {
+          syncActive(e.currentTarget);
+          scheduleFinish();
+        }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+      >
+        {images.map((url, idx) => (
+          <div key={url} className="skp-slide">
+            <img
+              src={url}
+              srcSet={srcSetFor[url]}
+              sizes={srcSetFor[url] ? "(min-width: 760px) 560px, 92vw" : undefined}
+              alt={idx === 0 ? name : `${name} ${idx + 1}`}
+              width={1080}
+              height={1080}
+              draggable={false}
+              // Off-screen slides are clipped, so lazy ones would only start loading
+              // and decoding mid-swipe. The first few load up front, at low priority.
+              loading={idx < 3 ? "eager" : "lazy"}
+              fetchPriority={idx === 0 ? "high" : "low"}
+              decoding="async"
+            />
+          </div>
+        ))}
       </div>
       {images.length > 1 ? (
         <div className="skp-capsule">

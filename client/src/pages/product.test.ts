@@ -222,7 +222,11 @@ test("phones pick a photo from round thumbnails in a capsule instead of dots", (
 test("the phone gallery swipe stays smooth on real phones", () => {
   // The active photo lives in PhoneGallery, so a swipe doesn't re-render the whole page.
   assert.match(productSource, /<PhoneGallery key=\{displayGallery\.join\(" "\)\} images=\{displayGallery\}/);
-  assert.match(productSource, /className="skp-gallery" data-page-settle="" onScroll=/);
+  assert.match(productSource, /className="skp-gallery"\s+data-page-settle=""\s+onScroll=/);
+  // Slides are direct snap children, and a swipe left between photos is finished in JS.
+  assert.doesNotMatch(productSource, /skp-gallery-track/);
+  assert.match(productSource, /const target = moved > 0\.15 \? from \+ 1 : moved < -0\.15 \? from - 1 : from;/);
+  assert.match(posterSource, /\.skp-gallery \{[^}]*border-radius: inherit;/);
   // The photos scroll natively instead of being moved by JavaScript, so Chrome on iPhone and
   // the Facebook/Messenger browsers (which inject their own scripts) swipe as smoothly as Safari.
   assert.doesNotMatch(productSource, /galleryApi/);
