@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Minus, Play, Plus, VolumeX } from "lucide-re
 import { useQuery } from "@tanstack/react-query";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
 import RecentlyViewed from "@/components/recently-viewed";
-import { useCart } from "@/contexts/cart-context";
+import { useAddToCart } from "@/contexts/cart-context";
 import Layout from "@/components/layout";
 import { useDockContactProduct } from "@/components/dock-contact";
 import { ProductMosaic } from "@/components/product-mosaic";
@@ -260,7 +260,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
   const honeyNutReelMedia = slug === "honey-nut" ? HONEY_NUT_REEL_MEDIA : null;
   const reelMedia = honeyNutReelMedia ? honeyNutReelMedia : REEL_MEDIA;
   const reelCount = reelMedia.length;
-  const { addToCart } = useCart();
+  const addToCart = useAddToCart();
   const [orderOpen, setOrderOpen] = useState(false);
   const [selectedBundleIdx, setSelectedBundleIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);

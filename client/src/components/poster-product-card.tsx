@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 
 import { BagIcon } from "@/components/bag-icon";
 import { formatCardAmount, getVariantLabel, selectDefaultVariant } from "@/components/home-product-card";
-import { useCart } from "@/contexts/cart-context";
+import { useAddToCart } from "@/contexts/cart-context";
 import { BanglaNumber } from "@/lib/bangla-digits";
 import { toGoogleAnalyticsItem } from "@/lib/google-analytics";
 import {
@@ -43,7 +43,7 @@ export default function PosterProductCard({
   const fixedVariant = catalogVariant
     ? product.variants?.find((item) => item.id === catalogVariant.id) ?? catalogVariant
     : undefined;
-  const { addToCart } = useCart();
+  const addToCart = useAddToCart();
   const [added, setAdded] = useState(false);
   const addedTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(addedTimer.current), []);

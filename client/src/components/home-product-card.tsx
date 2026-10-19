@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 
-import { useCart } from "@/contexts/cart-context";
+import { useAddToCart } from "@/contexts/cart-context";
 import { toGoogleAnalyticsItem } from "@/lib/google-analytics";
 import { getDefaultBundleIndex } from "@/lib/product-selection";
 import {
@@ -52,7 +52,7 @@ export function selectDefaultVariant(product: StorefrontProduct) {
 }
 
 export default function HomeProductCard({ product, className = "" }: HomeProductCardProps) {
-  const { addToCart } = useCart();
+  const addToCart = useAddToCart();
   const { src: image, srcSet: imageSrcSet } = getProductImageSet(product);
   // The card sells whichever variant it prices, so one variant drives both.
   // It resolves that variant exactly as the product page does — in-stock
