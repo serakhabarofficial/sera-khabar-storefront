@@ -85,6 +85,22 @@ test("drives every product section from the live catalog", () => {
   assert.doesNotMatch(homeSource, /price: \d|"৳\d|৳\d/);
 });
 
+test("tells the jaggery story beside the founder's reel, served from Cloudflare R2", () => {
+  assert.match(homeSource, /const FOUNDER_REEL = \{ src: "\/media\/story\/founder-reel-v1\.mp4", poster: "\/media\/story\/founder-reel-v1\.jpg" \};/);
+  // Muted, looping and inline, so phones play it with no tap; it plays only while on screen.
+  assert.match(homeSource, /<video\s+ref=\{videoRef\}\s+src=\{FOUNDER_REEL\.src\}\s+poster=\{FOUNDER_REEL\.poster\}\s+muted\s+loop\s+playsInline/);
+  assert.match(homeSource, /if \(entry\?\.isIntersecting\) video\.play\(\)/);
+  assert.match(homeSource, /aria-label=\{muted \? "শব্দ চালু করুন" : "শব্দ বন্ধ করুন"\}/);
+  const vercel = JSON.parse(readFileSync(new URL("../../../vercel.json", import.meta.url), "utf8"));
+  assert.deepEqual(vercel.rewrites[0], {
+    source: "/media/:path*",
+    destination: "https://pub-cfecc6eab1f44552a42789747b613cb7.r2.dev/:path*",
+  });
+  // Square and flat, as approved: no rounded corners or shadow on the reel.
+  const reel = stageCss.match(/\.st-reel \{([^}]+)\}/)?.[1] ?? "";
+  assert.doesNotMatch(reel, /border-radius|box-shadow/);
+});
+
 test("prices the আচার ad from catalog data and falls back to WhatsApp", () => {
   assert.match(homeSource, /<AcharAd product=\{homepageProducts\.find\(\(product\) => product\.slug === HOMEPAGE_AD_PRODUCT_SLUG\)\} \/>/);
   assert.match(homeSource, /const options = product \? getSizeOptions\(product\) : \[\];/);
@@ -100,5 +116,6 @@ test("follows the motion rules and respects reduced motion", () => {
   assert.match(stageCss, /@media \(prefers-reduced-motion: reduce\)/);
   // Sections reveal through the shared scroll reveal, not a homepage-only observer.
   assert.match(homeSource, /data-reveal=""/);
-  assert.doesNotMatch(homeSource, /IntersectionObserver/);
+  // (The reel's own observer only plays and pauses the video.)
+  assert.doesNotMatch(homeSource, /classList\.add\("in"\)|data-revealed/);
 });

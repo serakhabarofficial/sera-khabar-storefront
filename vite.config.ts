@@ -62,6 +62,15 @@ export default defineConfig({
   root: path.resolve(import.meta.dirname, "client"),
   envDir: import.meta.dirname,
   server: {
+    // Brand media lives in the Cloudflare R2 bucket sera-khabar-media; vercel.json rewrites /media/* to it in
+    // production, and this proxy does the same for the Vite dev server.
+    proxy: {
+      "/media": {
+        target: "https://pub-cfecc6eab1f44552a42789747b613cb7.r2.dev",
+        changeOrigin: true,
+        rewrite: (url) => url.replace(/^\/media/, ""),
+      },
+    },
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {

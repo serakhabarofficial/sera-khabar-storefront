@@ -2,6 +2,10 @@
   "regions": ["sin1"],
   "rewrites": [
     {
+      "source": "/media/:path*",
+      "destination": "https://pub-cfecc6eab1f44552a42789747b613cb7.r2.dev/:path*"
+    },
+    {
       "source": "/go/:slug",
       "destination": "/api/go?__campaign_slug=:slug"
     },
