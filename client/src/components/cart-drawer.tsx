@@ -25,37 +25,44 @@ import { MAX_LINE_QUANTITY } from "@shared/order-limits";
 // English copy, a free-delivery milestone, a size picker on every row, an "Add to your order" rail.
 
 const cartEase = [0.23, 1, 0.32, 1] as const;
-// Only transform and opacity animate (Emil Kowalski's rule): animating height or width re-lays-out the whole
-// sheet every frame, which Chrome on iOS can't keep up with (measured 2026-10-20: ~70 layouts per add/remove).
-// Rows and rail cards use AnimatePresence's popLayout: a leaving item is lifted out of the flow at once, and its
-// neighbours slide into the gap with a layout (FLIP) animation — one measurement, then transforms only.
-const slide = { duration: 0.34, ease: [0.4, 0, 0.2, 1] } as const;
-const rowMotion = {
-    layout: "position" as const,
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0, transition: { opacity: { duration: 0.26, delay: 0.08, ease: cartEase }, y: { duration: 0.34, delay: 0.08, ease: cartEase } } },
-    exit: { opacity: 0, scale: 0.98, transition: { duration: 0.18, ease: cartEase } },
-    transition: { layout: slide },
-};
+// Size changes (a row opening, a rail card folding away) move the things around
+// them, so they ease in and out instead of snapping most of the way at once.
+const foldEase = [0.4, 0, 0.2, 1] as const;
+const rowFold = {
+    initial: { opacity: 0, height: 0 },
+    animate: {
+        opacity: 1,
+        height: "auto",
+        transition: { height: { duration: 0.38, ease: foldEase }, opacity: { duration: 0.24, delay: 0.14, ease: "easeOut" } },
+    },
+    exit: {
+        opacity: 0,
+        height: 0,
+        transition: { opacity: { duration: 0.16, ease: "easeOut" }, height: { duration: 0.3, delay: 0.06, ease: foldEase } },
+    },
+} as const;
 const RAIL_GAP = 10;
-const cardMotion = {
-    layout: "position" as const,
-    initial: { opacity: 0, scale: 0.94 },
-    animate: { opacity: 1, scale: 1, transition: { duration: 0.28, delay: 0.1, ease: cartEase } },
-    exit: { opacity: 0, scale: 0.94, transition: { duration: 0.2, ease: cartEase } },
-    transition: { layout: slide },
-};
-// The "Add to your order" block only comes and goes when the catalog runs out of add-ons: a plain fade.
-const sectionFade = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.24, ease: cartEase } },
-    exit: { opacity: 0, transition: { duration: 0.16, ease: cartEase } },
-};
+// A rail slot folds its width (and the gap after it) shut, so the cards after it glide over.
+const railFold = (width: number) => ({
+    initial: { opacity: 0, scale: 0.94, width: 0, marginRight: -RAIL_GAP },
+    animate: {
+        opacity: 1,
+        scale: 1,
+        width,
+        marginRight: 0,
+        transition: { width: { duration: 0.32, ease: foldEase }, marginRight: { duration: 0.32, ease: foldEase }, opacity: { duration: 0.22, delay: 0.12 }, scale: { duration: 0.3, delay: 0.06, ease: cartEase } },
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.94,
+        width: 0,
+        marginRight: -RAIL_GAP,
+        transition: { opacity: { duration: 0.18, ease: "easeOut" }, scale: { duration: 0.22, ease: "easeOut" }, width: { duration: 0.32, delay: 0.06, ease: foldEase }, marginRight: { duration: 0.32, delay: 0.06, ease: foldEase } },
+    },
+} as const);
 // The Add label slides to "✓ Added" first; the card leaves after it, so the tap reads as cause, then effect.
 const ADD_CONFIRM_MS = 380;
 const MAX_SUGGESTIONS = 6;
-// Bag rows and rail cards request the same photo size, so a product added from the rail reuses the decoded image.
-const THUMB_SIZES = "160px";
 
 const cartPanelVariants: Variants = {
     closed: { opacity: 0 },
@@ -263,18 +270,10 @@ function CartInnerContent({
     const [confirming, setConfirming] = useState<Set<string>>(() => new Set());
     const timers = useRef<number[]>([]);
     useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
-    // A tapped control that is about to disappear hands focus to the bag body first (without scrolling), so the
-    // drawer's focus trap doesn't force a layout and a scroll in the animation's first frame.
-    const parkFocus = () => bodyRef.current?.focus({ preventScroll: true });
-    const removeRow = (item: CartItem) => {
-        parkFocus();
-        removeFromCart(item.id);
-    };
     const confirmAdd = (suggestion: Suggestion) => {
         if (confirming.has(suggestion.productUuid)) return;
         setConfirming((current) => new Set(current).add(suggestion.productUuid));
         timers.current.push(window.setTimeout(() => {
-            parkFocus();
             addSuggestion(suggestion);
             setConfirming((current) => {
                 const next = new Set(current);
@@ -327,7 +326,7 @@ function CartInnerContent({
                     )}
                 </motion.div>
 
-                <motion.div variants={cartSectionVariants} className="skc-body" ref={bodyRef} tabIndex={-1} layoutScroll>
+                <motion.div variants={cartSectionVariants} className="skc-body" ref={bodyRef}>
                     {items.length === 0 ? (
                         <div className="skc-empty">
                             <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -364,7 +363,7 @@ function CartInnerContent({
                             </div>
 
                             <ul className="skc-list">
-                                <AnimatePresence initial={false} mode="popLayout">
+                                <AnimatePresence initial={false}>
                                     {items.map((item, index) => {
                                         const { english, bangla } = getCartItemNames(item);
                                         const amount = getItemAmount(item);
@@ -372,11 +371,11 @@ function CartInnerContent({
                                         const upgrade = getUpgrade(item, options);
                                         const sizeText = englishSize(item.size);
                                         return (
-                                            <motion.li key={rowKeys[index]} {...rowMotion} className="skc-item">
+                                            <motion.li key={rowKeys[index]} {...rowFold} className="skc-item">
                                                 <div className="skc-row">
                                                     <div className="skc-img">
                                                         {/* The thumbnail takes the small size, not the full photo, so a new row doesn't download and decode 960px mid-animation. */}
-                                                        <img src={item.image} srcSet={thumbSrcSets.get(item.image)} sizes={thumbSrcSets.has(item.image) ? THUMB_SIZES : undefined} alt="" decoding="async" />
+                                                        <img src={item.image} srcSet={thumbSrcSets.get(item.image)} sizes={thumbSrcSets.has(item.image) ? "112px" : undefined} alt="" decoding="async" />
                                                     </div>
                                                     <div className="skc-info">
                                                         <div className="skc-top">
@@ -415,7 +414,7 @@ function CartInnerContent({
                                                         </p>
                                                         <div className="skc-ctl">
                                                             <div className="skc-qty">
-                                                                <button type="button" aria-label={`One less ${english}`} onClick={() => (item.quantity === 1 ? removeRow(item) : updateQuantity(item.id, item.quantity - 1))}>
+                                                                <button type="button" aria-label={`One less ${english}`} onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                                                                     <Minus className="w-3.5 h-3.5" />
                                                                 </button>
                                                                 <span>{item.quantity}</span>
@@ -423,7 +422,7 @@ function CartInnerContent({
                                                                     <Plus className="w-3.5 h-3.5" />
                                                                 </button>
                                                             </div>
-                                                            <button type="button" onClick={() => removeRow(item)} aria-label={`Remove ${english}`} className="skc-remove">
+                                                            <button type="button" onClick={() => removeFromCart(item.id)} aria-label={`Remove ${english}`} className="skc-remove">
                                                                 <Trash2 aria-hidden="true" />
                                                                 Remove
                                                             </button>
@@ -438,20 +437,20 @@ function CartInnerContent({
 
                             <AnimatePresence initial={false}>
                                 {suggestions.length > 0 && (
-                                    <motion.div key="skc-add" {...sectionFade} className="skc-add-fold">
+                                    <motion.div key="skc-add" {...rowFold} className="skc-add-fold">
                                         <section className="skc-add" aria-labelledby="skc-add-title">
                                             <div className="skc-add-head">
                                                 <h4 id="skc-add-title">Add to your order</h4>
                                                 <span>Ships in the same box</span>
                                             </div>
                                             {/* data-vaul-no-drag: sideways scrolling must not drag the drawer shut */}
-                                            <motion.ul className="skc-rail" data-vaul-no-drag layoutScroll>
-                                                <AnimatePresence initial={false} mode="popLayout">
+                                            <ul className="skc-rail" data-vaul-no-drag>
+                                                <AnimatePresence initial={false}>
                                                     {suggestions.map((suggestion) => {
                                                         const added = confirming.has(suggestion.productUuid);
                                                         const size = englishSize(suggestion.variantLabel);
                                                         return (
-                                                            <motion.li key={suggestion.productUuid} className="skc-card-slot" style={{ width: tileWidth }} {...cardMotion}>
+                                                            <motion.li key={suggestion.productUuid} className="skc-card-slot" {...railFold(tileWidth)}>
                                                                 <div className="skc-card">
                                                                     {stampedSuggestion === suggestion.productUuid && (
                                                                         <span className="skc-stamp" role="img" aria-label="Unlocks free delivery">
@@ -461,7 +460,7 @@ function CartInnerContent({
                                                                     )}
                                                                     <div className="skc-card-ph">
                                                                         {suggestion.image && (
-                                                                            <img src={suggestion.image} srcSet={suggestion.srcSet} sizes={suggestion.srcSet ? THUMB_SIZES : undefined} alt="" loading="lazy" decoding="async" />
+                                                                            <img src={suggestion.image} srcSet={suggestion.srcSet} sizes={suggestion.srcSet ? "160px" : undefined} alt="" loading="lazy" decoding="async" />
                                                                         )}
                                                                     </div>
                                                                     <h5>{suggestion.name}</h5>
@@ -483,7 +482,7 @@ function CartInnerContent({
                                                         );
                                                     })}
                                                 </AnimatePresence>
-                                            </motion.ul>
+                                            </ul>
                                         </section>
                                     </motion.div>
                                 )}
