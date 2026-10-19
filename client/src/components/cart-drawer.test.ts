@@ -61,3 +61,21 @@ test("desktop cart is the same Vaul drawer as phones, as a floating right panel 
   assert.match(cartDrawerSource, /isMobile \? "sk-sheet sk-cart-sheet" : "sk-panel sk-panel-right"/);
   assert.doesNotMatch(cartDrawerSource, /SheetContent/);
 });
+
+test("the whole cart is white, on phones and desktop (2026-10-20)", () => {
+  assert.match(posterSource, /\.sk-cart-sheet, \.sk-panel-right \{ background: #fff; \}/);
+  assert.match(rule(".skc-card"), /background: #fff;/);
+  assert.match(rule(".skc-row"), /background: #fff;/);
+});
+
+test("adding from the rail moves the product into the bag with a fold-away animation", () => {
+  assert.match(cartDrawerSource, /if \(inCart\.has\(productUuid\)\) continue;/);
+  const rail = cartDrawerSource.slice(cartDrawerSource.indexOf('<ul className="skc-rail"'), cartDrawerSource.indexOf("</ul>", cartDrawerSource.indexOf('<ul className="skc-rail"')));
+  assert.match(rail, /<AnimatePresence initial=\{false\}>/);
+  assert.match(rail, /\{\.\.\.railFold\}/);
+  // Animated boxes carry no padding: a padded box can't fold to 0 and jumps at the end.
+  assert.doesNotMatch(rule(".skc-card-slot"), /padding/);
+  assert.doesNotMatch(rule(".skc-item"), /padding/);
+  assert.match(cartDrawerSource, /const foldEase = \[0\.4, 0, 0\.2, 1\] as const;/);
+  assert.doesNotMatch(cartDrawerSource, /addedHere|data-added/);
+});

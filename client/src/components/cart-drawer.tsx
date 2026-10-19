@@ -1,5 +1,5 @@
 import { useCart, type CartItem } from "@/contexts/cart-context";
-import { Check, Minus, Plus, Trash2, X } from "lucide-react";
+import { Minus, Plus, Trash2, X } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Drawer } from "vaul";
 import { useMemo, useState, useEffect } from "react";
@@ -22,6 +22,39 @@ import {
 import { MAX_LINE_QUANTITY } from "@shared/order-limits";
 
 const cartEase = [0.23, 1, 0.32, 1] as const;
+// Size changes (a row opening, a rail card folding away) move the things around
+// them, so they ease in and out instead of snapping most of the way at once.
+const foldEase = [0.4, 0, 0.2, 1] as const;
+const rowFold = {
+    initial: { opacity: 0, height: 0 },
+    animate: {
+        opacity: 1,
+        height: "auto",
+        transition: { height: { duration: 0.34, ease: foldEase }, opacity: { duration: 0.22, delay: 0.12, ease: "easeOut" } },
+    },
+    exit: {
+        opacity: 0,
+        height: 0,
+        transition: { opacity: { duration: 0.16, ease: "easeOut" }, height: { duration: 0.3, delay: 0.06, ease: foldEase } },
+    },
+} as const;
+const railFold = {
+    initial: { opacity: 0, scale: 0.92, width: 0, marginRight: -6 },
+    animate: {
+        opacity: 1,
+        scale: 1,
+        width: 136,
+        marginRight: 0,
+        transition: { width: { duration: 0.34, ease: foldEase }, marginRight: { duration: 0.34, ease: foldEase }, opacity: { duration: 0.22, delay: 0.12 }, scale: { duration: 0.3, delay: 0.06, ease: cartEase } },
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.92,
+        width: 0,
+        marginRight: -6,
+        transition: { opacity: { duration: 0.16, ease: "easeOut" }, scale: { duration: 0.2, ease: "easeOut" }, width: { duration: 0.34, delay: 0.08, ease: foldEase }, marginRight: { duration: 0.34, delay: 0.08, ease: foldEase } },
+    },
+} as const;
 const MAX_SUGGESTIONS = 6;
 
 const cartPanelVariants: Variants = {
@@ -69,8 +102,8 @@ type Suggestion = {
 };
 
 // Products the shopper can add in one tap: in stock, sellable (both checkout ids
-// known) and not already in the bag. Ones added from this rail stay, ticked.
-function buildSuggestions(catalog: StorefrontProduct[], items: CartItem[], addedHere: string[]) {
+// known) and not already in the bag. Adding one moves it from the rail into the bag.
+function buildSuggestions(catalog: StorefrontProduct[], items: CartItem[]) {
     const inCart = new Set(items.map((item) => item.productUuid));
     const suggestions: Suggestion[] = [];
     for (const product of catalog) {
@@ -79,7 +112,7 @@ function buildSuggestions(catalog: StorefrontProduct[], items: CartItem[], added
         const productUuid = product.id != null ? String(product.id) : "";
         const variantId = variant?.id != null ? String(variant.id) : "";
         if (product.available === false || !productUuid || !variantId) continue;
-        if (inCart.has(productUuid) && !addedHere.includes(productUuid)) continue;
+        if (inCart.has(productUuid)) continue;
         const { src, srcSet } = getProductImageSet(product);
         suggestions.push({
             product,
@@ -106,7 +139,6 @@ type CartInnerContentProps = {
     freeDeliveryLeft: number;
     freeDeliveryProgress: number;
     suggestions: Suggestion[];
-    isInCart: (productUuid: string) => boolean;
     addSuggestion: (suggestion: Suggestion) => void;
     openCheckout: () => void;
 };
@@ -122,7 +154,6 @@ function CartInnerContent({
     freeDeliveryLeft,
     freeDeliveryProgress,
     suggestions,
-    isInCart,
     addSuggestion,
     openCheckout,
 }: CartInnerContentProps) {
@@ -166,10 +197,7 @@ function CartInnerContent({
                                         return (
                                             <motion.li
                                                 key={item.id}
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: "auto" }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                transition={{ duration: 0.24, ease: cartEase }}
+                                                {...rowFold}
                                                 className="skc-item"
                                             >
                                                 <div className="skc-row">
@@ -207,10 +235,16 @@ function CartInnerContent({
                                     <h4 id="skc-add-title">এর সাথে যোগ করুন</h4>
                                     {/* data-vaul-no-drag: sideways scrolling must not drag the drawer shut */}
                                     <ul className="skc-rail" data-vaul-no-drag>
-                                        {suggestions.map((suggestion) => {
-                                            const added = isInCart(suggestion.productUuid);
-                                            return (
-                                                <li key={suggestion.productUuid} className="skc-card">
+                                        <AnimatePresence initial={false}>
+                                        {suggestions.map((suggestion) => (
+                                            // The slot folds its width (and the rail gap) shut, so the
+                                            // cards after it glide over while the item drops into the bag.
+                                            <motion.li
+                                                key={suggestion.productUuid}
+                                                className="skc-card-slot"
+                                                {...railFold}
+                                            >
+                                                <div className="skc-card">
                                                     <div className="skc-card-ph">
                                                         {suggestion.image && (
                                                             <img src={suggestion.image} srcSet={suggestion.srcSet} sizes={suggestion.srcSet ? "120px" : undefined} alt="" loading="lazy" decoding="async" />
@@ -218,19 +252,18 @@ function CartInnerContent({
                                                         <button
                                                             type="button"
                                                             className="skc-plus"
-                                                            data-added={added ? "" : undefined}
-                                                            disabled={added}
-                                                            aria-label={added ? `${suggestion.name} ব্যাগে আছে` : `${suggestion.name} যোগ করুন`}
+                                                            aria-label={`${suggestion.name} যোগ করুন`}
                                                             onClick={() => addSuggestion(suggestion)}
                                                         >
-                                                            {added ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                                            <Plus className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                     <h5>{suggestion.name}</h5>
                                                     <span className="skc-card-price">{formatTaka(suggestion.amount)}</span>
-                                                </li>
-                                            );
-                                        })}
+                                                </div>
+                                            </motion.li>
+                                        ))}
+                                        </AnimatePresence>
                                     </ul>
                                 </section>
                             )}
@@ -273,7 +306,6 @@ export default function CartDrawer() {
     const [orderOpen, setOrderOpen] = useState(false);
     const [checkoutBundle, setCheckoutBundle] = useState<OrderDialogBundle | null>(null);
     const [isMobile, setIsMobile] = useState(false);
-    const [addedHere, setAddedHere] = useState<string[]>([]);
 
     // Use a matchMedia listener to detect mobile vs desktop to prevent the desktop Portal from rendering on mobile
     useEffect(() => {
@@ -283,10 +315,6 @@ export default function CartDrawer() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    useEffect(() => {
-        if (!isOpen) setAddedHere([]);
-    }, [isOpen]);
-
     const { data: catalogProducts } = useQuery({
         queryKey: ["merchant-suite-products-listing"],
         queryFn: fetchStorefrontProducts,
@@ -294,7 +322,7 @@ export default function CartDrawer() {
         enabled: isOpen,
     });
     const catalog = catalogProducts && catalogProducts.length ? catalogProducts : generatedStorefrontProducts;
-    const suggestions = useMemo(() => buildSuggestions(catalog, items, addedHere), [catalog, items, addedHere]);
+    const suggestions = useMemo(() => buildSuggestions(catalog, items), [catalog, items]);
 
     const cartOrder = useMemo<OrderDialogBundle | null>(() => {
         if (items.length === 0) {
@@ -378,7 +406,6 @@ export default function CartDrawer() {
         );
         // The row appears in the open bag, so the "added" toast would only repeat it.
         dismissNotice();
-        setAddedHere((ids) => [...ids, suggestion.productUuid]);
     };
 
     // Calculate subtotal
@@ -389,8 +416,6 @@ export default function CartDrawer() {
     const freeByProduct = bundleHasFreeDeliveryProduct(cartOrder);
     const freeDeliveryLeft = freeByProduct ? 0 : Math.max(0, freeDeliveryThreshold - subtotal);
     const freeDeliveryProgress = freeByProduct ? 1 : Math.min(1, subtotal / freeDeliveryThreshold);
-
-    const inCartIds = new Set(items.map((item) => item.productUuid));
 
     const innerProps: CartInnerContentProps = {
         items,
@@ -403,7 +428,6 @@ export default function CartDrawer() {
         freeDeliveryLeft,
         freeDeliveryProgress,
         suggestions,
-        isInCart: (productUuid) => inCartIds.has(productUuid),
         addSuggestion,
         openCheckout,
     };

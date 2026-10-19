@@ -215,8 +215,19 @@ const mosaicSource = readFileSync(new URL("../components/product-mosaic.tsx", im
 test("phones pick a photo from round thumbnails in a capsule instead of dots", () => {
   assert.match(productSource, /className="skp-capsule"/);
   assert.doesNotMatch(productSource, /className="skp-dots"/);
-  assert.match(productSource, /onClick=\{\(\) => goToImage\(idx\)\}[\s\S]*?aria-current=\{activeImage === idx\}/);
+  assert.match(productSource, /onClick=\{\(\) => api\?\.scrollTo\(idx\)\}[\s\S]*?aria-current=\{active === idx\}/);
   assert.match(posterSource, /\.skp-capsule button\[aria-current="true"\] \{[^}]*transform: none;/);
+});
+
+test("the phone gallery swipe stays smooth on real phones", () => {
+  // The active photo lives in GalleryCapsule, so a swipe doesn't re-render the whole page.
+  assert.match(productSource, /<GalleryCapsule api=\{galleryApi\} images=\{displayGallery\} srcSetFor=\{srcSetFor\} \/>/);
+  assert.doesNotMatch(productSource, /setActiveImage/);
+  // No backdrop blur over the moving photos.
+  const capsule = posterSource.slice(posterSource.indexOf(".skp-capsule {")).split("}")[0];
+  assert.doesNotMatch(capsule, /backdrop-filter/);
+  // Clipped off-screen slides would otherwise load and decode mid-swipe.
+  assert.match(productSource, /loading=\{idx < 3 \? "eager" : "lazy"\}/);
 });
 
 test("desktop shows every photo as a mosaic that opens a lightbox", () => {
