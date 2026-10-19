@@ -683,9 +683,10 @@
 /* Photo panel */
 .skp-photo { position: relative; border-radius: 28px; overflow: hidden; }
 /* Native scroll-snap: the OS scrolls the photos, so the swipe never waits on page scripts. */
-.skp-gallery { overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+/* The slides are the strip's direct children, so iOS sees them as its snap points. The strip has its
+   own radius because iOS doesn't clip a scrolling box to its parent's rounded corners. */
+.skp-gallery { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; border-radius: inherit; }
 .skp-gallery::-webkit-scrollbar { display: none; }
-.skp-gallery-track { display: flex; }
 .skp-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
 .skp-slide img { width: 100%; height: auto; user-select: none; }
 .skp-noimg { aspect-ratio: 1; background: var(--card); display: grid; place-items: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--sub); }

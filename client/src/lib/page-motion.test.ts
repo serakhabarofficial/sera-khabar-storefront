@@ -108,7 +108,7 @@ test("sections reveal as they reach the screen, not when the page mounts", () =>
   // The settle scales the hero's panel row as one piece.
   assert.match(home, /className="st-day-panels"\s+data-page-settle=""/);
   assert.match(read("../components/poster-product-card.tsx"), /<article className="c-card" data-reveal="">/);
-  assert.match(read("../pages/product.tsx"), /className="skp-gallery" data-page-settle=""/);
+  assert.match(read("../pages/product.tsx"), /className="skp-gallery"\s+data-page-settle=""/);
   // Desktop settles the photo mosaic instead, so the page settles whichever target is on screen.
   assert.match(read("../components/product-mosaic.tsx"), /className="skp-mosaic"[^>]*data-page-settle=""/);
   assert.match(read("../components/page-transition.tsx"), /querySelectorAll\("\[data-page-settle\]"\)\)\.find\(\(el\) => el\.getClientRects\(\)\.length > 0\)/);
