@@ -72,18 +72,17 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
     const product = products.find((item) => item.slug === step.slug);
     return product ? [{ ...step, product }] : [];
   });
-  const [active, setActive] = useState(0);
+  // `prev` is the moment just left, so phones can slide it out as the next one slides in.
+  const [{ active, prev }, setStep] = useState({ active: 0, prev: -1 });
+  const setActive = (index: number) => setStep((step) => (step.active === index ? step : { active: index, prev: step.active }));
   const [held, setHeld] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const duration = steps[active]?.product ? DAY_DURATION_MS.product : DAY_DURATION_MS.dawn;
 
-  // Steps on by itself unless the pointer rests on a panel; reduced motion keeps the visitor in charge.
-  useEffect(() => {
-    if (shouldReduceMotion || held || steps.length < 2) return;
-    const timer = window.setTimeout(() => setActive((index) => (index + 1) % steps.length), duration);
-    return () => window.clearTimeout(timer);
-  }, [active, held, duration, shouldReduceMotion, steps.length]);
+  // The active story bar is the clock: it fills over the moment's duration and its end steps the hero on, so the
+  // bar and the change always agree. Resting the pointer on a panel pauses it; reduced motion has no bar to run.
+  const next = () => setActive((active + 1) % steps.length);
 
   // The dawn clip plays muted and inline, only while its panel shows.
   useEffect(() => {
@@ -95,17 +94,20 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
     else video.pause();
   }, [active, shouldReduceMotion]);
 
-  const bars = (index: number) => (
-    <span className="st-day-bars" aria-hidden="true">
+  // Only the open panel shows its bars; they mount with it, so the running bar always starts empty.
+  const bars = (
+    <span className="st-day-bars" aria-hidden="true" style={{ "--dur": `${duration}ms` } as CSSProperties}>
       {steps.map((step, bar) => (
         <i
-          key={step.time}
-          data-done={bar < index || undefined}
-          data-run={(bar === index && !shouldReduceMotion) || undefined}
+          key={bar === active ? `${step.time}-run` : step.time}
+          data-done={bar < active || undefined}
+          data-run={(bar === active && !shouldReduceMotion && steps.length > 1) || undefined}
+          onAnimationEnd={bar === active ? next : undefined}
         />
       ))}
     </span>
   );
+  const last = Math.max(steps.length - 1, 1);
 
   return (
     <section className="st-row">
@@ -125,12 +127,25 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
         </div>
 
         <div className="st-day-line">
-          <span className="st-day-fill" style={{ transform: `scaleX(${active / Math.max(steps.length - 1, 1)})` }} />
+          {/* Fills smoothly from this moment's dot to the next one's, in step with the story bar. */}
+          <span
+            key={active}
+            className="st-day-fill"
+            data-run={(!shouldReduceMotion && active < last) || undefined}
+            style={
+              {
+                "--from": active / last,
+                "--to": Math.min(active + 1, last) / last,
+                "--dur": `${duration}ms`,
+                transform: `scaleX(${active / last})`,
+              } as CSSProperties
+            }
+          />
           {steps.map((step, index) => (
             <button
               key={step.time}
               type="button"
-              style={{ left: `${(index / Math.max(steps.length - 1, 1)) * 100}%` }}
+              style={{ left: `${(index / last) * 100}%` }}
               data-on={index === active || undefined}
               data-past={index < active || undefined}
               aria-label={`${step.time}, ${step.title}`}
@@ -150,6 +165,7 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
           className="st-day-panels"
           data-page-settle=""
           data-held={held || undefined}
+          data-reduced={shouldReduceMotion || undefined}
           onPointerLeave={() => setHeld(false)}
         >
           {steps.map((step, index) => {
@@ -166,12 +182,13 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
                   type="button"
                   className="st-day-pn is-film"
                   data-on={on || undefined}
+                  data-prev={index === prev || undefined}
                   aria-label={`${step.time}, ${step.title}`}
                   onPointerEnter={select}
                   onFocus={() => setActive(index)}
                   onClick={() => setActive(index)}
                 >
-                  {bars(index)}
+                  {on ? bars : null}
                   <video
                     ref={videoRef}
                     src={DAY_DAWN.src}
@@ -204,6 +221,7 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
                 href={`/product/${step.product.slug}`}
                 className="st-day-pn"
                 data-on={on || undefined}
+                data-prev={index === prev || undefined}
                 aria-label={`${step.time}, ${bangla}, ৳${toBanglaDigits(price)}`}
                 onPointerEnter={select}
                 onFocus={() => setActive(index)}
@@ -215,7 +233,7 @@ function DayHero({ products }: { products: StorefrontProduct[] }) {
                   }
                 }}
               >
-                {bars(index)}
+                {on ? bars : null}
                 {image.src ? (
                   <img
                     src={image.src}
