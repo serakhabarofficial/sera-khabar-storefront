@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const layoutSource = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
+const bagIconSource = readFileSync(new URL("./bag-icon.tsx", import.meta.url), "utf8");
 
 test("uses the Stage announcement row with no close button", () => {
   // Stage redesign 2026-10-19; delivery facts come from the same POLICY_FACTS checkout uses.
@@ -34,7 +35,8 @@ test("uses the existing icons in the mobile dock", () => {
 });
 
 test("uses the Phosphor handbag in both the header and the dock", () => {
-  assert.match(layoutSource, /viewBox="0 0 256 256"/);
+  assert.match(layoutSource, /import \{ BagIcon \} from "@\/components\/bag-icon";/);
+  assert.match(bagIconSource, /viewBox="0 0 256 256"/);
   assert.doesNotMatch(layoutSource, /M16 9a1 1 0 1 1-2 0/);
   // One icon, on the header's bag button and the dock's cart button.
   assert.equal((layoutSource.match(/<BagIcon /g) ?? []).length, 2);
@@ -43,7 +45,7 @@ test("uses the Phosphor handbag in both the header and the dock", () => {
 test("keeps header cart icons balanced without changing the mobile dock", () => {
   // Header: the Phosphor handbag with the count on its corner (hidden when empty); "ব্যাগ" is a desktop label.
   assert.match(layoutSource, /<span className="stc-bag">\s*<BagIcon className="h-6 w-6" \/>\s*\{itemCount > 0 \? <span className="stc-count num">\{toBanglaDigits\(itemCount > 99 \? "99\+" : itemCount\)\}<\/span> : null\}\s*<\/span>\s*<span className="stc-label">ব্যাগ<\/span>/);
-  assert.match(layoutSource, /d="m237\.9 198\.36l-14\.25-120/);
+  assert.match(bagIconSource, /d="m237\.9 198\.36l-14\.25-120/);
   assert.match(layoutSource, /<BagIcon className="!h-6 !w-6" \/>/);
   assert.match(layoutSource, /<SearchIcon className="h-5 w-5" \/>/);
 });
@@ -221,4 +223,16 @@ test("tapping the logo on the homepage scrolls back to the top", () => {
   // Already on "/", the link has nowhere to go, so the tap scrolls up instead (instantly with reduced motion).
   assert.match(layoutSource, /<Link href="\/" aria-label="সেরা খাবার — হোম" onClick=\{goHome\}>/);
   assert.match(layoutSource, /if \(location === "\/"\) \{[\s\S]*?window\.scrollTo\(\{ top: 0, behavior: shouldReduceMotion \? "auto" : "smooth" \}\)/);
+});
+
+test("product cards show an always-visible Add to cart pill with the header's handbag", () => {
+  const cardSource = readFileSync(new URL("./poster-product-card.tsx", import.meta.url), "utf8");
+  const stageCss = readFileSync(new URL("../stage.css", import.meta.url), "utf8");
+  assert.match(cardSource, /import \{ BagIcon \} from "@\/components\/bag-icon";/);
+  assert.match(cardSource, /<BagIcon className="st-add-ico" \/>\s*Add to cart/);
+  assert.match(cardSource, /Added\s*<\/span>/);
+  assert.match(stageCss, /\.st-card \.st-add \{[^}]*background: #f5ebe2;/);
+  // Shown on every screen: no rule hides it until hover.
+  assert.doesNotMatch(stageCss, /\.st-add:not\(\.added\)/);
+  assert.doesNotMatch(stageCss, /\.st-card:hover \.st-add/);
 });

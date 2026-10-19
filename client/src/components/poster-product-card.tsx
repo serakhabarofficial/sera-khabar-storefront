@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { Check } from "lucide-react";
 
+import { BagIcon } from "@/components/bag-icon";
 import { formatCardAmount, getVariantLabel, selectDefaultVariant } from "@/components/home-product-card";
 import { useCart } from "@/contexts/cart-context";
 import { BanglaNumber } from "@/lib/bangla-digits";
@@ -91,12 +93,18 @@ export default function PosterProductCard({
         <button
           type="button"
           disabled={!canAddToCart}
-          aria-label={`${bangla} কার্টে যোগ করুন`}
+          aria-label={`Add to cart: ${bangla}`}
           className={`st-add press${added ? " added" : ""}`}
           onClick={add}
         >
-          <span className="l1" aria-hidden="true">+</span>
-          <span className="l2" aria-hidden="true">✓</span>
+          <span className="l1" aria-hidden="true">
+            <BagIcon className="st-add-ico" />
+            Add to cart
+          </span>
+          <span className="l2" aria-hidden="true">
+            <Check className="st-add-ico" strokeWidth={1.8} />
+            Added
+          </span>
         </button>
         {isSoldOut ? <span className="st-card-sold">স্টক শেষ</span> : null}
         <Link href={`/product/${product.slug}`} className="st-card-img" aria-label={bangla}>
