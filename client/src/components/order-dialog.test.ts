@@ -130,6 +130,8 @@ test("the form asks for name, phone, address, then the optional জেলা and
   assert.ok(at(/textField\("phone"/) < at(/id="skx-address"/));
   assert.ok(at(/id="skx-address"/) < at(/kind="district"/));
   assert.ok(at(/kind="district"/) < at(/kind="thana"/));
+  // The জেলা/থানা row keeps the same 18px gap below the address as every other field.
+  assert.match(pageCss, /\.skx-field \+ \.skx-row \{ margin-top: 18px; \}|\.skx-field \+ \.skx-row[,\s{][^}]*margin-top: 18px;/);
   // Only name, phone and address can stop an order; জেলা and থানা are optional.
   const validate = dialogSource.slice(dialogSource.indexOf("export function validateCheckout"), dialogSource.indexOf("function getBundleAnalyticsItems"));
   assert.doesNotMatch(validate, /errors\.(district|thana)/);
