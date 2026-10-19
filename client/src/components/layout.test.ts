@@ -33,15 +33,17 @@ test("uses the existing icons in the mobile dock", () => {
   }
 });
 
-test("uses the Solar cart icon in both desktop and mobile navigation", () => {
-  assert.match(layoutSource, /viewBox="0 0 24 24"/);
-  assert.match(layoutSource, /M16 9a1 1 0 1 1-2 0/);
-  // The header shows "ব্যাগ" with a count; the Solar bag stays on the dock's cart button.
-  assert.equal((layoutSource.match(/<BagIcon /g) ?? []).length, 1);
+test("uses the Phosphor handbag in both the header and the dock", () => {
+  assert.match(layoutSource, /viewBox="0 0 256 256"/);
+  assert.doesNotMatch(layoutSource, /M16 9a1 1 0 1 1-2 0/);
+  // One icon, on the header's bag button and the dock's cart button.
+  assert.equal((layoutSource.match(/<BagIcon /g) ?? []).length, 2);
 });
 
 test("keeps header cart icons balanced without changing the mobile dock", () => {
-  assert.match(layoutSource, /ব্যাগ <span className="stc-count num">\{toBanglaDigits\(itemCount > 99 \? "99\+" : itemCount\)\}<\/span>/);
+  // Header: the Phosphor handbag with the count on its corner (hidden when empty); "ব্যাগ" is a desktop label.
+  assert.match(layoutSource, /<span className="stc-bag">\s*<BagIcon className="h-6 w-6" \/>\s*\{itemCount > 0 \? <span className="stc-count num">\{toBanglaDigits\(itemCount > 99 \? "99\+" : itemCount\)\}<\/span> : null\}\s*<\/span>\s*<span className="stc-label">ব্যাগ<\/span>/);
+  assert.match(layoutSource, /d="m237\.9 198\.36l-14\.25-120/);
   assert.match(layoutSource, /<BagIcon className="!h-6 !w-6" \/>/);
   assert.match(layoutSource, /<SearchIcon className="h-5 w-5" \/>/);
 });

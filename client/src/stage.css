@@ -318,14 +318,20 @@ main:has(.st, .skp) { background-color: #fff !important; }
 .stc-tools { display: flex; justify-content: flex-end; gap: 22px; font-size: 13.5px; align-items: center; }
 .stc-tools button { display: flex; gap: 7px; align-items: center; }
 .stc-count { display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: var(--st-ink); color: #fff; font-size: 11px; font-family: var(--st-serif); }
-/* Menu button: two hairlines in a thin circle; they cross into an ✕ while the menu is open */
-.stc-menu { display: none; position: relative; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--st-line) !important; transition: transform 160ms var(--st-ease-out), border-color 200ms ease; }
-.stc-menu i { position: absolute; left: 11px; right: 11px; height: 1.3px; border-radius: 2px; background: var(--st-ink); transition: transform 260ms var(--st-ease-out); }
-.stc-menu i:first-child { top: 15px; }
-.stc-menu i:last-child { top: 21px; right: 15px; }
-.stc-menu[aria-expanded="true"] { border-color: var(--st-ink) !important; }
-.stc-menu[aria-expanded="true"] i:first-child { transform: translateY(3px) rotate(45deg); }
-.stc-menu[aria-expanded="true"] i:last-child { right: 11px; transform: translateY(-3px) rotate(-45deg); }
+/* Header bag: the count sits on the bag's top-right corner, ringed white so it reads over the outline. */
+.stc-bag { position: relative; display: inline-grid; place-items: center; }
+.stc-bag .stc-count { position: absolute; top: -6px; right: -11px; min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; box-shadow: 0 0 0 2px #fff; }
+.stc-bag + .stc-label { margin-left: 8px; }
+/* Menu button: two hairlines in a thin 30px circle, close to the search and bag icons' size (the 38px box is only
+   the tap area); they cross into an ✕ while the menu is open */
+.stc-menu { display: none; position: relative; width: 38px; height: 38px; margin-left: -4px; border: 0 !important; transition: transform 160ms var(--st-ease-out); }
+.stc-menu::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; border: 1px solid var(--st-line); transition: border-color 200ms ease; }
+.stc-menu i { position: absolute; left: 13px; right: 13px; height: 1.3px; border-radius: 2px; background: var(--st-ink); transition: transform 260ms var(--st-ease-out); }
+.stc-menu i:first-child { top: 16px; }
+.stc-menu i:last-child { top: 21px; right: 17px; }
+.stc-menu[aria-expanded="true"]::before { border-color: var(--st-ink); }
+.stc-menu[aria-expanded="true"] i:first-child { transform: translateY(2.5px) rotate(45deg); }
+.stc-menu[aria-expanded="true"] i:last-child { right: 13px; transform: translateY(-2.5px) rotate(-45deg); }
 @media (max-width: 860px) {
   .stc-nav { display: none; }
   .stc-menu { display: block; justify-self: start; }
