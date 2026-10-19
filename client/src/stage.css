@@ -59,6 +59,7 @@
 .st-head { grid-template-columns: 1fr auto; align-items: center; }
 .st-head .st-cell { padding: 26px var(--st-pad); }
 .st-head h2 { font-size: clamp(30px, 3.6vw, 46px); }
+.st-head h1 { font-size: clamp(38px, 4.8vw, 66px); }
 .st-lab { font-size: 12.5px; color: var(--st-soft); }
 
 /* Hero: centred type, the jaggery still life on a stage, prices pinned to each product */
@@ -132,6 +133,10 @@
 .st-tabs-over { position: absolute; inset: 0; pointer-events: none; background: var(--st-ink); border-radius: 999px;
   clip-path: inset(0 var(--r, 100%) 0 var(--l, 0) round 999px); transition: clip-path 320ms var(--st-ease-in-out); }
 .st-tabs-over button { color: #fff; }
+/* Listing pages: the tabs get their own row, centred; on phones they scroll sideways. */
+.st-tabs-row .st-cell { display: flex; justify-content: center; padding-block: 16px; overflow-x: auto; scrollbar-width: none; }
+.st-tabs-row .st-cell::-webkit-scrollbar { display: none; }
+@media (max-width: 860px) { .st-tabs-row .st-cell { justify-content: flex-start; } }
 .st-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .st-grid > * { border-left: 0 !important; border-right: 1px solid var(--st-line); border-bottom: 1px solid var(--st-line); }
 .st-grid > :nth-child(4n) { border-right: 0; }

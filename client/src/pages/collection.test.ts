@@ -21,9 +21,10 @@ test("renders the homepage's empty message", () => {
   assert.match(collectionSource, /নতুন পণ্য শীঘ্রই আসছে।/);
 });
 
-test("uses the homepage poster cards with live stock merged in", () => {
-  assert.match(collectionSource, /<div className="sk">/);
-  assert.match(collectionSource, /<PosterProductCard\s+key=\{product\.id \|\| product\.slug\}\s+product=\{product\}\s+inventory=\{inventoryEntryFor\(inventory, product\)\}/);
+test("uses the homepage Stage cards with live stock merged in", () => {
+  assert.match(collectionSource, /<div className="st">\s*<div className="st-frame">/);
+  assert.match(collectionSource, /<div key=\{active\?\.label \?\? "all"\} className="st-row st-grid">/);
+  assert.match(collectionSource, /<PosterProductCard\s+key=\{product\.id \|\| product\.slug\}\s+product=\{product\}\s+inventory=\{inventoryEntryFor\(inventory, product\)\}\s+look="stage"/);
   assert.doesNotMatch(collectionSource, /StorefrontProductCard/);
   assert.doesNotMatch(productsSource, /StorefrontProductCard/);
 });

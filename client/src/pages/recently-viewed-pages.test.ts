@@ -18,7 +18,7 @@ test("leaves Recently Viewed off the redesigned homepage", () => {
 
 test("renders Recently Viewed on the all-products page without replacing its catalog", () => {
   assert.match(productsSource, /import RecentlyViewed from "@\/components\/recently-viewed"/);
-  assert.match(productsSource, /<RecentlyViewed products=\{products \?\? generatedStorefrontProducts\} \/>/);
+  assert.match(productsSource, /<RecentlyViewed products=\{products \?\? generatedStorefrontProducts\} look="stage" \/>/);
   assert.match(productCardSource, /<HomeProductCard product=\{merged\}/);
   // Stock now arrives as a prop from the page's single batched inventory read.
   assert.match(productCardSource, /mergeInventory\(product, inventory\)/);

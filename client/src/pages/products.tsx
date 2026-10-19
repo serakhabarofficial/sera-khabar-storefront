@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout";
 import PosterProductCard from "@/components/poster-product-card";
 import RecentlyViewed from "@/components/recently-viewed";
-import SkewReveal from "@/components/skew-reveal";
+import StageTabs from "@/components/stage-tabs";
 import { useLocation } from "wouter";
 import {
   fetchStorefrontProducts,
@@ -17,8 +17,8 @@ import { getFeaturedCollection, getProductsForCollection, HOMEPAGE_CATEGORIES } 
 import { toBanglaDigits } from "@/lib/bangla-digits";
 import { inventoryEntryFor, useCatalogInventory } from "@/lib/use-catalog-inventory";
 
-// The all-products page uses the homepage "Market Poster" look (client/src/poster.css), with the
-// same category chips as the homepage's "আমাদের পণ্য" section.
+// The all-products page uses the homepage "Stage" look (client/src/stage.css): the same hairline grid,
+// product cells and sliding category tabs as the homepage's "সেরা বিক্রি" section.
 export default function ProductsPage() {
   const [location] = useLocation();
   const searchQuery = new URLSearchParams(location.split("?")[1] ?? "").get("search") ?? "";
@@ -53,64 +53,62 @@ export default function ProductsPage() {
 
   return (
     <Layout>
-      <div className="sk">
-        <section className="cx-sec col-head">
-          <div className="wrap">
-            <SkewReveal as="h1">সকল পণ্য</SkewReveal>
-            <SkewReveal className="script sub">All Products</SkewReveal>
-            {searchQuery ? (
-              <p className="col-note">
-                “{searchQuery}” খুঁজে <span className="num">{toBanglaDigits(filteredProducts.length)}</span>টি পণ্য পাওয়া গেছে
-              </p>
-            ) : null}
+      <div className="st">
+        <div className="st-frame">
+          <div className="st-row st-head">
+            <div className="st-cell">
+              <h1 className="display" data-load-step="">
+                সকল <b>পণ্য</b>
+              </h1>
+            </div>
+            <div className="st-cell">
+              {searchQuery ? (
+                <span className="st-lab">
+                  “{searchQuery}” খুঁজে <span className="num">{toBanglaDigits(filteredProducts.length)}</span>টি পণ্য পাওয়া গেছে
+                </span>
+              ) : (
+                <span className="st-lab">All Products</span>
+              )}
+            </div>
           </div>
-        </section>
 
-        <section className="c-sec col-sec">
-          <div className="wrap">
-            {active ? (
-              <div className="c-tabs col-tabs" role="tablist" aria-label="ক্যাটাগরি">
-                {chips.map((chip) => (
-                  <button
-                    key={chip.slug || "all"}
-                    type="button"
-                    role="tab"
-                    aria-selected={chip === active}
-                    className={`chip press${chip === active ? " on" : ""}`}
-                    onClick={() => setActiveSlug(chip.slug)}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
+          {active ? (
+            <div className="st-row st-tabs-row">
+              <div className="st-cell">
+                <StageTabs
+                  tabs={chips.map((chip) => ({ key: chip.slug, label: chip.label }))}
+                  activeKey={active.slug}
+                  onSelect={setActiveSlug}
+                  label="ক্যাটাগরি"
+                />
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
+          <div key={active?.slug || "all"} className="st-row st-grid">
             {visibleProducts.length > 0 ? (
-              <div key={active?.slug || "all"} className="c-list">
-                {visibleProducts.map((product) => (
-                  <PosterProductCard
-                    key={product.id || product.slug}
-                    product={product}
-                    inventory={inventoryEntryFor(inventory, product)}
-                  />
-                ))}
-              </div>
+              visibleProducts.map((product) => (
+                <PosterProductCard
+                  key={product.id || product.slug}
+                  product={product}
+                  inventory={inventoryEntryFor(inventory, product)}
+                  look="stage"
+                />
+              ))
             ) : (
-              <div className="c-list">
-                <p className="c-empty">
-                  {isError
-                    ? "এই মুহূর্তে পণ্য দেখানো যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।"
-                    : searchQuery
-                      ? `“${searchQuery}” নামে কোনো পণ্য পাওয়া যায়নি।`
-                      : "নতুন পণ্য শীঘ্রই আসছে।"}
-                </p>
-              </div>
+              <p className="st-empty">
+                {isError
+                  ? "এই মুহূর্তে পণ্য দেখানো যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।"
+                  : searchQuery
+                    ? `“${searchQuery}” নামে কোনো পণ্য পাওয়া যায়নি।`
+                    : "নতুন পণ্য শীঘ্রই আসছে।"}
+              </p>
             )}
           </div>
-        </section>
+        </div>
       </div>
 
-      <RecentlyViewed products={products ?? generatedStorefrontProducts} />
+      <RecentlyViewed products={products ?? generatedStorefrontProducts} look="stage" />
     </Layout>
   );
 }

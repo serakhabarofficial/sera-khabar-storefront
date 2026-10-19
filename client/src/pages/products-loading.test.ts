@@ -18,8 +18,8 @@ test("renders generated products before the live catalog request completes", () 
 });
 
 test("renders a bilingual All Products title", () => {
-  assert.match(productsSource, /<SkewReveal as="h1">সকল পণ্য<\/SkewReveal>/);
-  assert.match(productsSource, /<SkewReveal className="script sub">All Products<\/SkewReveal>/);
+  assert.match(productsSource, /<h1 className="display" data-load-step="">\s*সকল <b>পণ্য<\/b>\s*<\/h1>/);
+  assert.match(productsSource, /<span className="st-lab">All Products<\/span>/);
 });
 
 test("keeps the shared product grid visible when background revalidation fails", () => {
