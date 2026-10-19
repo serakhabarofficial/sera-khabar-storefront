@@ -1,5 +1,4 @@
 import Layout from "@/components/layout";
-import { HeroDrip } from "@/components/hero-drip";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
 import StageTabs from "@/components/stage-tabs";
 import {
@@ -34,17 +33,6 @@ const DHAKA_DAYS = toBanglaDigits(POLICY_FACTS.dhakaDeliveryDays.replace(" days"
 const OUTSIDE_DAYS = toBanglaDigits(POLICY_FACTS.outsideDhakaDeliveryDays.replace(" days", ""));
 const DELIVERY_RANGE = `${DHAKA_DAYS.split("–")[0]}–${OUTSIDE_DAYS.split("–").pop()}`;
 
-// Where each product sits in /home/hero-jaggery-still-life.webp (percent of the photo). Prices are never
-// stored here: each dot reads its product from the live catalog and is skipped if that product is gone.
-const HERO_SPOTS = [
-  { slug: "round-patali-jaggery", x: 14, y: 52 },
-  { slug: "granulated-jaggery", x: 30, y: 30 },
-  { slug: "liquid-date-jaggery", x: 49, y: 28 },
-  { slug: "chocolate-seed-jaggery", x: 68, y: 30 },
-  { slug: "foil-wrapped-patali-jaggery", x: 88, y: 44 },
-  { slug: "date-palm-patali", x: 77, y: 72 },
-] as const;
-
 function productsInCollection(products: StorefrontProduct[], slug: string) {
   const collection = getFeaturedCollection(slug);
   return collection ? getProductsForCollection(products, collection) : [];
@@ -63,81 +51,198 @@ function getSizeOptions(product: StorefrontProduct) {
     .sort((a, b) => a.price - b.price);
 }
 
-function StageHero({ products }: { products: StorefrontProduct[] }) {
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
-  const spots = HERO_SPOTS.flatMap((spot) => {
-    const product = products.find((item) => item.slug === spot.slug);
-    return product ? [{ ...spot, product }] : [];
-  });
+// The day hero (approved 2026-10-19, "দিন"): dawn sap to noon patali in four panels. The dawn clip lives in the
+// Cloudflare R2 bucket sera-khabar-media and loads straight from R2 (a Vercel rewrite once cached a partial range
+// and broke the founder reel). Product panels read their name, photo and price from the live catalog and drop out
+// if that product is gone; only the time-of-day story is written here. Rename the clip (…-v2.mp4) when it changes.
+const DAY_MEDIA_ORIGIN = "https://pub-cfecc6eab1f44552a42789747b613cb7.r2.dev";
+const DAY_DAWN = { src: `${DAY_MEDIA_ORIGIN}/hero/dawn-v2.mp4`, poster: `${DAY_MEDIA_ORIGIN}/hero/dawn-v2.jpg` };
+type DayStep = { time: string; title: string; note: string; slug?: string };
+const DAY_STEPS: DayStep[] = [
+  { time: "ভোর ৪টা", title: "রস নামানো", note: "শীতের কুয়াশায়, রাতভর জমা টাটকা রস নামানো হয় সূর্য ওঠার আগেই।" },
+  { time: "সকাল ৮টা", title: "ঝোলা গুড়", slug: "liquid-date-jaggery", note: "রুটি, মুড়ি আর পায়েসে এক চামচ।" },
+  { time: "সকাল ১০টা", title: "বীজ গুড়", slug: "chocolate-seed-jaggery", note: "দানা দানা, চকলেটের মতো ঘন।" },
+  { time: "দুপুর ১২টা", title: "পাটালি", slug: "date-palm-patali", note: "জমে শক্ত, ভাঙলে মুচমুচে।" },
+];
+const DAY_DURATION_MS = { dawn: 6000, product: 4500 };
 
-  // A tap anywhere else closes the open price.
+function DayHero({ products }: { products: StorefrontProduct[] }) {
+  const steps = DAY_STEPS.flatMap((step): (DayStep & { product: StorefrontProduct | null })[] => {
+    if (!step.slug) return [{ ...step, product: null }];
+    const product = products.find((item) => item.slug === step.slug);
+    return product ? [{ ...step, product }] : [];
+  });
+  const [active, setActive] = useState(0);
+  const [held, setHeld] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const duration = steps[active]?.product ? DAY_DURATION_MS.product : DAY_DURATION_MS.dawn;
+
+  // Steps on by itself unless the pointer rests on a panel; reduced motion keeps the visitor in charge.
   useEffect(() => {
-    if (!openSlug) return;
-    const close = () => setOpenSlug(null);
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
-  }, [openSlug]);
+    if (shouldReduceMotion || held || steps.length < 2) return;
+    const timer = window.setTimeout(() => setActive((index) => (index + 1) % steps.length), duration);
+    return () => window.clearTimeout(timer);
+  }, [active, held, duration, shouldReduceMotion, steps.length]);
+
+  // The dawn clip plays muted and inline, only while its panel shows.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.defaultMuted = true;
+    video.muted = true;
+    if (active === 0 && !shouldReduceMotion) video.play()?.catch(() => {});
+    else video.pause();
+  }, [active, shouldReduceMotion]);
+
+  const bars = (index: number) => (
+    <span className="st-day-bars" aria-hidden="true">
+      {steps.map((step, bar) => (
+        <i
+          key={step.time}
+          data-done={bar < index || undefined}
+          data-run={(bar === index && !shouldReduceMotion) || undefined}
+        />
+      ))}
+    </span>
+  );
 
   return (
     <section className="st-row">
-      <div className="st-hero">
-        <div className="st-lab" data-load-step="">শীতের প্রথম ব্যাচ এসেছে</div>
-        <h1 className="display" data-load-step="">
-          খাঁটি খেজুরের <b>গুড়</b>
-        </h1>
-        <p className="st-hero-sub" data-load-step="">রাজশাহী থেকে সরাসরি। চিনি নেই, রং নেই।</p>
-        <div className="st-hero-cta" data-load-step="">
-          <Link href="/collection/jaggery" className="st-btn press">
-            এখনই অর্ডার করুন <span className="arr" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/products" className="st-lnk">সব পণ্য দেখুন</Link>
-        </div>
-        <div className="st-stage">
-          {/* The load settle scales this wrapper, so the drip overlay stays on the photo throughout. */}
-          <div className="st-photo" data-page-settle="">
-            <img
-              src="/home/hero-jaggery-still-life.webp"
-              srcSet="/home/hero-jaggery-still-life-640.webp 640w, /home/hero-jaggery-still-life.webp 960w"
-              sizes="(min-width: 1000px) 960px, 100vw"
-              alt="সেরা খাবারের দানাদার, ঝোলা ও বীজ গুড়, গোল পাটালি, ফয়েল পাটালি আর খেজুরের পাটালী"
-              width={960}
-              height={640}
-              fetchPriority="high"
-              decoding="async"
-            />
-            <HeroDrip />
+      <div>
+        <div className="st-day-top">
+          <div>
+            <h1 className="display" data-load-step="">
+              খেজুরের
+              <br />
+              খাঁটি <b>গুড়</b>
+            </h1>
+            <p className="st-day-sub" data-load-step="">শীতের ভোরের রস, মাটির চুলায় জ্বাল।</p>
           </div>
-          {spots.map(({ slug, x, y, product }, index) => {
-            const { bangla } = splitProductName(product.name);
-            const { price } = getStartingOption(product);
-            return (
-              <div
-                key={slug}
-                className="st-spot"
-                style={{ left: `${x}%`, top: `${y}%`, "--d": `${index * 90}ms` } as CSSProperties}
-                data-open={openSlug === slug || undefined}
-              >
+          <Link href="/collection/jaggery" className="st-btn press" data-load-step="">
+            অর্ডার করুন <span className="arr" aria-hidden="true">→</span>
+          </Link>
+        </div>
+
+        <div className="st-day-line">
+          <span className="st-day-fill" style={{ transform: `scaleX(${active / Math.max(steps.length - 1, 1)})` }} />
+          {steps.map((step, index) => (
+            <button
+              key={step.time}
+              type="button"
+              style={{ left: `${(index / Math.max(steps.length - 1, 1)) * 100}%` }}
+              data-on={index === active || undefined}
+              data-past={index < active || undefined}
+              aria-label={`${step.time}, ${step.title}`}
+              aria-pressed={index === active}
+              onClick={() => setActive(index)}
+            >
+              <span className="st-day-dot" />
+              <span className="st-day-lb">
+                <small>{step.time}</small>
+                {step.title}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div
+          className="st-day-panels"
+          data-page-settle=""
+          data-held={held || undefined}
+          onPointerLeave={() => setHeld(false)}
+        >
+          {steps.map((step, index) => {
+            const on = index === active;
+            const select = (event: { pointerType?: string }) => {
+              if (event.pointerType && event.pointerType !== "mouse") return;
+              setHeld(true);
+              setActive(index);
+            };
+            if (!step.product) {
+              return (
                 <button
+                  key={step.time}
                   type="button"
-                  className="st-spot-dot"
-                  aria-label={`${bangla}, ৳${toBanglaDigits(price)}`}
-                  aria-expanded={openSlug === slug}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setOpenSlug(openSlug === slug ? null : slug);
-                  }}
-                />
-                <Link href={`/product/${slug}`} className="st-pop" onClick={(event) => event.stopPropagation()}>
-                  <b>{bangla}</b>
-                  <span className="num">৳<BanglaNumber value={price} /></span>
-                  <em>দেখুন →</em>
-                </Link>
-              </div>
+                  className="st-day-pn is-film"
+                  data-on={on || undefined}
+                  aria-label={`${step.time}, ${step.title}`}
+                  onPointerEnter={select}
+                  onFocus={() => setActive(index)}
+                  onClick={() => setActive(index)}
+                >
+                  {bars(index)}
+                  <video
+                    ref={videoRef}
+                    src={DAY_DAWN.src}
+                    poster={DAY_DAWN.poster}
+                    muted
+                    autoPlay={!shouldReduceMotion}
+                    loop
+                    playsInline
+                    preload="auto"
+                    aria-hidden="true"
+                  />
+                  <span className="st-day-cap">
+                    <span className="st-day-t">{step.time}</span>
+                    <span className="st-day-n">{step.title}</span>
+                    <span className="st-day-more">
+                      <span>
+                        <p>{step.note}</p>
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              );
+            }
+            const { bangla } = splitProductName(step.product.name);
+            const { price } = getStartingOption(step.product);
+            const image = getProductImageSet(step.product);
+            return (
+              <Link
+                key={step.time}
+                href={`/product/${step.product.slug}`}
+                className="st-day-pn"
+                data-on={on || undefined}
+                aria-label={`${step.time}, ${bangla}, ৳${toBanglaDigits(price)}`}
+                onPointerEnter={select}
+                onFocus={() => setActive(index)}
+                onClick={(event) => {
+                  // A closed panel opens on the first tap; the open one goes to the product.
+                  if (!on) {
+                    event.preventDefault();
+                    setActive(index);
+                  }
+                }}
+              >
+                {bars(index)}
+                {image.src ? (
+                  <img
+                    src={image.src}
+                    srcSet={image.srcSet}
+                    sizes="(min-width: 760px) 40vw, 100vw"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : null}
+                <span className="st-day-cap">
+                  <span className="st-day-t">{step.time}</span>
+                  <span className="st-day-n">{step.title}</span>
+                  <span className="st-day-more">
+                    <span>
+                      <p>{step.note}</p>
+                      <span className="num">
+                        ৳<BanglaNumber value={price} />
+                      </span>
+                      <em>{bangla} দেখুন →</em>
+                    </span>
+                  </span>
+                </span>
+              </Link>
             );
           })}
-          <div className="st-ground" aria-hidden="true" />
         </div>
-        {spots.length ? <p className="st-hint">বিন্দুতে চাপ দিয়ে দাম দেখুন</p> : null}
       </div>
     </section>
   );
@@ -518,7 +623,7 @@ export default function Home() {
       <div className="st">
         <div className="st-frame">
           {/* Hero Section */}
-          <StageHero products={homepageProducts} />
+          <DayHero products={homepageProducts} />
 
           {/* Categories Section */}
           <CategoryCards products={homepageProducts} />

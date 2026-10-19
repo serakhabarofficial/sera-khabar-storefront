@@ -105,8 +105,8 @@ test("sections reveal as they reach the screen, not when the page mounts", () =>
   assert.doesNotMatch(poster, /\.sk \.stagger|\.sk \.reveal|sk-clip-in|animation: sk-rise/);
   const home = read("../pages/home.tsx");
   assert.doesNotMatch(home, /className="[^"]*\b(stagger|reveal)\b/);
-  // The settle scales the photo's wrapper, so the drip overlay inside it moves with the photo.
-  assert.match(home, /className="st-photo" data-page-settle="">\s*<img\s+src="\/home\/hero-jaggery-still-life\.webp"[\s\S]*?<HeroDrip \/>\s*<\/div>/);
+  // The settle scales the hero's panel row as one piece.
+  assert.match(home, /className="st-day-panels"\s+data-page-settle=""/);
   assert.match(read("../components/poster-product-card.tsx"), /<article className="c-card" data-reveal="">/);
   assert.match(read("../pages/product.tsx"), /className="skp-gallery" data-page-settle=""/);
 });
