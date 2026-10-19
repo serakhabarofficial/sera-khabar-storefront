@@ -39,7 +39,7 @@ test("the cart speaks English (2026-10-20, ঘর × রেফারেন্স
 
 test("every cart row has its own always-visible Remove button", () => {
   const row = cartDrawerSource.slice(cartDrawerSource.indexOf('className="skc-row"'), cartDrawerSource.indexOf("</motion.li>"));
-  assert.match(row, /onClick=\{\(\) => removeFromCart\(item\.id\)\} aria-label=\{`Remove \$\{english\}`\}/);
+  assert.match(row, /onClick=\{\(\) => removeRow\(item\)\} aria-label=\{`Remove \$\{english\}`\}/);
   assert.doesNotMatch(rule(".skc-remove"), /opacity: 0|display: none/);
 });
 
@@ -58,7 +58,7 @@ test("the add-on rail is titled Add to your order and only offers sellable produ
   assert.match(cartDrawerSource, /<h4 id="skc-add-title">Add to your order<\/h4>/);
   assert.match(cartDrawerSource, /if \(product\.available === false \|\| !productUuid \|\| !variantId\) continue;/);
   // Sideways scrolling inside the drawer must not drag it shut.
-  assert.match(cartDrawerSource, /<ul className="skc-rail" data-vaul-no-drag>/);
+  assert.match(cartDrawerSource, /<motion\.ul className="skc-rail" data-vaul-no-drag layoutScroll>/);
   // The homepage's beige pill, with the header's handbag.
   assert.match(cartDrawerSource, /<span className="l1"><BagIcon className="skc-plus-ic" \/>Add<\/span>/);
 });
@@ -100,15 +100,22 @@ test("the whole cart is white, with the total on a warm band (2026-10-20)", () =
   assert.match(rule(".skc-foot"), /background: #faf5f0;/);
 });
 
-test("adding from the rail moves the product into the bag with a fold-away animation", () => {
+test("bag rows and rail cards animate transform and opacity only, never height or width (2026-10-20)", () => {
   assert.match(cartDrawerSource, /if \(inCart\.has\(productUuid\)\) continue;/);
-  const rail = cartDrawerSource.slice(cartDrawerSource.indexOf('<ul className="skc-rail"'), cartDrawerSource.indexOf("</ul>", cartDrawerSource.indexOf('<ul className="skc-rail"')));
-  assert.match(rail, /<AnimatePresence initial=\{false\}>/);
-  assert.match(rail, /\{\.\.\.railFold\(tileWidth\)\}/);
-  // Animated boxes carry no padding: a padded box can't fold to 0 and jumps at the end.
-  assert.doesNotMatch(rule(".skc-card-slot"), /padding/);
-  assert.doesNotMatch(rule(".skc-item"), /padding/);
-  assert.match(cartDrawerSource, /const foldEase = \[0\.4, 0, 0\.2, 1\] as const;/);
+  // popLayout lifts a leaving item out of the flow; its neighbours slide into the gap with a layout (FLIP) animation.
+  assert.match(cartDrawerSource, /<ul className="skc-list">\s*<AnimatePresence initial=\{false\} mode="popLayout">/);
+  assert.match(cartDrawerSource, /<motion\.li key=\{rowKeys\[index\]\} \{\.\.\.rowMotion\} className="skc-item">/);
+  assert.match(cartDrawerSource, /<motion\.li key=\{suggestion\.productUuid\} className="skc-card-slot" style=\{\{ width: tileWidth \}\} \{\.\.\.cardMotion\}>/);
+  assert.match(cartDrawerSource, /layout: "position" as const/);
+  // Animating height or width re-laid-out the whole sheet every frame (~70 layouts per add or remove).
+  const motionDefs = cartDrawerSource.slice(cartDrawerSource.indexOf("const slide ="), cartDrawerSource.indexOf("// The Add label slides to"));
+  assert.doesNotMatch(motionDefs, /height:|width:|marginRight:/);
+  // The scroll containers are marked so layout measurements account for their scroll.
+  assert.match(cartDrawerSource, /className="skc-body" ref=\{bodyRef\} tabIndex=\{-1\} layoutScroll>/);
+  // A tapped control that disappears hands focus to the bag first, without scrolling.
+  assert.match(cartDrawerSource, /const parkFocus = \(\) => bodyRef\.current\?\.focus\(\{ preventScroll: true \}\);/);
+  // Rows and rail cards ask for the same photo size, so an added product reuses the decoded image.
+  assert.equal((cartDrawerSource.match(/sizes=\{[^}]*THUMB_SIZES/g) ?? []).length, 2);
   assert.doesNotMatch(cartDrawerSource, /addedHere|data-added/);
 });
 

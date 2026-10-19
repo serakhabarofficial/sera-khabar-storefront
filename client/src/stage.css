@@ -304,8 +304,8 @@
    turns the page, the আরও দেখুন shelf and the recently-viewed row white together. */
 .skp,
 .skp ~ .sk { --rice: #fff; background: #fff; }
-/* Short pages leave the shared <main> showing above the footer; keep it white under Stage pages. */
-main:has(.st, .skp) { background-color: #fff !important; }
+/* Short pages leave the shared <main> showing above the footer; layout.tsx makes it white on Stage routes (isStagePage).
+   Not main:has(.st, .skp): a :has() on a page-wide ancestor restyles the whole page on every DOM insertion or removal. */
 
 /* ── Shared chrome ── */
 .stc-announce { display: flex; justify-content: center; gap: 28px; padding: 10px 16px; border-bottom: 1px solid var(--st-line); font-size: 12.5px; color: var(--st-soft); background: #fff; white-space: nowrap; overflow: hidden; }

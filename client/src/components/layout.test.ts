@@ -4,6 +4,9 @@ import { test } from "node:test";
 
 const layoutSource = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
 const bagIconSource = readFileSync(new URL("./bag-icon.tsx", import.meta.url), "utf8");
+// isStagePage() from layout.tsx, rebuilt from its source (these tests read source text, they don't import components).
+const stageRoutePattern = layoutSource.match(/return path === "\/" \|\| (\/.+\/)\.test\(path\);/)?.[1] ?? "";
+const isStageRoute = (path: string) => path === "/" || new RegExp(stageRoutePattern.slice(1, -1)).test(path);
 
 test("uses the Stage announcement row with no close button", () => {
   // Stage redesign 2026-10-19; delivery facts come from the same POLICY_FACTS checkout uses.
@@ -188,7 +191,8 @@ test("page content uses the shared depth transition without a full-page blur lay
 
 test("no grey gap above the footer: cream main, dock space lives in the footer", () => {
   // The old Mango Lover grey (#f6f6f6) and an 80px pb-20 made a strip above the cash memo.
-  assert.match(layoutSource, /<main className="flex-grow overflow-hidden bg-\[#faf4ea\]">/);
+  // Cream by default, white on Stage routes; decided from the route, not a page-wide :has() (2026-10-20).
+  assert.match(layoutSource, /<main className=\{`flex-grow overflow-hidden \$\{isStagePage\(location\) \? "bg-white" : "bg-\[#faf4ea\]"\}`\}>/);
   assert.doesNotMatch(layoutSource, /<main[^>]*pb-20/);
   const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
   assert.match(posterSource, /@media \(max-width: 767px\) \{ footer\.sk \.fa \{ padding-bottom: calc\(98px \+ env\(safe-area-inset-bottom, 0px\)\); \} \}/);
@@ -198,8 +202,16 @@ test("no gap below the footer on phones: one dock clearance and a cream canvas",
   const posterSource = readFileSync(new URL("../poster.css", import.meta.url), "utf8");
   // A second clearance on footer.sk stacked on top of .fa's and doubled the empty space above the dock.
   assert.doesNotMatch(posterSource, /footer\.sk \{ padding-bottom/);
-  // iOS Safari shows the canvas under its floating toolbar; white there read as a band below the dock.
-  assert.match(posterSource, /@media \(max-width: 767px\) \{ html:has\(footer\.sk\), html:has\(footer\.sk\) body \{ background-color: #faf4ea; \} \}/);
+  // No :has() on <html> or <main> (2026-10-20): it made every cart insertion or removal restyle the whole page,
+  // which stuttered the cart's animations on Chrome iOS. (The html:has(footer.sk) rule had matched nothing since Stage.)
+  const stageSource = readFileSync(new URL("../stage.css", import.meta.url), "utf8");
+  for (const css of [posterSource, stageSource]) {
+    assert.doesNotMatch(css, /^\s*(html|main|body):has\(/m);
+  }
+  assert.equal(isStageRoute("/"), true);
+  assert.equal(isStageRoute("/product/date-palm-patali"), true);
+  assert.equal(isStageRoute("/collection/jaggery"), true);
+  assert.equal(isStageRoute("/booking"), false);
 });
 
 test("the dock reads হোম · মেনু · contact seal · খুঁজুন · ব্যাগ", () => {
