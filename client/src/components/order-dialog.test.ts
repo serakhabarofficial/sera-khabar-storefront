@@ -108,12 +108,26 @@ test("the phone's back button returns to the product, where the customer was", (
 test("validation is in Bangla and moves the customer to the first field that needs fixing", () => {
   assert.match(dialogSource, /errors\.name = "আপনার পুরো নাম লিখুন।"/);
   assert.match(dialogSource, /errors\.phone = "মোবাইল নম্বর লিখুন।"/);
-  assert.match(dialogSource, /errors\.district = "জেলা বেছে নিন।"/);
-  assert.match(dialogSource, /errors\.thana = values\.district \? "থানা বেছে নিন।" : "আগে জেলা বেছে নিন।"/);
-  assert.match(dialogSource, /errors\.address = "বাড়ি, রাস্তা বা এলাকার নাম লিখুন।"/);
+  assert.match(dialogSource, /if \(values\.address\.trim\(\)\.length < 5\) errors\.address = "বাড়ি, রাস্তা বা এলাকার নাম লিখুন।"/);
   // Bangla digits typed on a Bangla keyboard still count as a phone number.
   assert.match(dialogSource, /normalizeBdMobile\(toLatinDigits\(values\.phone\)\)/);
   assert.match(dialogSource, /const firstInvalid = \(Object\.keys\(fieldRefs\) as CheckoutField\[\]\)\.find\(\(field\) => fieldErrors\[field\]\);/);
+});
+
+test("the form asks for name, phone, address, then the optional জেলা and থানা", () => {
+  const form = dialogSource.slice(dialogSource.indexOf('<section className="skx-section"'), dialogSource.indexOf('<section className="skx-payment"'));
+  const at = (pattern: RegExp) => form.search(pattern);
+  assert.match(form, /textField\("name", "আপনার নাম", "Full name", "আপনার সম্পূর্ণ নাম লিখুন"\)/);
+  assert.ok(at(/textField\("name"/) < at(/textField\("phone"/));
+  assert.ok(at(/textField\("phone"/) < at(/id="skx-address"/));
+  assert.ok(at(/id="skx-address"/) < at(/kind="district"/));
+  assert.ok(at(/kind="district"/) < at(/kind="thana"/));
+  // Only name, phone and address can stop an order; জেলা and থানা are optional.
+  const validate = dialogSource.slice(dialogSource.indexOf("export function validateCheckout"), dialogSource.indexOf("function getBundleAnalyticsItems"));
+  assert.doesNotMatch(validate, /errors\.(district|thana)/);
+  assert.doesNotMatch(form, /errors\.(district|thana)/);
+  // Focus goes to the first invalid field in the order it appears.
+  assert.match(dialogSource, /phone: useRef<HTMLInputElement>\(null\),\n\s+address: useRef<HTMLTextAreaElement>\(null\),\n\s+district:/);
 });
 
 test("জেলা and থানা are search dropdowns; the address sent is street, থানা, জেলা", () => {

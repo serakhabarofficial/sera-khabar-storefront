@@ -54,7 +54,8 @@ export type OrderDialogBundle = {
   lineItems?: OrderDialogLineItem[];
 };
 
-type CheckoutField = "name" | "phone" | "district" | "thana" | "address";
+// In form order: the first field with an error gets focus.
+type CheckoutField = "name" | "phone" | "address" | "district" | "thana";
 type CheckoutValues = { name: string; phone: string; district: string | null; thana: string | null; address: string };
 const emptyValues: CheckoutValues = { name: "", phone: "", district: null, thana: null, address: "" };
 
@@ -62,15 +63,17 @@ const toBanglaDigits = (value: string | number) => String(value).replace(/\d/g, 
 const toLatinDigits = (value: string) => value.replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit)));
 const money = (amount: number) => `৳${toBanglaDigits(amount.toLocaleString("en-IN"))}`;
 
-/** Every message names the fix; the first field that needs one gets focus. */
+/**
+ * Name, phone and address are required; জেলা and থানা are optional. Every message names the fix; the
+ * first field that needs one gets focus. The address needs 5+ characters on its own because the order
+ * API rejects a shorter one, and an empty জেলা/থানা no longer pads it out.
+ */
 export function validateCheckout(values: CheckoutValues) {
   const errors: Partial<Record<CheckoutField, string>> = {};
   if (values.name.trim().length < 2) errors.name = "আপনার পুরো নাম লিখুন।";
   if (!values.phone.trim()) errors.phone = "মোবাইল নম্বর লিখুন।";
   else if (!normalizeBdMobile(toLatinDigits(values.phone))) errors.phone = "সঠিক ১১ সংখ্যার মোবাইল নম্বর লিখুন, যেমন 01712345678।";
-  if (!values.district) errors.district = "জেলা বেছে নিন।";
-  if (!values.thana) errors.thana = values.district ? "থানা বেছে নিন।" : "আগে জেলা বেছে নিন।";
-  if (values.address.trim().length < 4) errors.address = "বাড়ি, রাস্তা বা এলাকার নাম লিখুন।";
+  if (values.address.trim().length < 5) errors.address = "বাড়ি, রাস্তা বা এলাকার নাম লিখুন।";
   return errors;
 }
 
@@ -131,9 +134,9 @@ export default function OrderDialog({
   const fieldRefs = {
     name: useRef<HTMLInputElement>(null),
     phone: useRef<HTMLInputElement>(null),
+    address: useRef<HTMLTextAreaElement>(null),
     district: useRef<HTMLInputElement>(null),
     thana: useRef<HTMLInputElement>(null),
-    address: useRef<HTMLTextAreaElement>(null),
   };
   const capture = useAbandonedCartCapture("storefront");
   const bundleQuantity = bundle?.quantity ?? 1;
@@ -548,35 +551,8 @@ export default function OrderDialog({
                   <input name="hp_x7" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="absolute -left-[9999px] h-px w-px opacity-0" />
                   <section className="skx-section" aria-label="আপনার নাম, নম্বর ও ঠিকানা">
                     <div className="skx-row">
-                      {textField("name", "আপনার নাম", "Full name", "যেমন: সিহাব আহমেদ")}
+                      {textField("name", "আপনার নাম", "Full name", "আপনার সম্পূর্ণ নাম লিখুন")}
                       {textField("phone", "মোবাইল নম্বর", "Phone number", "01XXXXXXXXX", "এই নম্বরেই অর্ডার কনফার্ম করব।")}
-                    </div>
-                    <div className="skx-row skx-place-row">
-                      <PlaceCombobox
-                        ref={fieldRefs.district}
-                        kind="district"
-                        districtId={values.district}
-                        value={values.district}
-                        selectedLabel={districtName}
-                        error={errors.district}
-                        onPick={(id) => {
-                          const changed = id !== valuesRef.current.district;
-                          flushSync(() => setField("district", id, changed ? { thana: null } : {}));
-                          fieldRefs.thana.current?.focus();
-                        }}
-                      />
-                      <PlaceCombobox
-                        ref={fieldRefs.thana}
-                        kind="thana"
-                        districtId={values.district}
-                        value={values.thana}
-                        selectedLabel={thanaName}
-                        error={errors.thana}
-                        onPick={(id) => {
-                          setField("thana", id);
-                          fieldRefs.address.current?.focus();
-                        }}
-                      />
                     </div>
                     <div className="skx-field">
                       <label htmlFor="skx-address">সম্পূর্ণ ঠিকানা<small>Delivery address</small></label>
@@ -594,6 +570,28 @@ export default function OrderDialog({
                         onChange={(event) => setField("address", event.target.value)}
                       />
                       {errors.address ? <span className="skx-field-error" id="skx-address-error" role="alert">{errors.address}</span> : null}
+                    </div>
+                    <div className="skx-row skx-place-row">
+                      <PlaceCombobox
+                        ref={fieldRefs.district}
+                        kind="district"
+                        districtId={values.district}
+                        value={values.district}
+                        selectedLabel={districtName}
+                        onPick={(id) => {
+                          const changed = id !== valuesRef.current.district;
+                          flushSync(() => setField("district", id, changed ? { thana: null } : {}));
+                          fieldRefs.thana.current?.focus();
+                        }}
+                      />
+                      <PlaceCombobox
+                        ref={fieldRefs.thana}
+                        kind="thana"
+                        districtId={values.district}
+                        value={values.thana}
+                        selectedLabel={thanaName}
+                        onPick={(id) => setField("thana", id)}
+                      />
                     </div>
                   </section>
 
