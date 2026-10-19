@@ -51,7 +51,8 @@ export function PageTransition({ children, standalone = false }: { children: Rea
     const stopReveal = startScrollReveal(root, { instantInView: back });
     const stopSkewReveal = startSkewReveal(root, { instantInView: back });
 
-    const photo = root.querySelector("[data-page-settle]");
+    // The product page has one settle target per layout (phone carousel, desktop mosaic); settle the one on screen.
+    const photo = Array.from(root.querySelectorAll("[data-page-settle]")).find((el) => el.getClientRects().length > 0) ?? null;
     const animations: (Animation | null)[] = [];
     if (firstPage) {
       const load = getLoadMotion(reducedMotion);

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dock contact button — variants (round 2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Galada&family=Geist:wght@100..900&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal: #5b2d17; --deep: #4a2212; --sun: #f6b826; --pink: #e2547a; --ink: #3a1d0f; --sub: #7a6050;
+    --dock-ic: #9a6a52; --hair: #ecd6c8; --wa: #25d366; --butter: #fff6df; --memo: #fffaf1;
+    --out: cubic-bezier(0.23, 1, 0.32, 1);
+    --drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    --disp: "Noto Serif Bengali", serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { min-height: 100vh; background: #e9e4dd; font-family: "Geist", "Noto Sans Bengali", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+  .num { font-family: "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; }
+
+  /* Harness */
+  #stage { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 84px 16px 40px; }
+  .cap { max-width: 390px; text-align: center; }
+  .cap b { display: block; font-family: var(--disp); font-weight: 900; font-size: 18px; color: var(--royal); }
+  .cap span { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.6; color: var(--sub); }
+  .phone { position: relative; width: 390px; height: 800px; border-radius: 46px; overflow: hidden; background: #fff;
+    box-shadow: 0 0 0 10px #1d1410, 0 0 0 11px #3b2c25, 0 40px 80px -30px rgba(29, 20, 16, 0.6); isolation: isolate; }
+  @media (max-width: 480px) {
+    #stage { padding: 0; gap: 0; }
+    .cap { display: none; }
+    .phone { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+  }
+  .scroller { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .scroller::-webkit-scrollbar { display: none; }
+
+  /* Product page (current, without the phone/WhatsApp row) */
+  .ann { padding: 9px 16px; text-align: center; font-size: 12.5px; color: var(--sub); border-bottom: 1px solid var(--hair); }
+  .ann b { color: var(--royal); }
+  .hd { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 58px; padding: 0 16px; border-bottom: 1px solid var(--hair); }
+  .hd .menu { display: grid; gap: 5px; width: 22px; } .hd .menu i { display: block; height: 1.4px; background: var(--royal); } .hd .menu i + i { width: 14px; }
+  .hd .logo { font-family: var(--disp); font-weight: 900; font-size: 21px; color: var(--royal); }
+  .hd .bag { justify-self: end; font-size: 13px; font-weight: 600; color: var(--royal); }
+  .crumb { display: flex; gap: 7px; padding: 14px 16px 10px; font-size: 12.5px; color: var(--sub); }
+  .photo { position: relative; margin: 0 16px; border-radius: 22px; background: #f7f1e8; aspect-ratio: 1; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .chip { position: absolute; top: 14px; left: 14px; padding: 5px 12px; border-radius: 999px; background: #fff; font-family: var(--disp); font-weight: 700; font-size: 12px; color: var(--royal); }
+  .info { display: flex; flex-direction: column; gap: 16px; padding: 22px 16px 0; }
+  .info h1 { margin: 0; font-family: var(--disp); font-weight: 900; font-size: 34px; line-height: 1.25; color: var(--royal); }
+  .ticks { margin: -4px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+  .ticks li::before { content: "✓"; margin-right: 8px; color: var(--pink); font-weight: 700; }
+  .price { font-size: 30px; font-weight: 700; color: var(--royal); }
+  .lbl { display: block; margin-bottom: 8px; font-family: var(--disp); font-weight: 700; font-size: 14px; color: var(--royal); }
+  .sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .size { display: flex; align-items: center; gap: 10px; padding: 14px 12px; border-radius: 18px; text-align: left; box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); }
+  .size[aria-pressed="true"] { background: var(--butter); box-shadow: inset 0 0 0 2px var(--royal); }
+  .size b { display: block; font-family: var(--disp); font-weight: 900; font-size: 17px; color: var(--royal); }
+  .size .num { font-size: 15px; color: var(--royal); }
+  .buyrow { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+  .qty { display: inline-flex; align-items: center; height: 56px; padding: 0 6px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(58, 29, 15, 0.16); }
+  .qty button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; color: var(--royal); }
+  .qty output { min-width: 26px; text-align: center; font-size: 18px; }
+  .cod { display: flex; align-items: center; justify-content: center; gap: 10px; height: 56px; border-radius: 999px; background: var(--sun); font-weight: 700; font-size: 16px; }
+  .cod i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+  .cartbtn { height: 56px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--royal); font-weight: 700; font-size: 15px; color: var(--royal); }
+  .strip { margin: 30px 0 0; padding: 12px 0; overflow: hidden; white-space: nowrap; background: var(--royal); color: #fff; font-family: var(--disp); font-weight: 700; font-size: 14px; }
+  .strip span { margin: 0 14px; } .strip span::after { content: "✦"; margin-left: 28px; color: var(--sun); }
+  .details { padding: 28px 16px 0; }
+  .details h2 { margin: 0 0 12px; font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--royal); }
+  .memo { padding: 18px; border-radius: 18px; background: var(--memo); box-shadow: inset 0 0 0 1px var(--hair); font-size: 14px; line-height: 1.75; }
+  .memo p { margin: 0 0 10px; }
+  .memo .row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px dashed rgba(58, 29, 15, 0.2); }
+  .memo .row em { font-style: normal; color: var(--pink); font-weight: 700; }
+  .more { padding: 30px 16px 140px; }
+  .more h2 { margin: 0 0 12px; font-family: var(--disp); font-weight: 900; font-size: 22px; color: var(--royal); }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { border-radius: 18px; background: #f7f1e8; aspect-ratio: 0.8; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .card b { font-family: var(--disp); font-weight: 900; font-size: 15px; color: var(--royal); }
+  .card span { font-size: 13px; color: var(--sub); }
+
+  /* Dock: হোম · মেনু · যোগাযোগ · খুঁজুন · ব্যাগ */
+  .dock { position: absolute; z-index: 30; left: 12px; right: 12px; bottom: 14px; }
+  .pill { position: relative; z-index: 2; height: 60px; padding: 5px; display: flex; align-items: center; gap: 2px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.86); -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid var(--hair); box-shadow: 0 10px 30px -12px rgba(74, 34, 18, 0.28); transition: box-shadow 200ms ease; }
+  .it { position: relative; flex: 1 1 0; min-width: 0; height: 48px; display: grid; place-items: center; border-radius: 999px; color: var(--dock-ic); }
+  .it svg { width: 22px; height: 22px; }
+  .slot { position: relative; flex: none; width: 72px; height: 48px; }
+  .bagb { position: relative; flex: none; width: 48px; height: 48px; margin-left: 4px; display: grid; place-items: center; border-radius: 999px; background: var(--deep); color: #fff; }
+  .bagb svg { width: 21px; height: 21px; }
+  .badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; display: grid; place-items: center; border-radius: 999px;
+    background: #f08a1c; color: #fff; box-shadow: 0 0 0 2px #fff; font-family: var(--disp); font-weight: 600; font-size: 12.5px; }
+  .press { transition: transform 160ms var(--out); }
+  .press:active { transform: scale(0.97); }
+  .scrim { position: absolute; inset: 0; z-index: 25; background: rgba(58, 29, 15, 0.22); opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+  .phone.open .scrim { opacity: 1; pointer-events: auto; }
+  .wa-ic { width: 20px; height: 20px; filter: brightness(0) invert(1); }
+  /* Glyph swap shared by every contact button: receiver out, ✕ in */
+  .gl { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity 150ms ease, transform 220ms var(--out); }
+  .gl.x { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+  .phone.open .gl.ph { opacity: 0; transform: rotate(90deg) scale(0.6); }
+  .phone.open .gl.x { opacity: 1; transform: none; }
+  .tag { position: absolute; left: 50%; bottom: -1px; transform: translateX(-50%); font-family: var(--disp); font-weight: 700; font-size: 9.5px; line-height: 1; white-space: nowrap; }
+
+  /* ——— 1 · ডাকটিকিট / Stamp ——— */
+  .st-wrap { position: absolute; left: 50%; top: -14px; width: 58px; height: 62px; margin-left: -29px; filter: drop-shadow(0 6px 8px rgba(74, 34, 18, 0.28));
+    transform: rotate(-7deg); transition: transform 260ms var(--out); }
+  .st-btn { position: absolute; inset: 0; padding: 5px; background: var(--sun); color: var(--ink);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, radial-gradient(circle at center, #0000 2.4px, #000 2.9px) -5px -5px / 9.67px 10.33px round;
+            mask: linear-gradient(#000 0 0) content-box, radial-gradient(circle at center, #0000 2.4px, #000 2.9px) -5px -5px / 9.67px 10.33px round; }
+  .st-in { position: relative; display: block; height: 100%; border: 1px dashed rgba(58, 29, 15, 0.45); }
+  .st-in .gl { padding-bottom: 9px; }
+  .st-in .tag { bottom: 4px; color: var(--royal); }
+  .phone.open .st-wrap { transform: rotate(0deg) scale(0.94); }
+  .st-land { animation: stamp-land 420ms var(--out) 500ms both; }
+  @keyframes stamp-land { 0% { transform: rotate(-9deg) scale(1.35); opacity: 0; } 60% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+  .m-panel { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 18px 82px; border-radius: 30px; background: var(--memo);
+    border: 1px solid var(--hair); box-shadow: 0 30px 60px -24px rgba(74, 34, 18, 0.45);
+    clip-path: inset(calc(100% - 60px) 0 0 0 round 30px); visibility: hidden; transition: clip-path 200ms var(--out), visibility 0s linear 200ms; }
+  .phone.open .m-panel { clip-path: inset(0 0 0 0 round 30px); visibility: visible; transition: clip-path 320ms var(--drawer), visibility 0s; }
+  .phone.open .v1 .pill { box-shadow: none; }
+  .m-in { opacity: 0; transform: translateY(10px); transition: opacity 120ms ease, transform 120ms var(--out); }
+  .phone.open .m-in { opacity: 1; transform: none; transition: opacity 220ms ease 70ms, transform 260ms var(--out) 70ms; }
+  .phone.open .m-row.r1 { transition-delay: 110ms; } .phone.open .m-row.r2 { transition-delay: 150ms; }
+  .m-head { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 12px; border-bottom: 2px solid var(--royal); }
+  .m-head b { display: block; font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--royal); line-height: 1.2; }
+  .m-head small { display: block; font-size: 12.5px; color: var(--sub); }
+  .m-head .script { font-family: "Galada", cursive; font-size: 18px; color: var(--pink); transform: rotate(-4deg); }
+  .m-row { display: flex; align-items: center; gap: 12px; padding: 14px 2px; border-bottom: 1px dashed rgba(58, 29, 15, 0.25); }
+  .m-row .ico { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: #fff; }
+  .m-row.r1 .ico { background: var(--royal); } .m-row.r2 .ico { background: var(--wa); }
+  .m-row span { flex: 1; display: grid; }
+  .m-row b { font-family: var(--disp); font-weight: 700; font-size: 16px; color: var(--royal); }
+  .m-row small { font-size: 13px; color: var(--sub); }
+  .m-row i { font-style: normal; font-size: 18px; color: var(--royal); }
+
+  /* ——— 2 · কথার বুদবুদ / Speech bubble ——— */
+  .bb-btn { position: absolute; left: 50%; top: -16px; width: 60px; height: 60px; margin-left: -30px; color: #fff; }
+  .bb-btn > svg.shape { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 8px 10px rgba(74, 34, 18, 0.3)); transition: transform 240ms var(--out); transform-origin: 20% 90%; }
+  .bb-btn .gl { bottom: 8px; }
+  .bb-dot { position: absolute; top: 3px; right: 3px; width: 13px; height: 13px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 0 2.5px #fff; }
+  .bb-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--wa); animation: ping 1.4s var(--out) 700ms 2 both; }
+  @keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.6); opacity: 0; } }
+  .phone.open .bb-btn > svg.shape { transform: scale(0.92) rotate(-4deg); }
+  .phone.open .bb-dot { transform: scale(0); transition: transform 160ms var(--out); }
+  .bb-stack { position: absolute; z-index: 3; left: 50%; bottom: 78px; width: 270px; margin-left: -135px; display: grid; gap: 8px; pointer-events: none; }
+  .phone.open .bb-stack { pointer-events: auto; }
+  .bb-msg { display: flex; align-items: center; gap: 11px; padding: 11px 14px 11px 11px; border-radius: 22px 22px 22px 6px; color: #fff;
+    box-shadow: 0 12px 26px -12px rgba(58, 29, 15, 0.55); transform-origin: 30% 100%;
+    opacity: 0; transform: translateY(14px) scale(0.85); transition: opacity 120ms ease, transform 160ms var(--out); }
+  .bb-msg.call { background: var(--royal); } .bb-msg.wa { background: var(--wa); }
+  .bb-msg .ico { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
+  .bb-msg span { display: grid; } .bb-msg b { font-family: var(--disp); font-weight: 700; font-size: 15.5px; } .bb-msg small { font-size: 12.5px; opacity: 0.85; }
+  .bb-hello { justify-self: start; padding: 8px 14px; border-radius: 18px 18px 18px 6px; background: #fff; color: var(--royal); font-family: var(--disp); font-weight: 700; font-size: 14px;
+    box-shadow: 0 10px 22px -12px rgba(58, 29, 15, 0.5); opacity: 0; transform: translateY(14px) scale(0.85); transform-origin: 20% 100%; transition: opacity 120ms ease, transform 160ms var(--out); }
+  .phone.open .bb-hello, .phone.open .bb-msg { opacity: 1; transform: none; transition: opacity 180ms ease, transform 280ms var(--out); }
+  .phone.open .bb-msg.call { transition-delay: 60ms; }
+  .phone.open .bb-msg.wa { transition-delay: 120ms; }
+
+  /* ——— 3 · সিলমোহর / Scalloped seal ——— */
+  .se-btn { position: absolute; left: 50%; top: -18px; width: 64px; height: 64px; margin-left: -32px; color: var(--ink); }
+  .se-btn > svg.shape { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 8px 10px rgba(74, 34, 18, 0.3)); transition: transform 360ms var(--out); }
+  .se-btn:active > svg.shape { transform: rotate(14deg) scale(0.96); }
+  .phone.open .se-btn > svg.shape { transform: rotate(60deg); }
+  .se-turn { animation: seal-turn 900ms var(--out) 500ms both; }
+  @keyframes seal-turn { from { transform: rotate(-90deg) scale(0.7); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
+  .fan { position: absolute; z-index: 2; left: 50%; top: 14px; width: 62px; height: 62px; margin: -31px 0 0 -31px; display: grid; place-items: center; border-radius: 50%; color: #fff;
+    box-shadow: 0 12px 24px -10px rgba(58, 29, 15, 0.55); opacity: 0; transform: translate(0, 0) scale(0.4); pointer-events: none; transition: transform 180ms var(--out), opacity 120ms ease; }
+  .fan.call { background: var(--royal); } .fan.wa { background: var(--wa); }
+  .fan em { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); padding: 4px 10px; border-radius: 999px; background: #fff; color: var(--royal);
+    font-style: normal; font-family: var(--disp); font-weight: 700; font-size: 12.5px; white-space: nowrap; box-shadow: 0 4px 12px -6px rgba(58, 29, 15, 0.4); }
+  .phone.open .fan { opacity: 1; pointer-events: auto; transition: transform 300ms cubic-bezier(0.34, 1.32, 0.64, 1), opacity 160ms ease; }
+  .phone.open .fan.call { transform: translate(-76px, -114px) scale(1); }
+  .phone.open .fan.wa { transform: translate(76px, -114px) scale(1); transition-delay: 45ms; }
+
+  /* ——— 4 · পাতা / Leaf ——— */
+  .v4-vp { position: relative; flex: 1; height: 48px; overflow: visible; }
+  .v4-face { position: absolute; inset: 0; display: flex; gap: 2px; align-items: center; }
+  .v4-face > * { transition: transform 300ms var(--out), opacity 200ms ease; transition-delay: calc(var(--i) * 28ms); }
+  .v4-b > * { transform: translateY(70%); opacity: 0; pointer-events: none; }
+  .phone.open .v4-a > * { transform: translateY(-70%); opacity: 0; pointer-events: none; }
+  .phone.open .v4-b > * { transform: none; opacity: 1; pointer-events: auto; }
+  .v4-a .slot { width: 64px; }
+  .lf-btn { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 4px 50%; background: var(--royal); color: var(--sun);
+    box-shadow: 0 8px 16px -8px rgba(74, 34, 18, 0.6); transform: rotate(0deg); }
+  .lf-btn::before { content: ""; position: absolute; left: 7px; top: 7px; width: 44px; height: 1px; background: rgba(246, 184, 38, 0.35); transform-origin: 0 0; transform: rotate(45deg); }
+  .lf-btn .gl { transform: none; }
+  .lf-btn .lf-pip { position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 2.5px #fff; }
+  .lf-grow { animation: leaf-grow 520ms var(--out) 500ms both; transform-origin: 0 100%; }
+  @keyframes leaf-grow { from { transform: rotate(-35deg) scale(0.4); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
+  .v4-back { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 4px 50%; background: var(--royal); color: var(--sun); }
+  .v4-b a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; height: 48px; border-radius: 999px; font-family: var(--disp); font-weight: 700; font-size: 14px; color: #fff; white-space: nowrap; }
+  .v4-b .call { background: var(--royal); } .v4-b .wa { background: var(--wa); }
+  .v4-b .wa-ic { width: 17px; height: 17px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .phone *, .phone *::before, .phone *::after { transition-duration: 0.01ms !important; transition-delay: 0s !important; animation: none !important; }
+  }
+
+  /* Picker (verbatim spec) */
+  .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10, 10, 10, 0.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 8px 24px rgba(0, 0, 0, 0.24), 0 2px 6px rgba(0, 0, 0, 0.12); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); will-change: transform; }
+  .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1), width 250ms cubic-bezier(0.23, 1, 0.32, 1); }
+  @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } }
+  .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+  .proto-picker-item:hover { color: rgba(255, 255, 255, 0.85); }
+  .proto-picker-item:active { transform: scale(0.97); }
+  .proto-picker-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+  .proto-picker-item[data-active] { color: #fff; }
+  .proto-picker-divider { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); }
+  .proto-picker-replay { padding: 0 10px; font-size: 14px; }
+  .proto-picker[data-position="top"] { bottom: auto; top: 24px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<nav class="proto-picker" data-position="top" aria-label="Prototype variants">
+  <span class="proto-picker-highlight" aria-hidden="true"></span>
+  <button class="proto-picker-item" data-active aria-current="true">ডাকটিকিট</button>
+  <button class="proto-picker-item">বুদবুদ</button>
+  <button class="proto-picker-item">সিলমোহর</button>
+  <button class="proto-picker-item">পাতা</button>
+  <span class="proto-picker-divider" aria-hidden="true"></span>
+  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+</nav>
+
+<script>
+const TEL = "tel:+8801310980289";
+const WA = "https://wa.me/8801303103540?text=" + encodeURIComponent("Hello, I'd like to order: আমসত্ত্ব আচার | Mango Leather Pickle (২৫০ গ্রাম)");
+const WA_IMG = (s = 20) => `<img class="wa-ic" style="width:${s}px;height:${s}px" src="https://cdn.reicon.dev/logos/whatsapp/original.svg" alt="">`;
+const PHOTO = "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/960.webp";
+
+const I = {
+  home: '<svg viewBox="0 0 24 24" fill="none"><path d="M3.5 10.2 12 3.8l8.5 6.4V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 15.5c1.7 1.3 4.3 1.3 6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none"><path d="M11.5 21a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19Z M22 22l-2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 9.5h14M5 14.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  bag: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 9a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-6 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75A2.25 2.25 0 0 0 9.75 5v.254q.626-.005 1.355-.004h1.79q.73-.001 1.355.004V5A2.25 2.25 0 0 0 12 2.75m3.75 2.557V5a3.75 3.75 0 0 0-7.5 0v.307q-.202.014-.391.035c-.878.095-1.613.293-2.265.74a5 5 0 0 0-.63.516c-.566.552-.905 1.234-1.17 2.076c-.257.819-.465 1.859-.727 3.166l-.019.095c-.376 1.883-.673 3.367-.758 4.549c-.088 1.208.034 2.223.606 3.104q.288.442.664.81c.752.734 1.724 1.052 2.925 1.204c1.176.148 2.69.148 4.61.148h1.81c1.921 0 3.434 0 4.61-.148c1.201-.152 2.174-.47 2.925-1.204a4.8 4.8 0 0 0 .664-.81c.572-.88.694-1.896.607-3.104c-.086-1.182-.382-2.666-.76-4.549l-.018-.095c-.261-1.307-.47-2.347-.727-3.166c-.265-.842-.604-1.524-1.17-2.076a5 5 0 0 0-.63-.516c-.652-.447-1.387-.645-2.265-.74a11 11 0 0 0-.39-.035M8.02 6.833c-.747.08-1.208.233-1.578.486a3.3 3.3 0 0 0-.431.354c-.321.313-.56.735-.786 1.451c-.23.733-.424 1.693-.695 3.052c-.39 1.948-.667 3.34-.744 4.416c-.077 1.062.052 1.693.368 2.179q.196.302.454.554c.415.405 1.008.655 2.065.789c1.07.135 2.49.136 4.476.136h1.703c1.986 0 3.404-.001 4.475-.136c1.057-.134 1.65-.384 2.065-.789a3.3 3.3 0 0 0 .454-.554c.316-.486.445-1.117.369-2.18c-.078-1.076-.355-2.467-.744-4.415c-.272-1.359-.465-2.32-.696-3.052c-.225-.716-.465-1.138-.786-1.451a3 3 0 0 0-.43-.354c-.37-.253-.832-.405-1.579-.486c-.763-.082-1.743-.083-3.129-.083H11.15c-1.386 0-2.366.001-3.13.083"/></svg>',
+  phone: '<svg width="16" height="22" viewBox="7 1 11 22" aria-hidden="true"><path fill="currentColor" d="M15 2a1 1 0 0 0-1 1v3h-4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h5c1.11 0 2-.89 2-2V8c0-.74-.4-1.38-1-1.72V3a1 1 0 0 0-1-1m-5 6h5v5h-5zm0 7h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1z"/></svg>',
+  receiver: (s = 22, w = 1.6) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"><path d="M5.2 3.5h3.1l1.6 4.1-2.1 1.3a11 11 0 0 0 7.3 7.3l1.3-2.1 4.1 1.6v3.1a2 2 0 0 1-2.1 2A16.5 16.5 0 0 1 3.2 5.6a2 2 0 0 1 2-2.1Z" stroke="currentColor" stroke-width="${w}" stroke-linejoin="round"/></svg>`,
+  x: (s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+};
+const glyphs = (s, w) => `<span class="gl ph">${I.receiver(s, w)}</span><span class="gl x">${I.x(s - 2)}</span>`;
+
+const it = (label, icon, i = 0) => `<button class="it press" style="--i:${i}" aria-label="${label}">${icon}</button>`;
+const bag = `<button class="bagb press" aria-label="Cart, 2 items">${I.bag}<span class="badge">২</span></button>`;
+const home = it("হোম", I.home, 0), menu = it("মেনু", I.menu, 1), search = it("খুঁজুন", I.search, 3);
+
+// A scalloped seal outline: a circle whose radius ripples 12 times around.
+function scallop(cx, cy, R, a, n) {
+  let d = "";
+  for (let k = 0; k <= 240; k++) {
+    const t = (k / 240) * Math.PI * 2, r = R + a * Math.cos(n * t);
+    d += (k ? "L" : "M") + (cx + r * Math.cos(t)).toFixed(2) + " " + (cy + r * Math.sin(t)).toFixed(2);
+  }
+  return d + "Z";
+}
+
+function page() {
+  return `
+  <div class="scroller">
+    <div class="ann">সারা দেশে <b>ক্যাশ অন ডেলিভারি</b></div>
+    <div class="hd"><span class="menu"><i></i><i></i></span><span class="logo">সেরা খাবার</span><span class="bag">ব্যাগ <span class="num">২</span></span></div>
+    <div class="crumb"><span>হোম</span>›<span>হোমমেড</span>›<span>আমসত্ত্ব আচার</span></div>
+    <div class="photo"><span class="chip">হোমমেড</span><img src="${PHOTO}" alt="আমসত্ত্ব আচার"></div>
+    <div class="info">
+      <h1>আমসত্ত্ব আচার</h1>
+      <ul class="ticks"><li>খাঁটি আমসত্ত্ব দিয়ে তৈরি</li><li>মিষ্টি, টক ও ঝালের সমন্বয়</li><li>বাছাই করা মসলা</li></ul>
+      <div class="price num">৳৩৫০</div>
+      <div><span class="lbl">পরিমাণ বেছে নিন</span>
+        <div class="sizes">
+          <button class="size" aria-pressed="true"><span><b>২৫০ গ্রাম</b><span class="num">৳৩৫০</span></span></button>
+          <button class="size" aria-pressed="false"><span><b>৫০০ গ্রাম</b><span class="num">৳৭০০</span></span></button>
+        </div>
+      </div>
+      <div class="buyrow">
+        <div class="qty"><button aria-label="কমান">−</button><output class="num">১</output><button aria-label="বাড়ান">+</button></div>
+        <button class="cod press">অর্ডার করুন <i></i></button>
+      </div>
+      <button class="cartbtn press">কার্টে রাখুন</button>
+    </div>
+    <div class="strip"><span>ক্যাশ অন ডেলিভারি</span><span>সারাদেশে ডেলিভারি</span><span>রাজশাহী থেকে</span></div>
+    <div class="details">
+      <h2>বিস্তারিত</h2>
+      <div class="memo">
+        <p>খাঁটি আমসত্ত্ব দিয়ে তৈরি সুস্বাদু আচার, যেখানে মিষ্টি, টক ও ঝালের রয়েছে দারুণ সমন্বয়।</p>
+        <div class="row"><span>খাঁটি আমসত্ত্ব</span><em>✓</em></div>
+        <div class="row"><span>বাছাই করা মসলা</span><em>✓</em></div>
+      </div>
+    </div>
+    <div class="more">
+      <h2>আরও দেখুন</h2>
+      <div class="cards">
+        <div class="card"><b>খেজুরের গুড়</b><span class="num">৳৪৫০</span></div>
+        <div class="card"><b>আমের আচার</b><span class="num">৳৩০০</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const toggleAttrs = 'data-toggle aria-label="যোগাযোগ: ফোন বা হোয়াটসঅ্যাপ" aria-expanded="false"';
+
+const variants = [
+  {
+    cap: ["১ · ডাকটিকিট (Stamp)", "যোগাযোগ বোতামটা একটা হলুদ ডাকটিকিট, একটু বাঁকা, খাঁজকাটা কিনারা। পাতা খুললে সেটা ছাপ মারার মতো বসে। চাপ দিলে ডকটাই বড় হয়ে ক্যাশ মেমোর মতো যোগাযোগ কার্ড হয়ে যায়।"],
+    dock: () => `
+      <div class="scrim" data-close></div>
+      <div class="dock v1">
+        <div class="m-panel" role="dialog" aria-label="যোগাযোগ">
+          <div class="m-head m-in"><span><b>যোগাযোগ</b><small>আমসত্ত্ব আচার · ২৫০ গ্রাম × <span class="num">১</span></small></span><span class="script">সরাসরি অর্ডার</span></div>
+          <a class="m-row r1 m-in press" href="${TEL}"><span class="ico">${I.phone}</span><span><b>ফোনে অর্ডার</b><small class="num">০১৩১০-৯৮০২৮৯</small></span><i>→</i></a>
+          <a class="m-row r2 m-in press" href="${WA}" target="_blank" rel="noopener"><span class="ico">${WA_IMG(20)}</span><span><b>হোয়াটসঅ্যাপে অর্ডার</b><small class="num">০১৩০৩-১০৩৫৪০</small></span><i>→</i></a>
+        </div>
+        <div class="pill">${home}${menu}
+          <div class="slot"><div class="st-land" style="position:absolute;inset:0"><div class="st-wrap"><button class="st-btn press" ${toggleAttrs}><span class="st-in">${glyphs(20, 1.7)}<span class="tag">যোগাযোগ</span></span></button></div></div></div>
+          ${search}${bag}
+        </div>
+      </div>`,
+    init: (phone) => wireToggle(phone),
+  },
+  {
+    cap: ["২ · বুদবুদ (Bubble)", "যোগাযোগ বোতামটা একটা বাদামি কথার বুদবুদ, ডক থেকে একটু উঁচু, কোণে সবুজ “অনলাইন” বিন্দু। চাপ দিলে চ্যাটের মেসেজের মতো একটার পর একটা বুদবুদ ওঠে।"],
+    dock: () => `
+      <div class="scrim" data-close></div>
+      <div class="dock v2">
+        <div class="bb-stack" role="dialog" aria-label="যোগাযোগ">
+          <div class="bb-hello">আসসালামু আলাইকুম! কীভাবে অর্ডার করবেন?</div>
+          <a class="bb-msg call press" href="${TEL}"><span class="ico">${I.phone}</span><span><b>ফোনে অর্ডার</b><small class="num">০১৩১০-৯৮০২৮৯</small></span></a>
+          <a class="bb-msg wa press" href="${WA}" target="_blank" rel="noopener"><span class="ico">${WA_IMG(20)}</span><span><b>হোয়াটসঅ্যাপে মেসেজ</b><small>পণ্যের নাম লেখা থাকবে</small></span></a>
+        </div>
+        <div class="pill">${home}${menu}
+          <div class="slot"><button class="bb-btn press" ${toggleAttrs}>
+            <svg class="shape" viewBox="0 0 60 60"><path fill="#5b2d17" d="M20 3h20a17 17 0 0 1 17 17v12a17 17 0 0 1-17 17H26l-13 9 2.6-10.2A17 17 0 0 1 3 32V20A17 17 0 0 1 20 3Z"/></svg>
+            <span class="gl ph" style="bottom:8px">${I.receiver(22, 1.6)}</span><span class="gl x" style="bottom:8px">${I.x(20)}</span>
+            <span class="bb-dot"></span>
+          </button></div>
+          ${search}${bag}
+        </div>
+      </div>`,
+    init: (phone) => wireToggle(phone),
+  },
+  {
+    cap: ["৩ · সিলমোহর (Seal)", "যোগাযোগ বোতামটা ঢেউখেলানো কিনারার একটা হলুদ সিল, ভেতরে বাদামি দাগ। পাতা খুললে ঘুরে এসে বসে। চাপ দিলে সিল ঘোরে আর দুটো গোল বোতাম পাখার মতো ছড়িয়ে ওঠে।"],
+    dock: () => `
+      <div class="scrim" data-close></div>
+      <div class="dock v3">
+        <div class="pill">${home}${menu}
+          <div class="slot">
+            <a class="fan call" href="${TEL}" aria-label="ফোনে অর্ডার">${I.phone}<em>ফোনে অর্ডার</em></a>
+            <a class="fan wa" href="${WA}" target="_blank" rel="noopener" aria-label="হোয়াটসঅ্যাপে অর্ডার">${WA_IMG(24)}<em>হোয়াটসঅ্যাপ</em></a>
+            <button class="se-btn press" ${toggleAttrs}>
+              <span class="se-turn" style="position:absolute;inset:0"><svg class="shape" viewBox="0 0 64 64">
+                <path fill="#f6b826" d="${scallop(32, 32, 28.5, 2.4, 12)}"/>
+                <circle cx="32" cy="32" r="21.5" fill="none" stroke="#5b2d17" stroke-opacity=".55" stroke-width="1" stroke-dasharray="2.2 2.6"/>
+              </svg></span>
+              ${glyphs(22, 1.7)}
+            </button>
+          </div>
+          ${search}${bag}
+        </div>
+      </div>`,
+    init: (phone) => wireToggle(phone),
+  },
+  {
+    cap: ["৪ · পাতা (Leaf)", "যোগাযোগ বোতামটা লোগোর মতো একটা বাদামি পাতা, ভেতরে হলুদ ফোন, কোণে গোলাপি বিন্দু। চাপ দিলে ডকের আইকনগুলো সরে যায় আর ডকেই ফোন + হোয়াটসঅ্যাপ চলে আসে।"],
+    dock: () => `
+      <div class="dock v4">
+        <div class="pill">
+          <div class="v4-vp">
+            <div class="v4-face v4-a">${home}${menu}
+              <div class="slot" style="--i:2"><span class="lf-grow" style="position:absolute;inset:0"><button class="lf-btn press" ${toggleAttrs}><span class="gl ph">${I.receiver(21, 1.7)}</span><span class="lf-pip"></span></button></span></div>
+              ${search}
+            </div>
+            <div class="v4-face v4-b">
+              <button class="v4-back press" style="--i:0" data-close aria-label="বন্ধ করুন">${I.x(18)}</button>
+              <a class="call press" style="--i:1" href="${TEL}">${I.phone} ফোনে অর্ডার</a>
+              <a class="wa press" style="--i:2" href="${WA}" target="_blank" rel="noopener">${WA_IMG(17)} হোয়াটসঅ্যাপ</a>
+            </div>
+          </div>
+          ${bag}
+        </div>
+      </div>`,
+    init: (phone) => wireToggle(phone),
+  },
+];
+
+function wireToggle(phone) {
+  const btn = phone.querySelector("[data-toggle]");
+  const set = (open) => { phone.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open)); };
+  btn.addEventListener("click", () => set(!phone.classList.contains("open")));
+  phone.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", () => set(false)));
+  const onKey = (e) => { if (e.key === "Escape") set(false); };
+  document.addEventListener("keydown", onKey);
+  return () => document.removeEventListener("keydown", onKey);
+}
+
+// Picker wiring (reference behaviour)
+const stage = document.getElementById("stage");
+const picker = document.querySelector(".proto-picker");
+const highlight = picker.querySelector(".proto-picker-highlight");
+const items = [...picker.querySelectorAll(".proto-picker-item:not(.proto-picker-replay)")];
+const replay = picker.querySelector(".proto-picker-replay");
+let current = 0, cleanup = null;
+
+function moveHighlight() {
+  const el = items[current];
+  highlight.style.width = el.offsetWidth + "px";
+  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+}
+function mount(i) {
+  if (cleanup) { cleanup(); cleanup = null; }
+  stage.innerHTML = "";
+  requestAnimationFrame(() => {
+    const v = variants[i];
+    stage.innerHTML = `<div class="cap"><b>${v.cap[0]}</b><span>${v.cap[1]}</span></div><div class="phone">${page()}${v.dock()}</div>`;
+    cleanup = v.init(stage.querySelector(".phone")) || null;
+  });
+}
+function setActive(i) {
+  if (i < 0 || i >= variants.length) return;
+  current = i;
+  items.forEach((el, j) => {
+    el.toggleAttribute("data-active", j === i);
+    if (j === i) el.setAttribute("aria-current", "true"); else el.removeAttribute("aria-current");
+  });
+  moveHighlight();
+  const url = new URL(location);
+  url.searchParams.set("v", i + 1);
+  history.replaceState(null, "", url);
+  mount(i);
+}
+items.forEach((el, i) => el.addEventListener("click", () => setActive(i)));
+replay?.addEventListener("click", () => mount(current));
+window.addEventListener("resize", moveHighlight);
+document.addEventListener("keydown", (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const num = parseInt(e.key, 10);
+  if (num >= 1 && num <= variants.length) setActive(num - 1);
+  else if (e.key === "ArrowRight") setActive((current + 1) % variants.length);
+  else if (e.key === "ArrowLeft") setActive((current - 1 + variants.length) % variants.length);
+  else if (e.key === "r" || e.key === "R") mount(current);
+});
+setActive((parseInt(new URLSearchParams(location.search).get("v"), 10) || 1) - 1);
+requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute("data-ready", "")));
+</script>
+</body>
+</html>

@@ -345,42 +345,66 @@
 .sk-panel .skm { padding: 22px 24px 26px; }
 /* The cart sheet fits its content (up to 88dvh) instead of always filling the screen. */
 .sk-cart-sheet { padding-bottom: env(safe-area-inset-bottom, 0px); }
-/* Cart: Geist for English; existing Bengali faces remain behind it. */
+/* Cart, "এক নজরে" (approved 2026-10-19, docs/design/2026-10-19-cart-sheet/cart-variants.html):
+   dense rows with a remove button on each, an "এর সাথে যোগ করুন" rail, and one dark bar with the total. */
 .skc { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; overflow: hidden; color: #3a1d0f; font-family: "Geist", "Noto Serif Bengali", serif; }
 .skc-inner { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.skc-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 20px 14px; border-bottom: 1.5px dotted rgba(58, 29, 15, 0.22); }
-@media (min-width: 768px) { .skc-head { padding: 28px 28px 18px; } }
-.skc-title { display: block; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 26px; line-height: 1.2; color: #5b2d17; }
-.skc-count { display: block; font-size: 13px; color: #7a6050; }
-.skc-close { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; cursor: pointer; }
-.skc-list { min-height: 0; flex: 1 1 auto; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 12px; }
-@media (min-width: 768px) { .skc-list { padding: 18px 28px; } }
-.skc-item { display: flex; gap: 14px; padding: 12px; border-radius: 20px; background: #faf4ea; }
-.skc-img { flex: none; width: 84px; height: 84px; border-radius: 16px; background: #f1e5d3; display: grid; place-items: center; overflow: hidden; }
-.skc-img img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-.skc-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.skc-info h3 { margin: 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 700; font-size: 16px; line-height: 1.4; color: #3a1d0f; }
-.skc-size { align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: #f1e5d3; color: #5b2d17; font-size: 12px; font-weight: 600; }
-.skc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
-.skc-price { font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 19px; color: #5b2d17; }
-.skc-qty { display: flex; align-items: center; height: 36px; padding: 0 4px; border-radius: 999px; background: #fffdf8; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.12); }
+.skc-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 20px 12px; }
+@media (min-width: 768px) { .skc-head { padding: 22px 24px 14px; } }
+.skc-title { margin: 0; display: flex; align-items: baseline; gap: 8px; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 22px; line-height: 1.2; color: #5b2d17; }
+.skc-count { font-weight: 600; font-size: 14px; color: #7a6050; }
+.skc-close { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #f1e5d3; color: #5b2d17; border: 0; cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.skc-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.skc-body::-webkit-scrollbar { display: none; }
+.skc-list { margin: 0; padding: 2px 0 0; list-style: none; }
+/* Each item is its own raised card; the li keeps the gap so removal folds it shut cleanly. */
+.skc-item { overflow: hidden; padding: 2px 12px 8px; }
+@media (min-width: 768px) { .skc-item { padding-inline: 16px; } }
+.skc-row { display: grid; grid-template-columns: 68px minmax(0, 1fr) auto 36px; align-items: center; gap: 10px; padding: 10px 6px 10px 10px; border-radius: 22px; background: #fff; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.1), 0 1px 2px rgba(58, 29, 15, 0.06), 0 4px 10px -4px rgba(58, 29, 15, 0.12); }
+@media (min-width: 768px) { .skc-row { gap: 12px; padding: 12px 8px 12px 12px; } }
+.skc-img { width: 68px; height: 68px; border-radius: 16px; overflow: hidden; background: #faf4ea; }
+.skc-img img { width: 100%; height: 100%; object-fit: cover; }
+.skc-info { min-width: 0; }
+.skc-info h3 { margin: 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 800; font-size: 16px; line-height: 1.3; color: #5b2d17; overflow-wrap: anywhere; }
+.skc-meta { margin-top: 3px; font-size: 13px; color: #7a6050; }
+.skc-price { font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 800; font-size: 15.5px; color: #e2547a; }
+.skc-qty { display: inline-flex; align-items: center; height: 36px; padding: 0 3px; border-radius: 999px; background: #faf4ea; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.1); }
 .skc-qty button { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; border: 0; background: none; color: #5b2d17; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease; }
-.skc-qty span { min-width: 24px; text-align: center; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; }
-.skc-remove { align-self: flex-start; border: 0; background: none; padding: 2px 0; font-size: 12.5px; color: #7a6050; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-.skc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 240px; height: 100%; padding: 32px 20px; text-align: center; }
-.skc-empty h3 { margin: 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 22px; color: #5b2d17; }
-.skc-empty p { margin: 0 0 10px; font-size: 14px; color: #7a6050; }
-.skc-foot { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 20px 6px; border-top: 1.5px dotted rgba(58, 29, 15, 0.22); background: #fffdf8; }
-@media (min-width: 768px) { .skc-foot { padding: 20px 28px 28px; } }
-.skc-subtotal { display: flex; align-items: baseline; justify-content: space-between; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 700; font-size: 16px; color: #5b2d17; }
-.skc-subtotal b { font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-size: 26px; }
-.skc-note { margin: 0; font-size: 12.5px; color: #7a6050; }
-.skc-checkout { height: 52px; width: 100%; border-radius: 999px; border: 0; background: #f6b826; color: #3a1d0f; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
-.skc-checkout i { width: 8px; height: 8px; border-radius: 50%; background: #e2547a; }
-.skc-continue { border: 0; background: none; padding: 6px 0; font-size: 14px; font-weight: 600; color: #7a6050; cursor: pointer; }
-.skc-close:active, .skc-qty button:active, .skc-checkout:active { transform: scale(0.97); }
-@media (hover: hover) and (pointer: fine) { .skc-qty button:hover { background: #f1e5d3; } .skc-remove:hover, .skc-continue:hover { color: #5b2d17; } }
-@media (prefers-reduced-motion: reduce) { .skc-close:active, .skc-qty button:active, .skc-checkout:active { transform: none; } }
+.skc-qty button:disabled { opacity: 0.35; cursor: default; }
+.skc-qty span { min-width: 22px; text-align: center; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; color: #5b2d17; }
+.skc-remove { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 0; background: none; color: #7a6050; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease, color 160ms ease; }
+.skc-remove svg { width: 17px; height: 17px; stroke-width: 1.8; }
+.skc-add { padding: 18px 0 14px; }
+.skc-add h4 { margin: 0 20px 10px; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 16px; color: #5b2d17; }
+@media (min-width: 768px) { .skc-add h4 { margin-inline: 24px; } }
+.skc-rail { display: flex; gap: 10px; margin: 0; padding: 2px 20px 6px; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: 20px; scrollbar-width: none; }
+.skc-rail::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) { .skc-rail { padding-inline: 24px; scroll-padding-inline: 24px; } }
+.skc-card { flex: none; width: 132px; scroll-snap-align: start; padding: 8px; border-radius: 18px; background: #faf4ea; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.06); }
+.skc-card-ph { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #fff; }
+.skc-card-ph img { width: 100%; height: 100%; object-fit: cover; }
+.skc-plus { position: absolute; right: 6px; bottom: 6px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 0; background: #5b2d17; color: #fff; box-shadow: 0 0 0 2px #fff; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease; }
+.skc-plus[data-added] { background: #2f7a46; cursor: default; }
+.skc-card h5 { margin: 8px 2px 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 700; font-size: 13px; line-height: 1.3; color: #3a1d0f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.skc-card-price { display: block; margin: 2px 2px 0; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13.5px; color: #5b2d17; }
+.skc-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 240px; padding: 40px 24px 48px; text-align: center; color: #5b2d17; }
+.skc-empty h3 { margin: 8px 0 0; font-family: "Geist", "Noto Serif Bengali", serif; font-weight: 900; font-size: 22px; color: #5b2d17; }
+.skc-empty p { margin: 0 0 12px; font-size: 14px; color: #7a6050; }
+.skc-browse { display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 26px; border-radius: 999px; border: 0; background: #f6b826; color: #3a1d0f; font-weight: 700; font-size: 15.5px; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.skc-browse i, .skc-checkout i { width: 8px; height: 8px; border-radius: 50%; background: #e2547a; }
+.skc-foot { flex: none; padding: 6px 12px 12px; }
+@media (min-width: 768px) { .skc-foot { padding: 6px 16px 16px; } }
+.skc-bar { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 10px 10px 20px; border-radius: 26px; background: #4a2212; color: #fffdf8; overflow: hidden; }
+.skc-bar-line { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: rgba(255, 253, 248, 0.14); }
+.skc-bar-line i { position: absolute; inset: 0; background: #f6b826; }
+.skc-bar small { display: block; font-size: 12px; line-height: 1.4; color: rgba(255, 253, 248, 0.72); }
+.skc-bar small b { color: #f6b826; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; }
+.skc-total { display: block; font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 800; font-size: 24px; line-height: 1.2; }
+.skc-checkout { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; border: 0; background: #f6b826; color: #3a1d0f; font-weight: 700; font-size: 16px; white-space: nowrap; cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.skc-close:active, .skc-checkout:active, .skc-browse:active { transform: scale(0.97); }
+.skc-qty button:active, .skc-remove:active, .skc-plus:not(:disabled):active { transform: scale(0.9); }
+@media (hover: hover) and (pointer: fine) { .skc-qty button:not(:disabled):hover { background: #f1e5d3; } .skc-remove:hover { background: #fbe3df; color: #e2547a; } }
+@media (prefers-reduced-motion: reduce) { .skc-close:active, .skc-checkout:active, .skc-browse:active, .skc-qty button:active, .skc-remove:active, .skc-plus:active { transform: none; } }
 
 .sk-sheet-grab { flex: none; width: 40px; height: 5px; border-radius: 5px; background: rgba(91, 45, 23, 0.25); margin: 8px auto 4px; }
 /* Phone menu, "Cards" (approved 2026-10-13, docs/design/2026-10-13-homepage/mobile-menu-variants.html):
@@ -644,11 +668,13 @@
 /* Layout: phones stack photo → info → details; desktop puts photo + details left, info right */
 .skp-top { display: flex; flex-direction: column; gap: 18px; padding-top: 12px; }
 .skp-left { display: contents; }
-.skp-photo { order: 1; } .skp-info { order: 2; } .skp-details { order: 3; }
+.skp-media { order: 1; } .skp-info { order: 2; } .skp-details { order: 3; }
+/* The photo mosaic makes the left column the tall one, so the price and order buttons stay in view instead */
 @container skp (min-width: 760px) {
   .skp-top { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; padding-top: 22px; align-items: start; }
-  .skp-left { display: flex; flex-direction: column; gap: 26px; position: sticky; top: 96px; }
-  .skp-photo, .skp-info, .skp-details { order: 0; }
+  .skp-left { display: flex; flex-direction: column; gap: 26px; }
+  .skp-info { position: sticky; top: 96px; }
+  .skp-media, .skp-info, .skp-details { order: 0; }
 }
 
 /* Photo panel */
@@ -663,9 +689,62 @@
 .skp-seal > span { width: 70px; height: 70px; border-radius: 50%; border: 1.5px dashed var(--pink); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
 .skp-seal b { font-family: var(--disp); font-weight: 900; font-size: 13px; color: var(--royal); }
 .skp-seal small { font-size: 10px; font-weight: 700; color: var(--pink); }
-.skp-dots { position: absolute; z-index: 2; left: 0; right: 0; bottom: 14px; display: flex; justify-content: center; gap: 8px; }
-.skp-dots button { width: 8px; height: 8px; border-radius: 999px; background: rgba(91, 45, 23, 0.25); transition: width 200ms var(--ease-out), background-color 160ms ease; }
-.skp-dots button[aria-current="true"] { width: 22px; background: var(--royal); }
+/* Phone: round thumbnails in a frosted capsule where the dots were; the chosen one grows and takes a ring */
+.skp-capsule { position: absolute; z-index: 2; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 6px; max-width: calc(100% - 24px); padding: 5px; border-radius: 999px; overflow-x: auto; scrollbar-width: none;
+  background: rgba(255, 253, 248, 0.72); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); box-shadow: var(--soft); }
+.skp-capsule::-webkit-scrollbar { display: none; }
+.skp-capsule button { flex: none; width: 38px; height: 38px; border-radius: 50%; overflow: hidden; background: #fff; transform: scale(0.8); opacity: 0.75;
+  transition: transform 240ms var(--ease-out), opacity 160ms ease, box-shadow 160ms ease; }
+.skp-capsule button[aria-current="true"] { transform: none; opacity: 1; box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--royal); }
+.skp-capsule img { width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+
+/* Desktop: every photo at once. The first spans two columns, two sit beside it, the rest fill a row below. */
+.skp-mosaic { display: none; }
+@container skp (min-width: 760px) {
+  .skp-media[data-mosaic] > .skp-photo { display: none; }
+  .skp-mosaic { display: block; }
+}
+.skp-mosaic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.skp-mosaic-row { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.skp-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 20px; overflow: hidden; background: #fff; cursor: zoom-in; }
+.skp-tile img { width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; transition: transform 600ms var(--ease-out); }
+.skp-tile-big { grid-column: span 2; grid-row: span 2; border-radius: 28px; }
+.skp-mosaic-row .skp-tile { aspect-ratio: 4 / 3; }
+/* Two photos: the second stands tall beside the first instead of leaving a gap under it */
+.skp-mosaic[data-count="2"] .skp-tile:not(.skp-tile-big) { grid-row: span 2; aspect-ratio: auto; }
+.skp-tile-big .skp-seal { width: 72px; height: 72px; }
+.skp-tile-big .skp-seal > span { width: 61px; height: 61px; }
+.skp-tile-big .skp-seal b { font-size: 11.5px; }
+@media (hover: hover) and (pointer: fine) { .skp-tile:hover img { transform: scale(1.035); } }
+
+/* Lightbox: portals to <body>, outside .skp, so it carries its own values */
+.skp-lb-scrim { position: fixed; inset: 0; z-index: 200; background: rgba(42, 20, 10, 0.86); }
+.skp-lb { position: fixed; inset: 0; z-index: 201; display: grid; place-items: center; padding: 72px 96px; outline: none; color: #fff; font-family: "Geist", "Noto Serif Bengali", serif; }
+.skp-lb figure { margin: 0; width: min(100%, calc(100vh - 160px)); aspect-ratio: 1; border-radius: 24px; overflow: hidden; background: #fff; }
+.skp-lb figure img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+.skp-lb-btn { position: absolute; width: 48px; height: 48px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(255, 253, 248, 0.14); color: #fff; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: background-color 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+@media (hover: hover) and (pointer: fine) { .skp-lb-btn:hover { background: rgba(255, 253, 248, 0.24); } }
+.skp-lb-btn:active { transform: scale(0.94); }
+.skp-lb-btn:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.7); outline-offset: 2px; }
+.skp-lb-x { top: 20px; right: 20px; }
+.skp-lb-prev, .skp-lb-next { top: 50%; margin-top: -24px; }
+.skp-lb-prev { left: 24px; } .skp-lb-next { right: 24px; }
+.skp-lb-count { position: absolute; left: 0; right: 0; bottom: 24px; margin: 0; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.8); }
+/* Separate in/out names: Radix only waits for an exit animation whose name differs from the entrance */
+.skp-lb-scrim[data-state="open"], .skp-lb[data-state="open"] { animation: skp-lb-in 200ms ease; }
+.skp-lb-scrim[data-state="closed"], .skp-lb[data-state="closed"] { animation: skp-lb-out 150ms ease forwards; }
+.skp-lb[data-state="open"] figure { animation: skp-lb-pop 260ms cubic-bezier(0.23, 1, 0.32, 1); }
+.skp-lb[data-state="closed"] figure { animation: skp-lb-drop 150ms ease-in forwards; }
+@keyframes skp-lb-in { from { opacity: 0; } }
+@keyframes skp-lb-out { to { opacity: 0; } }
+@keyframes skp-lb-pop { from { transform: scale(0.96); } }
+@keyframes skp-lb-drop { to { transform: scale(0.98); } }
+@media (prefers-reduced-motion: reduce) {
+  .skp-capsule button { transition: opacity 160ms ease, box-shadow 160ms ease; }
+  .skp-tile img { transition: none; }
+  .skp-lb[data-state] figure { animation: none; }
+}
 
 /* Info column */
 .skp-info { display: flex; flex-direction: column; gap: 14px; }
@@ -673,7 +752,6 @@
 @container skp (min-width: 760px) { .skp-info h1 { font-size: 40px; } }
 .skp-pill { align-self: flex-start; margin-top: -6px; padding: 3px 11px; border-radius: 999px; background: var(--blush); font-size: 12.5px; font-weight: 600; color: var(--royal); }
 .skp-tag { margin: -4px 0 -6px; color: var(--pink); font-size: 18px; transform: rotate(-3deg); transform-origin: left; }
-.skp-lede { margin: 0; font-size: 14px; line-height: 1.65; color: var(--ink); }
 .skp-ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
 .skp-ticks li { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
 .skp-ticks li::before { content: "✓"; flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--sun); color: var(--royal); font-size: 10.5px; font-weight: 700; }
@@ -713,26 +791,14 @@
 .skp-call { background: var(--royal); color: var(--rice); }
 .skp-wa { background: #25d366; color: #fff; }
 .skp-wa img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+/* Phones order by phone or WhatsApp from the dock's contact seal instead (2026-10-19). */
+@media (max-width: 767px) { .skp-or, .skp-help { display: none; } }
 @media (hover: hover) and (pointer: fine) {
   .skp-cod:not(:disabled):hover { background: #efad12; }
   .skp-cart:not(:disabled):hover { background: rgba(91, 45, 23, 0.06); }
   .skp-call:hover { background: #4a2412; }
   .skp-wa:hover { background: #1fbd5a; }
 }
-
-/* Delivery estimate: a tear-off calendar page */
-.skp-cal { display: flex; align-items: center; gap: 14px; padding-top: 4px; }
-.skp-leaf { flex: none; width: 104px; border-radius: 14px; background: #fffdf6; box-shadow: var(--soft); overflow: hidden; text-align: center; rotate: -3deg; font-family: var(--disp); }
-.skp-leaf-mon { position: relative; padding: 6px 0 5px; background: var(--royal); color: var(--sun); font-size: 13px; font-weight: 700; }
-.skp-leaf-mon::before, .skp-leaf-mon::after { content: ""; position: absolute; top: -5px; width: 8px; height: 12px; border-radius: 4px; background: var(--sub); }
-.skp-leaf-mon::before { left: 26px; } .skp-leaf-mon::after { right: 26px; }
-.skp-leaf-d { padding: 6px 0 2px; font-size: 30px; line-height: 1.1; }
-.skp-leaf-d .num { color: var(--royal); }
-.skp-leaf-d em { font-style: normal; color: var(--pink); font-size: 22px; }
-.skp-leaf-wd { display: block; padding-bottom: 8px; font-size: 11.5px; font-weight: 700; color: var(--sub); }
-.skp-cal-txt .script { display: block; color: var(--pink); font-size: 17px; transform: rotate(-3deg); transform-origin: left; }
-.skp-cal-txt b { display: block; font-family: var(--disp); font-size: 17px; font-weight: 900; line-height: 1.3; color: var(--royal); }
-.skp-cal-txt small { display: block; margin-top: 4px; font-size: 12.5px; color: var(--sub); }
 
 /* Details: chips + footer-style cash memo, all in the title font */
 .skp-details { display: flex; flex-direction: column; gap: 12px; }
