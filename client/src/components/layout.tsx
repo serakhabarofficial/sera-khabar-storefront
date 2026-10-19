@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, ArrowRight, ShieldCheck, X } from "lucide-react";
+import { ArrowUpRight, ShieldCheck, X } from "lucide-react";
 import { Box as ReiconBox } from "reicon-react";
 import { useId, useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,6 @@ import { useCart } from "@/contexts/cart-context";
 import CartDrawer from "@/components/cart-drawer";
 import CartAddedToast from "@/components/cart-added-toast";
 import { PageContentTransition } from "@/components/page-transition";
-import SkewReveal from "@/components/skew-reveal";
 import { Drawer } from "vaul";
 import { useIsMobile } from "@/hooks/use-mobile";
 import headerLogo from "@assets/sera-khabar-leaf-logo.webp";
@@ -58,26 +57,20 @@ function SearchIcon({ className }: { className?: string }) {
 }
 
 function MenuLinesIcon({ className }: { className?: string }) {
+  // Two hairlines, the same mark as the header's menu button.
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
-      <path fillRule="evenodd" clipRule="evenodd" d="M20.75 7C20.75 7.41421 20.4142 7.75 20 7.75L4 7.75C3.58579 7.75 3.25 7.41421 3.25 7C3.25 6.58579 3.58579 6.25 4 6.25L20 6.25C20.4142 6.25 20.75 6.58579 20.75 7Z" />
-      <path fillRule="evenodd" clipRule="evenodd" d="M20.75 12C20.75 12.4142 20.4142 12.75 20 12.75L4 12.75C3.58579 12.75 3.25 12.4142 3.25 12C3.25 11.5858 3.58579 11.25 4 11.25L20 11.25C20.4142 11.25 20.75 11.5858 20.75 12Z" />
-      <path fillRule="evenodd" clipRule="evenodd" d="M20.75 17C20.75 17.4142 20.4142 17.75 20 17.75L4 17.75C3.58579 17.75 3.25 17.4142 3.25 17C3.25 16.5858 3.58579 16.25 4 16.25L20 16.25C20.4142 16.25 20.75 16.5858 20.75 17Z" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M5 9.5h14M5 14.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }
 
 function HomeDuotoneIcon({ className }: { className?: string }) {
+  // A thin outline house with a smile line, drawn at the dock's 1.4 stroke.
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M9.44661 15.3975C9.11385 15.1508 8.64413 15.2206 8.39748 15.5534C8.15082 15.8862 8.22062 16.3559 8.55339 16.6025C9.5258 17.3233 10.715 17.75 12 17.75C13.285 17.75 14.4742 17.3233 15.4466 16.6025C15.7794 16.3559 15.8492 15.8862 15.6025 15.5534C15.3559 15.2208 14.8862 15.1508 14.5534 15.3975C13.825 15.9373 12.9459 16.25 12 16.25C11.0541 16.25 10.175 15.9373 9.44661 15.3975Z" fill="currentColor" opacity="0.55" />
-      <path fillRule="evenodd" clipRule="evenodd" d="M12 1.25C11.2919 1.25 10.6485 1.45282 9.95055 1.79224C9.27585 2.12035 8.49642 2.60409 7.52286 3.20832L5.45628 4.4909C4.53509 5.06261 3.79744 5.5204 3.2289 5.95581C2.64015 6.40669 2.18795 6.86589 1.86131 7.46263C1.53535 8.05812 1.38857 8.69174 1.31819 9.4407C1.24999 10.1665 1.24999 11.0541 1.25 12.1672V13.7799C1.24999 15.6837 1.24998 17.1866 1.4027 18.3616C1.55937 19.567 1.88856 20.5401 2.63236 21.3094C3.37958 22.0824 4.33046 22.4277 5.50761 22.5914C6.64849 22.75 8.10556 22.75 9.94185 22.75H14.0581C15.8944 22.75 17.3515 22.75 18.4924 22.5914C19.6695 22.4277 20.6204 22.0824 21.3676 21.3094C22.1114 20.5401 22.4406 19.567 22.5973 18.3616C22.75 17.1866 22.75 15.6838 22.75 13.7799V12.1672C22.75 11.0541 22.75 10.1665 22.6818 9.4407C22.6114 8.69174 22.4646 8.05812 22.1387 7.46263C21.8121 6.86589 21.3599 6.40669 20.7711 5.95581C20.2026 5.5204 19.4649 5.06262 18.5437 4.49091L16.4771 3.20831C15.5036 2.60409 14.7241 2.12034 14.0494 1.79224C13.3515 1.45282 12.7081 1.25 12 1.25ZM8.27953 4.50412C9.29529 3.87371 10.0095 3.43153 10.6065 3.1412C11.1882 2.85833 11.6002 2.75 12 2.75C12.3998 2.75 12.8118 2.85833 13.3935 3.14119C13.9905 3.43153 14.7047 3.87371 15.7205 4.50412L17.7205 5.74537C18.6813 6.34169 19.3559 6.76135 19.8591 7.1467C20.3487 7.52164 20.6303 7.83106 20.8229 8.18285C21.0162 8.53589 21.129 8.94865 21.1884 9.58104C21.2492 10.2286 21.25 11.0458 21.25 12.2039V13.725C21.25 15.6959 21.2485 17.1012 21.1098 18.1683C20.9736 19.2163 20.717 19.8244 20.2892 20.2669C19.8649 20.7058 19.2871 20.9664 18.2858 21.1057C17.2602 21.2483 15.9075 21.25 14 21.25H10C8.09247 21.25 6.73983 21.2483 5.71422 21.1057C4.71286 20.9664 4.13514 20.7058 3.71079 20.2669C3.28301 19.8244 3.02642 19.2163 2.89019 18.1683C2.75149 17.1012 2.75 15.6959 2.75 13.725V12.2039C2.75 11.0458 2.75076 10.2286 2.81161 9.58104C2.87103 8.94865 2.98385 8.53589 3.17709 8.18285C3.36965 7.83106 3.65133 7.52164 4.14092 7.1467C4.6441 6.76135 5.31869 6.34169 6.27953 5.74537L8.27953 4.50412Z" fill="currentColor" />
+      <path d="M3.5 10.2 12 3.8l8.5 6.4V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M9 15.5c1.7 1.3 4.3 1.3 6 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -89,18 +82,20 @@ const MEMO_SHOP_LINKS = [
   ["সব পণ্য", "/products"],
 ] as const;
 
-// The approved memo shows three policy links; the other help pages stay reachable here too.
+// Every help page, listed in the footer's "সহায়তা ও নীতিমালা" column.
+const CONTACT_WHATSAPP_HREF = "https://api.whatsapp.com/send/?phone=8801303103540";
+
 const POLICY_LINKS = [
-  ["Privacy Policy", "/privacy-policy"],
-  ["Refund & Return", "/refund-return-exchange"],
-  ["Terms & Conditions", "/terms-and-conditions"],
-  ["Shipping Policy", "/shipping-policy"],
-  ["Payment Policy", "/payment-policy"],
-  ["Cancellation Policy", "/cancellation-policy"],
-  ["How to Order", "/how-to-order"],
-  ["Track Order", "/track-order"],
-  ["FAQ", "/faq"],
-  ["Contact", "/contact-us"],
+  ["গোপনীয়তা নীতি", "/privacy-policy"],
+  ["রিফান্ড ও রিটার্ন", "/refund-return-exchange"],
+  ["শর্তাবলি", "/terms-and-conditions"],
+  ["শিপিং নীতি", "/shipping-policy"],
+  ["পেমেন্ট নীতি", "/payment-policy"],
+  ["বাতিলের নীতি", "/cancellation-policy"],
+  ["কীভাবে অর্ডার করবেন", "/how-to-order"],
+  ["অর্ডার ট্র্যাক", "/track-order"],
+  ["প্রশ্নোত্তর", "/faq"],
+  ["যোগাযোগ", "/contact-us"],
 ] as const;
 
 // A 40px search suggestion thumbnail was pulling the 960px original; `sizes`
@@ -173,56 +168,56 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col md:bg-brand-ivory text-black selection:bg-brand-gold selection:text-white">
-      {/* Announcement Bar: turmeric "Poster" sign (approved 2026-10-13); one row on desktop, two centred lines on phones */}
-      <div className="sk-announce" role="region" aria-label="ঘোষণা">
-        <div className="sk-announce-text">
-          <span className="sk-announce-script">শীতের নতুন গুড়</span>
-          <b>
-            <span className="num">৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold)}</span>+ অর্ডারে ডেলিভারি ফ্রি
-          </b>
-        </div>
-        <span className="sk-announce-stamp">ক্যাশ অন ডেলিভারি</span>
-        <Link href="/collection/jaggery" className="sk-announce-cta">
-          কিনুন <i aria-hidden="true" />
-        </Link>
+      {/* Announcement: one hairline row of delivery facts (Stage redesign, 2026-10-19); the first fact only on phones */}
+      <div className="stc stc-announce" role="region" aria-label="ঘোষণা">
+        <span>
+          <span className="num">৳{toBanglaDigits(POLICY_FACTS.freeDeliveryThreshold.toLocaleString("en-IN"))}</span>+ অর্ডারে <b>ফ্রি ডেলিভারি</b>
+        </span>
+        <span>
+          সারা দেশে <b>ক্যাশ অন ডেলিভারি</b>
+        </span>
+        <span>
+          ঢাকায় <b>{toBanglaDigits(POLICY_FACTS.dhakaDeliveryDays.replace(" days", ""))} দিনে</b>, বাইরে{" "}
+          <b>{toBanglaDigits(POLICY_FACTS.outsideDhakaDeliveryDays.replace(" days", ""))} দিনে</b>
+        </span>
       </div>
-      {/* Navigation */}
-      <div className="sk sk-header" data-page-header="">
-        <div className="wrap">
-          <header className="c-head">
-            <nav className="menu" aria-label="Main">
-              <button type="button" className="menu-btn press" aria-label="Open menu" onClick={openMenu}>
-                <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
-                  <circle cx="12" cy="12" r="11.75" fill="#F6B826" />
-                  <path d="M8 8h8M8 12h8M8 16h8" stroke="#000" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
-              <button type="button" className="link" onClick={openMenu}>Menu</button>
-              <Link href="/products" className="link">Shop</Link>
-              <Link href="/about-us" className="link">About Us</Link>
-            </nav>
-            <Link href="/" aria-label="সেরা খাবার — হোম" onClick={goHome}>
-              <img className="c-logoimg" src={headerLogo} alt="Sera Khabar" />
-            </Link>
-            <div className="tools">
-              <button type="button" className="icon-btn press" onClick={openSearch} aria-label="Search">
-                <SearchIcon className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                className="bag press"
-                onClick={() => setCartOpen(true)}
-                aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
-              >
-                {itemCount > 0 ? (
-                  <span className="num">{toBanglaDigits(itemCount > 99 ? "99+" : itemCount)}</span>
-                ) : (
-                  <BagIcon className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </header>
-        </div>
+      {/* Navigation: links left, logo centred, search and bag right; on phones the menu button takes the links' place */}
+      <div className="stc stc-head" data-page-header="">
+        <header className="stc-frame stc-head-in">
+          <button
+            type="button"
+            className="stc-menu press"
+            aria-label="Open menu"
+            aria-expanded={isOpen}
+            onClick={openMenu}
+          >
+            <i />
+            <i />
+          </button>
+          <nav className="stc-nav" aria-label="Main">
+            <Link href="/products">সব পণ্য</Link>
+            <Link href="/collection/jaggery">খেজুরের গুড়</Link>
+            <Link href="/collection/homemade">হোমমেড</Link>
+            <Link href="/about-us">আমাদের গল্প</Link>
+          </nav>
+          <Link href="/" aria-label="সেরা খাবার — হোম" onClick={goHome}>
+            <img className="c-logoimg" src={headerLogo} alt="Sera Khabar" width={381} height={256} />
+          </Link>
+          <div className="stc-tools">
+            <button type="button" className="press" onClick={openSearch} aria-label="Search">
+              <SearchIcon className="h-5 w-5" />
+              <span className="stc-label">খুঁজুন</span>
+            </button>
+            <button
+              type="button"
+              className="press"
+              onClick={() => setCartOpen(true)}
+              aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
+            >
+              ব্যাগ <span className="stc-count num">{toBanglaDigits(itemCount > 99 ? "99+" : itemCount)}</span>
+            </button>
+          </div>
+        </header>
       </div>
 
       {/* Mobile bottom navigation: compact white pill, always at the bottom (approved 2026-10-13, "Label") */}
@@ -237,16 +232,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             const isActive = item.key === activeDockKey;
             const content = (
               <>
+                <span className="sk-dock-ic">{item.icon}</span>
+                {/* The active tab is marked by a small dot under its icon; it glides between tabs. */}
                 {isActive && (
                   <motion.span
                     layoutId={dockHighlightId}
-                    className="sk-dock-hl"
+                    className="sk-dock-dot"
                     aria-hidden="true"
                     transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: [0.23, 1, 0.32, 1] }}
                   />
                 )}
-                <span className="sk-dock-ic">{item.icon}</span>
-                {isActive && <span className="sk-dock-lbl">{item.label}</span>}
               </>
             );
             return item.href ? (
@@ -350,51 +345,66 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Drawer.Portal>
           <Drawer.Overlay className="sk-sheet-overlay" />
           <Drawer.Content
-            className={isMobile ? "sk-sheet sk-menu-sheet" : "sk-panel sk-panel-left sk-menu-sheet"}
+            className={isMobile ? "sk-sheet sk-menu-sheet stc" : "sk-panel sk-panel-left sk-menu-sheet stc"}
             aria-describedby={undefined}
           >
             <Drawer.Title className="sr-only">Menu</Drawer.Title>
             {isMobile && <div className="sk-sheet-grab" aria-hidden="true" />}
-            <div className="skm">
-              <div className="skm-head">
-                <div>
-                  <span className="skm-ask">কী খুঁজছেন?</span>
-                  <span className="skm-title">সেরা খাবার মেনু</span>
-                </div>
-                <button type="button" onClick={() => setIsOpen(false)} aria-label="Close menu" className="skm-close press">
-                  <X className="h-5 w-5" />
+            <div className="stm">
+              <div className="stm-head">
+                <span className="display">
+                  কী <b>খুঁজছেন?</b>
+                </span>
+                <button type="button" onClick={() => setIsOpen(false)} aria-label="Close menu" className="stm-close press">
+                  <X className="h-5 w-5" strokeWidth={1.3} />
                 </button>
               </div>
-              <nav aria-label="Categories" className="skm-cats">
+              <nav aria-label="Categories" className="stm-cats">
                 {HOMEPAGE_CATEGORIES.map((category, index) => (
                   <Link
                     key={category.slug}
                     href={`/collection/${category.slug}`}
                     onClick={() => setIsOpen(false)}
-                    className="skm-cat press"
-                    style={{ "--c": category.color, "--i": index } as CSSProperties}
-                    data-light={category.light || undefined}
+                    className="stm-cat press"
+                    style={{ "--i": index } as CSSProperties}
                   >
                     <img src={category.image} alt="" decoding="async" />
-                    <span className="skm-no num">{toBanglaDigits(String(index + 1).padStart(2, "0"))}</span>
                     <b>{category.name}</b>
                     <small>{category.en}</small>
                   </Link>
                 ))}
               </nav>
-              <nav aria-label="Mobile menu" className="skm-links">
+              <nav aria-label="Mobile menu" className="stm-rows">
                 {[
                   { href: "/", bn: "হোম", en: "Home" },
                   { href: "/products", bn: "সব পণ্য", en: "All products" },
                   { href: "/collection/top-selling-products", bn: "সেরা বিক্রিত পণ্য", en: "Top Selling Products", hot: true },
-                ].map((row) => (
-                  <Link key={row.href} href={row.href} onClick={() => setIsOpen(false)} className="skm-row press">
-                    <b>{row.bn}<small>{row.en}</small></b>
-                    {row.hot && <span className="skm-hot">জনপ্রিয়</span>}
-                    <i aria-hidden="true"><ArrowRight size={16} /></i>
+                ].map((row, index) => (
+                  <Link
+                    key={row.href}
+                    href={row.href}
+                    onClick={() => setIsOpen(false)}
+                    className="stm-row"
+                    aria-label={`${row.bn} (${row.en})`}
+                    style={{ "--i": index + 3 } as CSSProperties}
+                  >
+                    <span className="num">{toBanglaDigits(String(index + 1).padStart(2, "0"))}</span>
+                    <b>{row.bn}</b>
+                    {row.hot ? <em>জনপ্রিয়</em> : <span />}
+                    <i aria-hidden="true">→</i>
                   </Link>
                 ))}
               </nav>
+              <div className="stm-contact" style={{ "--i": 6 } as CSSProperties}>
+                <a href="tel:+8801310980289" className="press">
+                  <span>কল করুন</span>
+                  <b className="num">০১৩১০-৯৮০২৮৯</b>
+                </a>
+                <a href={CONTACT_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer" className="press">
+                  <span>হোয়াটসঅ্যাপ</span>
+                  <b className="num">০১৩০৩-১০৩৫৪০</b>
+                </a>
+              </div>
             </div>
           </Drawer.Content>
         </Drawer.Portal>
@@ -409,71 +419,85 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <PageContentTransition>{children}</PageContentTransition>
       </main>
 
-      {/* Cash memo footer (approved 2026-10-13) */}
-      <footer className="sk">
-        <div className="fa">
-          <div className="memo-w">
-            <span className="tack" />
-            <div className="memo">
-              <div className="memo-top">
-                <img src={headerLogo} alt="সেরা খাবার" loading="lazy" decoding="async" />
-                <div className="memo-title">
-                  <SkewReveal as="b" enabled={location === "/"}>ক্যাশ মেমো</SkewReveal>
-                  <span>প্রকৃতির স্বাদ, যত্নের সঙ্গে পৌঁছে দিই আপনার ঘরে।</span>
-                </div>
-                <div className="memo-no">
-                  নং <span className="num">২০২৬</span>
-                  <br />
-                  তারিখ: আজ
-                </div>
-              </div>
-              <div className="memo-cols">
-                <div>
-                  <div className="memo-h">কেনাকাটা</div>
-                  {MEMO_SHOP_LINKS.map(([label, href]) => (
-                    <Link key={label} href={href} className="memo-row">
-                      {label}
-                      <em>→</em>
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <div className="memo-h">যোগাযোগ</div>
-                  <a className="memo-row" href="tel:+8801310980289">কল করুন<em>→</em></a>
-                  <a className="memo-row" href="https://api.whatsapp.com/send/?phone=8801303103540" target="_blank" rel="noopener noreferrer">হোয়াটসঅ্যাপ করুন<em>→</em></a>
-                  <Link href="/about-us" className="memo-row">আমাদের গল্প<em>→</em></Link>
-                  <a className="memo-row" href={`https://api.whatsapp.com/send/?phone=8801303103540&text=${encodeURIComponent("পাইকারি অর্ডার করতে চাই")}`} target="_blank" rel="noopener noreferrer">পাইকারি অর্ডার<em>→</em></a>
-                </div>
-              </div>
-              <div className="memo-foot">
-                <p>
-                  সাধ্যের মধ্যে সেরা মানের পন্য আপনার ও আপনার পরিবারের জন্য,
-                  <br />
-                  যা আমরা পাঠাই একদম মাঠ পর্যায় থেকে, তাই পাচ্ছেন সাশ্রয়ী দামে সেরা মানের পন্যের নিশ্চয়তা।
-                </p>
-                {/* Bottom Bar */}
-                <a className="sign" href="https://api.whatsapp.com/send/?phone=8801733670129" target="_blank" rel="noopener noreferrer">
-                  <img src="/arc-logo.webp" alt="Arc Labs Corporation" width={244} height={88} loading="lazy" decoding="async" />
-                  <hr />
-                  <small>Designed &amp; Engineered by</small>
-                </a>
-              </div>
-              <div className="stampc" aria-hidden="true">
-                ক্যাশ অন
-                <br />
-                ডেলিভারি
-                <br />· সারা দেশে ·
-              </div>
+      {/* Wordmark footer (Stage redesign, 2026-10-19): statement and contact rows, link columns, the logo across the width */}
+      <footer className="stc stc-foot">
+        <div className="stc-frame">
+          <div className="st-row stc-f-top">
+            <div className="st-cell">
+              <h2 className="display">
+                প্রকৃতির স্বাদ, <b>যত্নের সঙ্গে</b> পৌঁছে দিই আপনার ঘরে।
+              </h2>
+              <p className="stc-f-about">
+                সাধ্যের মধ্যে সেরা মানের পণ্য আপনার ও আপনার পরিবারের জন্য, যা আমরা পাঠাই একদম মাঠ পর্যায় থেকে।
+              </p>
+            </div>
+            <div className="st-cell">
+              <div className="stc-f-lab">কথা বলুন</div>
+              <a className="stc-f-row" href={CONTACT_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer">
+                <span>হোয়াটসঅ্যাপ</span>
+                <span className="num">০১৩০৩-১০৩৫৪০</span>
+                <i aria-hidden="true">→</i>
+              </a>
+              <a className="stc-f-row" href="tel:+8801310980289">
+                <span>কল করুন</span>
+                <span className="num">০১৩১০-৯৮০২৮৯</span>
+                <i aria-hidden="true">→</i>
+              </a>
+              <a className="stc-f-row" href="mailto:serakhabar518@gmail.com">
+                <span>ইমেইল</span>
+                <span>serakhabar518@gmail.com</span>
+                <i aria-hidden="true">→</i>
+              </a>
             </div>
           </div>
-          <p className="f-copy">
-            © <span className="num">২০২৬</span> সেরা খাবার · নওহাটা, পবা, রাজশাহী, বাংলাদেশ, <span className="num">৬২১৩</span>
-          </p>
-          <nav className="f-pol" aria-label="Policies">
-            {POLICY_LINKS.map(([label, href]) => (
-              <Link key={href} href={href}>• {label}</Link>
-            ))}
-          </nav>
+          <div className="st-row stc-f-cols">
+            <div className="st-cell">
+              <h4>কেনাকাটা</h4>
+              <ul>
+                {MEMO_SHOP_LINKS.map(([label, href]) => (
+                  <li key={href}>
+                    <Link href={href} className="stc-fl">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="st-cell">
+              <h4>আরও</h4>
+              <ul>
+                <li>
+                  <Link href="/about-us" className="stc-fl">আমাদের গল্প</Link>
+                </li>
+                <li>
+                  <a className="stc-fl" href={`${CONTACT_WHATSAPP_HREF}&text=${encodeURIComponent("পাইকারি অর্ডার করতে চাই")}`} target="_blank" rel="noopener noreferrer">
+                    পাইকারি অর্ডার
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="st-cell stc-f-pol">
+              <h4>সহায়তা ও নীতিমালা</h4>
+              <ul aria-label="Policies">
+                {POLICY_LINKS.map(([label, href]) => (
+                  <li key={href}>
+                    <Link href={href} className="stc-fl">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="stc-f-word">
+            <img src="/sera-khabar-logo.svg" alt="সেরা খাবার" width={3500} height={640} loading="lazy" decoding="async" />
+          </div>
+          <div className="stc-f-legal">
+            <span>
+              © <span className="num">২০২৬</span> সেরা খাবার · নওহাটা, পবা, রাজশাহী <span className="num">৬২১৩</span>
+            </span>
+            {/* Bottom Bar */}
+            <a className="stc-arc" href="https://api.whatsapp.com/send/?phone=8801733670129" target="_blank" rel="noopener noreferrer">
+              <small>Designed &amp; Engineered by</small>
+              <img src="/arc-logo.webp" alt="Arc Labs Corporation" width={244} height={88} loading="lazy" decoding="async" />
+            </a>
+          </div>
         </div>
       </footer>
     </div>

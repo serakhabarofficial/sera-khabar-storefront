@@ -25,14 +25,17 @@ type Variant = NonNullable<StorefrontProduct["variants"]>[number];
 // background blends into the card), centred name, big numeral price, round + button.
 // Pass `variant` to sell one specific size; otherwise the card uses the default variant.
 // Listing pages pass `inventory` from their single batched stock read.
+// `look="stage"` renders the 2026-10-19 Stage homepage cell (stage.css) with the same purchase logic.
 export default function PosterProductCard({
   product: catalogProduct,
   variant: catalogVariant,
   inventory,
+  look = "poster",
 }: {
   product: StorefrontProduct;
   variant?: Variant;
   inventory?: StorefrontInventoryEntry | null;
+  look?: "poster" | "stage";
 }) {
   const product = mergeInventory(catalogProduct, inventory) ?? catalogProduct;
   const fixedVariant = catalogVariant
@@ -57,6 +60,66 @@ export default function PosterProductCard({
   const compareAtPrice = Number(product.compare_at_price);
   const hasDiscount = Number.isFinite(price) && Number.isFinite(compareAtPrice) && compareAtPrice > price;
   const detail = [variant ? variantLabel : "", english].filter(Boolean).join(" · ");
+
+  const add = () => {
+    addToCart(
+      {
+        id: getProductNumericId(product),
+        title: `${product.name} (${variantLabel})`,
+        price: formatCardAmount(price),
+        image,
+        productUuid,
+        variantId,
+        analyticsItem: toGoogleAnalyticsItem({
+          id: product.id ?? product.slug,
+          name: product.name,
+          variant: variantLabel,
+          price,
+          quantity: 1,
+        }),
+      },
+      variantLabel,
+    );
+    setAdded(true);
+    window.clearTimeout(addedTimer.current);
+    addedTimer.current = window.setTimeout(() => setAdded(false), 1600);
+  };
+
+  if (look === "stage") {
+    return (
+      <article className="st-card" data-reveal="">
+        <button
+          type="button"
+          disabled={!canAddToCart}
+          aria-label={`${bangla} কার্টে যোগ করুন`}
+          className={`st-add press${added ? " added" : ""}`}
+          onClick={add}
+        >
+          <span className="l1" aria-hidden="true">+</span>
+          <span className="l2" aria-hidden="true">✓</span>
+        </button>
+        {isSoldOut ? <span className="st-card-sold">স্টক শেষ</span> : null}
+        <Link href={`/product/${product.slug}`} className="st-card-img" aria-label={bangla}>
+          {image ? (
+            <img src={image} srcSet={srcSet} sizes={srcSet ? "(min-width: 860px) 280px, 45vw" : undefined} alt={product.name} loading="lazy" decoding="async" data-reveal-img="" />
+          ) : null}
+        </Link>
+        <Link href={`/product/${product.slug}`}>
+          <h3>{bangla}</h3>
+        </Link>
+        {english ? <div className="st-card-en">{english}</div> : null}
+        <div className="st-card-pr num">
+          ৳<BanglaNumber value={Number.isFinite(price) ? price : 0} />
+          {hasDiscount ? (
+            <s>
+              ৳<BanglaNumber value={compareAtPrice} />
+            </s>
+          ) : null}
+          {variant && variantLabel !== "Default" ? <small>{variantLabel}</small> : null}
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article className="c-card" data-reveal="">
@@ -85,29 +148,7 @@ export default function PosterProductCard({
             disabled={!canAddToCart}
             aria-label={`${bangla} কার্টে যোগ করুন`}
             className={`add press c-plus${added ? " added" : ""}`}
-            onClick={() => {
-              addToCart(
-                {
-                  id: getProductNumericId(product),
-                  title: `${product.name} (${variantLabel})`,
-                  price: formatCardAmount(price),
-                  image,
-                  productUuid,
-                  variantId,
-                  analyticsItem: toGoogleAnalyticsItem({
-                    id: product.id ?? product.slug,
-                    name: product.name,
-                    variant: variantLabel,
-                    price,
-                    quantity: 1,
-                  }),
-                },
-                variantLabel,
-              );
-              setAdded(true);
-              window.clearTimeout(addedTimer.current);
-              addedTimer.current = window.setTimeout(() => setAdded(false), 1600);
-            }}
+            onClick={add}
           >
             <span className="l1">+</span>
             <span className="l2">✓</span>

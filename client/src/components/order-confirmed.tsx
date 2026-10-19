@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Banknote, Check, Copy, Phone, Truck } from "lucide-react";
+import { prefersStillArt } from "../lib/alpha-video";
 
 // Approved 2026-10-18 (docs/design/2026-10-18-order-confirmed): the "Celebrate" screen with the kraft bag.
 // The bag is a HyperFrames render (order-pack-motion) with a transparent background; its motion is baked in.
@@ -11,16 +12,6 @@ export type ConfirmedOrder = { ref: string; firstName: string; total: number };
 
 const toBanglaDigits = (value: string) => value.replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
 
-// WebKit (every iOS browser, and Safari on the Mac) plays VP9 WebM but drops the transparency,
-// so those browsers and anyone who prefers reduced motion get the still final frame instead.
-function prefersStill() {
-  if (typeof window === "undefined") return true;
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return true;
-  const ua = navigator.userAgent;
-  const iOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  return iOS || /^((?!chrome|chromium|android|edg).)*safari/i.test(ua);
-}
-
 let warmed = false;
 /** Fetch the bag early (when checkout opens) so it plays straight away after the order goes through. */
 export function warmOrderConfirmedArt() {
@@ -28,12 +19,13 @@ export function warmOrderConfirmedArt() {
   warmed = true;
   const link = document.createElement("link");
   link.rel = "prefetch";
-  link.href = prefersStill() ? ORDER_PACK_STILL : ORDER_PACK_VIDEO;
+  link.href = prefersStillArt() ? ORDER_PACK_STILL : ORDER_PACK_VIDEO;
   document.head.append(link);
 }
 
 export function OrderConfirmed({ order, onClose }: { order: ConfirmedOrder; onClose: () => void }) {
-  const [still, setStill] = useState(prefersStill);
+  // Safari/iOS (no WebM transparency) and reduced motion get the still final frame instead.
+  const [still, setStill] = useState(prefersStillArt);
   const [copied, setCopied] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 

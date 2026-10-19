@@ -13,7 +13,7 @@ test("the cart uses Geist for English while retaining Bengali fallback fonts", (
   }
   const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
   assert.match(html, /family=Geist:wght@100\.\.900/);
-  assert.match(html, /family=Noto\+Serif\+Bengali:wght@400;500;600;700;800;900/);
+  assert.match(html, /family=Noto\+Serif\+Bengali:wght@300;400;500;600;700;800;900/);
 });
 
 test("cart prices and quantity digits use the Geist numeral face with a Bangla fallback", () => {

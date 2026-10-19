@@ -183,8 +183,8 @@ test("details are chips that switch one footer-style cash memo", () => {
   assert.match(posterSource, /\.skp-memo p \{[^}]*font-family: "Noto Serif Bengali"/);
 });
 
-test("related products use the homepage poster card", () => {
-  assert.match(productSource, /<PosterProductCard key=\{p\.slug\} product=\{p\} \/>/);
+test("related products use the homepage Stage product cell", () => {
+  assert.match(productSource, /<PosterProductCard key=\{p\.slug\} product=\{p\} look="stage" \/>/);
   assert.doesNotMatch(productSource, /HomeProductCard/);
 });
 

@@ -4,10 +4,11 @@ import { test } from "node:test";
 
 const layoutSource = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
 
-test("uses the turmeric Poster announcement with no close button", () => {
-  // Approved 2026-10-13; the free-delivery amount comes from the same POLICY_FACTS checkout uses.
-  assert.match(layoutSource, /<div className="sk-announce" role="region" aria-label="ঘোষণা">/);
-  assert.match(layoutSource, /toBanglaDigits\(POLICY_FACTS\.freeDeliveryThreshold\)/);
+test("uses the Stage announcement row with no close button", () => {
+  // Stage redesign 2026-10-19; delivery facts come from the same POLICY_FACTS checkout uses.
+  assert.match(layoutSource, /<div className="stc stc-announce" role="region" aria-label="ঘোষণা">/);
+  assert.match(layoutSource, /toBanglaDigits\(POLICY_FACTS\.freeDeliveryThreshold\.toLocaleString\("en-IN"\)\)/);
+  assert.match(layoutSource, /POLICY_FACTS\.dhakaDeliveryDays/);
   assert.doesNotMatch(layoutSource, /sk-announce-close/);
   assert.doesNotMatch(layoutSource, /Free shipping on orders over/);
 });
@@ -20,7 +21,9 @@ test("keeps the compact white pill dock fixed at the bottom on phones", () => {
   assert.match(layoutSource, /const dockHighlightId = `sk-dock-highlight-\$\{useId\(\)\}`;/);
   assert.match(layoutSource, /layoutId=\{dockHighlightId\}/);
   assert.match(layoutSource, /duration: shouldReduceMotion \? 0 : 0\.22/);
-  assert.match(layoutSource, /\{isActive && <span className="sk-dock-lbl">\{item\.label\}<\/span>\}/);
+  // Stage redesign: the active tab is marked by a small dot under its icon, not a labelled pill.
+  assert.match(layoutSource, /className="sk-dock-dot"/);
+  assert.doesNotMatch(layoutSource, /sk-dock-lbl|sk-dock-hl/);
 });
 
 test("uses the existing icons in the mobile dock", () => {
@@ -33,11 +36,12 @@ test("uses the existing icons in the mobile dock", () => {
 test("uses the Solar cart icon in both desktop and mobile navigation", () => {
   assert.match(layoutSource, /viewBox="0 0 24 24"/);
   assert.match(layoutSource, /M16 9a1 1 0 1 1-2 0/);
-  assert.equal((layoutSource.match(/<BagIcon /g) ?? []).length, 2);
+  // The header shows "ব্যাগ" with a count; the Solar bag stays on the dock's cart button.
+  assert.equal((layoutSource.match(/<BagIcon /g) ?? []).length, 1);
 });
 
 test("keeps header cart icons balanced without changing the mobile dock", () => {
-  assert.match(layoutSource, /<BagIcon className="h-5 w-5" \/>/);
+  assert.match(layoutSource, /ব্যাগ <span className="stc-count num">\{toBanglaDigits\(itemCount > 99 \? "99\+" : itemCount\)\}<\/span>/);
   assert.match(layoutSource, /<BagIcon className="!h-6 !w-6" \/>/);
   assert.match(layoutSource, /<SearchIcon className="h-5 w-5" \/>/);
 });
@@ -61,21 +65,20 @@ test("keeps the mobile dock search panel compact", () => {
   assert.match(layoutSource, /className="relative h-auto max-h-\[70dvh\] w-full[^"]*md:h-auto/);
 });
 
-test("uses the poster header: turmeric menu button, centred logo, turmeric bag", () => {
-  // Approved 2026-10-13 homepage redesign (docs/design/2026-10-13-homepage).
-  assert.match(layoutSource, /<div className="sk sk-header" data-page-header="">/);
-  assert.match(layoutSource, /<header className="c-head">/);
-  assert.match(layoutSource, /className="menu-btn press" aria-label="Open menu" onClick=\{openMenu\}/);
+test("uses the Stage header: links left, centred logo, search and bag right, hairline menu button", () => {
+  // Stage redesign 2026-10-19. The logo keeps .c-logoimg, which checkout's header transition follows.
+  assert.match(layoutSource, /<div className="stc stc-head" data-page-header="">/);
+  assert.match(layoutSource, /<header className="stc-frame stc-head-in">/);
+  assert.match(layoutSource, /className="stc-menu press"\s+aria-label="Open menu"\s+aria-expanded=\{isOpen\}\s+onClick=\{openMenu\}/);
   assert.match(layoutSource, /<img className="c-logoimg" src=\{headerLogo\}/);
-  assert.match(layoutSource, /className="bag press"/);
+  assert.match(layoutSource, /<nav className="stc-nav" aria-label="Main">/);
 });
 
-test("uses the pinned cash memo footer with the Arc Labs signature", () => {
-  assert.match(layoutSource, /<footer className="sk">/);
-  assert.match(layoutSource, /<SkewReveal as="b" enabled=\{location === "\/"\}>ক্যাশ মেমো<\/SkewReveal>/);
-  assert.match(layoutSource, /className="stampc"/);
-  assert.match(layoutSource, /<a className="sign" href="https:\/\/api\.whatsapp\.com\/send\/\?phone=8801733670129"/);
-  for (const label of ["ফ্রেশ আম", "হোমমেড", "গুড়", "সব পণ্য", "কল করুন", "হোয়াটসঅ্যাপ করুন", "আমাদের গল্প", "পাইকারি অর্ডার"]) {
+test("uses the Stage wordmark footer with the Arc Labs signature", () => {
+  assert.match(layoutSource, /<footer className="stc stc-foot">/);
+  assert.match(layoutSource, /<img src="\/sera-khabar-logo\.svg" alt="সেরা খাবার"/);
+  assert.match(layoutSource, /<a className="stc-arc" href="https:\/\/api\.whatsapp\.com\/send\/\?phone=8801733670129"/);
+  for (const label of ["ফ্রেশ আম", "হোমমেড", "গুড়", "সব পণ্য", "কল করুন", "হোয়াটসঅ্যাপ", "আমাদের গল্প", "পাইকারি অর্ডার", "সহায়তা ও নীতিমালা"]) {
     assert.match(layoutSource, new RegExp(label));
   }
 });
@@ -83,7 +86,7 @@ test("uses the pinned cash memo footer with the Arc Labs signature", () => {
 test("desktop menu is the same Cards menu in a left panel (2026-10-13)", () => {
   // One Vaul drawer serves both: a bottom sheet on phones, a floating left panel on desktop.
   assert.match(layoutSource, /<Drawer\.Root open=\{isOpen\} onOpenChange=\{setIsOpen\} direction=\{isMobile \? "bottom" : "left"\}>/);
-  assert.match(layoutSource, /isMobile \? "sk-sheet sk-menu-sheet" : "sk-panel sk-panel-left sk-menu-sheet"/);
+  assert.match(layoutSource, /isMobile \? "sk-sheet sk-menu-sheet stc" : "sk-panel sk-panel-left sk-menu-sheet stc"/);
   assert.doesNotMatch(layoutSource, /Desktop menu overlay/);
   assert.doesNotMatch(layoutSource, /md:bg-neutral-500\/60/);
   assert.doesNotMatch(layoutSource, /const MENU_ITEMS = \[/);
@@ -99,16 +102,16 @@ test("links Top Selling Products in the menu", () => {
   assert.match(menuSource, /সেরা বিক্রিত পণ্য/);
 });
 
-test("phone menu uses the homepage category cards (approved 2026-10-13, Cards variant)", () => {
+test("phone menu shows the homepage categories in one hairline box (Stage, 2026-10-19)", () => {
   const sheetStart = layoutSource.indexOf("<Drawer.Content\n");
   const sheetEnd = layoutSource.indexOf("</Drawer.Content>", sheetStart);
   assert.notEqual(sheetStart, -1);
   const sheet = layoutSource.slice(sheetStart, sheetEnd);
   assert.match(sheet, /HOMEPAGE_CATEGORIES\.map/);
-  assert.match(sheet, /className="skm-cat press"/);
+  assert.match(sheet, /className="stm-cat press"/);
   assert.match(sheet, /<img src=\{category\.image\}/);
   assert.match(sheet, /toBanglaDigits\(String\(index \+ 1\)\.padStart\(2, "0"\)\)/);
-  assert.match(sheet, /কী খুঁজছেন\?/);
+  assert.match(sheet, /কী <b>খুঁজছেন\?<\/b>/);
   // Categories sit on the first screen; the old second "Collections" page is gone.
   assert.doesNotMatch(layoutSource, /mobileMenuPage/);
   assert.doesNotMatch(layoutSource, /sk-menu-back/);
