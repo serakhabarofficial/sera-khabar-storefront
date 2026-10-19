@@ -51,7 +51,7 @@ test("a product with no resolvable ids cannot be ordered", () => {
 });
 
 test("adding to the cart shows a notice instead of opening the drawer", () => {
-  const addToCartBody = cartContext.slice(cartContext.indexOf("const addToCart = ("));
+  const addToCartBody = cartContext.slice(cartContext.indexOf("const addToCart = useCallback(("));
   assert.doesNotMatch(addToCartBody, /setIsOpen\(true\)/);
   assert.match(addToCartBody, /setNotice\(\{/);
 });

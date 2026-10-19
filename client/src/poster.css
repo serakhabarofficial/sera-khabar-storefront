@@ -384,6 +384,8 @@
 @media (min-width: 768px) { .skc-rail { padding-inline: 22px; scroll-padding-inline: 22px; } }
 /* The slot animates its width, so the card's 2px of room for its outline is margin, not slot padding. */
 .skc-card-slot { flex: none; width: 136px; scroll-snap-align: start; overflow: hidden; }
+/* Folds the whole rail away when its last card goes; no padding, so it folds to exactly 0. */
+.skc-add-fold { overflow: hidden; }
 .skc-card { width: 132px; margin: 2px 2px 8px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px rgba(58, 29, 15, 0.1), 0 1px 2px rgba(58, 29, 15, 0.06), 0 4px 10px -4px rgba(58, 29, 15, 0.12); }
 .skc-card-ph { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(58, 29, 15, 0.06); }
 .skc-card-ph img { width: 100%; height: 100%; object-fit: cover; }

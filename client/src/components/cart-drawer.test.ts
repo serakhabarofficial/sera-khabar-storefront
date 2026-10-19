@@ -79,3 +79,24 @@ test("adding from the rail moves the product into the bag with a fold-away anima
   assert.match(cartDrawerSource, /const foldEase = \[0\.4, 0, 0\.2, 1\] as const;/);
   assert.doesNotMatch(cartDrawerSource, /addedHere|data-added/);
 });
+
+test("adding or removing in the bag doesn't re-render the page behind it (2026-10-20)", () => {
+  const cartContext = readFileSync(new URL("../contexts/cart-context.tsx", import.meta.url), "utf8");
+  assert.match(cartContext, /const addToCart = useCallback\(/);
+  assert.match(cartContext, /<AddToCartContext\.Provider value=\{addToCart\}>/);
+  assert.match(cartContext, /afterNextPaint\(\(\) => \{\s*trackMerchantSuiteEvent\("cart"\);/);
+  for (const file of ["./poster-product-card.tsx", "./home-product-card.tsx", "../pages/product.tsx"]) {
+    const source = readFileSync(new URL(file, import.meta.url), "utf8");
+    assert.match(source, /const addToCart = useAddToCart\(\);/, file);
+    assert.doesNotMatch(source, /useCart\(\)/, file);
+  }
+  // Bag thumbnails take the small photo size, decoded off the main thread.
+  assert.match(cartDrawerSource, /srcSet=\{thumbSrcSets\.get\(item\.image\)\}[^>]*decoding="async"/);
+});
+
+test("framer-motion is at least 12.43, which fixed the one-frame blink when a fade ends (2026-10-20)", () => {
+  // Before 12.43 a finished fade showed its starting opacity for one frame: rail cards and bag rows blinked on add and remove.
+  const pkg = JSON.parse(readFileSync(new URL("../../../package.json", import.meta.url), "utf8"));
+  const [major, minor] = pkg.dependencies["framer-motion"].replace(/^[^\d]*/, "").split(".").map(Number);
+  assert.ok(major > 12 || (major === 12 && minor >= 43), pkg.dependencies["framer-motion"]);
+});

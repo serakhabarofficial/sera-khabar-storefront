@@ -141,6 +141,7 @@ type CartInnerContentProps = {
     suggestions: Suggestion[];
     addSuggestion: (suggestion: Suggestion) => void;
     openCheckout: () => void;
+    thumbSrcSets: Map<string, string>;
 };
 
 function CartInnerContent({
@@ -156,6 +157,7 @@ function CartInnerContent({
     suggestions,
     addSuggestion,
     openCheckout,
+    thumbSrcSets,
 }: CartInnerContentProps) {
     return (
         <div className="skc">
@@ -202,7 +204,8 @@ function CartInnerContent({
                                             >
                                                 <div className="skc-row">
                                                     <div className="skc-img">
-                                                        <img src={item.image} alt="" />
+                                                        {/* The 68px thumbnail takes the small size, not the full photo, so a new row doesn't download and decode 960px mid-animation. */}
+                                                        <img src={item.image} srcSet={thumbSrcSets.get(item.image)} sizes={thumbSrcSets.has(item.image) ? "68px" : undefined} alt="" decoding="async" />
                                                     </div>
                                                     <div className="skc-info">
                                                         <h3>{name}</h3>
@@ -230,7 +233,9 @@ function CartInnerContent({
                                 </AnimatePresence>
                             </ul>
 
+                            <AnimatePresence initial={false}>
                             {suggestions.length > 0 && (
+                                <motion.div key="skc-add" {...rowFold} className="skc-add-fold">
                                 <section className="skc-add" aria-labelledby="skc-add-title">
                                     <h4 id="skc-add-title">এর সাথে যোগ করুন</h4>
                                     {/* data-vaul-no-drag: sideways scrolling must not drag the drawer shut */}
@@ -266,7 +271,9 @@ function CartInnerContent({
                                         </AnimatePresence>
                                     </ul>
                                 </section>
+                                </motion.div>
                             )}
+                            </AnimatePresence>
                         </>
                     )}
                 </motion.div>
@@ -323,6 +330,15 @@ export default function CartDrawer() {
     });
     const catalog = catalogProducts && catalogProducts.length ? catalogProducts : generatedStorefrontProducts;
     const suggestions = useMemo(() => buildSuggestions(catalog, items), [catalog, items]);
+    // Photo URL -> its smaller sizes, for the bag's thumbnails.
+    const thumbSrcSets = useMemo(() => {
+        const index = new Map<string, string>();
+        for (const product of catalog) {
+            const { src, srcSet } = getProductImageSet(product);
+            if (src && srcSet) index.set(src, srcSet);
+        }
+        return index;
+    }, [catalog]);
 
     const cartOrder = useMemo<OrderDialogBundle | null>(() => {
         if (items.length === 0) {
@@ -430,6 +446,7 @@ export default function CartDrawer() {
         suggestions,
         addSuggestion,
         openCheckout,
+        thumbSrcSets,
     };
 
     return (

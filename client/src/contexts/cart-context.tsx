@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useState, useEffect, useRef } from 'react';
 import { trackMerchantSuiteEvent } from "@/lib/merchant-suite";
 import { trackGoogleEcommerceEvent, type GoogleAnalyticsItem } from "@/lib/google-analytics";
 import { MAX_LINE_QUANTITY } from "@shared/order-limits";
@@ -69,6 +69,15 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+// addToCart alone, with a stable identity: product cards and the product page only add,
+// so they don't re-render on every cart change (which would delay the cart's own animations).
+const AddToCartContext = createContext<CartContextType["addToCart"] | undefined>(undefined);
+
+// Analytics runs after the next frame is painted, so it never delays the tap's feedback.
+function afterNextPaint(run: () => void) {
+    if (typeof requestAnimationFrame !== "function") return run();
+    requestAnimationFrame(() => setTimeout(run, 0));
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
@@ -96,7 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('stepprs-cart');
     }, [items]);
 
-    const addToCart = (
+    const addToCart = useCallback((
         product: AddToCartProduct,
         size: string,
         quantity: number = 1
@@ -137,31 +146,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // shopper stays on the page; the drawer opens only on demand.
         noticeSeq.current += 1;
         setNotice({ key: noticeSeq.current, itemId, title: product.title, size, image: product.image, quantityAdded: quantity });
-        trackMerchantSuiteEvent("cart");
+        afterNextPaint(() => {
+            trackMerchantSuiteEvent("cart");
 
-        const value = Number(String(product.price).replace(/[^0-9.]/g, "")) || 0;
-        trackGoogleEcommerceEvent("add_to_cart", {
-          pageType: "product",
-          value,
-          items: [
-            product.analyticsItem
-              ? { ...product.analyticsItem, quantity }
-              : {
-                  item_id: String(product.id),
-                  item_name: product.title,
-                  item_brand: "Sera Khabar",
-                  item_category: "",
-                  item_variant: size,
-                  item_list_name: "",
-                  item_list_id: "",
-                  price: value,
-                  discount: 0,
-                  index: 0,
-                  quantity,
-                },
-          ],
+            const value = Number(String(product.price).replace(/[^0-9.]/g, "")) || 0;
+            trackGoogleEcommerceEvent("add_to_cart", {
+              pageType: "product",
+              value,
+              items: [
+                product.analyticsItem
+                  ? { ...product.analyticsItem, quantity }
+                  : {
+                      item_id: String(product.id),
+                      item_name: product.title,
+                      item_brand: "Sera Khabar",
+                      item_category: "",
+                      item_variant: size,
+                      item_list_name: "",
+                      item_list_id: "",
+                      price: value,
+                      discount: 0,
+                      index: 0,
+                      quantity,
+                    },
+              ],
+            });
         });
-    };
+    }, []);
 
     const removeFromCart = (itemId: string) => {
         setItems(prevItems => prevItems.filter(item => item.id !== itemId));
@@ -208,7 +219,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 consumeCartPulse
             }}
         >
-            {children}
+            <AddToCartContext.Provider value={addToCart}>{children}</AddToCartContext.Provider>
         </CartContext.Provider>
     );
 }
@@ -219,4 +230,12 @@ export function useCart() {
         throw new Error('useCart must be used within a CartProvider');
     }
     return context;
+}
+
+export function useAddToCart() {
+    const addToCart = useContext(AddToCartContext);
+    if (addToCart === undefined) {
+        throw new Error('useAddToCart must be used within a CartProvider');
+    }
+    return addToCart;
 }
