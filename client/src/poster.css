@@ -369,7 +369,6 @@
 .skc-mini.on { opacity: 1; }
 .skc-mini i { position: absolute; inset: 0; background: var(--skc-ink); }
 
-.skc-body:focus { outline: none; }
 .skc-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .skc-body::-webkit-scrollbar { display: none; }
 
@@ -387,10 +386,9 @@
 .skc-ms-lab { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11.5px; color: var(--skc-soft); font-variant-numeric: tabular-nums; }
 .skc-ms-lab span:last-child { color: var(--skc-ink); }
 
-/* Bag rows. */
-.skc-list { position: relative; margin: 0; padding: 0; list-style: none; }
-/* popLayout lifts a leaving row out of the flow: it needs a positioned list, and a full width once absolute. */
-.skc-item { width: 100%; }
+/* Bag rows. Animated boxes carry no padding: a padded box can't fold to 0 and jumps at the end. */
+.skc-list { margin: 0; padding: 0; list-style: none; }
+.skc-item { overflow: hidden; }
 .skc-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; margin: 0 var(--skc-pad); padding: 18px 0; }
 @media (min-width: 768px) { .skc-row { grid-template-columns: 112px minmax(0, 1fr); gap: 16px; } }
 .skc-item + .skc-item .skc-row { border-top: 1px solid var(--skc-line); }
@@ -420,9 +418,9 @@
 .skc-add-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
 .skc-add h4 { margin: 0; font-family: "Geist", sans-serif; font-weight: 400; font-size: 20px; letter-spacing: -0.025em; }
 .skc-add-head span { font-size: 12px; color: var(--skc-soft); }
-.skc-rail { position: relative; display: flex; gap: 10px; margin: 0 calc(-1 * var(--skc-pad)); padding: 2px var(--skc-pad) 4px; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--skc-pad); scrollbar-width: none; }
+.skc-rail { display: flex; gap: 10px; margin: 0 calc(-1 * var(--skc-pad)); padding: 2px var(--skc-pad) 4px; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--skc-pad); scrollbar-width: none; }
 .skc-rail::-webkit-scrollbar { display: none; }
-.skc-card-slot { flex: none; scroll-snap-align: start; }
+.skc-card-slot { flex: none; scroll-snap-align: start; overflow: hidden; }
 .skc-card { position: relative; display: flex; flex-direction: column; align-items: center; height: 100%; padding: 12px 8px 10px; border: 1px solid var(--skc-line); border-radius: 6px; background: #fff; text-align: center; transition: background-color 240ms ease; }
 @media (max-width: 767px) { .skc-card { padding: 14px 10px 12px; } }
 .skc-card-ph { width: 74%; aspect-ratio: 1; display: grid; place-items: center; }
@@ -539,8 +537,10 @@
   font-family: "Geist", "Noto Serif Bengali", serif; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13.5px; line-height: 1; box-shadow: 0 0 0 2px #fffdf8; }
 /* Phones only: unlayered CSS beats Tailwind's md:hidden, so hide it here explicitly. */
 @media (min-width: 768px) { .sk-dock { display: none; } }
-/* (Removed 2026-10-20: html:has(footer.sk) painted the canvas cream for the old poster footer. No footer.sk exists since
-   the Stage redesign, and a :has() on <html> made every cart insertion or removal restyle the whole document.) */
+/* Phones: iOS Safari draws the page under its floating toolbar, so the white body showed as a band below the
+   dock at the end of every page. Pages with the shared footer paint the canvas cream instead. The dock's
+   clearance lives only on footer .fa; a second padding on footer.sk once doubled the empty space. */
+@media (max-width: 767px) { html:has(footer.sk), html:has(footer.sk) body { background-color: #faf4ea; } }
 
 @media (prefers-reduced-motion: reduce) {
   .sk .bub, .sk .bub.typing i { animation: none !important; }
