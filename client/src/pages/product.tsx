@@ -6,7 +6,7 @@ import "@videojs/react/video/skin.css";
 import { Gesture, PlayButton } from "@videojs/react";
 import { Video, VideoPlayer, VideoSkin } from "@videojs/react/video";
 import { useReducedMotion } from "framer-motion";
-import { Phone, ChevronLeft, ChevronRight, Minus, Play, Plus, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Play, Plus, VolumeX } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import PosterProductCard, { splitProductName } from "@/components/poster-product-card";
 import RecentlyViewed from "@/components/recently-viewed";
@@ -594,7 +594,7 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
     );
   }
 
-  const { bangla: titleBn, english: titleEn } = splitProductName(product.name);
+  const { bangla: titleBn } = splitProductName(product.name);
   const sizeOffers = getSizeOffers(bundles);
   const collection = FEATURED_COLLECTIONS.find((item) => (item.productSlugs as readonly string[]).includes(product.slug));
   const collectionBn = collection ? collection.label.split("-")[1] ?? collection.label : null;
@@ -738,12 +738,6 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
 
           <div className="skp-info">
             <h1 data-load-step="">{titleBn}</h1>
-            <span className="skp-pill" data-load-step="">
-              {[titleEn, bundles.filter((bundle) => bundle.title !== "Default").map((bundle) => bundle.title).join(" / ")]
-                .filter(Boolean)
-                .join(" · ")}
-            </span>
-            <span className="skp-tag script" data-load-step="">রাজশাহী থেকে</span>
             {product.description ? <p className="skp-lede" data-load-step="">{product.description}</p> : null}
             {highlights.length ? (
               <ul className="skp-ticks">
@@ -867,7 +861,10 @@ export default function ProductPage({ params }: { params?: { id: string } }) {
             <div className="skp-or">অথবা</div>
             <div className="skp-help">
               <a href="tel:+8801310980289" className="skp-call press">
-                <Phone className="h-[18px] w-[18px] stroke-[1.75px]" aria-hidden="true" />
+                {/* Material Design Icons by Pictogrammers — https://github.com/Templarian/MaterialDesign/blob/master/LICENSE */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="7 1 11 22" aria-hidden="true" focusable="false" className="shrink-0">
+                  <path fill="#ffffff" d="M15 2a1 1 0 0 0-1 1v3h-4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h5c1.11 0 2-.89 2-2V8c0-.74-.4-1.38-1-1.72V3a1 1 0 0 0-1-1m-5 6h5v5h-5zm0 7h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-4 2h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1z" />
+                </svg>
                 ফোনে অর্ডার
               </a>
               <a

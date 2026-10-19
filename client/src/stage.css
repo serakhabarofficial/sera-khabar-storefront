@@ -388,9 +388,10 @@ main:has(.st, .skp) { background-color: #fff !important; }
 .stc-f-word { padding: clamp(36px, 5vw, 72px) var(--st-pad) clamp(30px, 4vw, 56px); border-top: 1px solid var(--st-line); }
 .stc-f-word img { width: 100%; }
 .stc-f-legal { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; padding: 18px var(--st-pad); border-top: 1px solid var(--st-line); font-size: 12.5px; color: var(--st-soft); }
-.stc-arc { display: inline-flex; align-items: center; gap: 10px; color: var(--st-soft); }
-.stc-arc small { font-size: 11px; letter-spacing: 0.04em; }
-.stc-arc img { height: 20px; width: auto; transition: transform 200ms var(--st-ease-out); }
+.stc-arc { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: var(--st-soft); }
+.stc-arc small { font-size: 10px; letter-spacing: 0.015em; white-space: nowrap; }
+.stc-arc-divider { flex: none; width: 1px; height: 22px; background: var(--st-line); }
+.stc-arc img { flex: none; width: 84px; height: auto; transition: transform 200ms var(--st-ease-out); }
 @media (hover: hover) and (pointer: fine) { .stc-arc:hover img { transform: scale(1.04); } }
 @media (max-width: 860px) {
   .stc-f-top,
