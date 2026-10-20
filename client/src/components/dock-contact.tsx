@@ -53,7 +53,7 @@ const WAVE_FAR = "M18.67 5.35c-1 -1 -2.26 -1.73 -3.67 -2.1M18.67 5.35c0.99 1 1.7
 
 // line-md "phone-call-loop" by Vjacheslav Trushkin (MIT, https://github.com/cyberalien/line-md), slowed to ring
 // once every four seconds. With reduced motion it is drawn still.
-function RingingPhoneIcon({ still }: { still: boolean }) {
+export function RingingPhoneIcon({ still }: { still: boolean }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">

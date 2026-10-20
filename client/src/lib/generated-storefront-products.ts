@@ -305,23 +305,49 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
     "slug": "mango-leather-pickle",
     "description": "খাঁটি আমসত্ত্ব দিয়ে তৈরি সুস্বাদু আচার, যেখানে মিষ্টি, টক ও ঝালের রয়েছে দারুণ সমন্বয়। বাছাই করা মসলা ও ঐতিহ্যবাহী স্বাদে তৈরি এই আচার প্রতিটি কামড়ে এনে দেবে অতুলনীয় স্বাদের অভিজ্ঞতা।",
     "url": null,
-    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/960.webp",
+    "image_url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/6a3e2ce3-25a8-4427-a871-bd31e1a11870/960.webp",
     "images": [
       {
-        "id": "1d25262e-fcdd-40f1-98c4-7f89cdd1fc21",
-        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/960.webp",
+        "id": "81d86429-cf96-4441-b49d-dd603c00e56e",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/6a3e2ce3-25a8-4427-a871-bd31e1a11870/960.webp",
         "sources": {
-          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/320.webp",
-          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/640.webp",
-          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/960.webp"
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/6a3e2ce3-25a8-4427-a871-bd31e1a11870/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/6a3e2ce3-25a8-4427-a871-bd31e1a11870/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/6a3e2ce3-25a8-4427-a871-bd31e1a11870/960.webp"
         },
         "alt_text": "আমসত্ত্ব আচার | Mango Leather Pickle",
         "sort_order": 0,
         "is_primary": true
+      },
+      {
+        "id": "2f31c61e-3a42-4015-add6-03a2bc596a37",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/688b8813-a874-4c22-b20e-52f1e20aa3d8/960.webp",
+        "sources": {
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/688b8813-a874-4c22-b20e-52f1e20aa3d8/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/688b8813-a874-4c22-b20e-52f1e20aa3d8/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/688b8813-a874-4c22-b20e-52f1e20aa3d8/960.webp"
+        },
+        "alt_text": "আমসত্ত্ব আচার | Mango Leather Pickle",
+        "sort_order": 2,
+        "is_primary": false
+      },
+      {
+        "id": "d71cb288-f961-4e3c-a3db-ac4fe237b958",
+        "url": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/960.webp",
+        "sources": {
+          "320": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/320.webp",
+          "640": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/640.webp",
+          "960": "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/960.webp"
+        },
+        "alt_text": "আমসত্ত্ব আচার | Mango Leather Pickle",
+        "sort_order": 3,
+        "is_primary": false
       }
     ],
     "image_urls": [
-      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/0ff7b2d1-e5cf-4298-9c0f-149329d8b237/960.webp"
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/6a3e2ce3-25a8-4427-a871-bd31e1a11870/960.webp",
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/688b8813-a874-4c22-b20e-52f1e20aa3d8/960.webp",
+      "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/960.webp"
     ],
     "price": 350,
     "compare_at_price": null,

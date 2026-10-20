@@ -235,32 +235,33 @@ function parseLandingOrderConfirmation(value: unknown): LandingOrderConfirmation
 export function writeLandingOrderConfirmation(
   storage: LandingConfirmationStorage | undefined,
   confirmation: LandingOrderConfirmation,
+  key = LANDING_CONFIRMATION_KEY,
 ) {
   if (!storage) return false;
   const safeConfirmation = parseLandingOrderConfirmation(confirmation);
   if (!safeConfirmation) return false;
 
   try {
-    storage.setItem(LANDING_CONFIRMATION_KEY, JSON.stringify(safeConfirmation));
+    storage.setItem(key, JSON.stringify(safeConfirmation));
     return true;
   } catch {
     return false;
   }
 }
 
-export function readLandingOrderConfirmation(storage: LandingConfirmationStorage | undefined) {
+export function readLandingOrderConfirmation(storage: LandingConfirmationStorage | undefined, key = LANDING_CONFIRMATION_KEY) {
   if (!storage) return null;
   try {
-    const serialized = storage.getItem(LANDING_CONFIRMATION_KEY);
+    const serialized = storage.getItem(key);
     return serialized ? parseLandingOrderConfirmation(JSON.parse(serialized)) : null;
   } catch {
     return null;
   }
 }
 
-export function clearLandingOrderConfirmation(storage: LandingConfirmationStorage | undefined) {
+export function clearLandingOrderConfirmation(storage: LandingConfirmationStorage | undefined, key = LANDING_CONFIRMATION_KEY) {
   try {
-    storage?.removeItem(LANDING_CONFIRMATION_KEY);
+    storage?.removeItem(key);
   } catch {
     // Storage can be unavailable in privacy modes. Clearing remains best-effort.
   }

@@ -44,6 +44,8 @@ type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Respo
 
 type AbandonedCartCaptureOptions = {
   source: AbandonedCartSource;
+  /** Isolate campaigns that share a legacy server-side source classification. */
+  draftScope?: string;
   storage?: StorageLike;
   fetchImpl?: FetchLike;
   createDraftKey?: () => string | null;
@@ -56,7 +58,7 @@ const MAX_MONEY = 10_000_000;
 const DEFAULT_DEBOUNCE_MS = 500;
 const DEFAULT_TIMEOUT_MS = 3_500;
 const DRAFT_STORAGE_PREFIX = "serakhabar-abandoned-cart-v1:";
-const memoryDraftKeys = new Map<AbandonedCartSource, string>();
+const memoryDraftKeys = new Map<string, string>();
 
 const CAMPAIGN_QUERY_KEYS: Array<[string, keyof AbandonedCartCampaign]> = [
   ["utm_source", "utmSource"],
@@ -140,7 +142,7 @@ function createBrowserDraftKey() {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-function readStoredDraftKey(source: AbandonedCartSource, storage: StorageLike | undefined) {
+function readStoredDraftKey(source: string, storage: StorageLike | undefined) {
   const storageKey = `${DRAFT_STORAGE_PREFIX}${source}`;
   try {
     const stored = storage?.getItem(storageKey);
@@ -152,7 +154,7 @@ function readStoredDraftKey(source: AbandonedCartSource, storage: StorageLike | 
   return isDraftKey(inMemory) ? inMemory : null;
 }
 
-function persistDraftKey(source: AbandonedCartSource, storage: StorageLike | undefined, draftKey: string) {
+function persistDraftKey(source: string, storage: StorageLike | undefined, draftKey: string) {
   memoryDraftKeys.set(source, draftKey);
   try {
     storage?.setItem(`${DRAFT_STORAGE_PREFIX}${source}`, draftKey);
@@ -161,7 +163,7 @@ function persistDraftKey(source: AbandonedCartSource, storage: StorageLike | und
   }
 }
 
-function removeDraftKey(source: AbandonedCartSource, storage: StorageLike | undefined) {
+function removeDraftKey(source: string, storage: StorageLike | undefined) {
   memoryDraftKeys.delete(source);
   try {
     storage?.removeItem(`${DRAFT_STORAGE_PREFIX}${source}`);
@@ -184,7 +186,7 @@ export class AbandonedCartCapture {
   private failed = false;
 
   constructor(private readonly options: AbandonedCartCaptureOptions) {
-    this.draftKeyValue = readStoredDraftKey(options.source, options.storage);
+    this.draftKeyValue = readStoredDraftKey(options.draftScope ?? options.source, options.storage);
   }
 
   get draftKey() {
@@ -237,7 +239,7 @@ export class AbandonedCartCapture {
     this.failed = false;
     this.resendAfterFlight = false;
     this.draftKeyValue = null;
-    removeDraftKey(this.options.source, this.options.storage);
+    removeDraftKey(this.options.draftScope ?? this.options.source, this.options.storage);
   }
 
   async finalize() {
@@ -262,7 +264,7 @@ export class AbandonedCartCapture {
     const generated = this.options.createDraftKey?.() ?? createBrowserDraftKey();
     if (!isDraftKey(generated)) return null;
     this.draftKeyValue = generated.toLowerCase();
-    persistDraftKey(this.options.source, this.options.storage, this.draftKeyValue);
+    persistDraftKey(this.options.draftScope ?? this.options.source, this.options.storage, this.draftKeyValue);
     return this.draftKeyValue;
   }
 
