@@ -45,14 +45,17 @@ export default function AmSottoAcharPage() {
   }, []);
   useEffect(() => {
     const el = root.current!, bar = el.querySelector<HTMLElement>(".v1-bar")!;
-    let heroGone = false, orderIn = false;
+    // The bar steps aside over the order memo and the footer, so the footer needs no room for it.
+    let heroGone = false, orderIn = false, footerIn = false;
     const io = new IntersectionObserver((entries) => entries.forEach((entry) => {
       if (entry.target.matches("[data-hero]")) heroGone = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+      else if (entry.target.matches("footer")) footerIn = entry.isIntersecting;
       else orderIn = entry.isIntersecting;
-      bar.classList.toggle("show", heroGone && !orderIn);
+      bar.classList.toggle("show", heroGone && !orderIn && !footerIn);
     }), { threshold: 0 });
     io.observe(el.querySelector("[data-hero]")!);
     io.observe(el.querySelector("#v1-order")!);
+    io.observe(el.querySelector("footer")!);
     return () => { io.disconnect(); clearTimeout(focusTimer.current); };
   }, []);
   return <div ref={root} className="amsotto">
