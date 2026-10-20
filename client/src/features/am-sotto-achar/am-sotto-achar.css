@@ -87,9 +87,9 @@
 .amsotto .tp-stop[data-side="right"] { grid-template-columns:1fr 92px; text-align:right; }
 .amsotto .tp-stop[data-side="right"] .tp-badge { order:2; }
 .amsotto .tp-stop > div { padding:10px 14px 12px; border-radius:20px; background:var(--paper); box-shadow:inset 0 0 0 1px #3f1a0b12; }
-.amsotto .tp-badge { position:relative; display:grid; place-items:center; width:92px; height:92px; border-radius:50%; background:#fff; box-shadow:0 0 0 6px var(--cream),0 10px 24px -12px #3f1a0b66; }
-.amsotto .tp-icon { display:block; width:60px; height:60px; }
-.amsotto .tp-badge b { position:absolute; top:-6px; right:-6px; display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:#fff; font-family:"Noto Serif Bengali",serif; font-size:17px; font-weight:800; box-shadow:0 0 0 3px var(--cream); }
+.amsotto .tp-badge { position:relative; z-index:2; display:grid; place-items:center; width:92px; height:92px; }
+.amsotto .tp-icon { display:block; width:108px; height:108px; }
+.amsotto .tp-badge b { position:absolute; z-index:1; top:-6px; right:-6px; display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:#fff; font-family:"Noto Serif Bengali",serif; font-size:17px; font-weight:800; box-shadow:0 0 0 3px var(--cream); }
 .amsotto .tp-stop[data-side="right"] .tp-badge b { right:auto; left:-6px; }
 .amsotto .tp-stop small { display:block; font-size:13px; font-weight:700; color:var(--sub); }
 .amsotto .tp-word { display:block; font-family:"Noto Serif Bengali",serif; font-weight:900; font-size:38px; line-height:1.15; }
