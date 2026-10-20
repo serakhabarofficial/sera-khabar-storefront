@@ -14,6 +14,8 @@ import { readOrCreateDeviceId } from "./device-id.ts";
 import { readCampaignClickCookie, readCampaignReceipt, type CampaignRedirectOptions } from './campaign-links.js';
 import { readAnalyticsSessionCookie } from './analytics-session.js';
 import { createGoHandler } from '../api/go.js';
+import { createSignalHandler } from '../api/storefront-signal.js';
+import { buildPurchaseEvent, sendMetaEvents } from "./meta-capi.ts";
 import {
   AbandonedCartUpstreamError,
   AbandonedCartValidationError,
@@ -25,6 +27,7 @@ type RouteDependencies = {
   processOrder?: (order: OrderRequest, options?: { clientContextHeader?: string; campaignClickId?: string; campaignReceipt?: string; analyticsSessionId?: string }) => Promise<OrderProcessResult>;
   campaignRedirectOptions?: CampaignRedirectOptions;
   processAbandonedCartCapture?: typeof processAbandonedCartCapture;
+  sendMeta?: typeof sendMetaEvents;
 };
 
 export async function registerRoutes(
@@ -34,7 +37,10 @@ export async function registerRoutes(
 ): Promise<Server> {
   const submitOrder = dependencies.processOrder ?? processOrder;
   const processCapture = dependencies.processAbandonedCartCapture ?? processAbandonedCartCapture;
+  const sendMeta = dependencies.sendMeta ?? sendMetaEvents;
   app.get('/go/:slug', createGoHandler({ ...dependencies.campaignRedirectOptions, local: true }));
+  // Locally there is no waitUntil; the send simply runs after the reply.
+  app.post("/api/storefront-signal", createSignalHandler({ send: sendMeta, schedule: () => {} }));
 
   app.post("/api/abandoned-carts", async (req, res, next) => {
     const { deviceId } = readOrCreateDeviceId(req, res);
@@ -79,6 +85,8 @@ export async function registerRoutes(
         res.status(202).json({ decision: "review", reviewId: "reviewId" in result ? result.reviewId : "" });
         return;
       }
+      // Same as api/orders.ts: Meta Purchase only for an order the Suite accepted, sent after the reply.
+      void sendMeta([buildPurchaseEvent(order, orderRef, req.headers, deviceId)]);
       res.status(201).json({ orderRef, decision: "allow" });
     } catch (error) {
       if (error instanceof z.ZodError) {

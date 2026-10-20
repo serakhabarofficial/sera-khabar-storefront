@@ -38,6 +38,8 @@ export type KalojiraOrderPayload = {
 
 export type KalojiraOrderConfirmation = {
   orderRef: string;
+  /** Catalog product id, so Meta's Purchase content_ids match the server event and the catalog. */
+  productId?: string;
   productName: string;
   variantLabel: string;
   quantity: number;
@@ -166,11 +168,13 @@ export function buildKalojiraOrderPayload(input: {
 
 export function buildKalojiraOrderConfirmation(
   orderRef: string,
-  payload: KalojiraOrderPayload,
+  payload: KalojiraOrderPayload & { items?: Array<{ productId: string }> },
 ): KalojiraOrderConfirmation {
   const totals = calculateKalojiraOrder(payload.bundlePrice / payload.quantity, payload.quantity, payload.deliveryCharge);
+  const productId = payload.items?.[0]?.productId.trim();
   return {
     orderRef: requiredTrimmedString(orderRef, 128, "Order reference"),
+    ...(productId ? { productId } : {}),
     productName: requiredTrimmedString(payload.bundleTitle, 200, "Product name"),
     variantLabel: requiredTrimmedString(payload.bundleDetails, 300, "Pack label"),
     ...totals,
@@ -186,6 +190,8 @@ function parseKalojiraOrderConfirmation(value: unknown): KalojiraOrderConfirmati
 
   try {
     const orderRef = requiredTrimmedString(confirmation.orderRef, 128, "Order reference");
+    const productId = typeof confirmation.productId === "string" && confirmation.productId.trim()
+      ? requiredTrimmedString(confirmation.productId, 120, "Product id") : undefined;
     const productName = requiredTrimmedString(confirmation.productName, 200, "Product name");
     const variantLabel = requiredTrimmedString(confirmation.variantLabel, 300, "Pack label");
     const quantity = confirmation.quantity;
@@ -209,6 +215,7 @@ function parseKalojiraOrderConfirmation(value: unknown): KalojiraOrderConfirmati
 
     return {
       orderRef,
+      ...(productId ? { productId } : {}),
       productName,
       variantLabel,
       quantity,

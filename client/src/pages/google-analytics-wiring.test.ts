@@ -8,6 +8,7 @@ const cartContext = readFileSync(new URL("../contexts/cart-context.tsx", import.
 const cartDrawer = readFileSync(new URL("../components/cart-drawer.tsx", import.meta.url), "utf8");
 const orderDialog = readFileSync(new URL("../components/order-dialog.tsx", import.meta.url), "utf8");
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
+const googleAnalytics = readFileSync(new URL("../lib/google-analytics.ts", import.meta.url), "utf8");
 const campaignCheckouts = [
   readFileSync(new URL("../features/sundarbans-honey/honey-checkout.tsx", import.meta.url), "utf8"),
   readFileSync(new URL("../features/kalojira-mixed/kalojira-checkout.tsx", import.meta.url), "utf8"),
@@ -47,10 +48,14 @@ test("order dialog sends begin_checkout and purchase after a successful order", 
   assert.doesNotMatch(orderDialog, /result\.order_id/);
 });
 
-test("ecommerce callers do not initialize direct Meta tracking", () => {
-  for (const source of [app, productPage, cartContext, orderDialog]) {
-    assert.doesNotMatch(source, /(?:@\/lib\/meta|initMetaPixel|trackMetaEvent|createEventId|metaEventId)/);
+test("Meta ecommerce events come only from the shared dataLayer helper", () => {
+  // Callers keep using trackGoogleEcommerceEvent; it mirrors each event to the Meta Pixel and the
+  // Conversions API, so no page wires Meta on its own. App.tsx only sends the per-route PageView.
+  for (const source of [productPage, cartContext, orderDialog, ...campaignCheckouts, ...campaignThankYouPages]) {
+    assert.doesNotMatch(source, /(?:@\/lib\/meta-pixel|fbq|trackMetaEcommerceEvent)/);
   }
+  assert.match(app, /trackMetaPageView\(\);/);
+  assert.match(googleAnalytics, /trackMetaEcommerceEvent\(payload\)/);
   assert.equal(existsSync(new URL("../lib/meta.ts", import.meta.url)), false);
 });
 

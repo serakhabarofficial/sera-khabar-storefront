@@ -86,7 +86,7 @@ export default function KalojiraMixedThankYouPage({
         address: confirmation.address,
       },
       items: [toGoogleAnalyticsItem({
-        id: confirmation.productName,
+        id: confirmation.productId ?? confirmation.productName,
         name: confirmation.productName,
         variant: confirmation.variantLabel,
         price: confirmation.unitPrice,
