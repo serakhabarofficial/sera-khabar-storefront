@@ -4,6 +4,8 @@ export const AMSOTTO_PATH = "/step/am-sotto-achar";
 export const AMSOTTO_THANK_YOU_PATH = "/step/am-sotto-achar/thank-you";
 export const AMSOTTO_CONFIRMATION_KEY = "am-sotto-achar-order-confirmation-v1";
 export const AMSOTTO_DELIVERY_CHARGE = 100;
+/** The hero's cream (`--cream`), also used for the page canvas and the mobile browser bars. */
+export const AMSOTTO_CANVAS = "#fff6e6";
 
 export const AMSOTTO_WHATSAPP_MESSAGE = "আমসত্ত্ব আচার অর্ডার করতে চাই";
 export const AMSOTTO_WHATSAPP_HREF = `https://wa.me/8801303103540?text=${encodeURIComponent(AMSOTTO_WHATSAPP_MESSAGE)}`;

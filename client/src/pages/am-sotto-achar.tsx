@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type MouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { resolveLandingCheckoutStatus } from "@/features/landing/checkout-state";
 import { getLandingPackOptions } from "@/features/landing/order";
@@ -9,7 +9,7 @@ import { TasteSpotlight } from "@/features/am-sotto-achar/taste-spotlight";
 import { RecipeMotion } from "@/features/am-sotto-achar/recipe-motion";
 import { AmsottoCheckout } from "@/features/am-sotto-achar/amsotto-checkout";
 import { AmsottoFooter } from "@/features/am-sotto-achar/footer";
-import { AMSOTTO_SLUG, reducedMotion, taka } from "@/features/am-sotto-achar/content";
+import { AMSOTTO_CANVAS, AMSOTTO_SLUG, reducedMotion, taka } from "@/features/am-sotto-achar/content";
 import "@/features/am-sotto-achar/am-sotto-achar.css";
 
 export default function AmSottoAcharPage() {
@@ -27,6 +27,21 @@ export default function AmSottoAcharPage() {
     root.current?.querySelector("#v1-order")?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
     clearTimeout(focusTimer.current);
     focusTimer.current = window.setTimeout(() => document.getElementById("amsotto-checkout-heading")?.focus({ preventScroll: true }), reducedMotion() ? 0 : 450);
+  }, []);
+  // Paint the canvas behind the page and the phone's browser bars in the hero's cream, so the
+  // status bar, overscroll and safe areas match the hero. Restored when leaving the landing.
+  useLayoutEffect(() => {
+    const html = document.documentElement, body = document.body;
+    const previous = [html.style.backgroundColor, body.style.backgroundColor];
+    html.style.backgroundColor = body.style.backgroundColor = AMSOTTO_CANVAS;
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const created = !meta, previousTheme = meta?.content;
+    if (!meta) { meta = document.createElement("meta"); meta.name = "theme-color"; document.head.append(meta); }
+    meta.content = AMSOTTO_CANVAS;
+    return () => {
+      [html.style.backgroundColor, body.style.backgroundColor] = previous;
+      if (created) meta!.remove(); else meta!.content = previousTheme ?? "";
+    };
   }, []);
   useEffect(() => {
     const el = root.current!, bar = el.querySelector<HTMLElement>(".v1-bar")!;
