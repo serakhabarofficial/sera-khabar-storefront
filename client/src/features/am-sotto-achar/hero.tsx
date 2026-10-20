@@ -52,7 +52,7 @@ export function AmsottoHero({ onOrderClick, price, packLabel }: {
       <div style={stagger(0)}><img className="v1-hero-logo" src={brandLogo} alt="সেরা খাবার" width={700} height={128} fetchPriority="high" /></div>
       <h1 style={stagger(1)}>আমসত্ত্ব<br />আচার</h1>
       <p className="v1-cycle" style={stagger(2)}>একটা কামড়ে <span className="v1-cycle-box" aria-live="off">{AMSOTTO_TASTES.map((t, i) => <span key={t.name} data-w={i} className={i === 0 ? "on" : undefined}>{t.name}</span>)}</span></p>
-      <p className="v1-lede" style={stagger(3)}>মিষ্টি, টক, হালকা ঝাল — খাঁটি বাঙালি আচার, এখন সরাসরি আপনার দরজায়।</p>
+      <p className="v1-lede" style={stagger(3)}>মিষ্টি, টক, হালকা ঝাল — হোমমেড শাহী আচার, এখন সরাসরি আপনার দরজায়।</p>
       <div className="v1-cta" style={stagger(4)}>
         <a className="v1-btn v1-btn-glow" href="#v1-order" onClick={onOrderClick}>এখনই অর্ডার করুন</a>
         <a className="v1-btn ghost" href={AMSOTTO_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer"><WhatsAppBrandIcon className="size-[18px]" /> WhatsApp</a>
