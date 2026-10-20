@@ -5,7 +5,7 @@ import { getLandingPackOptions } from "@/features/landing/order";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import { STOREFRONT_CATALOG_QUERY_OPTIONS, STOREFRONT_POLL_INTERVAL_MS, fetchStorefrontProduct, fetchStorefrontProductInventory, findGeneratedStorefrontProduct, mergeInventory } from "@/lib/storefront-products";
 import { AmsottoHero } from "@/features/am-sotto-achar/hero";
-import { TasteSpotlight } from "@/features/am-sotto-achar/taste-spotlight";
+import { TastePath } from "@/features/am-sotto-achar/taste-path";
 import { RecipeMotion } from "@/features/am-sotto-achar/recipe-motion";
 import { AmsottoCheckout } from "@/features/am-sotto-achar/amsotto-checkout";
 import { AmsottoFooter } from "@/features/am-sotto-achar/footer";
@@ -61,7 +61,7 @@ export default function AmSottoAcharPage() {
   return <div ref={root} className="amsotto">
     <main>
       <AmsottoHero onOrderClick={scrollToOrder} price={firstPack?.unitPrice} packLabel={firstPack?.label} />
-      <TasteSpotlight />
+      <TastePath />
       <RecipeMotion />
       <section className="v1-order" id="v1-order" aria-labelledby="amsotto-checkout-heading"><AmsottoCheckout product={product} status={status} productQuery={productQuery} inventoryQuery={inventoryQuery} onRetry={() => void Promise.all([productQuery.refetch(), inventoryQuery.refetch()])} /></section>
     </main>
