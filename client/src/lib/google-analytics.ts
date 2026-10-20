@@ -1,3 +1,5 @@
+import { readMetaCookies, trackMetaEcommerceEvent } from "./meta-pixel";
+
 export type GoogleEcommerceEventName =
   | "view_item"
   | "select_item"
@@ -65,6 +67,10 @@ export type GoogleEcommercePayload = {
   page_language: string;
   logged_in: false;
   customer_id: null;
+  /** The Meta event_id, so a later GTM Conversions API tag can deduplicate against the Pixel. */
+  event_id?: string;
+  fbp?: string;
+  fbc?: string;
   ecommerce: GoogleEcommerceData;
 };
 
@@ -73,6 +79,7 @@ export type GoogleAnalyticsWindow = {
   location?: Pick<Location, "href" | "pathname"> | URL;
   document?: {
     title?: string;
+    cookie?: string;
     documentElement?: { lang?: string };
   };
 };
@@ -192,6 +199,11 @@ export function trackGoogleEcommerceEvent(
     url: input.url ?? getCurrentUrl(browserTarget),
     language: input.language ?? getCurrentLanguage(browserTarget),
   });
+
+  // Every ecommerce event also goes to Meta (Pixel + Conversions API) under the same event_id.
+  const metaEventId = trackMetaEcommerceEvent(payload);
+  if (metaEventId) payload.event_id = metaEventId;
+  Object.assign(payload, readMetaCookies(browserTarget.document?.cookie));
 
   browserTarget.dataLayer = browserTarget.dataLayer || [];
   browserTarget.dataLayer.push(payload);

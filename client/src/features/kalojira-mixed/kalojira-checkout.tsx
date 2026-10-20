@@ -206,7 +206,7 @@ export function KalojiraCheckout({ product, status, productQuery, inventoryQuery
   };
 
   const analyticsItem = (pack: KalojiraPackOption, itemQuantity: number) => toGoogleAnalyticsItem({
-    id: pack.variantId,
+    id: product?.id ?? pack.variantId,
     name: product?.name ?? "",
     variant: pack.label,
     price: pack.unitPrice,

@@ -110,3 +110,19 @@ test("confirmation reader rejects a total that does not match subtotal plus deli
   }));
   assert.equal(readKalojiraOrderConfirmation(storage), null);
 });
+
+test("confirmation carries the catalog product id to the thank-you Purchase", () => {
+  const payload = buildKalojiraOrderPayload({
+    productName: "হোমমেড কুমড়ো বড়ি | Homemade Pumpkin Bori",
+    pack: { variantId: "v1kg", label: "১ কেজি", unitPrice: 600 },
+    quantity: 1,
+    customerName: "পরীক্ষা গ্রাহক",
+    phone: "01712345678",
+    address: "বাড়ি ১২ সাভার ঢাকা",
+  });
+  const confirmation = buildKalojiraOrderConfirmation("ORD-789", { ...payload, items: [{ productId: "prod-bori" }] });
+  assert.equal(confirmation.productId, "prod-bori");
+  const storage = createMemoryStorage();
+  assert.equal(writeKalojiraOrderConfirmation(storage, confirmation), true);
+  assert.equal(readKalojiraOrderConfirmation(storage)?.productId, "prod-bori");
+});

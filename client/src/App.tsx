@@ -25,6 +25,7 @@ import CollectionPage from "@/pages/collection";
 import SiteInformationPage from "@/pages/site-information";
 import { SITE_PAGES } from "@/lib/site-pages";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { trackMetaPageView } from "@/lib/meta-pixel";
 
 const CAMPAIGN_PAGE_TITLES: Record<string, string> = {
   "/step/sundarbans-natural-honey": "সুন্দরবনের প্রাকৃতিক মধু | সেরা খাবার",
@@ -148,6 +149,11 @@ function Router() {
     // The outgoing page is still fading out here, so scrolling now would make it jump.
     // The entering page applies this target before its first paint (see PageTransition).
     queueRouteScroll(targetY, isBack);
+  }, [location]);
+
+  // One Meta PageView per route, the first load included (index.html turns off the Pixel's own).
+  useEffect(() => {
+    trackMetaPageView();
   }, [location]);
 
   return (

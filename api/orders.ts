@@ -7,6 +7,8 @@ import { normalizeBdMobile } from "../shared/bd-phone.js";
 import { MAX_LINE_QUANTITY, MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.js";
 import { CAMPAIGN_CLICK_HEADER, CAMPAIGN_RECEIPT_HEADER, readCampaignClickCookie, readCampaignReceipt } from '../server/campaign-links.js';
 import { ANALYTICS_SESSION_HEADER, readAnalyticsSessionCookie } from '../server/analytics-session.js';
+import { waitUntil } from "@vercel/functions";
+import { buildPurchaseEvent, sendMetaEvents } from "../server/meta-capi.js";
 
 export { OrderProtectionError } from "../server/order-protection-errors.js";
 
@@ -78,6 +80,8 @@ type OrderServiceDependencies = {
 type OrderHandlerDependencies = {
   processOrder?: (order: OrderRequest, options?: { clientContextHeader?: string; campaignClickId?: string; campaignReceipt?: string; analyticsSessionId?: string }) => Promise<OrderProcessResult>;
   signContext?: typeof createSignedClientContext;
+  sendMeta?: typeof sendMetaEvents;
+  schedule?: (promise: Promise<unknown>) => void;
 };
 
 function byteLength(value: unknown) {
@@ -303,6 +307,8 @@ function sendJson(res: ServerResponse, statusCode: number, body: unknown) {
 
 export function createOrderHandler(dependencies: OrderHandlerDependencies = {}) {
   const submitOrder = dependencies.processOrder ?? processOrder;
+  const sendMeta = dependencies.sendMeta ?? sendMetaEvents;
+  const schedule = dependencies.schedule ?? waitUntil;
 
   return async function handler(
     req: IncomingMessage & { body?: unknown },
@@ -335,6 +341,8 @@ export function createOrderHandler(dependencies: OrderHandlerDependencies = {}) 
         sendJson(res, 202, { decision: "review", reviewId: "reviewId" in result ? result.reviewId : "" });
         return;
       }
+      // Meta Purchase only for an order the Suite accepted, sent after the reply so checkout never waits.
+      schedule(sendMeta([buildPurchaseEvent(order, orderRef, req.headers, deviceId)]));
       sendJson(res, 201, { orderRef, decision: "allow" });
     } catch (error) {
       if (error instanceof RequestBodyError) {

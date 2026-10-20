@@ -456,3 +456,45 @@ test("caps each line at 10 units with a WhatsApp message", () => {
   assert.equal(validateOrder(withQuantity(10)).items[0].quantity, 10);
   assert.throws(() => validateOrder(withQuantity(100)), { message: MAX_LINE_QUANTITY_MESSAGE });
 });
+
+test("an accepted order schedules one server-side Meta Purchase with hashed customer details", async () => {
+  const sent: unknown[][] = [];
+  const handler = createOrderHandler({
+    processOrder: async () => ({ orderRef: "ORD-77" }),
+    sendMeta: async (events) => { sent.push(events); return { ok: true }; },
+    schedule: () => {},
+  });
+  const req = createRequest(validOrder);
+  req.headers.cookie = "_fbp=fb.1.1.123";
+  req.headers.referer = "https://www.serakhabar.com/product/gur";
+  const { response, read } = createResponse();
+  await handler(req, response);
+
+  assert.equal(read().status, 201);
+  assert.equal(sent.length, 1);
+  const [event] = sent[0] as Array<Record<string, any>>;
+  assert.equal(event.event_name, "Purchase");
+  assert.equal(event.event_id, "purchase-ORD-77");
+  assert.equal(event.event_source_url, "https://www.serakhabar.com/product/gur");
+  assert.equal(event.custom_data.value, 1600);
+  assert.equal(event.custom_data.currency, "BDT");
+  assert.equal(event.custom_data.order_id, "ORD-77");
+  assert.deepEqual(event.custom_data.content_ids, [canonicalItems[0].productId]);
+  assert.equal(event.user_data.fbp, "fb.1.1.123");
+  assert.match(event.user_data.ph[0], /^[0-9a-f]{64}$/);
+  assert.equal(JSON.stringify(event).includes("01712345678"), false);
+  assert.equal(JSON.stringify(event).includes("Test Customer"), false);
+});
+
+test("a review hold sends no Meta Purchase", async () => {
+  const sent: unknown[] = [];
+  const handler = createOrderHandler({
+    processOrder: async () => ({ decision: "review", reviewId: "R-1" }),
+    sendMeta: async (events) => { sent.push(events); return { ok: true }; },
+    schedule: () => {},
+  });
+  const { response, read } = createResponse();
+  await handler(createRequest(validOrder), response);
+  assert.equal(read().status, 202);
+  assert.equal(sent.length, 0);
+});

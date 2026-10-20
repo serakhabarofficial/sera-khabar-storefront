@@ -72,9 +72,26 @@ the committed template.
 `VITE_`-prefixed values are compiled into public JavaScript and readable by anyone. Never move a
 secret behind a `VITE_` prefix, and never read `CUSTOM_ORDERS_API_KEY` from client code.
 
-No Google Tag Manager, GA4 or Meta Pixel is installed yet (Sera Khabar has none; the copied Mango Lover tags were removed). When added, the
-storefront emits only safe ecommerce `dataLayer` events; do not add direct analytics, Pixel, or CAPI
-configuration to this application.
+**Meta Pixel + Conversions API (approved 2026-10-20).** Pixel `1433713624268170` (`shared/meta.ts`,
+also in `client/index.html`). No Google Tag Manager or GA4 is installed. **Full guide and the
+new-landing-page checklist: `docs/meta-pixel-handoff.md` — read it before building any landing page,
+checkout or thank-you page.** In short: pages call `trackGoogleEcommerceEvent()` only and never `fbq`;
+a new landing gets PageView automatically and must send `view_item`, `begin_checkout` and (on its
+thank-you page) `purchase` with `transactionId: confirmation.orderRef`.
+
+- `trackGoogleEcommerceEvent` (`client/src/lib/google-analytics.ts`) pushes the ecommerce `dataLayer`
+  event and mirrors it to Meta through `client/src/lib/meta-pixel.ts`: `view_item` → ViewContent,
+  `add_to_cart` → AddToCart, `begin_checkout` → InitiateCheckout, `purchase` → Purchase. `App.tsx`
+  sends one PageView per route. Pages never call `fbq` themselves.
+- Each browser event also goes to `api/storefront-signal.ts` with the same `event_id`; that Vercel
+  function answers 204 and forwards it to the Conversions API in `waitUntil`. It accepts only
+  PageView/ViewContent/AddToCart/InitiateCheckout.
+- Purchase is sent server-side by `api/orders.ts` (and `server/routes.ts` locally) only after the
+  Suite accepts the order, with `event_id` `purchase-<orderRef>` and the customer's phone and name
+  SHA-256 hashed. The thank-you browser Purchase uses the same id, so Meta counts it once.
+- `META_CAPI_TOKEN` (server, **secret**) enables the server half; without it nothing is sent.
+  `META_TEST_EVENT_CODE` (server) routes events to Events Manager → Test Events while testing.
+  Never give either a `VITE_` prefix.
 
 Local dev points both URLs at `http://localhost:5002` (the Suite's dev port). The dev script loads
 `.env` with Node's `--env-file-if-exists`; there is deliberately no `dotenv` dependency, and the
@@ -300,6 +317,7 @@ to a system font — Hind Siliguri or Anek Bangla would fix it.
 npm run check                                    # tsc, no emit
 node --test client/src/pages/home.test.ts
 node --test client/src/lib/storefront-products.test.ts
+npx tsx --test client/src/lib/meta-coverage.test.ts client/src/lib/meta-pixel.test.ts server/meta-capi.test.ts api/storefront-signal.test.ts
 npm run build
 ```
 
@@ -345,6 +363,10 @@ file you edited is actually the one being rendered.
     after a build for unexpected generated-catalog changes.
 11. **Do not create real orders in the dashboard for testing** without saying so and cleaning up after.
 12. **Currency is `৳`**, never "BDT" or "Tk".
+13. **Every landing page is Meta-tracked through `trackGoogleEcommerceEvent()`** — follow the checklist
+    in `docs/meta-pixel-handoff.md`, name files `features/<name>/*-checkout.tsx` and
+    `pages/<name>-thank-you.tsx`, and keep `client/src/lib/meta-coverage.test.ts` passing. Never call
+    `fbq` or the Graph API outside `client/src/lib/meta-pixel.ts` / `server/meta-capi.ts`.
 
 ---
 
