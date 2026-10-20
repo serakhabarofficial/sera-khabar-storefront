@@ -63,30 +63,23 @@ function RollingTotal({ total }: { total: number | null }) {
   return <span ref={ref} className="v1-roll" />;
 }
 
-// Product-page photos first: a snap carousel where the next photo peeks in, so swiping is obvious.
-// The catalog photos are square, so slides stay 1:1 and are never cropped.
+// The product page's gallery: a full-width snap strip with round thumbnails in a cream capsule.
+// The landing leads with the in-hand photos, so the catalog order is reversed here.
 function MemoGallery({ product }: { product: StorefrontProduct | null }) {
   const rail = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const photos = useMemo(() => {
     if (!product) return [];
     const srcSets = buildProductSrcSetIndex(product);
-    return getProductGallery(product).map((src) => ({ src, srcSet: srcSets[src] }));
+    return getProductGallery(product).reverse().map((src) => ({ src, srcSet: srcSets[src] }));
   }, [product]);
-  useEffect(() => {
-    const node = rail.current;
-    if (!node) return;
-    const slides = Array.from(node.children);
-    const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) setActive(slides.indexOf(e.target)); }), { root: node, threshold: 0.6 });
-    slides.forEach((slide) => io.observe(slide));
-    return () => io.disconnect();
-  }, [photos]);
+  const goTo = (i: number) => { const node = rail.current; node?.scrollTo({ left: i * node.clientWidth, behavior: reducedMotion() ? "auto" : "smooth" }); };
   if (!photos.length) return null;
   return <div className="v1-gal">
-    <div ref={rail} className="v1-gal-rail" role="region" aria-label="আমসত্ত্ব আচারের ছবি" tabIndex={0}>
-      {photos.map((photo, i) => <div key={photo.src} className="v1-gal-slide"><img src={photo.src} srcSet={photo.srcSet} sizes="(min-width: 860px) 440px, 80vw" alt={`আমসত্ত্ব আচার, ছবি ${bn(i + 1)}`} width={960} height={960} loading={i ? "lazy" : undefined} draggable={false} /></div>)}
+    <div ref={rail} className="v1-gal-rail" role="region" aria-label="আমসত্ত্ব আচারের ছবি" tabIndex={0} onScroll={(e) => setActive(Math.round(e.currentTarget.scrollLeft / Math.max(e.currentTarget.clientWidth, 1)))}>
+      {photos.map((photo, i) => <div key={photo.src} className="v1-gal-slide"><img src={photo.src} srcSet={photo.srcSet} sizes="(min-width: 860px) 480px, 90vw" alt={`আমসত্ত্ব আচার, ছবি ${bn(i + 1)}`} width={960} height={960} loading={i < 3 ? "eager" : "lazy"} fetchPriority={i ? "low" : undefined} decoding="async" draggable={false} /></div>)}
     </div>
-    {photos.length > 1 && <div className="v1-gal-bar" aria-hidden="true">{photos.map((photo, i) => <i key={photo.src} data-on={i === active} />)}</div>}
+    {photos.length > 1 && <div className="v1-gal-capsule">{photos.map((photo, i) => <button key={photo.src} type="button" onClick={() => goTo(i)} aria-label={`ছবি ${bn(i + 1)}`} aria-current={active === i}><img src={photo.src} srcSet={photo.srcSet} sizes="38px" alt="" width={38} height={38} draggable={false} decoding="async" /></button>)}</div>}
   </div>;
 }
 
@@ -223,20 +216,22 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
         <div className="skx-paper-head"><img src="/home/leaf-mark.webp" alt="" width={48} height={48} /><div><h2 id="amsotto-checkout-heading" tabIndex={-1}>অর্ডার মেমো</h2><p>সেরা খাবার · রাজশাহী</p></div><span className="skx-serial" aria-hidden="true">খাতা নং<br /><b>০১</b></span></div>
         <div className="skx-order" onFocusCapture={beginCheckout}>
           <MemoGallery product={product} />
-          <div className="v1-memo-title"><h3>আমসত্ত্ব আচার</h3><span>রাজশাহীর আমে তৈরি</span></div>
-          <div className="skx-label-row"><span>প্যাক বেছে নিন</span><span>{bn(quantity)} প্যাক</span></div>
+          <h3 className="v1-memo-title">আমসত্ত্ব আচার</h3>
           <div className="v1-memo-packs" id="amsotto-packs" role="radiogroup" aria-label="প্যাক সাইজ" tabIndex={-1} aria-describedby={errors.pack ? "amsotto-pack-error" : undefined}>
-            {packs.map((pack) => <label key={pack.variantId} className="v1-memo-pack" data-checked={variantId === pack.variantId}>
-              <input className="sr-only" type="radio" name="pack" value={pack.variantId} checked={variantId === pack.variantId} disabled={status !== "ready" || pending} onChange={() => { beginCheckout(); setVariantId(pack.variantId); setErrors((current) => ({ ...current, pack: undefined })); trackGoogleEcommerceEvent("select_item", { pageType: "product", value: pack.unitPrice, items: [analyticsItem(pack, quantity)] }); }} />
-              <span className="dot" aria-hidden="true" /><span className="lbl">{pack.label}<small>{AMSOTTO_PACK_META[pack.label]?.note}</small></span><span className="pr">{status === "ready" ? taka(pack.unitPrice) : "—"}{status === "ready" && pack.unitPrice === Number(product?.price) && Number(product?.compare_at_price) > pack.unitPrice ? <s>{taka(Number(product?.compare_at_price))}</s> : null}</span>
-            </label>)}
+            {packs.map((pack) => { const checked = variantId === pack.variantId; return <div key={pack.variantId} className="v1-memo-pack" data-checked={checked}>
+              <label>
+                <input className="sr-only" type="radio" name="pack" value={pack.variantId} checked={checked} disabled={status !== "ready" || pending} onChange={() => { beginCheckout(); setVariantId(pack.variantId); setErrors((current) => ({ ...current, pack: undefined })); trackGoogleEcommerceEvent("select_item", { pageType: "product", value: pack.unitPrice, items: [analyticsItem(pack, quantity)] }); }} />
+                <span className="dot" aria-hidden="true" /><span className="lbl">{pack.label}<small>{AMSOTTO_PACK_META[pack.label]?.note}</small></span>
+              </label>
+              <div className="end">
+                <span className="pr">{status === "ready" ? taka(pack.unitPrice) : "—"}{status === "ready" && pack.unitPrice === Number(product?.price) && Number(product?.compare_at_price) > pack.unitPrice ? <s>{taka(Number(product?.compare_at_price))}</s> : null}</span>
+                {checked && <div className="skx-qty" role="group" aria-label={`${pack.label} পরিমাণ`}><button type="button" aria-label="কমান" disabled={quantity <= 1 || pending || status !== "ready"} onClick={() => { beginCheckout(); setQuantity((n) => Math.max(1, n - 1)); }}>−</button><output aria-live="polite">{bn(quantity)}</output><button type="button" aria-label="বাড়ান" disabled={quantity >= MAX_LINE_QUANTITY || pending || status !== "ready"} onClick={() => { beginCheckout(); setQuantity((n) => Math.min(MAX_LINE_QUANTITY, n + 1)); }}>+</button></div>}
+              </div>
+            </div>; })}
           </div>
           {errors.pack && <span id="amsotto-pack-error" className="skx-field-error" role="alert">{errors.pack}</span>}
           {recovery && <div className="v1-recovery"><p role="status">{status === "loading" ? "অর্ডারের তথ্য লোড হচ্ছে…" : AVAILABILITY_ERROR}</p><button type="button" onClick={onRetry}>আবার চেষ্টা করুন</button><SupportActions /></div>}
-          <div className="v1-memo-sum" role="group" aria-label="আপনার অর্ডার">
-            <div className="v1-memo-sum-qty"><small aria-hidden="true">পরিমাণ</small><div className="skx-qty" role="group" aria-label="আমসত্ত্ব আচার পরিমাণ"><button type="button" aria-label="কমান" disabled={quantity <= 1 || pending || status !== "ready"} onClick={() => { beginCheckout(); setQuantity((n) => Math.max(1, n - 1)); }}>−</button><output aria-live="polite">{bn(quantity)}</output><button type="button" aria-label="বাড়ান" disabled={quantity >= MAX_LINE_QUANTITY || pending || status !== "ready"} onClick={() => { beginCheckout(); setQuantity((n) => Math.min(MAX_LINE_QUANTITY, n + 1)); }}>+</button></div></div>
-            <div className="v1-memo-sum-total"><small>মোট (ডেলিভারি ছাড়া)</small><strong>{money(subtotal)}</strong></div>
-          </div>
+          <div className="v1-memo-sum"><span>মোট <small>(ডেলিভারি ছাড়া)</small></span><strong><RollingTotal total={subtotal} /></strong></div>
         </div>
         <form className="skx-form" noValidate onSubmit={handleSubmit} onFocusCapture={(e) => { beginCheckout(); formHandlers.onFocusCapture(e); }} onPasteCapture={formHandlers.onPasteCapture} onBlurCapture={flushCapture}>
           <input name="hp_x7" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="absolute -left-[9999px] h-px w-px opacity-0" />
