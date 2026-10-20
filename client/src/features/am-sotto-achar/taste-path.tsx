@@ -6,8 +6,9 @@ const TasteIconPlayer = lazy(loadPlayer);
 
 // "Path" (approved 2026-10-20): one bite in order, ১ → ২ → ৩. A mango ribbon draws through the three
 // stops once the section is in view; the page scrolls normally (no pinning), and each stop leads with a
-// picture and one big word so it reads without much reading. The badges are small Remotion loops that
-// play only while the section is on screen; the still drawing shows until then and for reduced motion.
+// picture and one big word so it reads without much reading. Each taste rests on a clay plate as a
+// small Remotion loop that plays only while the section is on screen; the still drawing shows until
+// then and for reduced motion.
 const stagger = (i: number) => ({ "--i": i } as CSSProperties);
 
 export function TastePath() {
@@ -35,7 +36,7 @@ export function TastePath() {
       </svg>
       <img className="tp-bowl tp-rv" style={stagger(0)} src={AMSOTTO_BITE_A_IMAGE} alt="বাটিতে আমসত্ত্ব আচার" width={900} height={750} loading="lazy" decoding="async" />
       <ol className="tp-stops">{T.map((t, i) => <li key={t.name} className="tp-stop tp-rv" data-side={i === 1 ? "right" : "left"} style={stagger(i * 3 + 2)}>
-        <span className="tp-badge" aria-hidden="true"><span className="tp-icon">{ready ? <Suspense fallback={<TasteArt icon={t.icon} ink={t.ink} />}><TasteIconPlayer icon={t.icon} ink={t.ink} playing={visible} offset={i * 20} /></Suspense> : <TasteArt icon={t.icon} ink={t.ink} />}</span><b style={{ background: t.ink }}>{bn(i + 1)}</b></span>
+        <span className="tp-badge" aria-hidden="true"><span className="tp-icon">{ready ? <Suspense fallback={<TasteArt icon={t.icon} />}><TasteIconPlayer icon={t.icon} playing={visible} offset={i * 30} /></Suspense> : <TasteArt icon={t.icon} />}</span><b style={{ background: t.ink }}>{bn(i + 1)}</b></span>
         <div><small>{t.step}</small><span className="tp-word" style={{ color: t.ink }}>{t.name}</span><p>{t.line}</p></div>
       </li>)}</ol>
     </div>
