@@ -4,9 +4,7 @@ import test from "node:test";
 
 const checkoutSources = [
   ["main cart checkout", new URL("./components/order-dialog.tsx", import.meta.url), null],
-  ["Sundarbans Honey checkout", new URL("./features/sundarbans-honey/honey-checkout.tsx", import.meta.url), "অসম্পূর্ণ চেকআউটের তথ্য"],
-  ["Kalojira Mixed checkout", new URL("./features/kalojira-mixed/kalojira-checkout.tsx", import.meta.url), "অসম্পূর্ণ চেকআউটের তথ্য"],
-  ["Honey Nut checkout", new URL("./features/honey-nut/honey-nut-checkout.tsx", import.meta.url), "অসম্পূর্ণ চেকআউটের তথ্য"],
+  ["landing kit checkout", new URL("./features/landing/landing-checkout.tsx", import.meta.url), "অসম্পূর্ণ চেকআউটের তথ্য"],
 ] as const;
 
 test("all checkout surfaces capture valid-phone drafts without coupling them to analytics", () => {

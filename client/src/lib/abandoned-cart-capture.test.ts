@@ -39,7 +39,7 @@ test("creates one draft key after a valid BD phone and reuses it for newer snaps
   const storage = new MemoryStorage();
   const requests: unknown[] = [];
   const capture = createAbandonedCartCapture({
-    source: "sundarbans_honey",
+    source: "kalojira_mixed",
     storage,
     debounceMs: 0,
     createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
@@ -57,8 +57,8 @@ test("creates one draft key after a valid BD phone and reuses it for newer snaps
   assert.equal(requests.length, 1);
   assert.deepEqual(requests[0], {
     ...snapshot,
-    source: "sundarbans_honey",
-    sourcePath: "/step/sundarbans-natural-honey",
+    source: "kalojira_mixed",
+    sourcePath: "/step/kalojira-mixed",
     draftKey: "7cb13b8e-b576-4faa-b238-cc8b73059772",
     items: [{ ...snapshot.items[0], quantity: 2 }],
     subtotal: 1500,
@@ -66,7 +66,7 @@ test("creates one draft key after a valid BD phone and reuses it for newer snaps
   });
 
   const resumedCapture = createAbandonedCartCapture({
-    source: "sundarbans_honey",
+    source: "kalojira_mixed",
     storage,
     createDraftKey: () => "should-not-be-used",
     fetchImpl: async () => new Response(null, { status: 202 }),
@@ -85,7 +85,7 @@ test("finalizes a closed checkout before rotating the next draft key", async () 
   const requests: Array<{ draftKey: string }> = [];
   let nextDraftKey = 0;
   const capture = createAbandonedCartCapture({
-    source: "sundarbans_honey",
+    source: "kalojira_mixed",
     storage,
     debounceMs: 0,
     createDraftKey: () => draftKeys[nextDraftKey++] ?? null,
@@ -110,7 +110,7 @@ test("posts the final snapshot after an in-flight update before rotating its dra
   const requests: Array<{ items: Array<{ quantity: number }> }> = [];
   let resolveFirstRequest: (() => void) | null = null;
   const capture = createAbandonedCartCapture({
-    source: "sundarbans_honey",
+    source: "kalojira_mixed",
     storage: new MemoryStorage(),
     debounceMs: 0,
     createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
@@ -141,7 +141,7 @@ test("does not repost an unchanged snapshot while finalizing an in-flight captur
   let requests = 0;
   let resolveRequest: (() => void) | null = null;
   const capture = createAbandonedCartCapture({
-    source: "honey_nut",
+    source: "kalojira_mixed",
     storage: new MemoryStorage(),
     debounceMs: 0,
     createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
@@ -168,7 +168,7 @@ test("retries an unchanged snapshot when its in-flight capture fails during fina
   let requests = 0;
   let resolveRequest: (() => void) | null = null;
   const capture = createAbandonedCartCapture({
-    source: "honey_nut",
+    source: "kalojira_mixed",
     storage: new MemoryStorage(),
     debounceMs: 0,
     createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
@@ -220,7 +220,7 @@ test("falls back to memory when session storage is unavailable and clears its dr
     removeItem: () => { throw new Error("blocked"); },
   };
   const capture = createAbandonedCartCapture({
-    source: "honey_nut",
+    source: "kalojira_mixed",
     storage: unavailableStorage,
     createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
     fetchImpl: async () => new Response(null, { status: 202 }),

@@ -61,6 +61,17 @@ test("only the confirmed legacy template product paths rewrite to the 410 handle
   }
 });
 
+test("retired Mango Lover landing pages answer 410 instead of the SPA shell", () => {
+  for (const landing of ["sundarbans-natural-honey", "honey-nut", "kalojira-mixed"]) {
+    for (const path of [`/step/${landing}`, `/step/${landing}/thank-you`]) {
+      assert.ok(
+        config.rewrites.some((rewrite) => rewrite.source === path && rewrite.destination === "/api/legacy-gone"),
+        `expected legacy rewrite for ${path}`,
+      );
+    }
+  }
+});
+
 test("HTML shell and generated product pages are never stored by browser caches", () => {
   const htmlHeaders = config.headers.find(
     (entry) => entry.source === "/((?!api(?:/|$)|assets(?:/|$)|.*\\.[^/]+$).*)",

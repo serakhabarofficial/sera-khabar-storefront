@@ -9,10 +9,9 @@ import { test } from "node:test";
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const indexCss = readFileSync(new URL("./index.css", import.meta.url), "utf8");
 const posterCss = readFileSync(new URL("./poster.css", import.meta.url), "utf8");
-const honeyCss = readFileSync(new URL("./features/honey-nut/campaign.css", import.meta.url), "utf8");
-const kalojiraCss = readFileSync(new URL("./features/kalojira-mixed/campaign.css", import.meta.url), "utf8");
+const landingCss = readFileSync(new URL("./features/landing/campaign.css", import.meta.url), "utf8");
 
-const styles = { "index.css": indexCss, "poster.css": posterCss, "honey-nut/campaign.css": honeyCss, "kalojira-mixed/campaign.css": kalojiraCss };
+const styles = { "index.css": indexCss, "poster.css": posterCss, "landing/campaign.css": landingCss };
 
 test("Geist is the only Latin face loaded from the network", () => {
   // The variable range is required: rules such as .skc-title and .sko-title ask for
@@ -84,6 +83,4 @@ function posterSource_numeralRules() {
 test("poster and campaign roots lead with Geist and keep Noto Serif Bengali behind it", () => {
   assert.match(posterCss, /\.sk \{[^}]*font-family: "Geist", "Noto Serif Bengali", serif;/);
   assert.match(posterCss, /\.skp \{[^}]*font-family: "Geist", "Noto Serif Bengali", serif;/);
-  assert.match(honeyCss, /\.honey-nut-page \{[^}]*font-family: "Geist", "Noto Serif Bengali", system-ui, serif;/);
-  assert.match(kalojiraCss, /\.kalojira-mixed-page \{[^}]*font-family: "Geist", "Noto Serif Bengali", system-ui, serif;/);
 });

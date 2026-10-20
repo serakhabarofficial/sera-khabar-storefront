@@ -3,9 +3,9 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const pageSource = readFileSync(new URL("./katimon-mango.tsx", import.meta.url), "utf8");
-const checkoutSource = readFileSync(new URL("../features/kalojira-mixed/kalojira-checkout.tsx", import.meta.url), "utf8");
-const mobileOrderBarSource = readFileSync(new URL("../features/kalojira-mixed/mobile-order-bar.tsx", import.meta.url), "utf8");
-const contentSource = readFileSync(new URL("../features/kalojira-mixed/katimon-content.ts", import.meta.url), "utf8");
+const checkoutSource = readFileSync(new URL("../features/landing/landing-checkout.tsx", import.meta.url), "utf8");
+const mobileOrderBarSource = readFileSync(new URL("../features/landing/mobile-order-bar.tsx", import.meta.url), "utf8");
+const contentSource = readFileSync(new URL("../features/landing/katimon-content.ts", import.meta.url), "utf8");
 const globalCssSource = readFileSync(new URL("../index.css", import.meta.url), "utf8");
 
 test("Katimon WhatsApp href uses the exact Bengali order message", () => {
@@ -15,10 +15,10 @@ test("Katimon WhatsApp href uses the exact Bengali order message", () => {
 });
 
 test("Katimon header, hero, footer, and checkout use the Katimon WhatsApp href", () => {
-  assert.match(pageSource, /const KALOJIRA_CAMPAIGN_WHATSAPP_HREF = KATIMON_CAMPAIGN_WHATSAPP_HREF/);
+  assert.doesNotMatch(pageSource, /LANDING_WHATSAPP_HREF/);
   assert.match(pageSource, /window\.open\(KATIMON_CAMPAIGN_WHATSAPP_HREF, "_blank"/);
-  assert.match(pageSource, /KALOJIRA_CAMPAIGN_WHATSAPP_HREF[^\n]*WhatsAppBrandIcon/);
-  assert.match(checkoutSource, /product\?\.slug === "katimon-mango" \? KATIMON_CAMPAIGN_WHATSAPP_HREF/);
+  assert.match(pageSource, /href=\{KATIMON_CAMPAIGN_WHATSAPP_HREF\}[^\n]*WhatsAppBrandIcon/);
+  assert.match(pageSource, /<LandingCheckout [^>]*whatsappHref=\{KATIMON_CAMPAIGN_WHATSAPP_HREF\}/);
   assert.match(checkoutSource, /function SupportActions\(\{ whatsappHref \}/);
   assert.doesNotMatch(checkoutSource, /placement=/);
   assert.match(checkoutSource, /href=\{whatsappHref\}/);
@@ -67,11 +67,11 @@ test("the Katimon page has a single homepage-style entrance reveal", () => {
 });
 
 test("the checkout heading focus does not show a browser outline after scrolling", () => {
-  assert.match(checkoutSource, /id="kalojira-checkout-heading" className="[^"]*focus:outline-none[^"]*"/);
+  assert.match(checkoutSource, /id="landing-checkout-heading" className="[^"]*focus:outline-none[^"]*"/);
 });
 
 test("the checkout heading stays centered and on one line on mobile", () => {
-  assert.match(checkoutSource, /id="kalojira-checkout-heading" className="[^"]*whitespace-nowrap[^"]*text-center[^"]*text-xl[^"]*sm:text-2xl sm:text-left[^"]*"/);
+  assert.match(checkoutSource, /id="landing-checkout-heading" className="[^"]*whitespace-nowrap[^"]*text-center[^"]*text-xl[^"]*sm:text-2xl sm:text-left[^"]*"/);
 });
 
 test("the checkout supporting copy stays centered on mobile without an outside delivery badge", () => {
@@ -88,9 +88,9 @@ test("the payment note and order confirmation message center on mobile", () => {
 test("checkout form controls use compact four-pixel corners", () => {
   assert.match(checkoutSource, /className="relative flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-\[4px\] border/);
   assert.match(checkoutSource, /<div className="flex w-fit items-center overflow-hidden rounded-\[4px\] border/);
-  assert.match(checkoutSource, /id="kalojira-name"[\s\S]*className="min-h-11 w-full rounded-\[4px\] border/);
-  assert.match(checkoutSource, /id="kalojira-phone"[\s\S]*className="min-h-11 w-full rounded-\[4px\] border/);
-  assert.match(checkoutSource, /id="kalojira-address"[\s\S]*className="min-h-24 w-full rounded-\[4px\] border/);
+  assert.match(checkoutSource, /id="landing-name"[\s\S]*className="min-h-11 w-full rounded-\[4px\] border/);
+  assert.match(checkoutSource, /id="landing-phone"[\s\S]*className="min-h-11 w-full rounded-\[4px\] border/);
+  assert.match(checkoutSource, /id="landing-address"[\s\S]*className="min-h-24 w-full rounded-\[4px\] border/);
 });
 
 test("availability recovery uses the brand WhatsApp icon and compact button corners", () => {
@@ -142,9 +142,17 @@ test("the Katimon footer credits Arc Labs with the emblem", () => {
 });
 
 test("the Katimon page reuses the mobile order dock with its checkout target", () => {
-  assert.match(pageSource, /import \{ MobileOrderBar \} from "@\/features\/kalojira-mixed\/mobile-order-bar";/);
+  assert.match(pageSource, /import \{ MobileOrderBar \} from "@\/features\/landing\/mobile-order-bar";/);
   assert.match(pageSource, /<MobileOrderBar checkoutId="order" whatsappHref=\{KATIMON_CAMPAIGN_WHATSAPP_HREF\}/);
-  assert.match(mobileOrderBarSource, /checkoutId = "kalojira-checkout"/);
+  assert.match(mobileOrderBarSource, /checkoutId = "landing-checkout"/);
   assert.match(mobileOrderBarSource, /const target = document\.getElementById\(checkoutId\)/);
   assert.match(mobileOrderBarSource, /href=\{whatsappHref\}/);
+});
+
+test("Katimon orders land on the Katimon thank-you page", () => {
+  const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
+  assert.match(pageSource, /<LandingCheckout [^>]*thankYouPath="\/step\/katimon-mango\/thank-you"/);
+  assert.match(appSource, /<Route path="\/step\/katimon-mango\/thank-you">\s*<PageTransition standalone><LandingThankYouPage backHref="\/step\/katimon-mango" backLabel="কাটিমন আম অর্ডার পেজে ফিরে যান" whatsappHref=\{KATIMON_CAMPAIGN_WHATSAPP_HREF\} \/>/);
+  assert.ok(appSource.indexOf('path="/step/katimon-mango/thank-you"') < appSource.indexOf('path="/step/katimon-mango"'), "specific route first");
+  assert.match(appSource, /"\/step\/katimon-mango\/thank-you": "কাটিমন আম অর্ডারের জন্য ধন্যবাদ \| সেরা খাবার"/);
 });

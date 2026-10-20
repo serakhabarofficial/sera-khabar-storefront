@@ -32,9 +32,7 @@ test("persists one opaque client session id per browser session", () => {
 test("adds the challenge and honeypot to every checkout surface", () => {
     for (const file of [
       "client/src/components/order-dialog.tsx",
-      "client/src/features/sundarbans-honey/honey-checkout.tsx",
-      "client/src/features/kalojira-mixed/kalojira-checkout.tsx",
-      "client/src/features/honey-nut/honey-nut-checkout.tsx",
+      "client/src/features/landing/landing-checkout.tsx",
     ]) {
       const source = readFileSync(resolve(process.cwd(), file), "utf8");
       assert.ok(source.includes("TurnstileChallenge"));

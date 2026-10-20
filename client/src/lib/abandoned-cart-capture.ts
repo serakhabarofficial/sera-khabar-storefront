@@ -2,9 +2,9 @@ import { normalizeBdMobile } from "../../../shared/bd-phone";
 
 export const ABANDONED_CART_SOURCE_PATHS = {
   storefront: "/checkout",
-  sundarbans_honey: "/step/sundarbans-natural-honey",
+  // Historical name kept on purpose: the Merchant Suite's abandoned_checkouts check constraint pairs
+  // "kalojira_mixed" with this path, and the বড়ি and কাটিমন আম landings record carts under it.
   kalojira_mixed: "/step/kalojira-mixed",
-  honey_nut: "/step/honey-nut",
 } as const;
 
 export type AbandonedCartSource = keyof typeof ABANDONED_CART_SOURCE_PATHS;

@@ -12,15 +12,11 @@ import Home from "@/pages/home";
 import ProductPage from "@/pages/product";
 import ProductsPage from "@/pages/products";
 import BookingPage from "@/pages/booking";
-import SundarbansHoneyPage from "@/pages/sundarbans-honey";
-import SundarbansHoneyThankYouPage from "@/pages/sundarbans-honey-thank-you";
-import KalojiraMixedPage from "@/pages/kalojira-mixed";
-import KalojiraMixedThankYouPage from "@/pages/kalojira-mixed-thank-you";
-import HoneyNutPage from "@/pages/honey-nut";
-import HoneyNutThankYouPage from "@/pages/honey-nut-thank-you";
+import LandingThankYouPage from "@/pages/landing-thank-you";
 import KatimonMangoPage from "@/pages/katimon-mango";
 import HomemadePumpkinBoriPage from "@/pages/homemade-pumpkin-bori";
-import { BORI_CAMPAIGN_WHATSAPP_HREF } from "@/features/kalojira-mixed/bori-content";
+import { BORI_CAMPAIGN_WHATSAPP_HREF } from "@/features/landing/bori-content";
+import { KATIMON_CAMPAIGN_WHATSAPP_HREF } from "@/features/landing/katimon-content";
 import CollectionPage from "@/pages/collection";
 import SiteInformationPage from "@/pages/site-information";
 import { SITE_PAGES } from "@/lib/site-pages";
@@ -28,13 +24,8 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { trackMetaPageView } from "@/lib/meta-pixel";
 
 const CAMPAIGN_PAGE_TITLES: Record<string, string> = {
-  "/step/sundarbans-natural-honey": "সুন্দরবনের প্রাকৃতিক মধু | সেরা খাবার",
-  "/step/sundarbans-natural-honey/thank-you": "অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
-  "/step/kalojira-mixed": "কালোজিরা মিক্সড | সেরা খাবার",
-  "/step/kalojira-mixed/thank-you": "কালোজিরা মিক্সড অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
-  "/step/honey-nut": "হানি নাট | সেরা খাবার",
-  "/step/honey-nut/thank-you": "হানি নাট অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
   "/step/katimon-mango": "কাটিমন আম | সেরা খাবার",
+  "/step/katimon-mango/thank-you": "কাটিমন আম অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
   "/step/homemade-pumpkin-bori": "কুমড়ো বড়ি | সেরা খাবার",
   "/step/homemade-pumpkin-bori/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
 };
@@ -162,29 +153,14 @@ function Router() {
       {/* Settle: the old page fades out completely, then the new one fades in. */}
       <AnimatePresence mode="wait">
         <Switch location={location} key={location}>
-          <Route path="/step/sundarbans-natural-honey/thank-you">
-            <PageTransition standalone><SundarbansHoneyThankYouPage /></PageTransition>
-          </Route>
-          <Route path="/step/sundarbans-natural-honey">
-            <PageTransition standalone><SundarbansHoneyPage /></PageTransition>
-          </Route>
-          <Route path="/step/kalojira-mixed/thank-you">
-            <PageTransition standalone><KalojiraMixedThankYouPage /></PageTransition>
-          </Route>
-          <Route path="/step/kalojira-mixed">
-            <PageTransition standalone><KalojiraMixedPage /></PageTransition>
-          </Route>
-          <Route path="/step/honey-nut/thank-you">
-            <PageTransition standalone><HoneyNutThankYouPage /></PageTransition>
-          </Route>
-          <Route path="/step/honey-nut">
-            <PageTransition standalone><HoneyNutPage /></PageTransition>
+          <Route path="/step/katimon-mango/thank-you">
+            <PageTransition standalone><LandingThankYouPage backHref="/step/katimon-mango" backLabel="কাটিমন আম অর্ডার পেজে ফিরে যান" whatsappHref={KATIMON_CAMPAIGN_WHATSAPP_HREF} /></PageTransition>
           </Route>
           <Route path="/step/katimon-mango">
             <PageTransition standalone><KatimonMangoPage /></PageTransition>
           </Route>
           <Route path="/step/homemade-pumpkin-bori/thank-you">
-            <PageTransition standalone><KalojiraMixedThankYouPage backHref="/step/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref={BORI_CAMPAIGN_WHATSAPP_HREF} /></PageTransition>
+            <PageTransition standalone><LandingThankYouPage backHref="/step/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref={BORI_CAMPAIGN_WHATSAPP_HREF} /></PageTransition>
           </Route>
           <Route path="/step/homemade-pumpkin-bori">
             <PageTransition standalone><HomemadePumpkinBoriPage /></PageTransition>

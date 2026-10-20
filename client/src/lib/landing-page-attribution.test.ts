@@ -5,9 +5,7 @@ import { currentLandingPagePath, normalizeLandingPagePath } from "./landing-page
 
 test("normalizes current landing page paths", () => {
   assert.equal(normalizeLandingPagePath("/step/katimon-mango/"), "/step/katimon-mango");
-  assert.equal(normalizeLandingPagePath("/step/honey-nut?utm_campaign=summer#checkout"), "/step/honey-nut");
-  assert.equal(normalizeLandingPagePath("/step/sundarbans-natural-honey"), "/step/sundarbans-natural-honey");
-  assert.equal(normalizeLandingPagePath("/step/kalojira-mixed"), "/step/kalojira-mixed");
+  assert.equal(normalizeLandingPagePath("/step/homemade-pumpkin-bori?utm_campaign=summer#checkout"), "/step/homemade-pumpkin-bori");
 });
 
 test("rejects non-landing and unsafe paths", () => {
@@ -44,9 +42,7 @@ test("reads the browser pathname when available", () => {
 
 test("all landing-page checkouts include the attribution field", () => {
   const checkoutSources = [
-    new URL("../features/kalojira-mixed/kalojira-checkout.tsx", import.meta.url),
-    new URL("../features/sundarbans-honey/honey-checkout.tsx", import.meta.url),
-    new URL("../features/honey-nut/honey-nut-checkout.tsx", import.meta.url),
+    new URL("../features/landing/landing-checkout.tsx", import.meta.url),
   ];
 
   for (const sourceUrl of checkoutSources) {
