@@ -105,8 +105,12 @@
 .amsotto .v1-memo .skx-paper-head h2 { font-size:35px; font-weight:900; line-height:1.35; }
 .amsotto .v1-memo .skx-qty button:disabled { cursor:default; }
 .amsotto .v1-memo .skx-order { padding:0; background:none; box-shadow:none; }
+/* Squarer memo: inputs and cards at 8–10px instead of the shared checkout's 13–16px. */
+.amsotto .v1-memo .skx-field input, .amsotto .v1-memo .skx-field textarea { border-radius:8px; }
+.amsotto .v1-memo .skx-pay-note, .amsotto .v1-memo .skx-error { border-radius:10px; }
+.amsotto .v1-memo .skx-combo-list { border-radius:10px; }
 /* Same gallery as the product page: square snap strip, round thumbnails in a cream capsule. */
-.amsotto .v1-gal { position:relative; border-radius:24px; overflow:hidden; background:#fff; box-shadow:0 0 0 1px #3f1a0b10; }
+.amsotto .v1-gal { position:relative; border-radius:12px; overflow:hidden; background:#fff; box-shadow:0 0 0 1px #3f1a0b10; }
 .amsotto .v1-gal-rail { display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; scrollbar-width:none; border-radius:inherit; }
 .amsotto .v1-gal-rail::-webkit-scrollbar { display:none; }
 .amsotto .v1-gal-rail:focus-visible { outline:2px solid var(--royal); outline-offset:-2px; }
@@ -118,7 +122,7 @@
 .amsotto .v1-gal-capsule img { display:block; width:100%; height:100%; object-fit:cover; }
 .amsotto .v1-memo-title { margin:18px 0 10px; font-family:var(--display); font-size:21px; font-weight:800; color:var(--ink); }
 /* একসাথে: one list; the chosen pack carries its own quantity. */
-.amsotto .v1-memo-packs { position:relative; border-radius:16px; background:#fff; overflow:hidden; }
+.amsotto .v1-memo-packs { position:relative; border-radius:10px; background:#fff; overflow:hidden; }
 .amsotto .v1-memo-packs::after { content:""; position:absolute; inset:0; z-index:2; border-radius:inherit; box-shadow:inset 0 0 0 1px var(--line); pointer-events:none; }
 .amsotto .v1-memo-pack { position:relative; display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; min-height:72px; padding:12px 14px; transition:background-color 220ms ease; }
 .amsotto .v1-memo-pack + .v1-memo-pack { border-top:1px solid var(--line); }
@@ -154,7 +158,7 @@
 .amsotto .v1-bar.show { transform:none; }
 .amsotto .v1-bar p { flex:1; margin:0; font-size:13px; line-height:1.3; }
 .amsotto .v1-bar p b { display:block; font-size:16px; }
-.amsotto .fv { display:flex; flex-direction:column; align-items:center; gap:16px; padding:28px 16px calc(96px + env(safe-area-inset-bottom,0px)); }
+.amsotto .fv { display:flex; flex-direction:column; align-items:center; gap:16px; padding:28px 16px calc(24px + env(safe-area-inset-bottom,0px)); }
 .amsotto .fv-copy { margin:0; font-size:11.5px; line-height:1.6; color:var(--sub); text-align:center; }
 .amsotto .fv-pol { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 14px; font-size:11px; color:var(--sub); }
 .amsotto .fv-pol a { color:inherit; text-decoration:none; }
@@ -219,7 +223,7 @@
   .amsotto .v1-recipe-lede { margin-left:0; font-size:18px; }
   .amsotto .v1-recipe-media { max-width:520px; }
   .amsotto .v1-bar { display:none; }
-  .amsotto .fv { padding-bottom:32px; }
+  .amsotto .fv { padding-bottom:28px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .amsotto *, .amsotto *::before, .amsotto *::after { animation-duration:1ms!important; animation-iteration-count:1!important; transition-property:opacity,color,background-color,border-color!important; scroll-behavior:auto!important; }
