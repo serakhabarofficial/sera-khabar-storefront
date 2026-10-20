@@ -64,14 +64,16 @@ function RollingTotal({ total }: { total: number | null }) {
 }
 
 // The product page's gallery: a full-width snap strip with round thumbnails in a cream capsule.
-// The landing leads with the in-hand photos, so the catalog order is reversed here.
+// The landing leads with the in-hand photos: catalog 2nd, then 3rd, then 1st (the white-background shot).
 function MemoGallery({ product }: { product: StorefrontProduct | null }) {
   const rail = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const photos = useMemo(() => {
     if (!product) return [];
     const srcSets = buildProductSrcSetIndex(product);
-    return getProductGallery(product).reverse().map((src) => ({ src, srcSet: srcSets[src] }));
+    const gallery = getProductGallery(product);
+    const ordered = gallery.length > 2 ? [gallery[1], gallery[2], gallery[0], ...gallery.slice(3)] : [...gallery].reverse();
+    return ordered.map((src) => ({ src, srcSet: srcSets[src] }));
   }, [product]);
   const goTo = (i: number) => { const node = rail.current; node?.scrollTo({ left: i * node.clientWidth, behavior: reducedMotion() ? "auto" : "smooth" }); };
   if (!photos.length) return null;
