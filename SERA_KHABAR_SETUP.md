@@ -59,7 +59,7 @@ Sera Khabar Supabase ref, the domain, the brand name and logo, and GTM/GA4 IDs (
 | `client/index.html` | GTM `GTM-5KKTRHFD`, title/OG tags "ম্যাংগো লাভার - Mango Lover", `www.mangolover.com.bd` | Sera Khabar GTM (or remove), brand, domain |
 | `client/src/App.tsx:28-36`, `client/src/components/layout.tsx` (~532, 672, 718), `api/legacy-gone.ts:9` | Bangla brand name ম্যাংগো লাভার | Sera Khabar brand |
 | `client/src/lib/generated-storefront-products.ts` | **generated snapshot of Mango Lover's products** | regenerate from Sera Khabar's Suite at build time, or empty it |
-| `client/src/features/*` (e.g. `kalojira-mixed/bori-content.ts`) and curated product/landing content | Mango Lover-specific products, images, pages | remove or replace with Sera Khabar content |
+| `client/src/features/*` (e.g. `landing/bori-content.ts`) and curated product/landing content | Mango Lover-specific products, images, pages | remove or replace with Sera Khabar content |
 | `.env.example` | Mango Lover workspace id `3cd26e57-…` | Sera Khabar values |
 | `public/` / `client/public/` | logos, favicon, OG images | Sera Khabar branding |
 | `CLAUDE.md`, `README.md` | Mango Lover docs, Vercel project `mangoloverbd`, Supabase ref | Sera Khabar |

@@ -70,41 +70,71 @@ Never give either a `VITE_` prefix. The Pixel ID is public and lives in code, no
 
 ## Checklist: a new landing page
 
-Landing pages live at `/step/<name>` (see the existing `honey-nut`, `kalojira-mixed`,
-`sundarbans-honey`, `katimon-mango`, `homemade-pumpkin-bori`).
+Landing pages live at `/step/<name>`. Live today: `/step/homemade-pumpkin-bori` (কুমড়ো বড়ি) and
+`/step/katimon-mango` (কাটিমন আম). Both run on the **landing kit** in `client/src/features/landing/`:
 
-1. **Route** — register `/step/<name>` (and `/step/<name>/thank-you`) in `client/src/App.tsx` inside
-   the existing `<Switch>`. PageView is then automatic. Nothing else to add for PageView.
-2. **Names** — the checkout component must be `client/src/features/<name>/<something>-checkout.tsx` and
-   the thank-you page `client/src/pages/<name>-thank-you.tsx`. The guard test finds them by these names.
-   If you reuse an existing checkout (as `katimon-mango` and `homemade-pumpkin-bori` reuse
-   `KalojiraCheckout`), it is already tracked.
-3. **ViewContent** — when the product is shown:
-   `trackGoogleEcommerceEvent("view_item", { pageType: "product", value, items })`.
-4. **InitiateCheckout** — when the customer starts the order form:
-   `trackGoogleEcommerceEvent("begin_checkout", { pageType: "checkout", value, items })`.
-5. **AddToCart** — only if the page has a cart button; the shared cart context already sends it.
-6. **Items** — build them with `toGoogleAnalyticsItem({ id, name, category, variant, price, quantity })`.
-   Use the **product id** from the catalog as `id` (not the product name), so browser and server
-   `content_ids` match and catalog ads work.
-7. **Order** — POST through `/api/orders` (never straight to the Suite). That is what sends the server
-   Purchase. Send `items` with the real `productId`s.
-8. **Purchase** — on the thank-you page, once per order (use a sessionStorage marker like
-   `features/honey-nut/tracking.ts`):
-   ```ts
-   trackGoogleEcommerceEvent("purchase", {
-     pageType: "thank_you",
-     transactionId: confirmation.orderRef,   // must be the Suite's orderRef: it is the dedup key
-     value: confirmation.total,              // product total + delivery
-     shipping: confirmation.deliveryCharge,
-     affiliation: "", tax: 0, coupon: "",
-     customer: { name: confirmation.customerName, phone: confirmation.phone, address: confirmation.address },
-     items: [toGoogleAnalyticsItem({ … })],
-   });
+| Kit file | What it gives you |
+|---|---|
+| `landing-checkout.tsx` → `LandingCheckout` | Pack picker, COD form, order POST, ViewContent + InitiateCheckout already wired |
+| `pages/landing-thank-you.tsx` → `LandingThankYouPage` | Order summary + Purchase (with `orderRef` and product id) already wired |
+| `mobile-order-bar.tsx`, `whatsapp-switch.tsx`, `campaign-layout.tsx` (`WhatsAppBrandIcon`) | Shared chrome |
+| `content.ts` | Support phone + fallback WhatsApp link |
+| `order.ts`, `checkout-state.ts`, `tracking.ts` | Totals, validation, confirmation storage, one-Purchase-per-order marker |
+
+**Start from the kit — then Meta tracking needs no extra code:**
+
+1. **Page** — copy `client/src/pages/katimon-mango.tsx` (or `homemade-pumpkin-bori.tsx`) to
+   `client/src/pages/<name>.tsx` and change the content. Put landing-specific constants in
+   `client/src/features/landing/<name>-content.ts` (like `katimon-content.ts`), including its own
+   WhatsApp link.
+2. **Checkout** — render
+   `<LandingCheckout product={product} status={status} productQuery={productQuery} inventoryQuery={inventoryQuery} thankYouPath="/step/<name>/thank-you" whatsappHref={<NAME>_CAMPAIGN_WHATSAPP_HREF} deliveryCharge={100} onRetry={…} />`.
+3. **Routes** — in `client/src/App.tsx`, add the thank-you route **before** the landing route, plus
+   both titles in `CAMPAIGN_PAGE_TITLES`:
+   ```tsx
+   <Route path="/step/<name>/thank-you">
+     <PageTransition standalone><LandingThankYouPage backHref="/step/<name>" backLabel="… অর্ডার পেজে ফিরে যান" whatsappHref={<NAME>_CAMPAIGN_WHATSAPP_HREF} /></PageTransition>
+   </Route>
+   <Route path="/step/<name>">
+     <PageTransition standalone><NamePage /></PageTransition>
+   </Route>
    ```
-   Never fire Purchase for a `decision: "review"` (held) order — there is no `orderRef`.
-9. **Verify** — `npx tsx --test client/src/lib/meta-coverage.test.ts client/src/lib/meta-pixel.test.ts`,
+   PageView is automatic for every route.
+4. **Product** — the product must exist and be published in the Merchant Suite. Never hardcode it.
+5. **Verify** — `npx tsx --test client/src/lib/meta-coverage.test.ts client/src/lib/meta-pixel.test.ts`,
    `npm run check`, then the live check below.
+
+Do not change the abandoned-cart source `"kalojira_mixed"` used by the kit. It is a historical name the
+Merchant Suite database requires (paired with `/step/kalojira-mixed`); every kit landing records carts
+under it.
+
+### Only if you build a checkout outside the kit
+
+The guard test finds custom checkouts as `client/src/features/<name>/<something>-checkout.tsx` and
+thank-you pages as `client/src/pages/<name>-thank-you.tsx`, so use those names. Then:
+
+- **ViewContent** — `trackGoogleEcommerceEvent("view_item", { pageType: "product", value, items })`.
+- **InitiateCheckout** — `trackGoogleEcommerceEvent("begin_checkout", { pageType: "checkout", value, items })`
+  when the customer starts the form.
+- **AddToCart** — only if the page has a cart button; the shared cart context already sends it.
+- **Items** — `toGoogleAnalyticsItem({ id, name, category, variant, price, quantity })` with the catalog
+  **product id** as `id`, so browser and server `content_ids` match.
+- **Order** — POST through `/api/orders` (never straight to the Suite) with real `productId`s; that sends
+  the server Purchase.
+- **Purchase** — on the thank-you page, once per order (sessionStorage marker like
+  `features/landing/tracking.ts`):
+  ```ts
+  trackGoogleEcommerceEvent("purchase", {
+    pageType: "thank_you",
+    transactionId: confirmation.orderRef,   // must be the Suite's orderRef: it is the dedup key
+    value: confirmation.total,              // product total + delivery
+    shipping: confirmation.deliveryCharge,
+    affiliation: "", tax: 0, coupon: "",
+    customer: { name: confirmation.customerName, phone: confirmation.phone, address: confirmation.address },
+    items: [toGoogleAnalyticsItem({ … })],
+  });
+  ```
+  Never fire Purchase for a `decision: "review"` (held) order — there is no `orderRef`.
 
 ## Live check (after deploy)
 

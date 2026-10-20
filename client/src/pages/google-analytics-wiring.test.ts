@@ -10,14 +10,10 @@ const orderDialog = readFileSync(new URL("../components/order-dialog.tsx", impor
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 const googleAnalytics = readFileSync(new URL("../lib/google-analytics.ts", import.meta.url), "utf8");
 const campaignCheckouts = [
-  readFileSync(new URL("../features/sundarbans-honey/honey-checkout.tsx", import.meta.url), "utf8"),
-  readFileSync(new URL("../features/kalojira-mixed/kalojira-checkout.tsx", import.meta.url), "utf8"),
-  readFileSync(new URL("../features/honey-nut/honey-nut-checkout.tsx", import.meta.url), "utf8"),
+  readFileSync(new URL("../features/landing/landing-checkout.tsx", import.meta.url), "utf8"),
 ];
 const campaignThankYouPages = [
-  readFileSync(new URL("./sundarbans-honey-thank-you.tsx", import.meta.url), "utf8"),
-  readFileSync(new URL("./kalojira-mixed-thank-you.tsx", import.meta.url), "utf8"),
-  readFileSync(new URL("./honey-nut-thank-you.tsx", import.meta.url), "utf8"),
+  readFileSync(new URL("./landing-thank-you.tsx", import.meta.url), "utf8"),
 ];
 
 test("product page sends view_item and direct checkout item metadata", () => {

@@ -6,8 +6,9 @@ const read = (path: string) => {
   const url = new URL(path, import.meta.url);
   return existsSync(url) ? readFileSync(url, "utf8") : "";
 };
-const contentSource = read("../features/kalojira-mixed/bori-content.ts");
-const checkoutSource = read("../features/kalojira-mixed/kalojira-checkout.tsx");
+const contentSource = read("../features/landing/bori-content.ts");
+const pageSource = read("./homemade-pumpkin-bori.tsx");
+const checkoutSource = read("../features/landing/landing-checkout.tsx");
 
 test("bori WhatsApp href uses the exact Bengali order message", () => {
   assert.match(contentSource, /হোমমেড কুমড়ো বড়ি \| Homemade Pumpkin Bori অর্ডার করতে চাই/);
@@ -20,13 +21,11 @@ test("bori image slots are named constants", () => {
   }
 });
 
-test("shared checkout uses the bori WhatsApp href for the bori product", () => {
-  assert.match(checkoutSource, /import \{ BORI_CAMPAIGN_WHATSAPP_HREF \} from "\.\/bori-content";/);
-  assert.match(checkoutSource, /product\?\.slug === "homemade-pumpkin-bori" \? BORI_CAMPAIGN_WHATSAPP_HREF/);
-  assert.match(checkoutSource, /product\?\.slug === "katimon-mango" \? KATIMON_CAMPAIGN_WHATSAPP_HREF/);
+test("the bori page hands the landing checkout its WhatsApp href and thank-you route", () => {
+  assert.match(checkoutSource, /whatsappHref = LANDING_WHATSAPP_HREF/);
+  assert.match(pageSource, /<LandingCheckout [^>]*thankYouPath="\/step\/homemade-pumpkin-bori\/thank-you" whatsappHref=\{BORI_CAMPAIGN_WHATSAPP_HREF\}/);
 });
 
-const pageSource = read("./homemade-pumpkin-bori.tsx");
 const appSource = read("../App.tsx");
 
 test("bori route and title are registered", () => {
@@ -67,7 +66,7 @@ test("bori order CTAs scroll to checkout", () => {
 });
 
 test("bori WhatsApp href encodes the exact message", async () => {
-  const { BORI_CAMPAIGN_WHATSAPP_HREF } = await import("../features/kalojira-mixed/bori-content.ts");
+  const { BORI_CAMPAIGN_WHATSAPP_HREF } = await import("../features/landing/bori-content.ts");
   assert.equal(BORI_CAMPAIGN_WHATSAPP_HREF, `https://wa.me/8801303103540?text=${encodeURIComponent("হোমমেড কুমড়ো বড়ি | Homemade Pumpkin Bori অর্ডার করতে চাই")}`);
 });
 
@@ -89,10 +88,10 @@ test("bori cooking time is 5–7 minutes everywhere on the page", () => {
   assert.ok((pageSource.match(/৫–৭ মিনিট/g) ?? []).length >= 1, "timeline step");
 });
 
-const cookingPathSource = read("../features/kalojira-mixed/bori-cooking-path.tsx");
+const cookingPathSource = read("../features/landing/bori-cooking-path.tsx");
 
 test("cooking timeline is a winding path on mobile and desktop", () => {
-  assert.match(pageSource, /import \{ BoriCookingPath \} from "@\/features\/kalojira-mixed\/bori-cooking-path";/);
+  assert.match(pageSource, /import \{ BoriCookingPath \} from "@\/features\/landing\/bori-cooking-path";/);
   assert.match(pageSource, /<BoriCookingPath steps=\{COOKING_STEPS\} \/>/);
   assert.doesNotMatch(pageSource, /<ol className="relative/, "old desktop list removed");
   assert.match(cookingPathSource, /className="mx-auto max-w-\[480px\] lg:hidden"/);
@@ -127,7 +126,7 @@ test("bori header uses option B on mobile and desktop", () => {
   assert.equal((header.match(/href=\{BORI_CAMPAIGN_WHATSAPP_HREF\}/g) ?? []).length, 1, "one WhatsApp icon in header");
   assert.match(header, /<button type="button" onClick=\{scrollToOrder\} className="inline-flex min-h-10 items-center rounded-\[6px\] bg-\[#eab308\][^"]*md:px-6 md:text-\[15px\]">অর্ডার করুন<\/button>/);
   assert.doesNotMatch(header, /bg-\[#25d366\] px-4/, "old green mobile pill removed");
-  assert.doesNotMatch(header, /KALOJIRA_CAMPAIGN_PHONE_HREF/);
+  assert.doesNotMatch(header, /LANDING_PHONE_HREF/);
   assert.match(header, /className="h-7 w-auto max-\[400px\]:h-6 max-\[340px\]:h-5 md:h-9"/);
   assert.match(header, /px-4 text-\[13px\] max-\[400px\]:px-3 max-\[400px\]:text-xs/);
 });
@@ -157,18 +156,18 @@ test("bori quote card speaks as the nutritionist, not a recipe", () => {
   assert.doesNotMatch(pageSource, /কুমড়ো বড়ি অল্প তেলে হালকা ভেজে/);
 });
 
-const thankYouSource = read("./kalojira-mixed-thank-you.tsx");
+const thankYouSource = read("./landing-thank-you.tsx");
 
 test("bori orders land on the bori thank-you page", () => {
-  assert.match(checkoutSource, /const thankYouPath = product\?\.slug === "homemade-pumpkin-bori" \? "\/step\/homemade-pumpkin-bori\/thank-you" : "\/step\/kalojira-mixed\/thank-you";/);
+  assert.match(pageSource, /thankYouPath="\/step\/homemade-pumpkin-bori\/thank-you"/);
   assert.match(checkoutSource, /setLocation\(thankYouPath\)/);
-  assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori\/thank-you">\s*<PageTransition standalone><KalojiraMixedThankYouPage backHref="\/step\/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref=\{BORI_CAMPAIGN_WHATSAPP_HREF\} \/><\/PageTransition>\s*<\/Route>\s*<Route path="\/step\/homemade-pumpkin-bori">/);
+  assert.match(appSource, /<Route path="\/step\/homemade-pumpkin-bori\/thank-you">\s*<PageTransition standalone><LandingThankYouPage backHref="\/step\/homemade-pumpkin-bori" backLabel="কুমড়ো বড়ি অর্ডার পেজে ফিরে যান" whatsappHref=\{BORI_CAMPAIGN_WHATSAPP_HREF\} \/><\/PageTransition>\s*<\/Route>\s*<Route path="\/step\/homemade-pumpkin-bori">/);
   assert.match(appSource, /"\/step\/homemade-pumpkin-bori\/thank-you": "কুমড়ো বড়ি অর্ডারের জন্য ধন্যবাদ \| সেরা খাবার"/);
   assert.match(thankYouSource, /<Link href=\{backHref\}/);
   assert.match(thankYouSource, /href=\{whatsappHref\}/);
 });
 
-const switchSource = read("../features/kalojira-mixed/whatsapp-switch.tsx");
+const switchSource = read("../features/landing/whatsapp-switch.tsx");
 
 test("header WhatsApp switch slides on tap and by drag before opening WhatsApp", () => {
   assert.match(switchSource, /drag="x"/);

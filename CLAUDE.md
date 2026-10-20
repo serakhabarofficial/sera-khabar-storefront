@@ -76,8 +76,8 @@ secret behind a `VITE_` prefix, and never read `CUSTOM_ORDERS_API_KEY` from clie
 also in `client/index.html`). No Google Tag Manager or GA4 is installed. **Full guide and the
 new-landing-page checklist: `docs/meta-pixel-handoff.md` — read it before building any landing page,
 checkout or thank-you page.** In short: pages call `trackGoogleEcommerceEvent()` only and never `fbq`;
-a new landing gets PageView automatically and must send `view_item`, `begin_checkout` and (on its
-thank-you page) `purchase` with `transactionId: confirmation.orderRef`.
+a new landing starts from the landing kit (`client/src/features/landing/`), which already sends
+`view_item`, `begin_checkout` and (on its thank-you page) `purchase` with `transactionId: confirmation.orderRef`.
 
 - `trackGoogleEcommerceEvent` (`client/src/lib/google-analytics.ts`) pushes the ecommerce `dataLayer`
   event and mirrors it to Meta through `client/src/lib/meta-pixel.ts`: `view_item` → ViewContent,
@@ -363,10 +363,13 @@ file you edited is actually the one being rendered.
     after a build for unexpected generated-catalog changes.
 11. **Do not create real orders in the dashboard for testing** without saying so and cleaning up after.
 12. **Currency is `৳`**, never "BDT" or "Tk".
-13. **Every landing page is Meta-tracked through `trackGoogleEcommerceEvent()`** — follow the checklist
-    in `docs/meta-pixel-handoff.md`, name files `features/<name>/*-checkout.tsx` and
-    `pages/<name>-thank-you.tsx`, and keep `client/src/lib/meta-coverage.test.ts` passing. Never call
-    `fbq` or the Graph API outside `client/src/lib/meta-pixel.ts` / `server/meta-capi.ts`.
+13. **Build every new landing page from the landing kit** (`client/src/features/landing/`:
+    `LandingCheckout` + `LandingThankYouPage`) following `docs/meta-pixel-handoff.md`; the kit already
+    sends Meta ViewContent, InitiateCheckout and Purchase. Live landings: `/step/homemade-pumpkin-bori`,
+    `/step/katimon-mango`. Keep `client/src/lib/meta-coverage.test.ts` passing, and never call `fbq` or
+    the Graph API outside `client/src/lib/meta-pixel.ts` / `server/meta-capi.ts`. The retired Mango
+    Lover landings (`/step/sundarbans-natural-honey`, `/step/honey-nut`, `/step/kalojira-mixed`) answer
+    410 through `/api/legacy-gone`; do not bring them back.
 
 ---
 

@@ -10,16 +10,14 @@ const CAPTURE_TIMEOUT_MS = 5_000;
 
 const sourcePaths = {
   storefront: "/checkout",
-  sundarbans_honey: "/step/sundarbans-natural-honey",
+  // Historical name kept on purpose: the Merchant Suite's abandoned_checkouts check constraint pairs
+  // "kalojira_mixed" with this path, and the বড়ি and কাটিমন আম landings record carts under it.
   kalojira_mixed: "/step/kalojira-mixed",
-  honey_nut: "/step/honey-nut",
 } as const;
 
 const sourceSchema = z.enum([
   "storefront",
-  "sundarbans_honey",
   "kalojira_mixed",
-  "honey_nut",
 ]);
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

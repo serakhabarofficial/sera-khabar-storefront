@@ -8,8 +8,8 @@ const testHeaderValue = ["fixture", "token"].join("-");
 
 const validCapture = {
   draftKey: "7cb13b8e-b576-4faa-b238-cc8b73059772",
-  source: "sundarbans_honey",
-  sourcePath: "/step/sundarbans-natural-honey",
+  source: "kalojira_mixed",
+  sourcePath: "/step/kalojira-mixed",
   customerName: "Test Customer",
   phone: "01712345678",
   address: "House 1 Road 2 Dhaka",

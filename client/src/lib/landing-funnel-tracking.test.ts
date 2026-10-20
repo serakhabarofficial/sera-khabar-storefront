@@ -5,9 +5,7 @@ import test from "node:test";
 // Landing-page checkouts must report the same funnel steps to Merchant Suite
 // as the order dialog, or their orders never show as checkout/purchase visits.
 const checkouts = [
-  "../features/kalojira-mixed/kalojira-checkout.tsx",
-  "../features/honey-nut/honey-nut-checkout.tsx",
-  "../features/sundarbans-honey/honey-checkout.tsx",
+  "../features/landing/landing-checkout.tsx",
 ];
 
 for (const path of checkouts) {
