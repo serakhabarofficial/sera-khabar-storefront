@@ -1,4 +1,4 @@
-// আমসত্ত্ব আচার landing (approved 2026-10-20, "Taste": Fade hero, Spotlight taste, Remotion recipe, Quiet footer).
+// আমসত্ত্ব আচার landing (approved 2026-10-20, "Taste": Fade hero, Path taste, Remotion recipe, Quiet footer).
 export const AMSOTTO_SLUG = "mango-leather-pickle";
 export const AMSOTTO_PATH = "/step/am-sotto-achar";
 export const AMSOTTO_THANK_YOU_PATH = "/step/am-sotto-achar/thank-you";
@@ -17,7 +17,6 @@ export const AMSOTTO_CREDIT_HREF = "https://www.arc-bangladesh.com/";
 const IMG = "/step/am-sotto-achar";
 export const AMSOTTO_HERO_IMAGE = `${IMG}/amsotto-hero-v1.webp`;
 export const AMSOTTO_BITE_A_IMAGE = `${IMG}/amsotto-bite-a-v1.webp`;
-export const AMSOTTO_BITE_B_IMAGE = `${IMG}/amsotto-bite-b-v1.webp`;
 export const AMSOTTO_BOWL_IMAGE = `${IMG}/amsotto-bowl-v1.webp`;
 
 /** Editorial notes only; all prices, including comparison prices, come from the catalog. */
@@ -27,9 +26,9 @@ export const AMSOTTO_PACK_META: Record<string, { note: string }> = {
 };
 
 export const AMSOTTO_TASTES = [
-  { name: "টক", step: "প্রথম কামড়", title: "তীব্র টক", line: "পাকা আমের আমসত্ত্ব। প্রথম ছোঁয়াতেই জিভ জেগে ওঠে।", ink: "#a67c00", glow: "#f5c518" },
-  { name: "ঝাল", step: "তারপর", title: "হালকা ঝাঁজ", line: "সরিষার তেল আর শুকনো মরিচ। ঝাল আছে, চোখে জল আনে না।", ink: "#c7361c", glow: "#ff6a3d" },
-  { name: "মিষ্টি", step: "শেষে", title: "গুড়ের আভাস", line: "শেষে গুড়ের হালকা মিষ্টি। তাই একটা টুকরোয় থামা যায় না।", ink: "#8a3b12", glow: "#eaa25f" },
+  { name: "টক", step: "প্রথম কামড়", title: "তীব্র টক", line: "পাকা আমের আমসত্ত্ব। প্রথম ছোঁয়াতেই জিভ জেগে ওঠে।", ink: "#a67c00", icon: "sour" },
+  { name: "ঝাল", step: "তারপর", title: "হালকা ঝাঁজ", line: "সরিষার তেল আর শুকনো মরিচ। ঝাল আছে, চোখে জল আনে না।", ink: "#c7361c", icon: "chili" },
+  { name: "মিষ্টি", step: "শেষে", title: "গুড়ের আভাস", line: "শেষে গুড়ের হালকা মিষ্টি। তাই একটা টুকরোয় থামা যায় না।", ink: "#8a3b12", icon: "sweet" },
 ] as const;
 
 /** Bangla digits, no thousands separator (the landing's price style). */

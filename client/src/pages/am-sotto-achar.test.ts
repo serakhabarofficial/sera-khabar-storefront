@@ -13,7 +13,7 @@ test("আমসত্ত্ব landing and separate thank-you routes are registe
   assert.match(app, /আমসত্ত্ব আচার \| সেরা খাবার/);
 });
 test("landing uses the live product and inventory API with the approved sections", () => {
-  for (const name of ["fetchStorefrontProduct", "fetchStorefrontProductInventory", "mergeInventory", "STOREFRONT_POLL_INTERVAL_MS", "AmsottoHero", "TasteSpotlight", "RecipeMotion", "AmsottoCheckout", "AmsottoFooter"]) assert.ok(page.includes(name), name);
+  for (const name of ["fetchStorefrontProduct", "fetchStorefrontProductInventory", "mergeInventory", "STOREFRONT_POLL_INTERVAL_MS", "AmsottoHero", "TastePath", "RecipeMotion", "AmsottoCheckout", "AmsottoFooter"]) assert.ok(page.includes(name), name);
 });
 test("memo checkout validates live availability and uses the shared protection and capture", () => {
   for (const name of ["validateCheckout", "composeDeliveryAddress", "PlaceCombobox", "PaperClip", "buildProtectionPayload", "TurnstileChallenge", "useAbandonedCartCapture", "productQuery.refetch()", "inventoryQuery.refetch()", "freshInventoryVariant.stock_quantity", "MAX_LINE_QUANTITY", "normalizeBdMobile"]) assert.ok(checkout.includes(name), name);

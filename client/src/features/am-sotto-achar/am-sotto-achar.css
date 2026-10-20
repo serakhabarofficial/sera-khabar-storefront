@@ -72,75 +72,28 @@
 .amsotto .hv-fade .hv-img { -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 42%,#000 84%,transparent 100%),linear-gradient(to right,transparent 0%,#000 12%,#000 88%,transparent 100%); -webkit-mask-composite:source-in; mask-image:linear-gradient(to bottom,transparent 0%,#000 42%,#000 84%,transparent 100%),linear-gradient(to right,transparent 0%,#000 12%,#000 88%,transparent 100%); mask-composite:intersect; }
 .amsotto .v1-sec { max-width:1120px; margin:0 auto; padding:32px 18px; }
 .amsotto .v1-kicker { margin:1em 0; text-align:center; font-size:12px; font-weight:800; letter-spacing:.02em; color:var(--chili); }
-.amsotto .v1-sec h2, .amsotto .tv-card h2 { margin:8px 0 0; text-align:center; font-family:"Noto Serif Bengali",serif; font-weight:900; font-size:clamp(28px,7vw,44px); line-height:1.2; text-wrap:balance; }
-.amsotto .tv-sr { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; margin:0; padding:0; }
-.amsotto [data-bowl] img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; will-change:transform,opacity; }
-.amsotto [data-bowl] { position:absolute; inset:0; will-change:transform; opacity:0; scale:.94; transition:opacity 600ms var(--ease-out),scale 700ms var(--ease-out); }
-.amsotto [data-bowl][data-ready] { opacity:1; scale:1; }
-/* একটা কামড়, তিনটে অনুভূতি — "Gentle": a CSS scroll timeline drives the pinned card (no per-frame JS).
-   Tastes rest at 0–14%, 43–57% and 86–100% of the pinned run; the changes between are soft crossfades. */
-.amsotto .tv-track { position:relative; height:175svh; view-timeline-name:--amsotto-taste; view-timeline-axis:block; }
-.amsotto .tv-pin { position:sticky; top:max(10px, calc((100svh - var(--pin-h, 0px)) / 2)); display:flex; padding:0 10px; }
-.amsotto .tv-card { position:relative; flex:1; display:flex; flex-direction:column; justify-content:center; width:100%; max-width:1100px; margin:0 auto; padding:28px 18px; border-radius:32px; }
-.amsotto .tvs .tv-card { background:var(--paper); box-shadow:inset 0 0 0 1px #3f1a0b14; text-align:center; }
-.amsotto .tvs-stage { position:relative; height:clamp(190px,36svh,420px); margin-top:10px; }
-.amsotto .tvs-glow { position:absolute; inset:14% 20%; border-radius:50%; background-color:#f5c518; opacity:.38; filter:blur(36px); }
-.amsotto .tvs-words, .amsotto .tvs-lines { display:grid; }
-.amsotto .tvs-words > *, .amsotto .tvs-lines > * { grid-area:1/1; }
-.amsotto .tvs-words span { font-family:"Noto Serif Bengali",serif; font-weight:900; font-size:clamp(64px,18vw,112px); line-height:1.25; }
-.amsotto .tvs-lines p { max-width:30ch; margin:0 auto; font-size:16px; line-height:1.7; color:var(--sub); text-wrap:pretty; }
-.amsotto .tvs-lines b { font-weight:800; }
-.amsotto .tvs-progress { position:relative; width:120px; height:4px; margin:16px auto 0; border-radius:4px; overflow:hidden; background:#3f1a0b1f; }
-.amsotto .tvs-progress i { position:absolute; inset:0; border-radius:inherit; background:var(--tam); transform-origin:left; transform:scaleX(.3333); }
-.amsotto .tvs-hint { position:absolute; left:0; right:0; top:calc(100% + 10px); display:flex; justify-content:center; align-items:center; gap:6px; margin:0; font-size:12.5px; color:var(--sub); }
-.amsotto .tvs-hint svg { width:14px; height:14px; animation:amsotto-nudge 1.6s var(--ease-out) infinite; }
-.amsotto .tvs-third { position:absolute; left:0; width:1px; height:33.334%; pointer-events:none; }
-.amsotto .tvs-words > :not(:first-child), .amsotto .tvs-lines > :not(:first-child), .amsotto .tvs-bowl [data-b] { opacity:0; }
-@keyframes amsotto-nudge { 0%,100% { transform:translateY(0); } 50% { transform:translateY(3px); } }
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .amsotto .tvs-bowl, .amsotto .tvs-bowl img, .amsotto .tvs-glow, .amsotto .tvs-words > *, .amsotto .tvs-lines > *, .amsotto .tvs-progress i, .amsotto .tvs-hint {
-      animation-timeline:--amsotto-taste; animation-range:contain 0% contain 100%; animation-duration:1ms; animation-timing-function:linear; animation-fill-mode:both;
-    }
-    .amsotto .tvs-bowl { animation-name:amsotto-tg-tilt; }
-    .amsotto .tvs-bowl [data-a] { animation-name:amsotto-tg-a; }
-    .amsotto .tvs-bowl [data-b] { animation-name:amsotto-tg-b; }
-    .amsotto .tvs-glow { animation-name:amsotto-tg-glow; }
-    .amsotto .tvs-words > :nth-child(1), .amsotto .tvs-lines > :nth-child(1) { animation-name:amsotto-tg-1; }
-    .amsotto .tvs-words > :nth-child(2), .amsotto .tvs-lines > :nth-child(2) { animation-name:amsotto-tg-2; }
-    .amsotto .tvs-words > :nth-child(3), .amsotto .tvs-lines > :nth-child(3) { animation-name:amsotto-tg-3; }
-    .amsotto .tvs-progress i { animation-name:amsotto-tg-fill; }
-    .amsotto .tvs-hint { animation-name:amsotto-tg-hint; }
-  }
-}
-@keyframes amsotto-tg-tilt { from { transform:rotate(-4deg); } to { transform:rotate(4deg); } }
-@keyframes amsotto-tg-a { 0%,14% { opacity:1; } 43%,57% { opacity:0; } 86%,100% { opacity:1; } }
-@keyframes amsotto-tg-b { 0%,14% { opacity:0; } 43%,57% { opacity:1; } 86%,100% { opacity:0; } }
-@keyframes amsotto-tg-glow { 0%,14% { background-color:#f5c518; } 43%,57% { background-color:#ff6a3d; } 86%,100% { background-color:#eaa25f; } }
-@keyframes amsotto-tg-1 { 0%,14% { opacity:1; transform:translateY(0); } 36%,100% { opacity:0; transform:translateY(-8px); } }
-@keyframes amsotto-tg-2 { 0%,21% { opacity:0; transform:translateY(8px); } 43%,57% { opacity:1; transform:translateY(0); } 79%,100% { opacity:0; transform:translateY(-8px); } }
-@keyframes amsotto-tg-3 { 0%,64% { opacity:0; transform:translateY(8px); } 86%,100% { opacity:1; transform:translateY(0); } }
-@keyframes amsotto-tg-fill { from { transform:scaleX(.3333); } to { transform:scaleX(1); } }
-@keyframes amsotto-tg-hint { 0% { opacity:1; } 6%,100% { opacity:0; } }
-/* Step fallback (no scroll timelines, or reduced motion): one short transition per taste change. */
-.amsotto .tv-track[data-step] .tvs-bowl { transition:opacity 600ms var(--ease-out),scale 700ms var(--ease-out),transform 600ms var(--ease-out); transform:rotate(-4deg); }
-.amsotto .tv-track[data-step] .tvs-bowl img { transition:opacity 420ms var(--ease-out); }
-.amsotto .tv-track[data-step] .tvs-glow { transition:background-color 420ms ease; }
-.amsotto .tv-track[data-step] .tvs-words > *, .amsotto .tv-track[data-step] .tvs-lines > * { opacity:0; transform:translateY(8px); transition:opacity 320ms var(--ease-out),transform 420ms var(--ease-out); }
-.amsotto .tv-track[data-step] .tvs-progress i { transition:transform 420ms var(--ease-out); }
-.amsotto .tv-track[data-step] .tvs-hint { transition:opacity 300ms ease; }
-.amsotto .tv-track[data-step="0"] .tvs-words > :nth-child(1), .amsotto .tv-track[data-step="0"] .tvs-lines > :nth-child(1),
-.amsotto .tv-track[data-step="1"] .tvs-words > :nth-child(2), .amsotto .tv-track[data-step="1"] .tvs-lines > :nth-child(2),
-.amsotto .tv-track[data-step="2"] .tvs-words > :nth-child(3), .amsotto .tv-track[data-step="2"] .tvs-lines > :nth-child(3) { opacity:1; transform:none; }
-.amsotto .tv-track[data-step="1"] .tvs-bowl { transform:rotate(0deg); }
-.amsotto .tv-track[data-step="2"] .tvs-bowl { transform:rotate(4deg); }
-.amsotto .tv-track[data-step="1"] .tvs-bowl [data-a] { opacity:0; }
-.amsotto .tv-track[data-step="1"] .tvs-bowl [data-b] { opacity:1; }
-.amsotto .tv-track[data-step="1"] .tvs-glow { background-color:#ff6a3d; }
-.amsotto .tv-track[data-step="2"] .tvs-glow { background-color:#eaa25f; }
-.amsotto .tv-track[data-step="1"] .tvs-progress i { transform:scaleX(.6667); }
-.amsotto .tv-track[data-step="2"] .tvs-progress i { transform:scaleX(1); }
-.amsotto .tv-track[data-step]:not([data-step="0"]) .tvs-hint { opacity:0; }
+.amsotto .v1-sec h2 { margin:8px 0 0; text-align:center; font-family:"Noto Serif Bengali",serif; font-weight:900; font-size:clamp(28px,7vw,44px); line-height:1.2; text-wrap:balance; }
+/* একটা কামড়, তিনটে অনুভূতি — "Path": a mango ribbon draws once through three stops; no pinning. */
+.amsotto .tp-lede { margin:10px auto 0; max-width:32ch; text-align:center; font-size:16px; line-height:1.7; color:var(--sub); }
+.amsotto .tp-wrap { position:relative; max-width:520px; margin:6px auto 0; }
+.amsotto .tp-bowl { position:relative; z-index:1; width:min(240px,58vw); height:auto; margin:0 auto; }
+.amsotto .tp-ribbon { position:absolute; left:0; top:150px; width:100%; height:calc(100% - 170px); overflow:visible; pointer-events:none; }
+.amsotto .tp-ribbon path { fill:none; stroke:var(--mango); stroke-width:10; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 1400ms var(--ease-out) 150ms; }
+.amsotto .tp.is-in .tp-ribbon path { stroke-dashoffset:0; }
+.amsotto .tp-rv { opacity:0; transform:translateY(14px); transition:opacity 480ms var(--ease-out),transform 560ms var(--ease-out); transition-delay:calc(var(--i,0)*90ms); }
+.amsotto .tp.is-in .tp-rv { opacity:1; transform:none; }
+.amsotto .tp-stops { margin:0; padding:0; list-style:none; }
+.amsotto .tp-stop { position:relative; z-index:1; display:grid; grid-template-columns:92px 1fr; align-items:center; gap:14px; margin-top:34px; text-align:left; }
+.amsotto .tp-stop[data-side="right"] { grid-template-columns:1fr 92px; text-align:right; }
+.amsotto .tp-stop[data-side="right"] .tp-badge { order:2; }
+.amsotto .tp-stop > div { padding:10px 14px 12px; border-radius:20px; background:var(--paper); box-shadow:inset 0 0 0 1px #3f1a0b12; }
+.amsotto .tp-badge { position:relative; display:grid; place-items:center; width:92px; height:92px; border-radius:50%; background:#fff; box-shadow:0 0 0 6px var(--cream),0 10px 24px -12px #3f1a0b66; }
+.amsotto .tp-icon { display:block; width:60px; height:60px; }
+.amsotto .tp-badge b { position:absolute; top:-6px; right:-6px; display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:#fff; font-family:"Noto Serif Bengali",serif; font-size:17px; font-weight:800; box-shadow:0 0 0 3px var(--cream); }
+.amsotto .tp-stop[data-side="right"] .tp-badge b { right:auto; left:-6px; }
+.amsotto .tp-stop small { display:block; font-size:13px; font-weight:700; color:var(--sub); }
+.amsotto .tp-word { display:block; font-family:"Noto Serif Bengali",serif; font-weight:900; font-size:38px; line-height:1.15; }
+.amsotto .tp-stop p { margin:2px 0 0; font-size:15px; line-height:1.6; color:var(--sub); text-wrap:pretty; }
 .amsotto .v1-recipe { display:grid; gap:8px; padding-bottom:16px; }
 .amsotto .v1-recipe-copy { text-align:center; }
 .amsotto .v1-recipe-lede { max-width:30ch; margin:12px auto 0; font-size:16px; line-height:1.7; color:var(--sub); text-wrap:pretty; }
@@ -250,7 +203,6 @@
   .amsotto .fvq-links a:hover .fvq-arrow { transform:translate(2px,-2px); color:var(--tam); }
 }
 @media (max-width:599px) { .amsotto .v1-memo .skx-paper-head h2 { font-size:29px; } }
-@media (max-width:859px) and (max-height:720px) { .amsotto .tvs-stage { height:26svh; } }
 @media (min-width:860px) {
   .amsotto .v1-hero { grid-template-columns:1.05fr 1fr; align-items:center; padding:32px 32px 32px; }
   .amsotto .v1-sec { padding-block:48px; }
@@ -260,9 +212,6 @@
   .amsotto .v1-cta { justify-content:flex-start; }
   .amsotto .hv .hv-art { margin:0; width:100%; max-width:600px; justify-self:center; }
   .amsotto .hv-fade .hv-art { justify-self:stretch; width:auto; max-width:none; margin:-48px -14% -40px; }
-  .amsotto .tv-card { padding:36px 56px; }
-  .amsotto .tv-pin { padding:0 16px; }
-  .amsotto .tvs-stage { height:clamp(260px,42vh,440px); }
   .amsotto .v1-recipe { grid-template-columns:1fr 1.1fr; align-items:center; gap:48px; max-width:1000px; }
   .amsotto .v1-recipe-copy, .amsotto .v1-recipe-copy h2, .amsotto .v1-recipe-copy .v1-kicker { text-align:left; }
   .amsotto .v1-recipe-lede { margin-left:0; font-size:18px; }
