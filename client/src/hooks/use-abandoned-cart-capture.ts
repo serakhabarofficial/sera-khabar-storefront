@@ -14,10 +14,10 @@ function getSessionStorage() {
   }
 }
 
-export function useAbandonedCartCapture(source: AbandonedCartSource, draftScope?: string): AbandonedCartCapture {
+export function useAbandonedCartCapture(source: AbandonedCartSource, draftScope?: string, sourcePath?: string): AbandonedCartCapture {
   const captureRef = useRef<AbandonedCartCapture | null>(null);
   if (!captureRef.current) {
-    captureRef.current = createAbandonedCartCapture({ source, draftScope, storage: getSessionStorage() });
+    captureRef.current = createAbandonedCartCapture({ source, draftScope, sourcePath, storage: getSessionStorage() });
   }
   const capture = captureRef.current;
 
