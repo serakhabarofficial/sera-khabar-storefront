@@ -16,8 +16,9 @@ test("landing uses the live product and inventory API with the approved sections
   for (const name of ["fetchStorefrontProduct", "fetchStorefrontProductInventory", "mergeInventory", "STOREFRONT_POLL_INTERVAL_MS", "AmsottoHero", "TastePath", "RecipeMotion", "AmsottoCheckout", "AmsottoFooter"]) assert.ok(page.includes(name), name);
 });
 test("memo checkout validates live availability and uses the shared protection and capture", () => {
-  for (const name of ["validateCheckout", "composeDeliveryAddress", "PlaceCombobox", "PaperClip", "buildProtectionPayload", "TurnstileChallenge", "useAbandonedCartCapture", "productQuery.refetch()", "inventoryQuery.refetch()", "freshInventoryVariant.stock_quantity", "MAX_LINE_QUANTITY", "normalizeBdMobile"]) assert.ok(checkout.includes(name), name);
+  for (const name of ["validateCheckout", "PaperClip", "buildProtectionPayload", "TurnstileChallenge", "useAbandonedCartCapture", "productQuery.refetch()", "inventoryQuery.refetch()", "freshInventoryVariant.stock_quantity", "MAX_LINE_QUANTITY", "normalizeBdMobile"]) assert.ok(checkout.includes(name), name);
   assert.match(checkout, /apiRequest\("POST", "\/api\/orders", payload\)/);
+  assert.doesNotMatch(checkout, /PlaceCombobox|composeDeliveryAddress/);
   assert.doesNotMatch(checkout, /buildLandingOrderPayload/);
   assert.match(checkout, /response.status === 202 && result.decision === "review"/);
   assert.match(checkout, /response.status !== 201/);

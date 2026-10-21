@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, type CSSProperties, type MouseEventHandler } from "react";
 import brandLogo from "@assets/sera-khabar-logo.webp";
-import { WhatsAppBrandIcon } from "@/features/landing/campaign-layout";
-import { AMSOTTO_HERO_IMAGE, AMSOTTO_TASTES, AMSOTTO_WHATSAPP_HREF, reducedMotion, taka } from "./content";
+import { AMSOTTO_HERO_IMAGE, AMSOTTO_TASTES, reducedMotion, taka } from "./content";
 
 const stagger = (i: number) => ({ "--i": i } as CSSProperties);
 
@@ -55,7 +54,6 @@ export function AmsottoHero({ onOrderClick, price, packLabel }: {
       <p className="v1-lede" style={stagger(3)}>মিষ্টি, টক, হালকা ঝাল — হোমমেড শাহী আচার, এখন সরাসরি আপনার দরজায়।</p>
       <div className="v1-cta" style={stagger(4)}>
         <a className="v1-btn v1-btn-glow" href="#v1-order" onClick={onOrderClick}>এখনই অর্ডার করুন</a>
-        <a className="v1-btn ghost" href={AMSOTTO_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer"><WhatsAppBrandIcon className="size-[18px]" /> WhatsApp</a>
       </div>
       <p className="v1-trust" style={stagger(5)}><b>ক্যাশ অন ডেলিভারি</b> · সারা বাংলাদেশে ডেলিভারি <span className="num">৳১০০</span></p>
     </div>

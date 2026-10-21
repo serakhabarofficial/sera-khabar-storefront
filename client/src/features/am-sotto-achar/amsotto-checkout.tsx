@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { flushSync } from "react-dom";
-import { ArrowUpRight, Banknote, Check, ChevronDown, Phone, Truck } from "lucide-react";
+import { ArrowUpRight, Banknote, Check, ChevronDown, Phone } from "lucide-react";
 import { useLocation } from "wouter";
 import { validateCheckout } from "@/components/order-dialog";
 import { PaperClip } from "@/components/paper-clip";
-import { PlaceCombobox } from "@/components/place-combobox";
 import { OrderHoldConfirmation } from "@/components/order-hold-confirmation";
 import { warmOrderConfirmedArt } from "@/components/order-confirmed";
 import { OrderProtectionMessage } from "@/components/order-protection-message";
 import { TurnstileChallenge } from "@/components/turnstile-challenge";
 import { useAbandonedCartCapture } from "@/hooks/use-abandoned-cart-capture";
 import { readAbandonedCartCampaign } from "@/lib/abandoned-cart-capture";
-import { composeDeliveryAddress, deliveryWindow, findDistrict, findThana } from "@/lib/bd-locations";
+import { formatDeliveryWindow } from "@/lib/bd-locations";
 import { apiRequest } from "@/lib/queryClient";
 import { currentLandingPagePath } from "@/lib/landing-page-attribution";
 import { trackMerchantSuiteEvent } from "@/lib/merchant-suite";
@@ -29,7 +27,7 @@ import { AMSOTTO_DELIVERY_CHARGE, AMSOTTO_PACK_META, AMSOTTO_PHONE_HREF, AMSOTTO
 
 const AVAILABILITY_ERROR = "এই প্যাকটি এখন অর্ডারের জন্য পাওয়া যাচ্ছে না। অন্য প্যাক বেছে নিন বা আমাদের কল করুন।";
 const toLatinDigits = (value: string) => value.replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit)));
-type Values = { name: string; phone: string; address: string; district: string | null; thana: string | null };
+type Values = { name: string; phone: string; address: string };
 type Field = keyof Values;
 type Errors = Partial<Record<Field | "pack", string>>;
 type RefreshQuery<T> = { refetch: () => Promise<{ data: T | undefined; isError: boolean }> };
@@ -96,7 +94,7 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const packs = status === "ready" ? livePacks : lastPacks.current;
   const [variantId, setVariantId] = useState(() => packs[0]?.variantId ?? "");
   const [quantity, setQuantity] = useState(1);
-  const [values, setValues] = useState<Values>({ name: "", phone: "", address: "", district: null, thana: null });
+  const [values, setValues] = useState<Values>({ name: "", phone: "", address: "" });
   const valuesRef = useRef(values); valuesRef.current = values;
   const [errors, setErrors] = useState<Errors>({});
   const [announcement, setAnnouncement] = useState("");
@@ -106,25 +104,26 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const [retryable, setRetryable] = useState(true);
   const submitting = useRef(false), viewed = useRef(false), began = useRef(false);
   const { formHandlers, trackPhoneCandidate, buildProtectionPayload, resetTurnstileSignal, resetTurnstile, setTurnstileToken } = useCheckoutProtectionSignals();
-  const refs = { name: useRef<HTMLInputElement>(null), phone: useRef<HTMLInputElement>(null), address: useRef<HTMLTextAreaElement>(null), district: useRef<HTMLInputElement>(null), thana: useRef<HTMLInputElement>(null) };
+  const refs = { name: useRef<HTMLInputElement>(null), phone: useRef<HTMLInputElement>(null), address: useRef<HTMLTextAreaElement>(null) };
   const selected = packs.find((pack) => pack.variantId === variantId);
   const presented = status === "ready" ? selected : undefined;
   const subtotal = presented ? presented.unitPrice * quantity : null;
   const total = subtotal === null ? null : subtotal + AMSOTTO_DELIVERY_CHARGE;
-  const eta = deliveryWindow(values.district);
+  // No জেলা on this form, so the window spans Dhaka (1–2 days) and outside Dhaka (2–3 days).
+  const eta = useMemo(() => formatDeliveryWindow(1, 3), []);
 
   const snapshot = (current = valuesRef.current) => !product || !presented || subtotal === null || total === null ? null : ({
-    customerName: current.name, phone: toLatinDigits(current.phone), address: composeDeliveryAddress(current.address, current.thana, current.district),
+    customerName: current.name, phone: toLatinDigits(current.phone), address: current.address.trim(),
     items: [{ productName: product.name, variantName: presented.label, quantity, unitPrice: presented.unitPrice }],
     subtotal, deliveryRate: AMSOTTO_DELIVERY_CHARGE, total, campaign: readAbandonedCartCampaign(window.location.search),
   });
   const updateCapture = (current?: Values) => { const value = snapshot(current); return value ? capture.capture(value) : null; };
   const flushCapture = () => { const value = snapshot(); if (value) void capture.flush(value); };
-  const setField = (field: Field, value: string | null, extra: Partial<Values> = {}) => {
-    const next = { ...valuesRef.current, [field]: value, ...extra };
+  const setField = (field: Field, value: string) => {
+    const next = { ...valuesRef.current, [field]: value };
     valuesRef.current = next;
     setValues(next);
-    setErrors((current) => ({ ...current, [field]: undefined, ...(field === "district" ? { thana: undefined } : {}) }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
     updateCapture(next);
   };
   const analyticsItem = (pack: LandingPackOption, qty: number) => toGoogleAnalyticsItem({ id: product?.id ?? pack.variantId, name: product?.name ?? "", variant: pack.label, price: pack.unitPrice, quantity: qty });
@@ -149,12 +148,12 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
     event.preventDefault();
     if (submitting.current) return;
     const current = valuesRef.current;
-    const nextErrors: Errors = validateCheckout(current);
+    const nextErrors: Errors = validateCheckout({ ...current, district: null, thana: null });
     if (status !== "ready" || !selected) nextErrors.pack = AVAILABILITY_ERROR;
     setErrors(nextErrors);
     setRequestError(false);
     if (Object.values(nextErrors).some(Boolean)) {
-      const first = (["name", "phone", "address", "district", "thana"] as Field[]).find((field) => nextErrors[field]);
+      const first = (["name", "phone", "address"] as Field[]).find((field) => nextErrors[field]);
       if (first) refs[first].current?.focus();
       else document.getElementById("amsotto-packs")?.focus();
       return;
@@ -182,7 +181,7 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
       const payload = {
         bundleTitle: freshProduct.name, bundleDetails: freshPack.label, bundlePrice: freshPack.unitPrice * quantity,
         quantity, deliveryCharge: AMSOTTO_DELIVERY_CHARGE, customerName: current.name.trim(),
-        phone: normalizeBdMobile(toLatinDigits(current.phone))!, address: composeDeliveryAddress(current.address, current.thana, current.district),
+        phone: normalizeBdMobile(toLatinDigits(current.phone))!, address: current.address.trim(),
         paymentMethod: "cash_on_delivery" as const,
         items: [{ productId: String(freshProduct.id), variantId: freshPack.variantId, quantity }],
         ...buildProtectionPayload(honeypot), ...(landingPagePath ? { landingPagePath } : {}), ...(draftKey ? { draftKey } : {}),
@@ -218,8 +217,8 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
         <div className="skx-paper-head"><img src="/home/leaf-mark.webp" alt="" width={48} height={48} /><div><h2 id="amsotto-checkout-heading" tabIndex={-1}>অর্ডার মেমো</h2><p>সেরা খাবার · রাজশাহী</p></div><span className="skx-serial" aria-hidden="true">খাতা নং<br /><b>০১</b></span></div>
         <div className="skx-order" onFocusCapture={beginCheckout}>
           <MemoGallery product={product} />
-          <h3 className="v1-memo-title">আমসত্ত্ব আচার</h3>
-          <div className="v1-memo-packs" id="amsotto-packs" role="radiogroup" aria-label="প্যাক সাইজ" tabIndex={-1} aria-describedby={errors.pack ? "amsotto-pack-error" : undefined}>
+          <p className="v1-memo-pick" id="amsotto-packs-label"><span>পরিমাণ বেছে নিন</span></p>
+          <div className="v1-memo-packs" id="amsotto-packs" role="radiogroup" aria-labelledby="amsotto-packs-label" tabIndex={-1} aria-describedby={errors.pack ? "amsotto-pack-error" : undefined}>
             {packs.map((pack) => { const checked = variantId === pack.variantId; return <div key={pack.variantId} className="v1-memo-pack" data-checked={checked}>
               <label>
                 <input className="sr-only" type="radio" name="pack" value={pack.variantId} checked={checked} disabled={status !== "ready" || pending} onChange={() => { beginCheckout(); setVariantId(pack.variantId); setErrors((current) => ({ ...current, pack: undefined })); trackGoogleEcommerceEvent("select_item", { pageType: "product", value: pack.unitPrice, items: [analyticsItem(pack, quantity)] }); }} />
@@ -233,22 +232,21 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
           </div>
           {errors.pack && <span id="amsotto-pack-error" className="skx-field-error" role="alert">{errors.pack}</span>}
           {recovery && <div className="v1-recovery"><p role="status">{status === "loading" ? "অর্ডারের তথ্য লোড হচ্ছে…" : AVAILABILITY_ERROR}</p><button type="button" onClick={onRetry}>আবার চেষ্টা করুন</button><SupportActions /></div>}
-          <div className="v1-memo-sum"><span>মোট <small>(ডেলিভারি ছাড়া)</small></span><strong><RollingTotal total={subtotal} /></strong></div>
         </div>
         <form className="skx-form" noValidate onSubmit={handleSubmit} onFocusCapture={(e) => { beginCheckout(); formHandlers.onFocusCapture(e); }} onPasteCapture={formHandlers.onPasteCapture} onBlurCapture={flushCapture}>
           <input name="hp_x7" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="absolute -left-[9999px] h-px w-px opacity-0" />
           <section className="skx-section" aria-label="আপনার নাম, নম্বর ও ঠিকানা">
             <div className="skx-row">{textField("name", "আপনার নাম", "Full name", "আপনার সম্পূর্ণ নাম লিখুন")}{textField("phone", "মোবাইল নম্বর", "Phone number", "01XXXXXXXXX", "এই নম্বরেই অর্ডার কনফার্ম করব।")}</div>
             <div className="skx-field"><label htmlFor="amsotto-address">সম্পূর্ণ ঠিকানা<small>Delivery address</small></label><textarea ref={refs.address} id="amsotto-address" name="address" rows={3} maxLength={300} autoComplete="street-address" placeholder="বাড়ি / হোল্ডিং, রাস্তা, এলাকা" value={values.address} aria-invalid={Boolean(errors.address)} aria-describedby={errors.address ? "amsotto-address-error" : undefined} onChange={(e) => setField("address", e.target.value)} />{errors.address && <span className="skx-field-error" id="amsotto-address-error" role="alert">{errors.address}</span>}</div>
-            <div className="skx-row skx-place-row"><PlaceCombobox ref={refs.district} kind="district" districtId={values.district} value={values.district} selectedLabel={findDistrict(values.district)?.[1] ?? ""} onPick={(id) => { const changed = id !== valuesRef.current.district; flushSync(() => setField("district", id, changed ? { thana: null } : {})); refs.thana.current?.focus(); }} /><PlaceCombobox ref={refs.thana} kind="thana" districtId={values.district} value={values.thana} selectedLabel={findThana(values.thana)?.[2] ?? ""} onPick={(id) => setField("thana", id)} /></div>
           </section>
-          <section className="skx-payment" aria-label="পেমেন্ট ও ডেলিভারি"><div className="skx-stamp" aria-hidden="true">আগে অর্ডার<br /><b>পরে পেমেন্ট</b><small>ক্যাশ অন ডেলিভারি</small></div><div className="skx-pay-note"><span className="skx-pay-icon"><Banknote aria-hidden="true" /></span><div><strong>ক্যাশ অন ডেলিভারি</strong><p>পণ্য হাতে পেয়ে টাকা দেবেন। এখন কোনো পেমেন্ট নয়।</p></div><span className="skx-pay-check"><Check aria-hidden="true" /></span></div><div className="skx-delivery-note"><Truck aria-hidden="true" /><span>{eta ? <>সম্ভাব্য ডেলিভারি <strong>{eta}</strong></> : "ঢাকায় ১–২ দিন · ঢাকার বাইরে ২–৩ দিন"}</span><b>{taka(AMSOTTO_DELIVERY_CHARGE)}</b></div></section>
-          <div className="skx-amounts"><div><span>পণ্যের দাম</span><strong>{money(subtotal)}</strong></div><div><span>ডেলিভারি চার্জ</span><strong>{taka(AMSOTTO_DELIVERY_CHARGE)}</strong></div><div className="skx-grand"><span>সর্বমোট<small>হাতে পেয়ে পরিশোধ করবেন</small></span><strong><RollingTotal total={total} /></strong></div></div>
+          <section className="skx-payment" aria-label="পেমেন্ট ও ডেলিভারি"><div className="skx-stamp" aria-hidden="true">আগে অর্ডার<br /><b>পরে পেমেন্ট</b><small>ক্যাশ অন ডেলিভারি</small></div></section>
+          <div className="skx-amounts"><div><span>পণ্যের দাম</span><strong>{money(subtotal)}</strong></div><div><span>ডেলিভারি চার্জ<small className="v1-eta">সম্ভাব্য ডেলিভারি <b>{eta}</b></small></span><strong>{taka(AMSOTTO_DELIVERY_CHARGE)}</strong></div><div className="skx-grand"><span>সর্বমোট<small>হাতে পেয়ে পরিশোধ করবেন</small></span><strong><RollingTotal total={total} /></strong></div></div>
           <div aria-live="polite" aria-atomic="true">{announcement ? <p className={requestError ? "skx-error" : "skx-field-hint"}>{announcement}</p> : null}</div>
           {decision === "block" && <OrderProtectionMessage decision="block" retryable={retryable} />}
           {requestError && <div className="v1-recovery"><SupportActions /></div>}
           <TurnstileChallenge onToken={setTurnstileToken} resetSignal={resetTurnstileSignal} />
           <button type="submit" className="skx-submit" disabled={pending || status !== "ready" || !selected}><span>{pending ? "অর্ডার পাঠানো হচ্ছে…" : requestError ? "আবার অর্ডার চেষ্টা করুন" : "অর্ডার নিশ্চিত করুন"}</span><span className="skx-submit-end">{money(total)} <ArrowUpRight aria-hidden="true" /></span></button>
+          <p className="v1-pay-line"><Banknote aria-hidden="true" /><span><b>ক্যাশ অন ডেলিভারি</b> · পণ্য হাতে পেয়ে টাকা দেবেন</span></p>
           <p className="skx-submit-help">কনফার্ম করতে আমরা আপনাকে ফোন করব।</p><p className="skx-terms">অর্ডার করে আপনি আমাদের <a href="/terms-and-conditions" target="_blank" rel="noopener">শর্তাবলি</a> ও <a href="/refund-return-exchange" target="_blank" rel="noopener">রিটার্ন নীতিমালা</a> মেনে নিচ্ছেন।</p>
           <details className="skx-policy"><summary>ডেলিভারি ও ফেরত নীতি <ChevronDown aria-hidden="true" /></summary><ul>{["পেমেন্ট শুধু ক্যাশ অন ডেলিভারি।", "ঢাকায় ১–২ দিন, ঢাকার বাইরে ২–৩ দিনে ডেলিভারি।", "পণ্যে সমস্যা হলে ডেলিভারির ২৪ ঘণ্টার মধ্যে জানান।"].map((point) => <li key={point}><Check aria-hidden="true" /><span>{point}</span></li>)}</ul></details>
           <div className="skx-signoff"><span>বিশ্বাসের সঙ্গে,</span><b>সেরা খাবার</b><img src="/home/leaf-mark.webp" alt="" width={30} height={30} /></div>
