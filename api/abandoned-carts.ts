@@ -15,6 +15,8 @@ const sourcePaths = {
   // Historical name kept on purpose: the Merchant Suite's abandoned_checkouts check constraint pairs
   // "kalojira_mixed" with this path, and the বড়ি and কাটিমন আম landings record carts under it.
   kalojira_mixed: "/step/kalojira-mixed",
+  // The আমসত্ত্ব আচার landing has its own source so incomplete orders are labelled with it.
+  am_sotto_achar: "/step/am-sotto-achar",
 } as const;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

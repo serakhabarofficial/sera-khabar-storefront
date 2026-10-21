@@ -5,6 +5,8 @@ export const ABANDONED_CART_SOURCE_PATHS = {
   // Historical name kept on purpose: the Merchant Suite's abandoned_checkouts check constraint pairs
   // "kalojira_mixed" with this path, and the বড়ি and কাটিমন আম landings record carts under it.
   kalojira_mixed: "/step/kalojira-mixed",
+  // The আমসত্ত্ব আচার landing has its own source so incomplete orders are labelled with it.
+  am_sotto_achar: "/step/am-sotto-achar",
 } as const;
 
 export type AbandonedCartSource = keyof typeof ABANDONED_CART_SOURCE_PATHS;
