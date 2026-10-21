@@ -87,7 +87,7 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const [, setLocation] = useLocation();
   // The Suite currently accepts the legacy source enum only. Keep its transport contract,
   // but never share a draft key with the honey campaign. Orders carry landingPagePath below.
-  const capture = useAbandonedCartCapture("kalojira_mixed", "am_sotto_achar");
+  const capture = useAbandonedCartCapture("am_sotto_achar", "am_sotto_achar");
   const livePacks = useMemo(() => product ? getLandingPackOptions(product) : [], [product]);
   const lastPacks = useRef(livePacks);
   if (status === "ready" && livePacks.length) lastPacks.current = livePacks;
