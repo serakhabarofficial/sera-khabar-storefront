@@ -69,6 +69,11 @@ export function deliveryWindow(districtId: string | null, today = new Date()) {
   const district = findDistrict(districtId);
   if (!district) return null;
   const [from, to] = district[2] === "Dhaka" ? [1, 2] : [2, 3];
+  return formatDeliveryWindow(from, to, today);
+}
+
+/** "২২–২৪ অক্টোবর": the dates `from`–`to` days after today. */
+export function formatDeliveryWindow(from: number, to: number, today = new Date()) {
   const day = (offset: number) => {
     const date = new Date(today);
     date.setDate(date.getDate() + offset);
