@@ -23,7 +23,7 @@ import type { LandingCheckoutStatus } from "@/features/landing/checkout-state";
 import { WhatsAppBrandIcon } from "@/features/landing/campaign-layout";
 import { normalizeBdMobile } from "../../../../shared/bd-phone";
 import { MAX_LINE_QUANTITY } from "../../../../shared/order-limits";
-import { AMSOTTO_DELIVERY_CHARGE, AMSOTTO_PACK_META, AMSOTTO_PHONE_HREF, AMSOTTO_PHONE_LABEL, AMSOTTO_THANK_YOU_PATH, AMSOTTO_WHATSAPP_HREF, bn, reducedMotion, taka } from "./content";
+import { AMSOTTO_DELIVERY_CHARGE, AMSOTTO_PACK_META, AMSOTTO_PATH, AMSOTTO_PHONE_HREF, AMSOTTO_PHONE_LABEL, AMSOTTO_THANK_YOU_PATH, AMSOTTO_WHATSAPP_HREF, bn, reducedMotion, taka } from "./content";
 
 const AVAILABILITY_ERROR = "এই প্যাকটি এখন অর্ডারের জন্য পাওয়া যাচ্ছে না। অন্য প্যাক বেছে নিন বা আমাদের কল করুন।";
 const toLatinDigits = (value: string) => value.replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit)));
@@ -87,7 +87,7 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const [, setLocation] = useLocation();
   // The Suite currently accepts the legacy source enum only. Keep its transport contract,
   // but never share a draft key with the honey campaign. Orders carry landingPagePath below.
-  const capture = useAbandonedCartCapture("am_sotto_achar", "am_sotto_achar");
+  const capture = useAbandonedCartCapture("landing", "am_sotto_achar", (currentLandingPagePath() ?? AMSOTTO_PATH).toLowerCase());
   const livePacks = useMemo(() => product ? getLandingPackOptions(product) : [], [product]);
   const lastPacks = useRef(livePacks);
   if (status === "ready" && livePacks.length) lastPacks.current = livePacks;

@@ -9,7 +9,9 @@ export const ABANDONED_CART_SOURCE_PATHS = {
   am_sotto_achar: "/step/am-sotto-achar",
 } as const;
 
-export type AbandonedCartSource = keyof typeof ABANDONED_CART_SOURCE_PATHS;
+// Any /step/<name> landing page captures as "landing" with its own address, so the
+// Merchant Suite names it from the address and a new landing needs no entry here.
+export type AbandonedCartSource = keyof typeof ABANDONED_CART_SOURCE_PATHS | "landing";
 
 export type AbandonedCartCampaign = Partial<Record<
   "utmSource" | "utmMedium" | "utmCampaign" | "utmContent" | "utmTerm",
@@ -48,6 +50,8 @@ type AbandonedCartCaptureOptions = {
   source: AbandonedCartSource;
   /** Isolate campaigns that share a legacy server-side source classification. */
   draftScope?: string;
+  /** The landing page's own address; required for the "landing" source. */
+  sourcePath?: string;
   storage?: StorageLike;
   fetchImpl?: FetchLike;
   createDraftKey?: () => string | null;
@@ -216,7 +220,7 @@ export class AbandonedCartCapture {
       campaign: normalizeCampaign(snapshot.campaign),
       draftKey,
       source: this.options.source,
-      sourcePath: ABANDONED_CART_SOURCE_PATHS[this.options.source],
+      sourcePath: this.options.source === "landing" ? this.options.sourcePath ?? "" : ABANDONED_CART_SOURCE_PATHS[this.options.source],
     };
     this.schedule();
     return draftKey;

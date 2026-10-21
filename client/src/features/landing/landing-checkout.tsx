@@ -145,9 +145,10 @@ export function LandingCheckout({ product, status, productQuery, inventoryQuery,
   deliveryCharge?: number;
 }) {
   const [, setLocation] = useLocation();
-  // "kalojira_mixed" is a historical name: the Merchant Suite's abandoned_checkouts check constraint
-  // pairs it with "/step/kalojira-mixed", and every landing built on this kit records carts under it.
-  const capture = useAbandonedCartCapture("kalojira_mixed");
+  // Each landing page records incomplete orders under its own address, falling back to the
+  // address of its thank-you route when rendered elsewhere.
+  const landingPath = (currentLandingPagePath() ?? thankYouPath.replace(/\/thank-you$/, "")).toLowerCase();
+  const capture = useAbandonedCartCapture("landing", landingPath, landingPath);
   const livePacks = useMemo(() => product ? getLandingPackOptions(product) : [], [product]);
   const lastPacksRef = useRef(livePacks);
   if (status === "ready" && livePacks.length) lastPacksRef.current = livePacks;
