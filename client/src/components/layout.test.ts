@@ -81,7 +81,7 @@ test("uses the Stage header: links left, centred logo, search and bag right, hai
 test("uses the Stage wordmark footer with the Arc Labs signature", () => {
   assert.match(layoutSource, /<footer className="stc stc-foot">/);
   assert.match(layoutSource, /<img src="\/sera-khabar-logo\.svg" alt="সেরা খাবার"/);
-  assert.match(layoutSource, /<a className="stc-arc" href="https:\/\/api\.whatsapp\.com\/send\/\?phone=8801733670129"/);
+  assert.match(layoutSource, /<a className="stc-arc" href="https:\/\/www\.arc-bangladesh\.com\/"/);
   for (const label of ["ফ্রেশ আম", "হোমমেড", "গুড়", "সব পণ্য", "কল করুন", "হোয়াটসঅ্যাপ", "আমাদের গল্প", "পাইকারি অর্ডার", "সহায়তা ও নীতিমালা"]) {
     assert.match(layoutSource, new RegExp(label));
   }
@@ -154,14 +154,15 @@ test("connects footer information and support links to real pages", () => {
   assert.doesNotMatch(layoutSource, /href="#"/);
 });
 
-test("uses Sera Khabar WhatsApp in customer navigation and Arc Labs WhatsApp only for the developer credit", () => {
+test("uses Sera Khabar WhatsApp in customer navigation and the Arc Labs website for the developer credit", () => {
   const bottomBarIndex = layoutSource.indexOf("/* Bottom Bar */");
   assert.notEqual(bottomBarIndex, -1);
   const customerNavigationSource = layoutSource.slice(0, bottomBarIndex);
 
   assert.match(customerNavigationSource, /phone=8801303103540/);
   assert.doesNotMatch(customerNavigationSource, /phone=8801733670129/);
-  assert.match(layoutSource.slice(bottomBarIndex), /phone=8801733670129/);
+  assert.match(layoutSource.slice(bottomBarIndex), /href="https:\/\/www\.arc-bangladesh\.com\/"/);
+  assert.doesNotMatch(layoutSource, /phone=8801733670129/);
 });
 
 test("mounts the floating add-to-cart toast beside the cart drawer", () => {
