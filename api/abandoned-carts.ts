@@ -4,7 +4,7 @@ import { CLIENT_CONTEXT_HEADER, createSignedClientContext } from "../server/clie
 import { readOrCreateDeviceId } from "../server/device-id.js";
 import { normalizeBdMobile } from "../shared/bd-phone.js";
 import { CAMPAIGN_CLICK_HEADER, CAMPAIGN_RECEIPT_HEADER, readCampaignClickCookie, readCampaignReceipt } from '../server/campaign-links.js';
-import { ANALYTICS_SESSION_HEADER, readAnalyticsSessionCookie } from '../server/analytics-session.js';
+import { ANALYTICS_SESSION_HEADER, ANALYTICS_VISITOR_HEADER, readAnalyticsSessionCookie, readAnalyticsVisitorCookie } from '../server/analytics-session.js';
 
 const MAX_REQUEST_BYTES = 32 * 1024;
 const MAX_MONEY = 10_000_000;
@@ -31,8 +31,9 @@ export type AbandonedCartCapture = {
   source: AbandonedCartSource;
   sourcePath: string;
   customerName?: string;
-  phone: string;
+  phone?: string;
   address?: string;
+  returningVisit?: true;
   items: Array<{
     productName: string;
     variantName?: string;
@@ -71,7 +72,7 @@ class RequestBodyError extends Error {
 type CaptureHandlerDependencies = {
   processCapture?: (
     capture: AbandonedCartCapture,
-    context?: { forwardedClientIp?: string; clientContextHeader?: string; campaignClickId?: string; campaignReceipt?: string; analyticsSessionId?: string },
+    context?: { forwardedClientIp?: string; clientContextHeader?: string; campaignClickId?: string; campaignReceipt?: string; analyticsSessionId?: string; analyticsVisitorId?: string },
   ) => Promise<void>;
 };
 
@@ -85,6 +86,7 @@ type AbandonedCartServiceDependencies = {
   campaignClickId?: string;
   campaignReceipt?: string;
   analyticsSessionId?: string;
+  analyticsVisitorId?: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -187,14 +189,18 @@ export function parseAbandonedCartCapture(body: unknown): AbandonedCartCapture {
     "deliveryRate",
     "total",
     "campaign",
+    "returningVisit",
   ];
   if (!isStrictRecord(body, captureKeys)) throw new AbandonedCartValidationError();
 
   const draftKey = requiredText(requiredValue(body, "draftKey"));
   const source = requiredValue(body, "source");
   const sourcePath = requiredText(requiredValue(body, "sourcePath"), 120);
-  const phone = requiredText(requiredValue(body, "phone"));
-  if (!UUID_RE.test(draftKey) || typeof source !== "string" || (source !== "landing" && !Object.hasOwn(sourcePaths, source)) || normalizeBdMobile(phone) !== phone) {
+  // A draft may arrive before the phone is complete; a phone that is present must be valid.
+  const phone = optionalText(optionalValue(body, "phone"), 20);
+  const returningVisit = optionalValue(body, "returningVisit");
+  if (!UUID_RE.test(draftKey) || typeof source !== "string" || (source !== "landing" && !Object.hasOwn(sourcePaths, source))
+    || (phone !== undefined && normalizeBdMobile(phone) !== phone) || (returningVisit !== undefined && returningVisit !== true)) {
     throw new AbandonedCartValidationError();
   }
   const normalizedSource = source as AbandonedCartSource;
@@ -208,13 +214,19 @@ export function parseAbandonedCartCapture(body: unknown): AbandonedCartCapture {
   const total = boundedMoney(requiredValue(body, "total"));
   if (Math.abs(total - (subtotal + deliveryRate)) > 0.001) throw new AbandonedCartValidationError();
 
+  const customerName = optionalText(optionalValue(body, "customerName"), 120);
+  const address = optionalText(optionalValue(body, "address"), 500);
+  // An empty form is only a returning-visit signal; the Merchant Suite fills or drops it.
+  if (!customerName && !phone && !address && returningVisit !== true) throw new AbandonedCartValidationError();
+
   return {
     draftKey: draftKey.toLowerCase(),
     source: normalizedSource,
     sourcePath,
-    customerName: optionalText(optionalValue(body, "customerName"), 120),
-    phone,
-    address: optionalText(optionalValue(body, "address"), 500),
+    customerName,
+    ...(phone ? { phone } : {}),
+    address,
+    ...(returningVisit === true ? { returningVisit: true as const } : {}),
     items: parseItems(requiredValue(body, "items")),
     subtotal,
     deliveryRate,
@@ -252,6 +264,7 @@ export async function processAbandonedCartCapture(
         ...(dependencies.campaignClickId ? { [CAMPAIGN_CLICK_HEADER]: dependencies.campaignClickId } : {}),
         ...(dependencies.campaignReceipt ? { [CAMPAIGN_RECEIPT_HEADER]: dependencies.campaignReceipt } : {}),
         ...(dependencies.analyticsSessionId ? { [ANALYTICS_SESSION_HEADER]: dependencies.analyticsSessionId } : {}),
+        ...(dependencies.analyticsVisitorId ? { [ANALYTICS_VISITOR_HEADER]: dependencies.analyticsVisitorId } : {}),
       },
       body: JSON.stringify(capture),
       signal: (dependencies.timeoutSignal ?? (() => AbortSignal.timeout(CAPTURE_TIMEOUT_MS)))(),
@@ -313,11 +326,12 @@ function sendJson(res: ServerResponse, statusCode: number, body: unknown) {
 
 export function createAbandonedCartHandler(dependencies: CaptureHandlerDependencies = {}) {
   const processCapture = dependencies.processCapture
-    ?? ((capture: AbandonedCartCapture, context?: { forwardedClientIp?: string; clientContextHeader?: string; campaignClickId?: string; analyticsSessionId?: string }) => processAbandonedCartCapture(capture, {
+    ?? ((capture: AbandonedCartCapture, context?: { forwardedClientIp?: string; clientContextHeader?: string; campaignClickId?: string; analyticsSessionId?: string; analyticsVisitorId?: string }) => processAbandonedCartCapture(capture, {
       forwardedClientIp: context?.forwardedClientIp,
       clientContextHeader: context?.clientContextHeader,
       campaignClickId: context?.campaignClickId,
       analyticsSessionId: context?.analyticsSessionId,
+      analyticsVisitorId: context?.analyticsVisitorId,
     }));
 
   return async function handler(
@@ -337,12 +351,14 @@ export function createAbandonedCartHandler(dependencies: CaptureHandlerDependenc
       const campaignClickId = readCampaignClickCookie(req);
       const campaignReceipt = readCampaignReceipt(req);
       const analyticsSessionId = readAnalyticsSessionCookie(req);
+      const analyticsVisitorId = readAnalyticsVisitorCookie(req);
       await processCapture(capture, {
         forwardedClientIp: getVercelClientIp(req),
         ...(clientContextHeader ? { clientContextHeader } : {}),
         ...(campaignClickId ? { campaignClickId } : {}),
         ...(campaignReceipt ? { campaignReceipt } : {}),
         ...(analyticsSessionId ? { analyticsSessionId } : {}),
+        ...(analyticsVisitorId ? { analyticsVisitorId } : {}),
       });
       sendJson(res, 202, { ok: true });
     } catch (error) {

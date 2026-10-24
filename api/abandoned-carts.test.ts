@@ -168,6 +168,14 @@ test("Vercel parsing matches the local strict capture contract", async () => {
   };
 
   assert.deepEqual(parseVercelCapture(normalizedCapture), parseLocalCapture(normalizedCapture));
+  // A draft may arrive before the phone is complete, and an empty form only as a returning visit.
+  const { phone: _phone, ...withoutPhone } = validCapture;
+  const emptyForm = { ...withoutPhone, customerName: undefined, address: undefined };
+  for (const capture of [withoutPhone, { ...emptyForm, returningVisit: true }]) {
+    assert.deepEqual(parseVercelCapture(capture), parseLocalCapture(capture));
+  }
+  assert.equal(parseVercelCapture({ ...emptyForm, returningVisit: true }).returningVisit, true);
+  invalidCaptures.push(emptyForm, { ...emptyForm, returningVisit: false });
   for (const capture of invalidCaptures) {
     assert.throws(() => parseVercelCapture(capture));
     assert.throws(() => parseLocalCapture(capture));

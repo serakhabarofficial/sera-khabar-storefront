@@ -3,7 +3,7 @@ import test from 'node:test';
 import express from 'express';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { readAnalyticsSessionCookie } from './analytics-session.ts';
+import { readAnalyticsSessionCookie, readAnalyticsVisitorCookie } from './analytics-session.ts';
 import { registerRoutes } from './routes.ts';
 import { createOrderHandler, processOrder as productionOrder, validateOrder } from '../api/orders.ts';
 import { processOrder as localOrder, orderRequestSchema } from './order-service.ts';
@@ -96,4 +96,42 @@ test('the default Vercel capture handler forwards the visit all the way to the S
     if (previous.url === undefined) delete process.env.MERCHANT_SUITE_URL; else process.env.MERCHANT_SUITE_URL = previous.url;
     if (previous.key === undefined) delete process.env.CUSTOM_ORDERS_API_KEY; else process.env.CUSTOM_ORDERS_API_KEY = previous.key;
   }
+});
+
+// A returning visit is recognised by the tracker's per-browser ms_vid cookie, forwarded as a header only.
+const browser = '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
+
+test('reads one well-formed tracker browser cookie only', () => {
+  const read = (cookie: string) => readAnalyticsVisitorCookie({ headers: { cookie } });
+  assert.equal(read(`ms_sid=${visit}; ms_vid=${browser.toUpperCase()}`), browser);
+  assert.equal(read(`ms_vid=${browser}; ms_vid=${browser}`), undefined);
+  assert.equal(read('ms_vid=not-a-browser'), undefined);
+  assert.equal(read(''), undefined);
+});
+
+const returningVisit = { draftKey: product, source: 'landing', sourcePath: '/step/am-sotto-achar', returningVisit: true,
+  items: [{ productName: 'Honey', quantity: 1, unitPrice: 100 }], subtotal: 100, deliveryRate: 0, total: 100 };
+
+for (const platform of ['express', 'vercel'] as const) test(`${platform} capture route passes the browser cookie with a returning visit`, async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  const submitCapture = async (_body: unknown, options = {}) => { calls.push(options); };
+  const app = express(); app.use(express.json()); const server = createServer(app);
+  if (platform === 'express') await registerRoutes(server, app, { processAbandonedCartCapture: submitCapture });
+  else app.post('/api/abandoned-carts', createAbandonedCartHandler({ processCapture: submitCapture }));
+  server.listen(0, '127.0.0.1'); await once(server, 'listening'); const base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+  try {
+    for (const cookie of [`ms_vid=${browser}`, 'ms_vid=forged', '']) {
+      const result = await fetch(`${base}/api/abandoned-carts`, { method: 'POST', headers: { 'Content-Type': 'application/json', cookie }, body: JSON.stringify(returningVisit) });
+      assert.equal(result.status, 202);
+      assert.equal(calls.at(-1)!.analyticsVisitorId, cookie === `ms_vid=${browser}` ? browser : undefined);
+    }
+  } finally { server.closeAllConnections(); server.close(); }
+});
+
+for (const [label, service] of [['production', productionCapture], ['local', localCapture]] as const) test(`${label} capture service sends the browser as a header, never in the body`, async () => {
+  let headers = new Headers(); let payload = '';
+  await service(returningVisit as never, { merchantSuiteUrl: 'https://suite.invalid', apiKey: 'test-api-key', analyticsVisitorId: browser,
+    fetchImpl: async (_target, init) => { headers = new Headers(init?.headers); payload = String(init?.body); return new Response('{}', { status: 201 }); } });
+  assert.equal(headers.get('x-mlbd-analytics-visitor-id'), browser);
+  assert.equal(payload.includes(browser), false);
 });
