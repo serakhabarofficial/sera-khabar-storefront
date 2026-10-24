@@ -248,3 +248,53 @@ test("posts capture data only to the same-origin proxy and never carries server 
   assert.match(source, /fetchImpl\("\/api\/abandoned-carts"/);
   assert.doesNotMatch(source, /CUSTOM_ORDERS_API_KEY|MERCHANT_SUITE_URL|VITE_STOREFRONT_ID|orgId|org_id|supabase/i);
 });
+
+test("a partial-contact capture saves a name or address before the phone is complete", async () => {
+  const { createAbandonedCartCapture } = await import("./abandoned-cart-capture.ts");
+  const requests: Array<Record<string, unknown>> = [];
+  const options = {
+    source: "landing" as const,
+    sourcePath: "/step/am-sotto-achar",
+    debounceMs: 0,
+    createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
+    fetchImpl: async (_url: RequestInfo | URL, init?: RequestInit) => {
+      requests.push(JSON.parse(String(init?.body)));
+      return new Response(null, { status: 202 });
+    },
+  };
+  const strict = createAbandonedCartCapture(options);
+  assert.equal(strict.capture({ ...snapshot, phone: "0171" }), null);
+
+  const partial = createAbandonedCartCapture({ ...options, partialContact: true });
+  assert.equal(partial.capture({ ...snapshot, customerName: "", phone: "0171", address: "" }), null);
+  assert.ok(partial.capture({ ...snapshot, phone: "0171", address: "" }));
+  await partial.flush();
+  assert.equal(requests.at(-1)!.customerName, "Test Customer");
+  assert.equal(Object.hasOwn(requests.at(-1)!, "phone"), false);
+  assert.equal(Object.hasOwn(requests.at(-1)!, "returningVisit"), false);
+
+  assert.ok(partial.capture({ ...snapshot, customerName: "", phone: "", address: "", returningVisit: true }));
+  await partial.flush();
+  assert.equal(requests.at(-1)!.returningVisit, true);
+});
+
+test("flushPending sends only a waiting or failed save", async () => {
+  const { createAbandonedCartCapture } = await import("./abandoned-cart-capture.ts");
+  let sent = 0;
+  const capture = createAbandonedCartCapture({
+    source: "storefront",
+    debounceMs: 60_000,
+    createDraftKey: () => "7cb13b8e-b576-4faa-b238-cc8b73059772",
+    fetchImpl: async () => { sent += 1; return new Response(null, { status: 202 }); },
+  });
+
+  capture.flushPending();
+  capture.capture(snapshot);
+  capture.flushPending();
+  await delay();
+  assert.equal(sent, 1);
+  capture.flushPending();
+  await delay();
+  assert.equal(sent, 1);
+  capture.dispose();
+});

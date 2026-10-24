@@ -12,7 +12,7 @@ import { MAX_LINE_QUANTITY_MESSAGE } from "../shared/order-limits.ts";
 import { createSignedClientContext } from "./client-context.ts";
 import { readOrCreateDeviceId } from "./device-id.ts";
 import { readCampaignClickCookie, readCampaignReceipt, type CampaignRedirectOptions } from './campaign-links.js';
-import { readAnalyticsSessionCookie } from './analytics-session.js';
+import { readAnalyticsSessionCookie, readAnalyticsVisitorCookie } from './analytics-session.js';
 import { createGoHandler } from '../api/go.js';
 import { createSignalHandler } from '../api/storefront-signal.js';
 import { buildPurchaseEvent, sendMetaEvents } from "./meta-capi.ts";
@@ -50,8 +50,9 @@ export async function registerRoutes(
       const campaignClickId = readCampaignClickCookie(req);
       const campaignReceipt = readCampaignReceipt(req);
       const analyticsSessionId = readAnalyticsSessionCookie(req);
+      const analyticsVisitorId = readAnalyticsVisitorCookie(req);
       await processCapture(capture, { ...(clientContextHeader ? { clientContextHeader } : {}), ...(campaignClickId ? { campaignClickId } : {}), ...(campaignReceipt ? { campaignReceipt } : {}),
-        ...(analyticsSessionId ? { analyticsSessionId } : {}) });
+        ...(analyticsSessionId ? { analyticsSessionId } : {}), ...(analyticsVisitorId ? { analyticsVisitorId } : {}) });
       res.status(202).json({ ok: true });
     } catch (error) {
       if (error instanceof AbandonedCartValidationError) {

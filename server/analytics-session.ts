@@ -15,3 +15,17 @@ export function readAnalyticsSessionCookie(req: { headers: IncomingHttpHeaders }
   const value = matches[0].slice('ms_sid='.length);
   return UUID.test(value) ? value.toLowerCase() : undefined;
 }
+
+// The same tracker keeps a random per-browser id in the first-party `ms_vid`
+// cookie. The checkout proxy forwards it so the Suite can recognise a returning
+// buyer; the Suite never sends that buyer's details back to the browser.
+export const ANALYTICS_VISITOR_HEADER = 'x-mlbd-analytics-visitor-id';
+
+export function readAnalyticsVisitorCookie(req: { headers: IncomingHttpHeaders }): string | undefined {
+  const header = req.headers.cookie;
+  if (typeof header !== 'string' || header.length > 8192) return undefined;
+  const matches = header.split(';').map(part => part.trim()).filter(part => part.split('=', 1)[0] === 'ms_vid');
+  if (matches.length !== 1) return undefined;
+  const value = matches[0].slice('ms_vid='.length);
+  return UUID.test(value) ? value.toLowerCase() : undefined;
+}

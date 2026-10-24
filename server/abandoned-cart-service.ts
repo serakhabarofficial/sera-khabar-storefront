@@ -3,7 +3,7 @@ import { isIP } from "node:net";
 import { CLIENT_CONTEXT_HEADER } from "./client-context.ts";
 import { normalizeBdMobile } from "../shared/bd-phone.ts";
 import { CAMPAIGN_CLICK_HEADER, CAMPAIGN_RECEIPT_HEADER } from './campaign-links.js';
-import { ANALYTICS_SESSION_HEADER } from './analytics-session.js';
+import { ANALYTICS_SESSION_HEADER, ANALYTICS_VISITOR_HEADER } from './analytics-session.js';
 
 const MAX_MONEY = 10_000_000;
 const CAPTURE_TIMEOUT_MS = 5_000;
@@ -42,8 +42,10 @@ const captureSchema = z.object({
   source: sourceSchema,
   sourcePath: z.string().trim().min(1).max(120),
   customerName: optionalText(120),
-  phone: z.string().trim().refine((phone) => normalizeBdMobile(phone) === phone, "Phone must be a valid Bangladeshi number"),
+  // A draft may arrive before the phone is complete; a phone that is present must be valid.
+  phone: z.string().trim().refine((phone) => normalizeBdMobile(phone) === phone, "Phone must be a valid Bangladeshi number").optional(),
   address: optionalText(500),
+  returningVisit: z.literal(true).optional(),
   items: z.array(z.object({
     productName: z.string().trim().min(1).max(200),
     variantName: optionalText(160),
@@ -70,6 +72,10 @@ const captureSchema = z.object({
   if (Math.abs(capture.total - (capture.subtotal + capture.deliveryRate)) > 0.001) {
     context.addIssue({ code: z.ZodIssueCode.custom, message: "Checkout total is inconsistent" });
   }
+  // An empty form is only a returning-visit signal; the Merchant Suite fills or drops it.
+  if (!capture.customerName && !capture.phone && !capture.address && !capture.returningVisit) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "Checkout has no customer details" });
+  }
 });
 
 type CampaignKey = "utmSource" | "utmMedium" | "utmCampaign" | "utmContent" | "utmTerm";
@@ -79,8 +85,9 @@ export type AbandonedCartCapture = {
   source: z.infer<typeof sourceSchema>;
   sourcePath: string;
   customerName?: string;
-  phone: string;
+  phone?: string;
   address?: string;
+  returningVisit?: true;
   items: Array<{
     productName: string;
     variantName?: string;
@@ -145,6 +152,7 @@ type AbandonedCartServiceDependencies = {
   campaignClickId?: string;
   campaignReceipt?: string;
   analyticsSessionId?: string;
+  analyticsVisitorId?: string;
 };
 
 export async function processAbandonedCartCapture(
@@ -176,6 +184,7 @@ export async function processAbandonedCartCapture(
         ...(dependencies.campaignClickId ? { [CAMPAIGN_CLICK_HEADER]: dependencies.campaignClickId } : {}),
         ...(dependencies.campaignReceipt ? { [CAMPAIGN_RECEIPT_HEADER]: dependencies.campaignReceipt } : {}),
         ...(dependencies.analyticsSessionId ? { [ANALYTICS_SESSION_HEADER]: dependencies.analyticsSessionId } : {}),
+        ...(dependencies.analyticsVisitorId ? { [ANALYTICS_VISITOR_HEADER]: dependencies.analyticsVisitorId } : {}),
       },
       body: JSON.stringify(capture),
       signal: (dependencies.timeoutSignal ?? (() => AbortSignal.timeout(CAPTURE_TIMEOUT_MS)))(),

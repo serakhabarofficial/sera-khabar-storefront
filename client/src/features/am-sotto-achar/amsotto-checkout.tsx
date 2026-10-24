@@ -87,7 +87,7 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const [, setLocation] = useLocation();
   // The Suite currently accepts the legacy source enum only. Keep its transport contract,
   // but never share a draft key with the honey campaign. Orders carry landingPagePath below.
-  const capture = useAbandonedCartCapture("landing", "am_sotto_achar", (currentLandingPagePath() ?? AMSOTTO_PATH).toLowerCase());
+  const capture = useAbandonedCartCapture("landing", "am_sotto_achar", (currentLandingPagePath() ?? AMSOTTO_PATH).toLowerCase(), { partialContact: true });
   const livePacks = useMemo(() => product ? getLandingPackOptions(product) : [], [product]);
   const lastPacks = useRef(livePacks);
   if (status === "ready" && livePacks.length) lastPacks.current = livePacks;
@@ -102,7 +102,7 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const [pending, setPending] = useState(false);
   const [decision, setDecision] = useState<"review" | "block" | null>(null);
   const [retryable, setRetryable] = useState(true);
-  const submitting = useRef(false), viewed = useRef(false), began = useRef(false);
+  const submitting = useRef(false), viewed = useRef(false), began = useRef(false), visitSent = useRef(false);
   const { formHandlers, trackPhoneCandidate, buildProtectionPayload, resetTurnstileSignal, resetTurnstile, setTurnstileToken } = useCheckoutProtectionSignals();
   const refs = { name: useRef<HTMLInputElement>(null), phone: useRef<HTMLInputElement>(null), address: useRef<HTMLTextAreaElement>(null) };
   const selected = packs.find((pack) => pack.variantId === variantId);
@@ -129,6 +129,30 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
     setErrors((current) => ({ ...current, [field]: undefined }));
     updateCapture(next);
   };
+  // Some in-app browsers autofill a field without firing an input event, so read the boxes themselves.
+  const syncAutofill = () => {
+    for (const field of ["name", "phone", "address"] as Field[]) {
+      const value = refs[field].current?.value;
+      if (value === undefined || value === valuesRef.current[field]) continue;
+      if (field === "phone") trackPhoneCandidate(toLatinDigits(value));
+      setField(field, value);
+    }
+  };
+  // A visit that leaves the form empty still tells the Suite which browser came by; the Suite fills it
+  // from that browser's last order, or drops it for a first-time visitor.
+  const sendReturningVisit = () => {
+    if (visitSent.current) return;
+    syncAutofill();
+    const current = valuesRef.current;
+    if (current.name.trim() || current.phone.trim() || current.address.trim()) { visitSent.current = true; return; }
+    const value = snapshot();
+    if (!value) return;
+    visitSent.current = true;
+    if (capture.capture({ ...value, returningVisit: true })) capture.flushPending();
+  };
+  // Window listeners outlive a render; route them to this render's handlers.
+  const latest = useRef({ syncAutofill, sendReturningVisit });
+  latest.current = { syncAutofill, sendReturningVisit };
   const analyticsItem = (pack: LandingPackOption, qty: number) => toGoogleAnalyticsItem({ id: product?.id ?? pack.variantId, name: product?.name ?? "", variant: pack.label, price: pack.unitPrice, quantity: qty });
   const beginCheckout = () => {
     if (began.current || status !== "ready" || !selected || !product) return;
@@ -146,6 +170,31 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
     trackGoogleEcommerceEvent("view_item", { pageType: "product", value: selected.unitPrice, items: [analyticsItem(selected, 1)] });
   }, [product, selected, status]);
   useEffect(() => { updateCapture(); }, [values, quantity, variantId, product, status]);
+  useEffect(() => {
+    const sync = () => latest.current.syncAutofill();
+    const timers = [250, 1000, 2500].map((delay) => window.setTimeout(sync, delay));
+    window.addEventListener("focus", sync);
+    window.addEventListener("pageshow", sync);
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("pageshow", sync);
+    };
+  }, []);
+  const visitReady = status === "ready" && Boolean(product) && Boolean(presented);
+  useEffect(() => {
+    if (!visitReady || visitSent.current) return;
+    const send = () => latest.current.sendReturningVisit();
+    const timer = window.setTimeout(send, 10_000);
+    const sendWhenHidden = () => { if (document.visibilityState === "hidden") send(); };
+    window.addEventListener("pagehide", send);
+    document.addEventListener("visibilitychange", sendWhenHidden);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pagehide", send);
+      document.removeEventListener("visibilitychange", sendWhenHidden);
+    };
+  }, [visitReady]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

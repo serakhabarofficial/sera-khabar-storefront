@@ -29,6 +29,8 @@ export type AbandonedCartSnapshot = {
   customerName?: string;
   phone: string;
   address?: string;
+  /** An empty form sent on a landing visit; the Merchant Suite fills it only for a returning buyer. */
+  returningVisit?: boolean;
   items: AbandonedCartItem[];
   subtotal: number;
   deliveryRate: number;
@@ -36,7 +38,9 @@ export type AbandonedCartSnapshot = {
   campaign?: AbandonedCartCampaign;
 };
 
-export type AbandonedCartCapturePayload = AbandonedCartSnapshot & {
+export type AbandonedCartCapturePayload = Omit<AbandonedCartSnapshot, "phone" | "returningVisit"> & {
+  phone?: string;
+  returningVisit?: true;
   draftKey: string;
   source: AbandonedCartSource;
   sourcePath: string;
@@ -52,6 +56,8 @@ type AbandonedCartCaptureOptions = {
   draftScope?: string;
   /** The landing page's own address; required for the "landing" source. */
   sourcePath?: string;
+  /** Save as soon as any detail is entered, before the phone number is complete. */
+  partialContact?: boolean;
   storage?: StorageLike;
   fetchImpl?: FetchLike;
   createDraftKey?: () => string | null;
@@ -100,8 +106,16 @@ function validBrowserPhone(phone: string) {
   return normalizeBdMobile(phone) !== null;
 }
 
-function validSnapshot(snapshot: AbandonedCartSnapshot) {
-  if (!validBrowserPhone(snapshot.phone)
+function hasContact(snapshot: AbandonedCartSnapshot, partialContact: boolean) {
+  if (validBrowserPhone(snapshot.phone)) return true;
+  if (!partialContact) return false;
+  return Boolean(normalizedOptionalText(snapshot.customerName, 120)
+    || normalizedOptionalText(snapshot.address, 500)
+    || snapshot.returningVisit);
+}
+
+function validSnapshot(snapshot: AbandonedCartSnapshot, partialContact: boolean) {
+  if (!hasContact(snapshot, partialContact)
     || !isBoundedOptionalText(snapshot.customerName, 120)
     || !isBoundedOptionalText(snapshot.address, 500)
     || !Array.isArray(snapshot.items)
@@ -200,14 +214,16 @@ export class AbandonedCartCapture {
   }
 
   capture(snapshot: AbandonedCartSnapshot) {
-    if (!validSnapshot(snapshot)) return null;
+    if (!validSnapshot(snapshot, this.options.partialContact === true)) return null;
     const draftKey = this.ensureDraftKey();
     if (!draftKey) return null;
 
+    const phone = normalizeBdMobile(snapshot.phone) ?? undefined;
     this.latestPayload = {
       customerName: normalizedOptionalText(snapshot.customerName, 120),
-      phone: normalizeBdMobile(snapshot.phone)!,
+      ...(phone ? { phone } : {}),
       address: normalizedOptionalText(snapshot.address, 500),
+      ...(snapshot.returningVisit ? { returningVisit: true as const } : {}),
       items: snapshot.items.map((item) => ({
         productName: item.productName.trim(),
         variantName: normalizedOptionalText(item.variantName, 160),
@@ -237,6 +253,13 @@ export class AbandonedCartCapture {
   retry() {
     if (!this.failed || !this.latestPayload) return;
     this.schedule(0);
+  }
+
+  /** Sends a waiting or failed save now, for when the page is being hidden or closed. */
+  flushPending() {
+    if (!this.latestPayload || (!this.timer && !this.failed)) return;
+    this.clearTimer();
+    void this.send();
   }
 
   clear() {
