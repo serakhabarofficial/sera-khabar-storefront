@@ -107,6 +107,9 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
   const refs = { name: useRef<HTMLInputElement>(null), phone: useRef<HTMLInputElement>(null), address: useRef<HTMLTextAreaElement>(null) };
   const selected = packs.find((pack) => pack.variantId === variantId);
   const presented = status === "ready" ? selected : undefined;
+  const cheapestPrice = Math.min(...packs.map((p) => p.unitPrice));
+  const compareAt = Number(product?.compare_at_price);
+  const discountPercent = compareAt > cheapestPrice ? Math.round((1 - cheapestPrice / compareAt) * 100) : 0;
   const subtotal = presented ? presented.unitPrice * quantity : null;
   const total = subtotal === null ? null : subtotal + AMSOTTO_DELIVERY_CHARGE;
   // No জেলা on this form, so the window spans Dhaka (1–2 days) and outside Dhaka (2–3 days).
@@ -222,10 +225,10 @@ export function AmsottoCheckout({ product, status, productQuery, inventoryQuery,
             {packs.map((pack) => { const checked = variantId === pack.variantId; return <div key={pack.variantId} className="v1-memo-pack" data-checked={checked}>
               <label>
                 <input className="sr-only" type="radio" name="pack" value={pack.variantId} checked={checked} disabled={status !== "ready" || pending} onChange={() => { beginCheckout(); setVariantId(pack.variantId); setErrors((current) => ({ ...current, pack: undefined })); trackGoogleEcommerceEvent("select_item", { pageType: "product", value: pack.unitPrice, items: [analyticsItem(pack, quantity)] }); }} />
-                <span className="dot" aria-hidden="true" /><span className="lbl">{pack.label}<small>{AMSOTTO_PACK_META[pack.label]?.note}</small></span>
+                <span className="dot" aria-hidden="true" /><span className="lbl">{pack.label}{status === "ready" && discountPercent > 0 && pack.unitPrice === cheapestPrice ? <em className="off">{bn(discountPercent)}% ছাড়</em> : null}<small>{AMSOTTO_PACK_META[pack.label]?.note}</small></span>
               </label>
               <div className="end">
-                <span className="pr">{status === "ready" ? taka(pack.unitPrice) : "—"}{status === "ready" && pack.unitPrice === Number(product?.price) && Number(product?.compare_at_price) > pack.unitPrice ? <s>{taka(Number(product?.compare_at_price))}</s> : null}</span>
+                <span className="pr">{status === "ready" ? taka(pack.unitPrice) : "—"}{status === "ready" && pack.unitPrice === Math.min(...packs.map((p) => p.unitPrice)) && Number(product?.compare_at_price) > pack.unitPrice ? <s>{taka(Number(product?.compare_at_price))}</s> : null}</span>
                 {checked && <div className="skx-qty" role="group" aria-label={`${pack.label} পরিমাণ`}><button type="button" aria-label="কমান" disabled={quantity <= 1 || pending || status !== "ready"} onClick={() => { beginCheckout(); setQuantity((n) => Math.max(1, n - 1)); }}>−</button><output aria-live="polite">{bn(quantity)}</output><button type="button" aria-label="বাড়ান" disabled={quantity >= MAX_LINE_QUANTITY || pending || status !== "ready"} onClick={() => { beginCheckout(); setQuantity((n) => Math.min(MAX_LINE_QUANTITY, n + 1)); }}>+</button></div>}
               </div>
             </div>; })}

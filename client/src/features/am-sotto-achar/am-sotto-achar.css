@@ -143,11 +143,17 @@
 .amsotto .v1-memo-pack[data-checked="true"] .dot { background:var(--royal); box-shadow:none; }
 .amsotto .v1-memo-pack[data-checked="true"] .dot::after { transform:scale(1); }
 .amsotto .v1-memo-pack .lbl { font-family:var(--display); font-size:17px; font-weight:800; line-height:1.4; color:var(--ink); }
+.amsotto .v1-memo-pack .lbl .off { position:relative; display:inline-block; margin-left:8px; padding:3px 12px; border-radius:999px; background:var(--chili); color:#fff; font-family:var(--body); font-size:14px; font-weight:800; font-style:normal; line-height:1.5; vertical-align:middle; }
+/* Minimal border beam: one short, soft streak on a 1px ring. */
+@property --amsotto-beam { syntax:"<angle>"; initial-value:0deg; inherits:false; }
+@keyframes amsotto-beam { to { --amsotto-beam:360deg; } }
+.amsotto .v1-memo-pack .lbl .off::after { content:""; position:absolute; inset:0; padding:1px; border-radius:inherit; background:conic-gradient(from var(--amsotto-beam),transparent 0 80%,rgba(255,255,255,.85) 100%); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0); pointer-events:none; animation:amsotto-beam 3s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .amsotto .v1-memo-pack .lbl .off::after { animation:none; } }
 .amsotto .v1-memo-pack .lbl small { display:block; font-family:var(--body); font-size:11px; font-weight:400; color:var(--muted); }
 .amsotto .v1-memo-pack .end { position:relative; z-index:1; display:grid; justify-items:end; gap:6px; pointer-events:none; }
 .amsotto .v1-memo-pack .pr { font-family:var(--display); font-size:21px; font-weight:900; line-height:1.2; font-variant-numeric:tabular-nums; color:var(--ink); transition:color 200ms ease; }
 .amsotto .v1-memo-pack[data-checked="true"] .pr { color:var(--chili); }
-.amsotto .v1-memo-pack .pr s { display:block; font-size:12px; font-weight:400; color:var(--muted); }
+.amsotto .v1-memo-pack .pr s { display:inline-block; margin-left:8px; font-size:16px; font-weight:700; color:var(--sub); text-decoration:none; padding:0 2px; background:linear-gradient(to bottom right,transparent calc(50% - 1px),var(--chili) calc(50% - 1px),var(--chili) calc(50% + 1px),transparent calc(50% + 1px)); }
 .amsotto .v1-memo-pack .skx-qty { pointer-events:auto; border:0; background:#fff; box-shadow:0 1px 2px #3f1a0b14,0 4px 10px -6px #3f1a0b55; animation:amsotto-qty-in 260ms var(--ease-out); }
 .amsotto .v1-memo-pack .skx-qty button { min-width:36px; min-height:36px; font-size:18px; color:var(--royal); }
 .amsotto .v1-memo-pack .skx-qty output { min-width:22px; font-family:var(--display); font-size:15px; font-weight:700; color:var(--ink); }

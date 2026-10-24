@@ -21,9 +21,7 @@ export const AMSOTTO_BOWL_IMAGE = `${IMG}/amsotto-bowl-v1.webp`;
 
 /** Editorial notes only; all prices, including comparison prices, come from the catalog. */
 export const AMSOTTO_PACK_META: Record<string, { note: string }> = {
-  "৫০০ গ্রাম": { note: "প্রথমবার স্বাদ নিতে" },
-  "১ কেজি": { note: "পরিবারের জন্য সাশ্রয়ী" },
-};
+  "৫০০ গ্রাম": { note: "প্রথমবার স্বাদ নিতে" },};
 
 export const AMSOTTO_TASTES = [
   { name: "টক", step: "প্রথম কামড়", title: "তীব্র টক", line: "পাকা আমের আমসত্ত্ব। প্রথম ছোঁয়াতেই জিভ জেগে ওঠে।", ink: "#a67c00", icon: "sour" },
