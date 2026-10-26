@@ -4,6 +4,8 @@ export type GoogleEcommerceEventName =
   | "view_item"
   | "select_item"
   | "add_to_cart"
+  | "view_cart"
+  | "remove_from_cart"
   | "begin_checkout"
   | "purchase";
 
@@ -32,7 +34,7 @@ type GoogleAnalyticsItemInput = {
 
 type GoogleEcommerceBaseInput = {
   event: GoogleEcommerceEventName;
-  pageType: "product" | "checkout" | "thank_you";
+  pageType: "product" | "cart" | "checkout" | "thank_you";
   title?: string;
   url?: string;
   language?: string;

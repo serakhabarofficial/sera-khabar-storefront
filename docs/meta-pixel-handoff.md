@@ -38,10 +38,12 @@ Meta keeps one copy of each event because both copies carry the same `event_name
 |---|---|---|---|
 | (route change) | `PageView` | yes | yes, via `/api/storefront-signal` |
 | `view_item` | `ViewContent` | yes | yes, via `/api/storefront-signal` |
-| `add_to_cart` | `AddToCart` | yes | yes, via `/api/storefront-signal` |
+| `add_to_cart` (incl. the bag's + button) | `AddToCart` | yes | yes, via `/api/storefront-signal` |
 | `begin_checkout` | `InitiateCheckout` | yes | yes, via `/api/storefront-signal` |
 | `purchase` | `Purchase` | yes | yes, from `api/orders.ts` after the order is saved |
 | `select_item` | — (not a Meta event) | no | no |
+| `view_cart` (bag opened) | — (not a Meta event) | no | no |
+| `remove_from_cart` (bag − / Remove) | — (not a Meta event) | no | no |
 
 No `AddPaymentInfo`: checkout is cash on delivery only. No email: checkout does not ask for one.
 

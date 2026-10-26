@@ -57,7 +57,9 @@ anyone. Only put non-secret values there.
 
 Tracking: Meta Pixel + Conversions API are sent from code (`docs/meta-pixel-handoff.md`). Google Tag
 Manager `GTM-MHFGH4B8`, managed by the merchant's ad agency, loads from `client/index.html` and reads
-the ecommerce `dataLayer` (`view_item`, `add_to_cart`, `begin_checkout`, `select_item`, `purchase`).
+the ecommerce `dataLayer` (`view_item`, `add_to_cart`, `view_cart`, `remove_from_cart`, `begin_checkout`, `select_item`,
+`purchase`). The bag sends `view_cart` when it opens, and its + / − / Remove buttons send
+`add_to_cart` / `remove_from_cart` for the units that changed.
 The `purchase` event carries `ecommerce.customer` (name, phone, address) by the merchant's choice, so
 every tag in the container can read it.
 
