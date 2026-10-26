@@ -164,4 +164,4 @@ thank-you pages as `client/src/pages/<name>-thank-you.tsx`, so use those names. 
 - Don't send Purchase from the browser to `/api/storefront-signal`; it is rejected by design.
 - Don't put plain name/phone/address into Meta `custom_data`. Customer data goes to Meta only hashed,
   in `user_data`, from the server.
-- Don't add GTM to forward the same events to Meta as well; that doubles every event.
+- Don't add a Meta Pixel tag to GTM (`GTM-MHFGH4B8`, loaded in `client/index.html`); that doubles every event.

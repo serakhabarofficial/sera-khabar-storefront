@@ -4,6 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+  <!-- Google Tag Manager. Reads the ecommerce dataLayer from client/src/lib/google-analytics.ts.
+       Must not carry a Meta Pixel tag: Meta is sent from code (see docs/meta-pixel-handoff.md). -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-MHFGH4B8');</script>
+  <!-- End Google Tag Manager -->
+
   <title>সেরা খাবার - Sera Khabar</title>
 
   <meta name="description" content="সেরা খাবার — Sera Khabar. Rajshahi's best mangoes, gur and homemade food, delivered across Bangladesh." />
@@ -94,6 +104,10 @@
 </head>
 
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MHFGH4B8"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

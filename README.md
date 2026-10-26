@@ -55,12 +55,14 @@ never commit it. `.env.example` is the committed template.
 Anything prefixed `VITE_` is compiled into the public JavaScript bundle and is readable by
 anyone. Only put non-secret values there.
 
-No Google Tag Manager, GA4 or Meta Pixel is installed yet (Sera Khabar has none; the copied Mango Lover tags were removed). When added, the
-storefront emits only safe ecommerce `dataLayer` events; do not add direct analytics, Pixel, or CAPI
-configuration to this application.
+Tracking: Meta Pixel + Conversions API are sent from code (`docs/meta-pixel-handoff.md`). Google Tag
+Manager `GTM-MHFGH4B8`, managed by the merchant's ad agency, loads from `client/index.html` and reads
+the ecommerce `dataLayer` (`view_item`, `add_to_cart`, `begin_checkout`, `select_item`, `purchase`).
+The `purchase` event carries `ecommerce.customer` (name, phone, address) by the merchant's choice, so
+every tag in the container can read it.
 
-Before deploying tracking changes, verify the GTM container has one GA4 configuration tag, one Meta
-Pixel/CAPI path, and one trigger per ecommerce event. Use a History Change or virtual page-view trigger
+Before deploying tracking changes, verify the GTM container has no Meta Pixel tag (that would double
+every Meta event) and one trigger per ecommerce event. Use a History Change or virtual page-view trigger
 for SPA navigation without duplicating the initial page view, then validate GA4 DebugView, Meta Test
 Events, and Meta Pixel Helper on the deployed storefront.
 
