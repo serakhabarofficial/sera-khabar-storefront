@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useState, useEffect, useRef } from 'react';
 import { trackMerchantSuiteEvent } from "@/lib/merchant-suite";
 import { trackGoogleEcommerceEvent, type GoogleAnalyticsItem } from "@/lib/google-analytics";
+import { cartItemsValue, cartLineAnalyticsItem, quantityChangeEvent } from "@/lib/cart-analytics";
 import { MAX_LINE_QUANTITY } from "@shared/order-limits";
 
 export interface CartItem {
@@ -80,12 +81,26 @@ function afterNextPaint(run: () => void) {
     requestAnimationFrame(() => setTimeout(run, 0));
 }
 
+// Bag events for GTM. view_cart and remove_from_cart have no Meta event; add_to_cart from the
+// bag's plus button also goes to Meta, like any other add.
+function trackCartEvent(event: "view_cart" | "add_to_cart" | "remove_from_cart", items: GoogleAnalyticsItem[]) {
+    afterNextPaint(() => trackGoogleEcommerceEvent(event, { pageType: "cart", value: cartItemsValue(items), items }));
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [notice, setNotice] = useState<CartNotice | null>(null);
     const [cartPulseKey, setCartPulseKey] = useState(0);
     const noticeSeq = useRef(0);
+    const itemsRef = useRef(items);
+    itemsRef.current = items;
+
+    // One view_cart each time the bag opens with something in it.
+    useEffect(() => {
+        if (!isOpen || itemsRef.current.length === 0) return;
+        trackCartEvent("view_cart", itemsRef.current.map((line) => cartLineAnalyticsItem(line, line.quantity)));
+    }, [isOpen]);
 
     // Load cart from localStorage on mount (migrates legacy stepprs-cart key)
     useEffect(() => {
@@ -176,7 +191,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const removeFromCart = (itemId: string) => {
+        const line = items.find(item => item.id === itemId);
         setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+        if (line) trackCartEvent("remove_from_cart", [cartLineAnalyticsItem(line, line.quantity)]);
     };
 
     const updateQuantity = (itemId: string, quantity: number) => {
@@ -185,11 +202,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             return;
         }
 
+        const line = items.find(item => item.id === itemId);
+        const next = Math.min(MAX_LINE_QUANTITY, quantity);
         setItems(prevItems =>
             prevItems.map(item =>
-                item.id === itemId ? { ...item, quantity: Math.min(MAX_LINE_QUANTITY, quantity) } : item
+                item.id === itemId ? { ...item, quantity: next } : item
             )
         );
+        const change = line ? quantityChangeEvent(line.quantity, next) : null;
+        if (line && change) trackCartEvent(change.event, [cartLineAnalyticsItem(line, change.quantity)]);
     };
 
     // Changes a bag row to another size of the same product without moving it in the bag. `keep` units of the

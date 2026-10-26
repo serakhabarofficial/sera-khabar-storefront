@@ -26,6 +26,25 @@ test("cart add sends add_to_cart with selected variant metadata", () => {
   assert.match(cartContext, /analyticsItem\?: GoogleAnalyticsItem/);
 });
 
+test("opening the bag sends view_cart with every row", () => {
+  assert.match(cartContext, /trackCartEvent\("view_cart", itemsRef\.current\.map\(\(line\) => cartLineAnalyticsItem\(line, line\.quantity\)\)\)/);
+  assert.match(cartContext, /if \(!isOpen \|\| itemsRef\.current\.length === 0\) return;/);
+});
+
+test("the bag's Remove, minus and plus send remove_from_cart and add_to_cart", () => {
+  const remove = cartContext.slice(cartContext.indexOf("const removeFromCart"), cartContext.indexOf("const updateQuantity"));
+  assert.match(remove, /trackCartEvent\("remove_from_cart", \[cartLineAnalyticsItem\(line, line\.quantity\)\]\)/);
+  const update = cartContext.slice(cartContext.indexOf("const updateQuantity"), cartContext.indexOf("const swapVariant"));
+  assert.match(update, /removeFromCart\(itemId\);/);
+  assert.match(update, /quantityChangeEvent\(line\.quantity, next\)/);
+  assert.match(update, /trackCartEvent\(change\.event, \[cartLineAnalyticsItem\(line, change\.quantity\)\]\)/);
+  // Emptying the bag after an order and switching sizes are not removals.
+  for (const name of ["const swapVariant", "const clearCart"]) {
+    const start = cartContext.indexOf(name);
+    assert.doesNotMatch(cartContext.slice(start, cartContext.indexOf("};", start)), /trackCartEvent/);
+  }
+});
+
 test("homepage add to cart passes real product metadata into cart analytics", () => {
   assert.match(homeProductCard, /toGoogleAnalyticsItem/);
   assert.match(homeProductCard, /analyticsItem: toGoogleAnalyticsItem\(\{/);

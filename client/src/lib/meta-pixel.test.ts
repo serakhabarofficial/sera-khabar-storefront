@@ -93,6 +93,18 @@ test("select_item has no Meta event and PageView is sent both ways", () => {
   });
 });
 
+test("view_cart and remove_from_cart stay in the dataLayer and never reach Meta", () => {
+  withBrowser((calls, beacons) => {
+    for (const event of ["view_cart", "remove_from_cart"] as const) {
+      assert.equal(trackMetaEcommerceEvent(buildGoogleEcommercePayload({
+        event, pageType: "cart", value: 450, items: [item],
+      })), null);
+    }
+    assert.equal(calls.length, 0);
+    assert.equal(beacons.length, 0);
+  });
+});
+
 test("the dataLayer purchase carries the Meta event_id, fbp and fbc", () => {
   withBrowser(() => {
     const target = {
