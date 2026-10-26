@@ -73,7 +73,9 @@ the committed template.
 secret behind a `VITE_` prefix, and never read `CUSTOM_ORDERS_API_KEY` from client code.
 
 **Meta Pixel + Conversions API (approved 2026-10-20).** Pixel `1433713624268170` (`shared/meta.ts`,
-also in `client/index.html`). No Google Tag Manager or GA4 is installed. **Full guide and the
+also in `client/index.html`). Google Tag Manager `GTM-MHFGH4B8` (the merchant's ad agency's
+container) also loads from `client/index.html` and reads the same `dataLayer`; it must not carry a Meta
+Pixel tag, because Meta is already sent from code. **Full guide and the
 new-landing-page checklist: `docs/meta-pixel-handoff.md` — read it before building any landing page,
 checkout or thank-you page.** In short: pages call `trackGoogleEcommerceEvent()` only and never `fbq`;
 a new landing starts from the landing kit (`client/src/features/landing/`), which already sends
