@@ -17,6 +17,8 @@ import KatimonMangoPage from "@/pages/katimon-mango";
 import HomemadePumpkinBoriPage from "@/pages/homemade-pumpkin-bori";
 import AmSottoAcharPage from "@/pages/am-sotto-achar";
 import AmSottoAcharThankYouPage from "@/pages/am-sotto-achar-thank-you";
+import KhejurerGurPage from "@/pages/khejurer-gur";
+import KhejurerGurThankYouPage from "@/pages/khejurer-gur-thank-you";
 import { BORI_CAMPAIGN_WHATSAPP_HREF } from "@/features/landing/bori-content";
 import { KATIMON_CAMPAIGN_WHATSAPP_HREF } from "@/features/landing/katimon-content";
 import CollectionPage from "@/pages/collection";
@@ -28,6 +30,8 @@ import { trackMetaPageView } from "@/lib/meta-pixel";
 const CAMPAIGN_PAGE_TITLES: Record<string, string> = {
   "/step/am-sotto-achar": "আমসত্ত্ব আচার | সেরা খাবার",
   "/step/am-sotto-achar/thank-you": "আমসত্ত্ব আচার অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
+  "/step/khejurer-gur": "খেজুরের গুড় | সেরা খাবার",
+  "/step/khejurer-gur/thank-you": "খেজুরের গুড় অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
   "/step/katimon-mango": "কাটিমন আম | সেরা খাবার",
   "/step/katimon-mango/thank-you": "কাটিমন আম অর্ডারের জন্য ধন্যবাদ | সেরা খাবার",
   "/step/homemade-pumpkin-bori": "কুমড়ো বড়ি | সেরা খাবার",
@@ -168,6 +172,12 @@ function Router() {
           </Route>
           <Route path="/step/homemade-pumpkin-bori">
             <PageTransition standalone><HomemadePumpkinBoriPage /></PageTransition>
+          </Route>
+          <Route path="/step/khejurer-gur/thank-you">
+            <PageTransition standalone><KhejurerGurThankYouPage /></PageTransition>
+          </Route>
+          <Route path="/step/khejurer-gur">
+            <PageTransition standalone><KhejurerGurPage /></PageTransition>
           </Route>
           <Route path="/step/am-sotto-achar/thank-you">
             <PageTransition standalone><AmSottoAcharThankYouPage /></PageTransition>
