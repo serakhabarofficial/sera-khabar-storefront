@@ -1,18 +1,17 @@
 import { ArrowUpRight } from "lucide-react";
 import brandLogo from "@assets/sera-khabar-logo.webp";
 import { WhatsAppBrandIcon } from "@/features/landing/campaign-layout";
-import { AL, FOOTER_CELL_BLOOM, FOOTER_LOTUS, FOOTER_ROW } from "./alpona";
+import { FOOTER_CELL_BLOOM, FOOTER_LOTUS, FOOTER_ROW, JHALOR } from "./alpona";
 import { GUR_CREDIT_HREF, GUR_PHONE_HREF, GUR_PHONE_LABEL, GUR_WHATSAPP_HREF } from "./content";
 
 const html = (markup: string) => ({ dangerouslySetInnerHTML: { __html: markup } });
-const EDGE = AL.border("currentColor", 1200);
 const bloom = <span className="sg-al" aria-hidden="true"><svg viewBox="-100 -100 200 200" {...html(FOOTER_CELL_BLOOM)} /></span>;
 
 // দুই রঙ footer: a terracotta crown with the logo and a turning lotus, then a cream sheet for
 // everything readable — Swiss-grid call cells, links, credit and copyright.
 export function GurFooter() {
   return <footer className="ftw"><div className="ft ft1" data-io>
-    <div className="ft-edge" aria-hidden="true" {...html(EDGE)} />
+    <div className="ft-edge" aria-hidden="true" {...html(JHALOR)} />
     <div className="ft1-in">
       <div className="ft-mand" aria-hidden="true"><svg viewBox="-100 -100 200 200" {...html(FOOTER_LOTUS)} /></div>
       <img className="ft-logo" src={brandLogo} alt="সেরা খাবার" width={700} height={128} loading="lazy" />

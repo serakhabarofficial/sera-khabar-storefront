@@ -1,7 +1,8 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import brandLogo from "@assets/sera-khabar-logo.webp";
 import type { LandingPackOption } from "@/features/landing/order";
-import { AL, BURSTS, END_STRIP, LINE_TIP, NAKSHI_STRIP, PILL_LOTUS, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_TIP } from "./alpona";
+import { AL, BURSTS, END_STRIP, JHALOR, LINE_TIP, NAKSHI_STRIP, PILL_LOTUS, QUOTE_CARTOUCHE, QUOTE_CORNER_LOTUS, QUOTE_STRIP, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
+import { banglaDateParts } from "./bangla-date";
 import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_USES, GUR_WHY, taka, reducedMotion, type GurProductMeta } from "./content";
 
 export type GurShelfItem = { meta: GurProductMeta; packs: LandingPackOption[]; compareAt: number };
@@ -9,7 +10,6 @@ type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string,
 
 const html = (markup: string) => ({ dangerouslySetInnerHTML: { __html: markup } });
 const HERO_MANDALA = `<svg viewBox="-100 -100 200 200">${AL.lotus("#D98A6E")}</svg>`;
-const BORDER = AL.border("#A63D24", 1200);
 
 /** Scroll-drawn line through the three গুড়, with the lotus riding its tip. */
 function useTimeline(box: React.RefObject<HTMLDivElement | null>, deps: unknown) {
@@ -98,11 +98,13 @@ export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
     <p className="gf-kick rv">রাজশাহীর গাছির হাতে · শীতের ভোরে</p>
     <h1 className="gf-word">
       <span className="gf-pre rv" style={{ "--d": "80ms" } as React.CSSProperties}>খেজুরের</span>
+      <span className="gf-lw">
       <img className="gf-lett" src={GUR_IMAGES.lettering} alt="গুড়" width={1200} height={859} fetchPriority="high" />
-      <svg className="gf-drop gf-fall" style={{ "--fall": "calc(min(330px,58vw) * .42 + 52px)" } as React.CSSProperties} viewBox="0 0 22 30" aria-hidden="true">
+      <svg className="gf-drop gf-fall" viewBox="0 0 22 30" aria-hidden="true">
         <defs><radialGradient id="gfG" cx="38%" cy="58%" r="70%"><stop offset="0" stopColor="#f08a3a" /><stop offset=".55" stopColor="#b4531b" /><stop offset="1" stopColor="#6a2207" /></radialGradient></defs>
         <path d="M11 0 C11 0 1 13 1 19.5 A10 10 0 0 0 21 19.5 C21 13 11 0 11 0Z" fill="url(#gfG)" /><ellipse cx="7.4" cy="18" rx="2.2" ry="3.6" fill="#fff" opacity=".55" transform="rotate(18 7.4 18)" />
       </svg>
+      </span>
     </h1>
     <div className="gf-trio">
       <div className="al-mand" aria-hidden="true" {...html(HERO_MANDALA)} />
@@ -113,7 +115,32 @@ export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
     <p className="gf-sub rv" style={{ "--d": "200ms" } as React.CSSProperties}>ঝোলা · বীজ · পাটালি — চিনি নেই, ভেজাল নেই</p>
     <a className="btn rv" style={{ "--d": "260ms" } as React.CSSProperties} href="#gur-order" onClick={onOrderClick}>এখনই অর্ডার করুন</a>
     <small>ক্যাশ অন ডেলিভারি · সারা দেশে ৳১০০</small>
-    <div className="al-bd" aria-hidden="true" {...html(BORDER)} />
+  </section>;
+}
+
+const WHY_ICONS = { minerals: WHY_MINERALS, sweet: WHY_SWEET };
+const QUOTE = "কুয়াশার কোলে শিশিরের গান, খেজুরের গুড়ে বাংলার প্রাণ";
+
+// The verse under the hero, as a মোহিনী-style কার্তুশ on the burgundy lotus pattern: pink stepped frame,
+// lotuses in the corners, today's বঙ্গাব্দ date, and the hand-lettered verse on a cream panel that rises in.
+export function GurQuote() {
+  // Today's বঙ্গাব্দ date; rechecked every minute so an open page turns over at midnight in Dhaka.
+  const [today, setToday] = useState(() => banglaDateParts());
+  useEffect(() => {
+    const timer = window.setInterval(() => setToday(banglaDateParts()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return <section className="gf-q" data-io style={{ "--pat": `url(${GUR_IMAGES.lotusPattern})` } as React.CSSProperties}>
+    <div className="q-strip t" aria-hidden="true" {...html(QUOTE_STRIP)} />
+    <div className="q-cart">
+      <svg className="q-frame" viewBox="0 0 300 380" preserveAspectRatio="none" aria-hidden="true" {...html(QUOTE_CARTOUCHE)} />
+      {["tl", "tr", "bl", "br"].map((c) => <span key={c} className={`q-lotus ${c}`} aria-hidden="true"><svg viewBox="-50 -50 100 70" {...html(QUOTE_CORNER_LOTUS)} /></span>)}
+      <blockquote>
+        <span className="q-cal"><i>{today.month}</i><b>{today.day}</b><small>{today.year}</small></span>
+        <img className="q-lett" src={GUR_IMAGES.quoteLettering} alt={QUOTE} width={1200} height={442} loading="lazy" />
+      </blockquote>
+    </div>
+    <div className="q-strip b" aria-hidden="true" {...html(QUOTE_STRIP)} />
   </section>;
 }
 
@@ -122,9 +149,9 @@ export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) 
   const vine = useRef<HTMLDivElement>(null);
   useTimeline(timeline, shelf.map((s) => s.packs.length).join());
   useVine(vine);
-  return <section className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" {...html(BORDER)} /><div>
+  return <section className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" {...html(JHALOR)} /><div>
     <div className="gf-shh">
-      <div className="gf-mark"><b>গুড়</b><span>সেরা খাবার</span></div>
+      <div className="gf-mark"><b>গুড়</b></div>
       <div className="gf-intro"><h2 id="gf-sh-h">শীতের তিন গুড়</h2><p>রাজশাহীর গাছির হাতে বানানো খেজুরের গুড়। এই শীতে আমাদের প্রিয় তিনটি: ঝোলা, বীজ আর পাটালি। যেকোনো দাম ছুঁলেই মেমোতে উঠবে।</p></div>
     </div>
     <div className="gf-tl" ref={timeline}>
@@ -173,7 +200,7 @@ export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) 
         <div className="vn" ref={vine}>
           <svg className="vn-svg" aria-hidden="true"><path className="stem" /><g className="vn-bud" {...html(WHY_TIP)} /></svg>
           {GUR_WHY.map((why, n) => <div key={why.title} className={`vn-it${n % 2 ? " r" : ""}`}>
-            <div className="vn-node"><svg viewBox="-100 -100 200 200" aria-hidden="true" {...html(WHY_BLOOM)} /><div className="ph"><img src={why.image} alt="" width={560} height={512} loading="lazy" /></div></div>
+            <div className="vn-node"><svg viewBox="-100 -100 200 200" aria-hidden="true" {...html(WHY_BLOOM)} />{"icon" in why ? <div className="ph ic"><svg viewBox="12 12 76 76" aria-hidden="true" {...html(WHY_ICONS[why.icon])} /></div> : <div className="ph"><img src={why.image} alt="" width={560} height={512} loading="lazy" /></div>}</div>
             <div className="vn-tx"><b>{why.title}</b><span>{why.line}</span></div>
           </div>)}
         </div>

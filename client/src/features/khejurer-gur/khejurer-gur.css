@@ -88,9 +88,19 @@
 .kg .am-k .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
 /* ── bottom bar + toast ── */
-.kg .bar { position:fixed; left:10px; right:10px; bottom:calc(10px + env(safe-area-inset-bottom,0px)); z-index:40; max-width:520px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 18px; border-radius:999px; background:var(--navy); color:#fff; box-shadow:0 16px 30px -14px #0f3b4f99; transform:translateY(170%); transition:transform 380ms var(--ease-out); }
+.kg .bar { position:fixed; left:10px; right:10px; bottom:calc(10px + env(safe-area-inset-bottom,0px)); z-index:40; max-width:520px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:7px 7px 7px 8px; border-radius:999px; background:#FFF6E6; color:#3B1A0A; box-shadow:inset 0 0 0 2px #A63D24, 0 16px 30px -14px #5A1E0E80; transform:translateY(170%); transition:transform 380ms var(--ease-out); }
 .kg .bar.show { transform:none; }
-.kg .bar p { flex:1; margin:0; font-size:12.5px; line-height:1.3; } .kg .bar p b { display:block; font-size:16px; }
+/* order bar: cream pill with a terracotta rim, dotted rice-paste seam and a turning আলপনা lotus, like the page's buttons */
+.kg .bar::before { content:""; position:absolute; inset:5px; border-radius:inherit; border:1.4px dotted #A63D2499; pointer-events:none; }
+.kg .bar-lotus { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:50%; background:#A63D24; color:#FFF6E6; }
+.kg .bar-lotus svg { width:26px; height:26px; animation:gf-turn 12s linear infinite; }
+/* label and a hanging mustard price tag side by side */
+.kg .bar p { flex:1; min-width:0; display:flex; align-items:center; gap:8px; margin:0; font:600 12.5px/1.25 "Noto Sans Bengali",sans-serif; color:#A63D24; }
+.kg .bar p span { min-width:0; }
+.kg .bar p b { position:relative; flex:none; display:flex; align-items:baseline; gap:4px; padding:3px 10px 3px 17px; background:#F6C453; color:#3B1A0A; font:800 16px/1.2 "Noto Sans Bengali",sans-serif; clip-path:polygon(9px 0,100% 0,100% 100%,9px 100%,0 50%); }
+.kg .bar p b::before { content:""; position:absolute; left:7px; top:50%; width:4px; height:4px; margin-top:-2px; border-radius:50%; background:#FFF6E6; }
+.kg .bar p b small { font-size:11px; font-weight:700; }
+@media (prefers-reduced-motion:reduce) { .kg .bar-lotus svg { animation:none; } }
 .kg .toast { position:fixed; left:50%; top:62px; z-index:60; translate:-50% 0; padding:10px 16px; border-radius:999px; background:var(--navy); color:#fff; font-weight:700; opacity:0; transform:translateY(-10px) scale(.96); transition:opacity 240ms var(--ease-out),transform 240ms var(--ease-out); pointer-events:none; white-space:nowrap; }
 .kg .toast.show { opacity:1; transform:none; }
 
@@ -102,23 +112,30 @@
 .kg .bar .btn::after { inset:4px; }
 @media (hover:hover) and (pointer:fine) { .gf .btn:hover, .kg .bar .btn:hover, .kg .skx-submit:not(:disabled):hover { background:#8E3119; } }
 .gf-drop { display:block; width:22px; height:30px; }
-.gf-hero { position:relative; min-height:100svh; display:flex; flex-direction:column; align-items:center; padding:28px 20px 40px; text-align:center; overflow:clip; }
+.gf-hero { position:relative; display:flex; flex-direction:column; align-items:center; padding:28px 20px 12px; text-align:center; overflow:clip; }
 .gf-hero::before { content:""; position:absolute; inset:4% -30% auto; height:56%; background:radial-gradient(closest-side,#f8d9a6 0%,#fbf4e800 70%); pointer-events:none; }
 .gf .gf-logo { position:relative; height:24px; width:auto; }
 /* রেখার মাঝে: a hairline under the logo, a quiet kicker, then খেজুরের between two short dashes */
 .gf-kick { position:relative; width:220px; margin:12px 0 0; padding-top:12px; border-top:1px solid #B4531B55; font:500 12.5px/1.4 "Noto Sans Bengali",sans-serif; color:var(--sub); }
-.gf-word { position:relative; width:min(340px,86vw); margin:22px 0 0; font:inherit; }
+/* lettering, falling drop and bowl share one geometry so the drop leaves the big drip and lands on the gur */
+.gf-hero { --ww:min(340px,86vw); --lw:var(--ww); --bw:min(330px,58vw); }
+@media (max-width:600px) { .gf-hero { --lw:calc(var(--ww) * .84); } }
+.gf-word { position:relative; width:var(--ww); margin:22px 0 0; font:inherit; }
+.gf-hero > .gf-word:not(.al-mand):not(.al-kl):not(.al-bd) { z-index:3; }
+.gf-lw { position:relative; display:block; width:var(--lw); margin:4px auto 0; animation:gf-float 6s ease-in-out infinite; }
 .gf-pre { display:flex; align-items:center; justify-content:center; gap:12px; font-size:26px; font-weight:700; line-height:1; color:var(--deep); }
 .gf-pre::before, .gf-pre::after { content:""; width:34px; height:2px; border-radius:2px; background:#A63D24; }
-.gf-lett { position:relative; z-index:1; width:100%; margin-top:4px; filter:drop-shadow(0 18px 18px rgba(120,40,0,.25)); animation:gf-float 6s ease-in-out infinite; }
-@keyframes gf-float { 50% { transform:translateY(-6px); } }
-.gf-fall { position:absolute; left:47%; top:88%; z-index:0; animation:gf-fall 3.4s cubic-bezier(.55,0,1,.45) infinite; transform-origin:50% 0; }
+.gf-lett { position:relative; z-index:1; display:block; width:100%; filter:drop-shadow(0 18px 18px rgba(120,40,0,.25)); }
+@keyframes gf-float { 50% { transform:translateY(-3px); } }
+/* the big drip's tip is at 48.2% across and 95% down the lettering; the gur in the bowl is centred 45% down the bowl */
+.gf-fall { --dw:calc(var(--lw) * .042); --dh:calc(var(--dw) * 1.364); --fall:calc(var(--lw) * .7167 * .05 + 14px + var(--bw) * .45 - var(--dh) * 1.15);
+  width:var(--dw); height:var(--dh); position:absolute; left:calc(48.2% - var(--dw) / 2); top:95%; z-index:0; animation:gf-fall 3.4s cubic-bezier(.55,0,1,.45) infinite; transform-origin:50% 0; }
 @keyframes gf-fall {
   0% { transform:translateY(-14px) scale(.2,.6); opacity:0; }
   18% { transform:translateY(-8px) scale(.9,1.25); opacity:1; }
   34% { transform:translateY(0) scale(1); opacity:1; animation-timing-function:cubic-bezier(.55,0,1,.45); }
   62% { transform:translateY(var(--fall,150px)) scale(.9,1.15); opacity:1; }
-  64%,100% { transform:translateY(var(--fall,150px)) scale(1.4,.3); opacity:0; }
+  64%,100% { transform:translateY(calc(var(--fall,150px) + var(--dh,30px) * .85)) scale(1.4,.3); opacity:0; }
 }
 .gf-trio { position:relative; width:min(660px,100vw); margin-top:14px; display:flex; justify-content:center; }
 .gf-bowl { position:relative; z-index:2; width:min(330px,58vw); mix-blend-mode:multiply; }
@@ -130,7 +147,7 @@
 .gf-hero.in .gf-side.l { transform:rotate(-9deg); }
 .gf-hero.in .gf-side.r { transform:rotate(8deg); }
 .gf-bowl img { width:100%; -webkit-mask-image:radial-gradient(closest-side,#000 74%,transparent 100%); mask-image:radial-gradient(closest-side,#000 74%,transparent 100%); }
-.gf-ring { position:absolute; left:50%; top:47%; width:46%; aspect-ratio:2.2; margin-left:-23%; border:2px solid #7b2a0c; border-radius:50%; opacity:0; animation:gf-ring 3.4s var(--ease-out) infinite; }
+.gf-ring { position:absolute; left:calc(50% - var(--lw) * .018); top:45%; width:46%; aspect-ratio:2.2; translate:-50% -50%; border:2px solid #7b2a0c; border-radius:50%; opacity:0; animation:gf-ring 3.4s var(--ease-out) infinite; }
 @keyframes gf-ring { 0%,62% { transform:scale(.3); opacity:0; } 64% { opacity:.7; } 100% { transform:scale(1.5); opacity:0; } }
 .gf-sub { position:relative; margin:6px 0 20px; font-size:15px; font-weight:600; color:var(--sub); }
 .gf-hero small { margin-top:12px; font-size:12.5px; color:var(--sub); font-family:"Noto Sans Bengali",sans-serif; }
@@ -143,8 +160,7 @@
 .gf-show { --ink2:#8A2E19; background:#F8F2E7; color:var(--ink2); padding:56px 20px 46px; }
 .gf-show > div { max-width:1040px; margin:0 auto; }
 .gf-shh { display:grid; gap:16px; }
-.gf-mark b { display:block; font-family:Galada,cursive; font-weight:400; font-size:clamp(88px,26vw,150px); line-height:.82; color:var(--ink2); }
-.gf-mark span { display:block; margin:4px 0 0 6px; font:500 22px "Noto Sans Bengali",sans-serif; }
+.gf-mark b { display:block; font:800 clamp(72px,21vw,120px)/.95 "Baloo Da 2","Noto Sans Bengali",sans-serif; letter-spacing:-.01em; color:var(--ink2); }
 .gf-intro h2 { margin:0; font-family:Galada,cursive; font-weight:400; font-size:24px; letter-spacing:.02em; }
 .gf-intro p { margin:8px 0 0; font:500 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:38ch; }
 /* three গুড়, zig-zag down a winding blue line that draws itself */
@@ -304,7 +320,7 @@
 .gf-ic .kg { transform-box:fill-box; transform-origin:0% 100%; animation:gf-sp 1.8s ease-in-out infinite; }
 @keyframes gf-sp { 50% { transform:rotate(-14deg); } }
 @media (min-width:760px) { .gf-shh { grid-template-columns:1fr 1fr; align-items:start; } }
-@media (prefers-reduced-motion:reduce) { .gf-fall, .gf-ring, .gf-lett { animation:none; } .gf-fall { opacity:0; } .gf-side { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .gf-fall, .gf-ring, .gf-lw { animation:none; } .gf-fall { opacity:0; } .gf-side { transition:none; } }
 /* why গুড়: an আলপনা vine grows down the frame; a lotus blooms at each reason */
 .vn { position:relative; max-width:620px; margin:0 auto; padding:8px 18px 34px; }
 .vn-svg { position:absolute; left:0; top:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:0; }
@@ -321,11 +337,23 @@
 .vn-node { position:relative; width:90%; max-width:160px; aspect-ratio:1; justify-self:center; }
 .vn-node > svg { position:absolute; inset:-11%; width:122%; height:122%; overflow:visible; }
 .vn-it.on .vn-node > svg { animation:gf-turn 50s linear infinite 1.4s; }
-.vn-node g { transform-box:view-box; transform-origin:50% 50%; transform:scale(0) rotate(-70deg); opacity:0; transition:transform 900ms var(--spring), opacity .3s ease; transition-delay:var(--d); }
-.vn-it.on .vn-node g { transform:none; opacity:1; }
+.vn-node > svg > g { transform-box:view-box; transform-origin:50% 50%; transform:scale(0) rotate(-70deg); opacity:0; transition:transform 900ms var(--spring), opacity .3s ease; transition-delay:var(--d); }
+.vn-it.on .vn-node > svg > g { transform:none; opacity:1; }
 .vn-node .ph { position:absolute; inset:13%; border-radius:50%; overflow:hidden; background:#FFF8EC; box-shadow:0 0 0 3px var(--or), 0 0 0 7px #FBF6EC; transform:scale(0); transition:transform 700ms var(--spring) .45s; }
 .vn-it.on .vn-node .ph { transform:none; }
 .vn-node .ph img { width:100%; height:100%; object-fit:cover; mix-blend-mode:multiply; transform:scale(1.05); }
+.vn-node .ph.ic { display:grid; place-items:center; }
+.vn-node .ph.ic svg { width:86%; height:86%; overflow:visible; }
+.mn-tile { transform-box:fill-box; transform-origin:50% 100%; animation:mn-bob 2.8s ease-in-out infinite; }
+.mn-tile.b { animation-delay:-1.4s; }
+.mn-s { font:800 15px "Geist","Noto Sans Bengali",sans-serif; fill:#B5442A; }
+.mn-n { font:700 7.5px "Noto Sans Bengali",sans-serif; fill:#3A160B; }
+@keyframes mn-bob { 0%,100% { transform:translateY(0) rotate(var(--r)); } 50% { transform:translateY(-5px) rotate(calc(var(--r) * -1)); } }
+.tc-stm { stroke-dasharray:1; stroke-dashoffset:1; animation:tc-steam 2.8s ease-in-out infinite; }
+.tc-stm.b { animation-delay:-1.4s; }
+@keyframes tc-steam { 0%,10% { stroke-dashoffset:1; } 45%,75% { stroke-dashoffset:0; } 100% { stroke-dashoffset:-1; } }
+.tc-sw { transform-box:view-box; transform-origin:50px 50px; animation:gf-turn 4s linear infinite; }
+@media (prefers-reduced-motion:reduce) { .mn-tile { animation:none; transform:rotate(var(--r)); } .tc-stm, .tc-sw { animation:none; stroke-dashoffset:0; } }
 .vn-tx { opacity:0; transform:translateX(16px); transition:opacity .6s ease .55s, transform .8s var(--ease-out) .55s; }
 .vn-it.r .vn-tx { text-align:right; transform:translateX(-16px); }
 .vn-it.on .vn-tx { opacity:1; transform:none; }
@@ -341,15 +369,15 @@
 .al-kl svg { width:100%; height:100%; }
 @keyframes al-sway { 50% { rotate:8deg; } }
 .al-bd { position:absolute; left:0; right:0; bottom:0; height:30px; overflow:hidden; pointer-events:none; }
-.al-bd svg { width:200%; height:100%; animation:rc-drift 40s linear infinite; }
-.al-bd.top { position:relative; height:28px; margin:-56px -20px 28px; transform:scaleY(-1); }
+.al-bd svg { display:block; height:100%; animation:rc-drift 60s linear infinite; }
+.al-bd.top { position:relative; max-width:none; height:56px; margin:-56px -20px 24px; }
 @media (prefers-reduced-motion:reduce) { .al-mand svg, .al-kl, .al-bd svg { animation:none!important; } }
 /* ── footer: আলপনা দুই রঙ — terracotta crown with the logo, everything readable on a cream sheet ── */
 .kg .ftw .ft1-wave, .kg .ftw .ft1 .ftd { display:none; }
 .kg .ftw .ft1 { --bg:#A63D24; --ink:#2B140A; --sub:#5A2E1C; --acc:#A63D24; --mo:#FFF6E6; --mop:.07; --rule:#2B140A; --ic:#A63D24; --ict:#FFF6E6; }
 .kg .ftw .ft1-in { background:var(--bg); color:var(--ink); padding-top:46px; isolation:isolate; }
-.ft-edge { height:30px; overflow:hidden; margin-bottom:-1px; color:var(--bg); }
-.ft-edge svg { display:block; width:200%; height:100%; animation:rc-drift 50s linear infinite; }
+.ft-edge { height:56px; overflow:hidden; margin-bottom:-1px; transform:scaleY(-1); }
+.ft-edge svg { display:block; height:100%; animation:rc-drift 60s linear infinite; }
 .ft-mand { position:absolute; z-index:-1; left:50%; top:-90px; width:min(150vw,640px); aspect-ratio:1; translate:-50% 0; opacity:var(--mop); color:var(--mo); pointer-events:none; }
 .ft-mand svg { width:100%; height:100%; animation:gf-turn 140s linear infinite; }
 .kg .ftw .ft-logo { filter:brightness(0) invert(1); }
@@ -387,3 +415,29 @@
 @media (prefers-reduced-motion:reduce) {
   .kg *, .kg *::before, .kg *::after { animation-duration:1ms!important; animation-iteration-count:1!important; transition-duration:1ms!important; transition-delay:0ms!important; }
 }
+
+/* ── quote under the hero: মোহিনী-style কার্তুশ on the burgundy lotus pattern ── */
+.gf-q { position:relative; display:grid; place-items:center; padding:56px 22px; overflow:hidden; text-align:center; background:#5E0B37 var(--pat) center / cover; }
+.gf-q .q-strip { position:absolute; left:0; right:0; height:22px; display:flex; align-items:center; overflow:hidden; background:#E3127A; }
+.gf-q .q-strip.t { top:0; } .gf-q .q-strip.b { bottom:0; }
+.gf-q .q-strip svg { flex:none; height:16px; animation:rc-drift 40s linear infinite; }
+.gf-q .q-cart { position:relative; width:min(310px,84vw); aspect-ratio:300/380; display:grid; place-items:center; }
+.gf-q .q-frame { position:absolute; inset:0; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 10px 18px #2a001580); transform:scale(.9); opacity:0; transition:transform .9s var(--spring), opacity .4s ease; }
+.gf-q.in .q-frame { transform:none; opacity:1; }
+.gf-q .q-lotus { position:absolute; width:24%; opacity:0; transition:opacity .6s ease .5s; }
+.gf-q.in .q-lotus { opacity:1; }
+.gf-q .q-lotus svg { display:block; width:100%; overflow:visible; animation:q-sway 5s ease-in-out infinite; }
+.gf-q .q-lotus.tl { left:-5%; top:5%; } .gf-q .q-lotus.tr { right:-5%; top:5%; transform:scaleX(-1); }
+.gf-q .q-lotus.bl { left:-5%; bottom:5%; transform:scaleY(-1); } .gf-q .q-lotus.br { right:-5%; bottom:5%; transform:scale(-1); }
+@keyframes q-sway { 50% { transform:rotate(6deg) scale(1.04); } }
+.gf-q blockquote { position:relative; margin:0; width:88%; }
+/* today's বঙ্গাব্দ date as a tiny wall-calendar page: month band, big day, year */
+.gf-q .q-cal { display:grid; justify-items:center; width:fit-content; min-width:44px; margin:0 auto 8px; border-radius:5px; overflow:hidden; background:#fff; box-shadow:0 0 0 1.2px #A63D24, 0 3px 6px -3px #5A1E0E66; font-family:"Anek Bangla","Noto Sans Bengali",sans-serif; opacity:0; transition:opacity .6s ease .35s; }
+.gf-q .q-cal i { display:block; width:100%; padding:1px 7px; background:#A63D24; color:#FFF6E6; font-style:normal; font-weight:600; font-size:9px; line-height:1.45; text-align:center; }
+.gf-q .q-cal b { padding-top:1px; font-weight:700; font-size:16px; line-height:1.05; color:#3B1A0A; }
+.gf-q .q-cal small { padding-bottom:2px; font-weight:500; font-size:8px; line-height:1.3; color:#7a5a44; }
+.gf-q .q-lett { display:block; width:100%; height:auto; opacity:0; transform:translateY(14px) scale(.94); filter:blur(6px); transition:opacity .7s ease .45s, transform 1s var(--spring) .45s, filter .9s ease .45s; }
+.gf-q.in .q-cal { opacity:1; }
+.gf-q.in .q-lett { opacity:1; transform:none; filter:none; }
+@media (max-width:600px) { .gf-q { padding:38px 14px; } .gf-q .q-cart { width:min(320px,90vw); aspect-ratio:300/280; } .gf-q .q-cal { margin-bottom:5px; } .gf-q .q-lotus { width:19%; } .gf-q .q-lotus.tl, .gf-q .q-lotus.tr { top:2%; } .gf-q .q-lotus.bl, .gf-q .q-lotus.br { bottom:2%; } }
+@media (prefers-reduced-motion:reduce) { .gf-q *, .gf-q *::before { transition:none!important; animation:none!important; opacity:1!important; filter:none!important; } .gf-q .q-frame, .gf-q .q-lett { transform:none!important; } }

@@ -4,9 +4,10 @@ import { resolveLandingCheckoutStatus } from "@/features/landing/checkout-state"
 import { getLandingPackOptions, type LandingPackOption } from "@/features/landing/order";
 import { generatedStorefrontProducts } from "@/lib/generated-storefront-products";
 import { STOREFRONT_CATALOG_QUERY_OPTIONS, STOREFRONT_POLL_INTERVAL_MS, fetchStorefrontProduct, fetchStorefrontProductInventory, findGeneratedStorefrontProduct, mergeInventory } from "@/lib/storefront-products";
-import { GurHero, GurStory, type GurShelfItem } from "@/features/khejurer-gur/story";
+import { GurHero, GurQuote, GurStory, type GurShelfItem } from "@/features/khejurer-gur/story";
 import { GurCheckout, type GurLines, type GurOffer } from "@/features/khejurer-gur/gur-checkout";
 import { GurFooter } from "@/features/khejurer-gur/footer";
+import { PILL_LOTUS } from "@/features/khejurer-gur/alpona";
 import { GUR_CANVAS, GUR_PRODUCTS, reducedMotion, taka } from "@/features/khejurer-gur/content";
 import "@/features/am-sotto-achar/am-sotto-achar.css";
 import "@/features/khejurer-gur/khejurer-gur.css";
@@ -99,13 +100,14 @@ export default function KhejurerGurPage() {
   return <div ref={root} className="kg gf">
     <main>
       <GurHero onOrderClick={scrollToOrder} />
+      <GurQuote />
       <GurStory shelf={shelf} inMemo={inMemo} onAdd={addToMemo} />
       <div className="amsotto am-k"><section className="v1-order" id="gur-order" aria-labelledby="gur-checkout-heading">
         <GurCheckout offers={stableOffers} lines={lines} setLines={setLines} onRetry={() => void Promise.all(stableOffers.map((o) => o.refresh()))} />
       </section></div>
     </main>
     <GurFooter />
-    <div className="bar" aria-hidden="true"><p>খেজুরের গুড় · ৩ রকম<b className="num">{Number.isFinite(cheapest) ? `${taka(cheapest)} থেকে` : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
+    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>খেজুরের গুড় · ৩ রকম</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)} <small>থেকে</small></> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
     <div className={`toast${toast ? " show" : ""}`} role="status">{toast}</div>
   </div>;
 }

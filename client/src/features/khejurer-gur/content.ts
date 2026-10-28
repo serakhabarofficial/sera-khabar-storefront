@@ -25,6 +25,8 @@ export const GUR_IMAGES = {
   illJhola: `${IMG}/ill-jhola-v1.webp`,
   illBij: `${IMG}/ill-bij-v1.webp`,
   illPatali: `${IMG}/ill-patali-v1.webp`,
+  lotusPattern: `${IMG}/lotus-arabesque-v1.webp`,
+  quoteLettering: `${IMG}/quote-lettering-v1.webp`,
 } as const;
 
 /**
@@ -50,8 +52,8 @@ export const GUR_USES = [
 export const GUR_WHY = [
   { image: GUR_IMAGES.harvest, title: "খাঁটি রস থেকে", line: "কারখানায় সাদা করা নয়, কোনো কেমিক্যাল নেই" },
   { image: GUR_IMAGES.cook, title: "ধীরে জ্বাল", line: "উঠোনের চুলায় ঘণ্টার পর ঘণ্টা কাঠের আগুনে" },
-  { image: GUR_IMAGES.bij, title: "খনিজ থাকে", line: "আয়রন, পটাশিয়ামের মতো কিছু খনিজ" },
-  { image: GUR_IMAGES.jhola, title: "অল্পেই মিষ্টি", line: "ক্যারামেলের মতো গভীর স্বাদ" },
+  { icon: "minerals", title: "খনিজ থাকে", line: "আয়রন, পটাশিয়ামের মতো কিছু খনিজ" },
+  { icon: "sweet", title: "অল্পেই মিষ্টি", line: "ক্যারামেলের মতো গভীর স্বাদ" },
 ] as const;
 
 /** Bangla digits, no thousands separator (the landing's price style). */
