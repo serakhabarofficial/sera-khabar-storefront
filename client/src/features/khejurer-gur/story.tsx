@@ -237,22 +237,23 @@ export function GurQuote() {
     const timer = window.setInterval(() => setToday(banglaDateParts()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
-  // Fetch and decode the art and the verse as soon as the page opens; the verse only rises once both are decoded,
-  // so nothing can pop in mid-reveal.
+  // The verse only rises once the frieze the browser actually picked from srcset (800 or 1200, by screen) and the verse
+  // lettering are decoded; if someone scrolls here first, art and verse fade in together instead of the art popping in late.
+  const art = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let live = true;
-    const decode = (src: string) => { const img = new Image(); img.src = src; return img.decode().catch(() => {}); };
-    const art = window.matchMedia("(min-width: 601px)").matches ? GUR_IMAGES.quoteGatewayLarge : GUR_IMAGES.quoteGateway;
-    void Promise.all([decode(art), decode(GUR_IMAGES.quoteLettering)]).then(() => { if (live) setReady(true); });
+    const verse = new Image();
+    verse.src = GUR_IMAGES.quoteLettering;
+    void Promise.all([art.current?.decode().catch(() => {}), verse.decode().catch(() => {})]).then(() => { if (live) setReady(true); });
     return () => { live = false; };
   }, []);
-  // রাজশাহীর ঐতিহ্য: a terracotta gateway with a Padma dawn through its arches; the verse (shown twice, clipped to one
-  // line each) and today's date sit in the sky above it.
+  // রাজশাহীর ঐতিহ্য: a Puthia-temple terracotta frieze (গাছি, a woman with a রসের হাঁড়ি, a boat on the Padma, lotus, mangoes);
+  // the verse (shown twice, clipped to one line each) and today's date sit on the cream above it.
   return <section className="gf-q" data-io data-ready={ready || undefined}>
     <div className="q-in">
-      <img className="q-art" src={GUR_IMAGES.quoteGateway} srcSet={`${GUR_IMAGES.quoteGateway} 800w, ${GUR_IMAGES.quoteGatewayLarge} 1200w`} sizes="(min-width: 601px) 760px, 100vw"
-        alt="রাজশাহীর পোড়ামাটির তোরণ, খিলানের ভেতর দিয়ে পদ্মার কুয়াশা-ভোর, খেজুর গাছে রসের হাঁড়ি" width={1200} height={800} decoding="async" />
+      <img ref={art} className="q-art" src={GUR_IMAGES.quoteFrieze} srcSet={`${GUR_IMAGES.quoteFrieze} 800w, ${GUR_IMAGES.quoteFriezeLarge} 1200w`} sizes="(min-width: 601px) 760px, 100vw"
+        alt="পুঠিয়ার মন্দিরের ধাঁচে পোড়ামাটির ফলক: খেজুর গাছে গাছি, মাথায় রসের হাঁড়ি নিয়ে নারী, পদ্মায় নৌকা, পদ্ম আর আম" width={1200} height={600} fetchPriority="high" decoding="async" />
       <blockquote>
         <div className="q-verse" role="img" aria-label={QUOTE}>
           <img className="l1" src={GUR_IMAGES.quoteLettering} alt="" width={1200} height={442} decoding="async" />
@@ -349,7 +350,7 @@ function GurRoad() {
         <path className="dash" d={ROUTE} mask={`url(#grm${i})`} />
         <g className="hd"><path d="M10 0 C10 0 -1 -7.5 -5.5 -7.5 A7.5 7.5 0 0 0 -5.5 7.5 C-1 7.5 10 0 10 0Z" fill="url(#grDrop)" /><ellipse cx="-6" cy="-3.2" rx="2.6" ry="1.5" fill="#fff" opacity=".55" /><animateMotion path={ROUTE} dur={`${ROUTE_S}s`} begin="indefinite" fill="freeze" rotate="auto" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".45 .05 .3 1" /></g>
       </svg>
-      <video src={st.src} poster={st.poster} width={st.w} height={st.h} autoPlay muted loop playsInline preload="metadata" aria-label={st.label} style={{ objectPosition: st.pos }} />
+      <video src={st.src} poster={st.poster} width={st.w} height={st.h} muted loop playsInline preload="none" aria-label={st.label} style={{ objectPosition: st.pos }} />
       <figcaption><span>{st.time}</span><b>{st.line}</b></figcaption>
     </figure>)}
     <span className="gr-trail" aria-hidden="true" />

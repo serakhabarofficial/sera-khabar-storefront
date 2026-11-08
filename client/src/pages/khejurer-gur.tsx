@@ -92,7 +92,7 @@ export default function KhejurerGurPage() {
     const clips = new IntersectionObserver((entries) => entries.forEach(({ target, isIntersecting }) => {
       const video = target as HTMLVideoElement;
       if (isIntersecting) void video.play().catch(() => {}); else video.pause();
-    }), { rootMargin: "120px 0px" });
+    }), { rootMargin: "400px 0px" });
     el.querySelectorAll("video").forEach((video) => clips.observe(video));
     // decorative CSS loops (drifting borders, lotuses, stickers, steam) keep running off screen and many animate inside SVGs,
     // which costs layout + paint every frame; pause each block's animations while it's out of view
