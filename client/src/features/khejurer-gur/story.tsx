@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import brandLogo from "@assets/sera-khabar-logo.webp";
 import type { LandingPackOption } from "@/features/landing/order";
-import { AL, JHALOR, PILL_LOTUS, QUOTE_CARTOUCHE, QUOTE_CORNER_LOTUS, QUOTE_STRIP, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
+import { AL, JHALOR, PILL_LOTUS, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
 import { banglaDateParts } from "./bangla-date";
 import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_PRODUCTS, GUR_USES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
 
@@ -237,26 +237,30 @@ export function GurQuote() {
     const timer = window.setInterval(() => setToday(banglaDateParts()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
-  // Fetch and decode the lotus pattern and the verse as soon as the page opens, so the section is complete
-  // before it scrolls in; the verse only rises once its image is decoded, so it can't pop in mid-reveal.
+  // Fetch and decode the art and the verse as soon as the page opens; the verse only rises once both are decoded,
+  // so nothing can pop in mid-reveal.
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let live = true;
     const decode = (src: string) => { const img = new Image(); img.src = src; return img.decode().catch(() => {}); };
-    void Promise.all([decode(GUR_IMAGES.lotusPattern), decode(GUR_IMAGES.quoteLettering)]).then(() => { if (live) setReady(true); });
+    const art = window.matchMedia("(min-width: 601px)").matches ? GUR_IMAGES.quoteGatewayLarge : GUR_IMAGES.quoteGateway;
+    void Promise.all([decode(art), decode(GUR_IMAGES.quoteLettering)]).then(() => { if (live) setReady(true); });
     return () => { live = false; };
   }, []);
-  return <section className="gf-q" data-io data-ready={ready || undefined} style={{ "--pat": `url(${GUR_IMAGES.lotusPattern})` } as React.CSSProperties}>
-    <div className="q-strip t" aria-hidden="true" {...html(QUOTE_STRIP)} />
-    <div className="q-cart">
-      <svg className="q-frame" viewBox="0 0 300 380" preserveAspectRatio="none" aria-hidden="true" {...html(QUOTE_CARTOUCHE)} />
-      {["tl", "tr", "bl", "br"].map((c) => <span key={c} className={`q-lotus ${c}`} aria-hidden="true"><svg viewBox="-50 -50 100 70" {...html(QUOTE_CORNER_LOTUS)} /></span>)}
+  // রাজশাহীর ঐতিহ্য: a terracotta gateway with a Padma dawn through its arches; the verse (shown twice, clipped to one
+  // line each) and today's date sit in the sky above it.
+  return <section className="gf-q" data-io data-ready={ready || undefined}>
+    <div className="q-in">
+      <img className="q-art" src={GUR_IMAGES.quoteGateway} srcSet={`${GUR_IMAGES.quoteGateway} 800w, ${GUR_IMAGES.quoteGatewayLarge} 1200w`} sizes="(min-width: 601px) 760px, 100vw"
+        alt="রাজশাহীর পোড়ামাটির তোরণ, খিলানের ভেতর দিয়ে পদ্মার কুয়াশা-ভোর, খেজুর গাছে রসের হাঁড়ি" width={1200} height={800} decoding="async" />
       <blockquote>
-        <span className="q-cal"><i>{today.month}</i><b>{today.day}</b><small>{today.year}</small></span>
-        <img className="q-lett" src={GUR_IMAGES.quoteLettering} alt={QUOTE} width={1200} height={442} decoding="async" />
+        <div className="q-verse" role="img" aria-label={QUOTE}>
+          <img className="l1" src={GUR_IMAGES.quoteLettering} alt="" width={1200} height={442} decoding="async" />
+          <img className="l2" src={GUR_IMAGES.quoteLettering} alt="" width={1200} height={442} decoding="async" />
+        </div>
+        <span className="q-date">{today.month} {today.day} · {today.year}</span>
       </blockquote>
     </div>
-    <div className="q-strip b" aria-hidden="true" {...html(QUOTE_STRIP)} />
   </section>;
 }
 

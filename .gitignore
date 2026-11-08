@@ -10,3 +10,6 @@ vite.config.ts.*
 .superpowers/
 .gstack/
 .worktrees/
+
+# Lipighor fonts: web use needs written permission; never commit the font files to this public repo
+client/public/fonts/li-alinur-smaroklipi-unicode.ttf
