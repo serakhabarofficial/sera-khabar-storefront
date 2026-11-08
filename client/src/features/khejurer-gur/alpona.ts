@@ -28,6 +28,15 @@ export const JHALOR = (() => {
   return `<svg viewBox="0 0 ${w} 56" width="${w}" aria-hidden="true"><rect width="${w}" height="32" fill="${AT}"/><path d="M0 4 H${w} M0 29 H${w}" stroke="${AW}" stroke-width="1" stroke-dasharray="2 4" stroke-linecap="round"/>${Array.from({ length: n }, (_, k) => tile(k)).join("")}</svg>`;
 })();
 
+/** The ঝালর band as one 48px tile for a repeating CSS background, for places it stands still: a tiny cached image paints
+ *  at once, where the 4320px-wide inline SVG above (wide only so it can drift) painted late and flicked in on iPhones.
+ *  The half dot on the seam is drawn at both edges so the tiles meet cleanly. */
+export const JHALOR_BG = (() => {
+  const tile = `<g transform="translate(24 17)">${petals(8, 0, 10, 3.2, AW)}<circle r="2.4" fill="${AT}"/></g><circle cy="17" r="2" fill="${AW}"/><circle cx="48" cy="17" r="2" fill="${AW}"/><path d="M0 32 A12 12 0 0 0 24 32 A12 12 0 0 0 48 32" fill="${AT}"/><circle cx="12" cy="49" r="2.6" fill="${AT}"/><circle cx="36" cy="49" r="2.6" fill="${AT}"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="56" viewBox="0 0 48 56"><rect width="48" height="32" fill="${AT}"/><path d="M0 4 H48 M0 29 H48" stroke="${AW}" stroke-width="1" stroke-dasharray="2 4" stroke-linecap="round"/>${tile}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+})();
+
 /** Terracotta আলপনা tiles behind the recipe ticket. */
 export const RECIPE_FLOOR = `<defs><pattern id="kgAlFloor" width="128" height="128" patternUnits="userSpaceOnUse"><g transform="translate(64 64) scale(.5)">${AL.lotus(AW)}</g>${[[0, 0], [128, 0], [0, 128], [128, 128]].map(([x, y]) => `<g transform="translate(${x} ${y}) scale(.2)">${AL.wheel(AW)}</g>`).join("")}</pattern></defs><rect x="-10%" y="-10%" width="120%" height="120%" fill="url(#kgAlFloor)" opacity=".9"/>`;
 
