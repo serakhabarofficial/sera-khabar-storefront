@@ -26,8 +26,6 @@ export function GurFooter() {
         <nav className="ft-pol" aria-label="নীতিমালা">{[["Privacy Policy", "/privacy-policy"], ["Refund & Return", "/refund-return-exchange"], ["Terms & Conditions", "/terms-and-conditions"]].map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
         <a className="ft-credit" href={GUR_CREDIT_HREF} target="_blank" rel="noopener noreferrer"><small>Designed &amp; Engineered by</small><i /><img src="/arc-credit.webp" alt="Arc Labs Corporation" width={188} height={72} loading="lazy" /></a>
         <p className="ft-copy">© <span className="num">২০২৬</span> সেরা খাবার · নওহাটা, পবা, রাজশাহী, বাংলাদেশ, <span className="num">৬২১৩</span></p>
-        {/* Lipighor's web-font licence asks for this backlink in the landing page footer */}
-        <p className="ft-font">ওয়েবফন্ট- <a href="https://lipighor.com" target="_blank" rel="noopener noreferrer">lipighor.com</a></p>
       </div>
     </div>
   </div></footer>;

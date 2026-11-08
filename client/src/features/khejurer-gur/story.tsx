@@ -336,7 +336,11 @@ function GurRoad() {
         <path className="dash" d={ROUTE} mask={`url(#grm${i})`} />
         <g className="hd"><path d="M10 0 C10 0 -1 -7.5 -5.5 -7.5 A7.5 7.5 0 0 0 -5.5 7.5 C-1 7.5 10 0 10 0Z" fill="url(#grDrop)" /><ellipse cx="-6" cy="-3.2" rx="2.6" ry="1.5" fill="#fff" opacity=".55" /><animateMotion path={ROUTE} dur={`${ROUTE_S}s`} begin="indefinite" fill="freeze" rotate="auto" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".45 .05 .3 1" /></g>
       </svg>
-      <video src={st.src} poster={st.poster} width={st.w} height={st.h} muted loop playsInline preload="none" aria-label={st.label} style={{ objectPosition: st.pos }} />
+      <video src={st.src} poster={st.poster} width={st.w} height={st.h} muted loop playsInline preload="none" aria-label={st.label} style={{ objectPosition: st.pos }}
+        onPlaying={(e) => e.currentTarget.parentElement?.setAttribute("data-live", "")} />
+      {/* the poster as a real image over the clip until the clip is actually playing: iOS Safari blanks a video's own poster the
+          moment play() is called, before any frame is ready, which flashed the stop empty while scrolling. Frame 0 is the poster. */}
+      <img className="gr-cover" src={st.poster} width={st.w} height={st.h} alt="" decoding="async" style={{ objectPosition: st.pos }} />
       <figcaption><span>{st.time}</span><b>{st.line}</b></figcaption>
     </figure>)}
     <span className="gr-trail" aria-hidden="true" />
