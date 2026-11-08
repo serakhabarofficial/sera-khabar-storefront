@@ -194,7 +194,6 @@ function GurNameTicker() {
 export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
   return <section className="gf-hero" data-hero data-io>
     <img className="gf-logo" src={brandLogo} alt="সেরা খাবার" width={700} height={128} />
-    <p className="gf-kick rv">রাজশাহীর গাছির হাতে · শীতের ভোরে</p>
     <h1 className="gf-word">
       <span className="gf-pre rv" style={{ "--d": "80ms" } as React.CSSProperties}><img className="gf-pre-lett" src={GUR_IMAGES.khejurerLettering} alt="খেজুরের" width={720} height={348} fetchPriority="high" /></span>
       <span className="gf-lw">
