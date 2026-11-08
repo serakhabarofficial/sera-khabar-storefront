@@ -252,7 +252,7 @@ export function GurQuote() {
 }
 
 /** রসের পথ: a straight village road down the left; the three stops sit on the right, each a still picture with its
- *  milestone lit, a dashed arrow out to it and its line. A small গাছি stands at the top of the road. Fully static. */
+ *  milestone lit, a dashed arrow out to it and its line. Only the small গাছি moves: he walks the road as you scroll. */
 const ROAD_STOPS = [
   { time: "ভোর ৪টা", line: "গাছে ওঠা", poster: GUR_IMAGES.gachiFogPoster, w: 640, h: 806, pos: "50% 38%", label: "কুয়াশার ভোরে খেজুর গাছে উঠছেন গাছি" },
   { time: "ভোর ৬টা", line: "রস নিয়ে পথে", poster: GUR_IMAGES.roadWalkPoster, w: 640, h: 640, pos: "50% 60%", label: "বাঁকে রসের হাঁড়ি নিয়ে কুয়াশার পথে হাঁটছেন গাছি" },
@@ -270,10 +270,13 @@ function GurRoad() {
     const strips = Array.from(svg.querySelectorAll<SVGPathElement>(".gr-p"));
     const stones = Array.from(svg.querySelectorAll<SVGCircleElement>(".gr-stone"));
     const stops = Array.from(el.querySelectorAll<HTMLElement>(".gr-stop"));
-    // static: the road, milestones and arrows are laid out once (and again on resize); nothing moves with scroll
+    const RM = reducedMotion();
+    // The road, milestones and arrows are static (laid out on mount and resize). Only the গাছি moves: he walks down the
+    // road with the scroll, easing toward the scroll target, and sways while he's moving.
+    let H = 0, X = 0, top = 0, vh = innerHeight, vw = innerWidth, frame = 0, cur = -1, goal = 0, moving = false;
     const build = () => {
       const br = el.getBoundingClientRect(), road = el.querySelector<HTMLElement>(".gr-road")!.getBoundingClientRect();
-      const H = br.height, X = road.left - br.left + road.width / 2;
+      H = br.height; X = road.left - br.left + road.width / 2; top = br.top + scrollY;
       svg.setAttribute("viewBox", `0 0 ${br.width} ${H}`);
       strips.forEach((p) => p.setAttribute("d", `M${X} 0 V${H}`));
       stops.forEach((st, i) => {
@@ -281,12 +284,27 @@ function GurRoad() {
         stones[i].setAttribute("cx", `${X}`); stones[i].setAttribute("cy", `${r.top - br.top + r.height / 2}`);
         st.style.setProperty("--arm", `${Math.round(r.left - br.left - X)}px`);
       });
-      walker.style.transform = `translate3d(${X.toFixed(1)}px, 0, 0) translate(-50%, -86%)`;
     };
-    build();
-    const ro = new ResizeObserver(build);
-    ro.observe(el);
-    return () => ro.disconnect();
+    const draw = (y: number) => { walker.style.transform = `translate3d(${X.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -86%)`; };
+    const target = () => RM ? H : Math.max(0, Math.min(H, scrollY + vh * 0.6 - top));
+    const step = () => {
+      frame = 0;
+      const d = goal - cur;
+      cur = Math.abs(d) < 0.4 ? goal : cur + d * 0.22;
+      draw(cur);
+      const still = cur === goal;
+      if (still === moving) { moving = !still; walker.classList.toggle("go", moving); }
+      if (!still) frame = requestAnimationFrame(step);
+    };
+    const onScroll = () => { goal = target(); if (!frame) frame = requestAnimationFrame(step); };
+    const relayout = () => { build(); goal = target(); if (cur < 0) cur = goal; onScroll(); };
+    // the phone's address bar changes innerHeight while scrolling; only a real resize (width change) remeasures the viewport
+    const onResize = () => { if (innerWidth !== vw) { vw = innerWidth; vh = innerHeight; } relayout(); };
+    const ro = new ResizeObserver(relayout);
+    ro.observe(el); ro.observe(document.body);
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onResize);
+    return () => { ro.disconnect(); removeEventListener("scroll", onScroll); removeEventListener("resize", onResize); cancelAnimationFrame(frame); };
   }, []);
   return <div className="gr" ref={box}>
     <span className="gr-road" aria-hidden="true" />
