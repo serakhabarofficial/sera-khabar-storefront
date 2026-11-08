@@ -94,6 +94,11 @@ export default function KhejurerGurPage() {
       if (isIntersecting) void video.play().catch(() => {}); else video.pause();
     }), { rootMargin: "400px 0px" });
     el.querySelectorAll("video").forEach((video) => clips.observe(video));
+    // once the page (hero first) has loaded, fetch the road clips quietly so they're ready before you scroll to them
+    const warm = () => el.querySelectorAll<HTMLVideoElement>(".gr-stop video").forEach((video) => { if (video.readyState === 0) { video.preload = "auto"; video.load(); } });
+    let warmTimer = 0;
+    const onLoad = () => { warmTimer = window.setTimeout(warm, 1200); };
+    if (document.readyState === "complete") onLoad(); else addEventListener("load", onLoad, { once: true });
     // decorative CSS loops (drifting borders, lotuses, stickers, steam) keep running off screen and many animate inside SVGs,
     // which costs layout + paint every frame; pause each block's animations while it's out of view
     const sleepy = new IntersectionObserver((entries) => entries.forEach(({ target, isIntersecting }) => target.classList.toggle("kg-sleep", !isIntersecting)), { rootMargin: "100px 0px" });
@@ -109,7 +114,7 @@ export default function KhejurerGurPage() {
     io.observe(el.querySelector("[data-hero]")!);
     io.observe(el.querySelector("#gur-order")!);
     io.observe(el.querySelector("footer")!);
-    return () => { reveal.disconnect(); clips.disconnect(); sleepy.disconnect(); io.disconnect(); clearTimeout(focusTimer.current); clearTimeout(toastTimer.current); };
+    return () => { removeEventListener("load", onLoad); clearTimeout(warmTimer); reveal.disconnect(); clips.disconnect(); sleepy.disconnect(); io.disconnect(); clearTimeout(focusTimer.current); clearTimeout(toastTimer.current); };
   }, [shelf.length]);
 
   return <div ref={root} className="kg gf">
