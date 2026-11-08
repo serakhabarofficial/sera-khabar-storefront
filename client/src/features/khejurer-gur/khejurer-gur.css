@@ -167,6 +167,14 @@
 /* products, shown like a café poster: numbered top-down photos, then about + menu */
 .gf-show { --ink2:#8A2E19; background:#F8F2E7; color:var(--ink2); padding:56px 20px 46px;; overflow-x:clip; }
 .gf-show > div { max-width:1040px; margin:0 auto; }
+/* entrance, once, as the section's top reaches the screen: the alpona band fades in, then the গুড় header rises 14px into
+   place and the road fades in, 70ms apart. Opacity + transform only (GPU, no repaint), so the fade also covers the moment
+   iPhone is still painting the section, which used to pop in. The road only fades, so the walker's measurements never shift. */
+.gf-show .al-bd.top, .gf-show .gf-shh, .gf-show .gr { opacity:0; transition:opacity 500ms ease; }
+.gf-show .gf-shh { transform:translateY(14px); transition:opacity 500ms ease 70ms, transform 650ms var(--ease-out) 70ms; }
+.gf-show .gr { transition-delay:140ms; }
+.gf-show[data-shown] .al-bd.top, .gf-show[data-shown] .gf-shh, .gf-show[data-shown] .gr { opacity:1; transform:none; }
+@media (prefers-reduced-motion:reduce) { .gf-show .gf-shh { transform:none; } .gf-show .al-bd.top, .gf-show .gf-shh, .gf-show .gr { transition:opacity 200ms ease; } }
 .gf-shh { display:grid; gap:16px; }
 /* the big গুড় with the gachi climbing his palm beside it; multiply drops the illustration's cream into the section's */
 .gf-mark { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }

@@ -354,7 +354,16 @@ function GurRoad() {
 export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
   const vine = useRef<HTMLDivElement>(null);
   useVine(vine);
-  return <section className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" style={{ backgroundImage: JHALOR_BG }} /><div>
+  // The band, header and road ease in once as the section's top reaches the screen, instead of popping in when iPhone
+  // finishes painting them. Fires once; scrolling back never replays it.
+  const show = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = show.current!;
+    const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { el.setAttribute("data-shown", ""); io.disconnect(); } }, { rootMargin: "0px 0px -40px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return <section ref={show} className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" style={{ backgroundImage: JHALOR_BG }} /><div>
     <div className="gf-shh">
       <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub">রসের পথ</span></div>
     </div>
