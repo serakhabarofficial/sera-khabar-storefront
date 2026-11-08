@@ -34,7 +34,7 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 470,
+        "price": 410,
         "available": true
       }
     ]
@@ -72,7 +72,7 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 450,
+        "price": 400,
         "available": true
       }
     ]
@@ -110,7 +110,7 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 550,
+        "price": 500,
         "available": true
       }
     ]
@@ -144,19 +144,11 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
     "available": true,
     "variants": [
       {
-        "id": "86463a58-35a0-44ef-b6bc-520f2fedfced",
-        "attributes": {
-          "size": "৫০০ গ্রাম"
-        },
-        "price": 300,
-        "available": true
-      },
-      {
         "id": "da26dde9-7004-4950-b6a5-01ba0aa6d5d8",
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 560,
+        "price": 410,
         "available": true
       }
     ]
@@ -190,19 +182,11 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
     "available": true,
     "variants": [
       {
-        "id": "16fe38df-7f70-4769-b617-a922d0b659e9",
-        "attributes": {
-          "size": "৫০০ গ্রাম"
-        },
-        "price": 380,
-        "available": true
-      },
-      {
         "id": "52595145-8b6f-47fa-bf25-9b6506eec89e",
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 720,
+        "price": 370,
         "available": true
       }
     ]
@@ -240,15 +224,7 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 671,
-        "available": true
-      },
-      {
-        "id": "0eb6491d-0dca-4356-a229-1c97c5160d24",
-        "attributes": {
-          "size": "৫০০ গ্রাম"
-        },
-        "price": 350,
+        "price": 400,
         "available": true
       }
     ]
@@ -350,23 +326,15 @@ export const generatedStorefrontProducts: StorefrontProduct[] = [
       "https://xnuiaxygeoydtopvcmli.supabase.co/storage/v1/object/public/product-images/690aa8b3-6657-46c4-8df5-addcc1f96035/38fc78e0-2256-4182-8722-6023db8c8662/ac28fe0f-fd2c-4764-9907-853e8f8080f8/960.webp"
     ],
     "price": 350,
-    "compare_at_price": null,
+    "compare_at_price": 800,
     "available": true,
     "variants": [
-      {
-        "id": "45903151-f482-479b-a342-c2cfe29cd82d",
-        "attributes": {
-          "size": "৫০০ গ্রাম"
-        },
-        "price": 350,
-        "available": true
-      },
       {
         "id": "151cfed4-c2a4-4c04-8b9f-c9eb3c24433c",
         "attributes": {
           "size": "১ কেজি"
         },
-        "price": 700,
+        "price": 400,
         "available": true
       }
     ]

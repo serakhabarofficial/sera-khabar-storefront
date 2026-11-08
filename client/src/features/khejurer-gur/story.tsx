@@ -237,7 +237,16 @@ export function GurQuote() {
     const timer = window.setInterval(() => setToday(banglaDateParts()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
-  return <section className="gf-q" data-io style={{ "--pat": `url(${GUR_IMAGES.lotusPattern})` } as React.CSSProperties}>
+  // Fetch and decode the lotus pattern and the verse as soon as the page opens, so the section is complete
+  // before it scrolls in; the verse only rises once its image is decoded, so it can't pop in mid-reveal.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let live = true;
+    const decode = (src: string) => { const img = new Image(); img.src = src; return img.decode().catch(() => {}); };
+    void Promise.all([decode(GUR_IMAGES.lotusPattern), decode(GUR_IMAGES.quoteLettering)]).then(() => { if (live) setReady(true); });
+    return () => { live = false; };
+  }, []);
+  return <section className="gf-q" data-io data-ready={ready || undefined} style={{ "--pat": `url(${GUR_IMAGES.lotusPattern})` } as React.CSSProperties}>
     <div className="q-strip t" aria-hidden="true" {...html(QUOTE_STRIP)} />
     <div className="q-cart">
       <svg className="q-frame" viewBox="0 0 300 380" preserveAspectRatio="none" aria-hidden="true" {...html(QUOTE_CARTOUCHE)} />

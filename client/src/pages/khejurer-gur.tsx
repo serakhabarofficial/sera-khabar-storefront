@@ -8,7 +8,7 @@ import { GurHero, GurQuote, GurStory, type GurShelfItem } from "@/features/kheju
 import { GurCheckout, type GurLines, type GurOffer } from "@/features/khejurer-gur/gur-checkout";
 import { GurFooter } from "@/features/khejurer-gur/footer";
 import { PILL_LOTUS } from "@/features/khejurer-gur/alpona";
-import { GUR_CANVAS, GUR_PRODUCTS, bn, reducedMotion, taka } from "@/features/khejurer-gur/content";
+import { GUR_CANVAS, GUR_PRESELECTED, GUR_PRESELECTED_PACK, GUR_PRODUCTS, bn, reducedMotion, taka } from "@/features/khejurer-gur/content";
 import "@/features/am-sotto-achar/am-sotto-achar.css";
 import "@/features/khejurer-gur/khejurer-gur.css";
 
@@ -35,12 +35,16 @@ export default function KhejurerGurPage() {
   const shelf: GurShelfItem[] = stableOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs, compareAt: Number(o.product?.compare_at_price) || 0 }));
   const cheapest = Math.min(...stableOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
 
-  // The memo opens with every গুড়'s first pack chosen. Seeded per variant, not per product: the build snapshot can
-  // carry older variant ids than the live catalog, and a pack that arrives with a new id must be ticked too.
+  // The memo opens with only the preselected গুড় ticked, at their ১ কেজি pack. Seeded per variant, not per product: the
+  // build snapshot can carry older variant ids than the live catalog, and a pack that arrives with a new id must be ticked too.
   const [lines, setLinesState] = useState<GurLines>({});
   const seeded = useRef(new Set<string>());
   useEffect(() => {
-    const firsts = stableOffers.flatMap((o) => o.status === "ready" && o.packs[0] && !seeded.current.has(o.packs[0].variantId) ? [o.packs[0].variantId] : []);
+    const firsts = stableOffers.flatMap((o) => {
+      if (o.status !== "ready" || !GUR_PRESELECTED.includes(o.meta.slug)) return [];
+      const pack = o.packs.find((p) => p.label.trim() === GUR_PRESELECTED_PACK) ?? o.packs[0];
+      return pack && !seeded.current.has(pack.variantId) ? [pack.variantId] : [];
+    });
     if (!firsts.length) return;
     firsts.forEach((id) => seeded.current.add(id));
     setLinesState((current) => ({ ...current, ...Object.fromEntries(firsts.filter((id) => current[id] === undefined).map((id) => [id, 1])) }));
