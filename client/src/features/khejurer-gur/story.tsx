@@ -278,6 +278,9 @@ function GurRoad() {
       const br = el.getBoundingClientRect(), road = el.querySelector<HTMLElement>(".gr-road")!.getBoundingClientRect();
       H = br.height; X = road.left - br.left + road.width / 2; top = br.top + scrollY;
       svg.setAttribute("viewBox", `0 0 ${br.width} ${H}`);
+      // the rough-edge filter only needs the road strip, not the whole width; a smaller filter region is far cheaper to paint
+      const rough = svg.querySelector<SVGFilterElement>("#grRough")!;
+      rough.setAttribute("x", `${Math.max(0, X - 48)}`); rough.setAttribute("width", "96");
       strips.forEach((p) => p.setAttribute("d", `M${X} 0 V${H}`));
       at = stops.map((st) => { const r = st.getBoundingClientRect(); return r.top - br.top + r.height / 2; });
       stones.forEach((c, i) => { c.setAttribute("cx", `${X}`); c.setAttribute("cy", `${at[i]}`); });

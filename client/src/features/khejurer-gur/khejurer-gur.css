@@ -190,10 +190,12 @@
 .gr-stone { fill:#F8F2E7; stroke:#B98D62; stroke-width:2; transition:fill .35s, stroke .35s; }
 .gr-stone.on { fill:#A63D24; stroke:#A63D24; }
 .gr-stop { grid-column:2; position:relative; margin:0; }
-.gr-stop video, .gr-stop .gr-cover { display:block; width:100%; height:auto; aspect-ratio:5/4; object-fit:cover; mix-blend-mode:multiply;
+/* the clips and posters carry the page cream already (multiplied in when encoded), so no mix-blend-mode: blending a video
+   made iOS Safari paint the whole section into an offscreen group first, which left it blank for a moment on scroll */
+.gr-stop video, .gr-stop .gr-cover { display:block; width:100%; height:auto; aspect-ratio:5/4; object-fit:cover;
   -webkit-mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); }
 .gr-stop .gr-cover { position:absolute; left:0; top:0; pointer-events:none; }
-/* exactly one of the two shows (both multiply into the page, so showing both would darken it): cover until playing, then the clip */
+/* exactly one of the two shows: the poster cover until the clip is playing, then the clip */
 .gr-stop:not([data-live]) video, .gr-stop[data-live] .gr-cover { visibility:hidden; }
 /* the arrow is a little travel route (like a flight path): dashed, out from the milestone, one loop, into the video,
    with a গুড় drop flying it and landing at the video; it plays when the walker arrives (SMIL, started from GurRoad) */
