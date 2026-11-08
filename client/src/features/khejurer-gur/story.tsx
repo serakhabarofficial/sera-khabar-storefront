@@ -244,7 +244,7 @@ export function GurQuote() {
       {["tl", "tr", "bl", "br"].map((c) => <span key={c} className={`q-lotus ${c}`} aria-hidden="true"><svg viewBox="-50 -50 100 70" {...html(QUOTE_CORNER_LOTUS)} /></span>)}
       <blockquote>
         <span className="q-cal"><i>{today.month}</i><b>{today.day}</b><small>{today.year}</small></span>
-        <img className="q-lett" src={GUR_IMAGES.quoteLettering} alt={QUOTE} width={1200} height={442} loading="lazy" />
+        <img className="q-lett" src={GUR_IMAGES.quoteLettering} alt={QUOTE} width={1200} height={442} decoding="async" />
       </blockquote>
     </div>
     <div className="q-strip b" aria-hidden="true" {...html(QUOTE_STRIP)} />
