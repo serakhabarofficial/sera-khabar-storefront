@@ -185,17 +185,22 @@
 .gr-svg .grass { stroke:#B9B98F; stroke-width:58; opacity:.45; }
 .gr-svg .dirt { stroke:#DDBB92; stroke-width:38; }
 .gr-svg .rut { stroke:#ECD3B0; stroke-width:10; opacity:.85; }
+/* the footprint line is its own layer (not in the filtered road SVG) and only stretches with a transform */
+.gr-trail { position:absolute; top:0; z-index:1; width:2px; border-radius:1px; background:#A9714A; opacity:.6; transform-origin:50% 0; transform:scaleY(0); will-change:transform; pointer-events:none; }
 .gr-stone { fill:#F8F2E7; stroke:#B98D62; stroke-width:2; transition:fill .35s, stroke .35s; }
 .gr-stone.on { fill:#A63D24; stroke:#A63D24; }
 .gr-stop { grid-column:2; position:relative; margin:0; }
-.gr-stop .gr-pic { display:block; width:100%; height:auto; aspect-ratio:5/4; object-fit:cover; mix-blend-mode:multiply;
+.gr-stop video { display:block; width:100%; height:auto; aspect-ratio:5/4; object-fit:cover; mix-blend-mode:multiply;
   -webkit-mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); }
-/* the arrow is a little travel route (like a flight path): dashed, out from the milestone, one loop, into the picture,
-   with a গুড় drop resting at its tip. Static: always drawn. */
-.gr-arrow { position:absolute; z-index:1; top:50%; left:calc(-1 * var(--arm,88px) + 6px); width:calc(var(--arm,88px) + 12px); height:auto; aspect-ratio:120/48; translate:0 -64.6%; overflow:visible; pointer-events:none; }
+/* the arrow is a little travel route (like a flight path): dashed, out from the milestone, one loop, into the video,
+   with a গুড় drop flying it and landing at the video; it plays when the walker arrives (SMIL, started from GurRoad) */
+.gr-arrow { position:absolute; z-index:1; top:50%; left:calc(-1 * var(--arm,88px) + 6px); width:calc(var(--arm,88px) + 12px); height:auto; aspect-ratio:120/48; translate:0 -64.6%; overflow:visible; pointer-events:none; opacity:0; transition:opacity .2s; }
+.gr-stop.on .gr-arrow { opacity:1; }
 .gr-arrow .dash { fill:none; stroke:#8A2E19; stroke-width:1.6; stroke-linecap:round; stroke-dasharray:3.2 3.4; }
 .gr-arrow .hd { filter:drop-shadow(0 1.5px 1.5px #6a220740); }
-.gr-stop figcaption { position:absolute; left:6%; bottom:4%; display:grid; gap:1px; }
+/* the line shows once the walker arrives */
+.gr-stop figcaption { position:absolute; left:6%; bottom:4%; display:grid; gap:1px; opacity:0; transform:translateY(8px); filter:blur(4px); transition:opacity .5s var(--ease-out), transform .6s var(--ease-out), filter .5s; }
+.gr-stop.on figcaption { opacity:1; transform:none; filter:none; }
 .gr-stop figcaption span { font:700 11.5px "Noto Sans Bengali",sans-serif; letter-spacing:.06em; color:#A63D24; }
 .gr-stop figcaption b { font:800 19px/1.2 "Noto Sans Bengali",sans-serif; color:var(--ink2); text-shadow:0 0 10px #F8F2E7, 0 0 4px #F8F2E7; }
 .gr-end { padding-top:6px; text-align:center; }
@@ -207,14 +212,14 @@
 .gr-walker { animation:gr-step .7s ease-in-out infinite alternate paused; }
 .gr-walker.go { animation-play-state:running; }
 @keyframes gr-step { from { rotate:-1deg; } to { rotate:1deg; } }
-@media (prefers-reduced-motion:reduce) { .gr-walker { animation:none; } }
 @media (min-width:760px) {
   .gr { --road:72px; max-width:760px; margin:24px auto 0; column-gap:56px; row-gap:22px; }
-  .gr-stop .gr-pic { aspect-ratio:16/10; }
+  .gr-stop video { aspect-ratio:16/10; }
   .gr-svg .grass { stroke-width:72; } .gr-svg .dirt { stroke-width:48; } .gr-svg .rut { stroke-width:12; }
   .gr-walker { width:52px; }
   .gr-stop figcaption b { font-size:24px; }
 }
+@media (prefers-reduced-motion:reduce) { .gr-walker { animation:none; } .gr-stop figcaption, .gr-arrow { transition:none; } }
 /* কাঁটা: numbers ride a thin arc, the গুড় at the pointer shows on the right. Normal flow (no pinning): a stroke
    fills along the arc toward the next গুড়, then the dial turns */
 .gf-dial { position:relative; margin:4px -20px 0; }
