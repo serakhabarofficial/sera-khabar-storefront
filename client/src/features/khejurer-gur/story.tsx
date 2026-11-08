@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import brandLogo from "@assets/sera-khabar-logo.webp";
 import type { LandingPackOption } from "@/features/landing/order";
-import { AL, JHALOR, PILL_LOTUS, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
+import { AL, JHALOR, JHALOR_BG, PILL_LOTUS, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
 import { banglaDateParts } from "./bangla-date";
 import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_PRODUCTS, GUR_USES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
 
@@ -351,7 +351,7 @@ function GurRoad() {
 export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
   const vine = useRef<HTMLDivElement>(null);
   useVine(vine);
-  return <section className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" {...html(JHALOR)} /><div>
+  return <section className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" style={{ backgroundImage: JHALOR_BG }} /><div>
     <div className="gf-shh">
       <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub">রসের পথ</span></div>
     </div>

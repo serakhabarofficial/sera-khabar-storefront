@@ -446,7 +446,7 @@
 @keyframes al-sway { 50% { rotate:8deg; } }
 .al-bd { position:absolute; left:0; right:0; bottom:0; height:30px; overflow:hidden; pointer-events:none; }
 .al-bd svg { display:block; height:100%; }
-.al-bd.top { position:relative; max-width:none; height:56px; margin:-56px -20px 24px; }
+.al-bd.top { position:relative; max-width:none; height:56px; margin:-56px -20px 24px; background:repeat-x 0 0 / 48px 56px; }
 @media (prefers-reduced-motion:reduce) { .al-mand svg, .al-kl, .al-bd svg { animation:none!important; } }
 /* ── footer: আলপনা দুই রঙ — terracotta crown with the logo, everything readable on a cream sheet ── */
 .kg .ftw .ft1-wave, .kg .ftw .ft1 .ftd { display:none; }
