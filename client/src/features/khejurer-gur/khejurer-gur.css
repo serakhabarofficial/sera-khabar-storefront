@@ -1,3 +1,7 @@
+/* Type: primary text is Noto Sans Bengali; the small rust accents use Alinur Smaroklipi (Lipighor). Lipighor's licence
+   allows web use only with written permission and a footer backlink, and forbids sharing the font file, so the .ttf is
+   git-ignored here (this repo is public) and must be hosted only once permission is granted. */
+@font-face { font-family:"Alinur Smaroklipi"; src:url("/fonts/li-alinur-smaroklipi-unicode.ttf") format("truetype"); font-weight:400; font-style:normal; font-display:swap; }
 /* খেজুরের গুড় landing (গ · ফোঁটা). Everything is scoped under .kg: App imports every page, so this CSS is global. */
 /* ── base (from the design shell) ── */
 .kg { --ease-out:cubic-bezier(0.23,1,0.32,1); --ease-io:cubic-bezier(0.77,0,0.175,1); --spring:cubic-bezier(.2,1.4,.4,1);
@@ -105,7 +109,7 @@
 .kg .toast.show { opacity:1; transform:none; }
 
 <style>
-.gf { --cream:#FBF4E8; --car:#B4531B; --deep:#3B1A0A; --amber:#F2A541; --sub:#7a5a44; background:var(--cream); color:var(--deep); font-family:"Noto Serif Bengali",serif; }
+.gf { --cream:#FBF4E8; --car:#B4531B; --deep:#3B1A0A; --amber:#F2A541; --sub:#7a5a44; background:var(--cream); color:var(--deep); font-family:"Noto Sans Bengali",sans-serif; }
 /* order buttons (ডট-রেখা): terracotta pill with a rice-paste dotted line just inside the edge */
 .gf .btn, .kg .bar .btn, .kg .skx-submit { position:relative; background:#A63D24; color:#FFF6E6 !important; }
 .gf .btn::after, .kg .bar .btn::after, .kg .skx-submit::after { content:""; position:absolute; inset:5px; border-radius:inherit; border:1.6px dotted #FFF6E6cc; pointer-events:none; }
@@ -167,10 +171,13 @@
 /* the big গুড় with the gachi climbing his palm beside it; multiply drops the illustration's cream into the section's */
 .gf-mark { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
 .gf-mark b { display:block; font:800 clamp(72px,21vw,120px)/.95 "Baloo Da 2","Noto Sans Bengali",sans-serif; letter-spacing:-.01em; color:var(--ink2); }
-.gf-intro h2 { margin:0; font-family:Galada,cursive; font-weight:400; font-size:24px; letter-spacing:.02em; }
+.gf-intro h2 { margin:0; font-family:"Alinur Smaroklipi","Noto Sans Bengali",sans-serif; font-weight:400; font-size:24px; letter-spacing:.02em; }
 .gf-intro p { margin:8px 0 0; font:500 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:38ch; }
 /* রসের পথ: a straight dirt road on the left, the three stops on the right; a small গাছি walks the road as you scroll */
-.gf-mark-sub { align-self:flex-end; margin:0 0 14px; font:400 24px/1 Galada,cursive; color:#A63D24; }
+.gf-mark-sub { align-self:flex-end; position:relative; margin:0 12px 18px 0; padding:6px 4px; font:400 24px/1 "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; color:#A63D24; }
+/* a hand-drawn rust loop around রসের পথ: an imperfect ellipse whose ends overshoot and cross, tilted a touch */
+.gf-mark-sub::after { content:""; position:absolute; inset:-9px -16px -8px -14px; rotate:-3deg; pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80' preserveAspectRatio='none'%3E%3Cpath d='M146 9 C184 13 197 33 188 51 C175 73 104 79 54 73 C19 69 3 54 7 37 C11 18 47 8 103 6 C141 5 170 10 186 22' fill='none' stroke='%23A63D24' stroke-width='2.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
 .gr { --road:58px; position:relative; contain:inline-size; display:grid; grid-template-columns:var(--road) minmax(0,1fr); column-gap:30px; row-gap:18px; margin-top:14px; padding:22px 0 26px; }
 .gr-road { grid-column:1; grid-row:1 / span 3; }
 .gr-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
@@ -291,7 +298,7 @@
 @keyframes gf-wv { to { transform:translateX(-44px); } }
 
 .gf-about { position:relative; display:flow-root; }
-.gf-about h3 { margin:0; font:900 clamp(26px,7.4vw,38px)/1.1 "Noto Serif Bengali",serif; letter-spacing:-.3px; }
+.gf-about h3 { margin:0; font:900 clamp(26px,7.4vw,38px)/1.1 "Noto Sans Bengali",sans-serif; letter-spacing:-.3px; }
 .gf-about p { margin:8px 0 0; font:600 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:42ch; color:#1F2A44; }
 .gf-about small { display:block; margin-top:6px; font:800 12px "Noto Sans Bengali",sans-serif; letter-spacing:.04em; }
 
@@ -311,13 +318,13 @@
   mask:radial-gradient(circle 13px,#0000 97%,#000) -20px -20px/40px 40px round, linear-gradient(#000 0 0) 20px 20px/calc(100% - 40px) calc(100% - 40px) no-repeat;
   clip-path:inset(0 0 100% 0); transform:rotate(-2deg) translateY(20px); transition:clip-path 1.6s cubic-bezier(.65,0,.35,1), transform 1s var(--spring); }
 .gf-rc.in .rc-card { clip-path:inset(0 0 0 0); transform:rotate(-2deg); }
-.rc-card h3 { margin:0; font:900 clamp(24px,7vw,32px)/1.05 "Noto Serif Bengali",serif; color:var(--mr); letter-spacing:.5px; }
+.rc-card h3 { margin:0; font:900 clamp(24px,7vw,32px)/1.05 "Noto Sans Bengali",sans-serif; color:var(--mr); letter-spacing:.5px; }
 .rc-card .ad { display:block; margin-top:4px; font:600 11px/1.5 "Noto Sans Bengali",sans-serif; opacity:.8; }
 .rc-dash { height:2px; margin:14px 0; background:linear-gradient(90deg,var(--mr) 0 8px,transparent 8px 14px) 0 0/14px 2px repeat-x; opacity:.55; }
 .rc-art { position:relative; width:min(48%,180px); margin:0 auto; background:var(--mr); mix-blend-mode:multiply; -webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent 100%); mask-image:radial-gradient(closest-side,#000 72%,transparent 100%); animation:rc-float 5s ease-in-out infinite; }
 .rc-art img { width:100%; display:block; background:#fff; filter:grayscale(1) contrast(2.4) brightness(1.18); mix-blend-mode:screen; }
 @keyframes rc-float { 50% { transform:translateY(-5px) rotate(2deg); } }
-.rc-card .sc { display:block; margin-top:2px; font:400 clamp(24px,6.8vw,30px)/1.1 Galada,cursive; color:var(--or); }
+.rc-card .sc { display:block; margin-top:2px; font:400 clamp(24px,6.8vw,30px)/1.1 "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; color:var(--or); }
 .rc-list { position:relative; list-style:none; margin:14px -6px 0; padding:16px 14px; display:grid; gap:8px; text-align:left; isolation:isolate; }
 .rc-list::before { content:""; position:absolute; inset:0; z-index:-1; background:#E6E0FA; border-radius:42% 58% 46% 54% / 18% 22% 20% 24%; animation:rc-blob 10s ease-in-out infinite; }
 @keyframes rc-blob { 50% { border-radius:56% 44% 52% 48% / 24% 16% 26% 18%; transform:rotate(-1deg) scale(1.01); } }
@@ -363,7 +370,7 @@
 .rc-arts .rc-art { width:min(32%,150px); margin:0; }
 .rc-arts .rc-art:nth-child(2) { width:min(36%,170px); animation-delay:-1.6s; } .rc-arts .rc-art:nth-child(3) { animation-delay:-3.2s; }
 .rc-foot { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
-.rc-foot em { font:400 30px/1 Galada,cursive; font-style:normal; color:var(--mr); clip-path:inset(0 100% 0 0); transition:clip-path 1.2s var(--ease-out) 1.9s; }
+.rc-foot em { font:400 30px/1 "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; font-style:normal; color:var(--mr); clip-path:inset(0 100% 0 0); transition:clip-path 1.2s var(--ease-out) 1.9s; }
 .gf-rc.in .rc-foot em { clip-path:inset(0 0 0 0); }
 .rc-foot span { font:800 13px "Noto Sans Bengali",sans-serif; letter-spacing:.04em; }
 .rc-post { position:absolute; z-index:3; right:-8px; bottom:-34px; width:84px; padding:7px; background:#fff; transform:translateY(-140px) rotate(-30deg); opacity:0; transition:transform 900ms var(--spring) 950ms, opacity .3s ease 950ms;
@@ -371,12 +378,12 @@
 .gf-rc.in .rc-post { transform:rotate(8deg); opacity:1; }
 .rc-post div { position:relative; aspect-ratio:4/5; background:#FBF4E6; display:grid; place-items:center; box-shadow:inset 0 0 0 1.5px var(--bl); }
 .rc-post img { width:94%; mix-blend-mode:multiply; }
-.rc-post small { position:absolute; left:6px; top:4px; font:400 13px Galada,cursive; color:var(--bl); }
+.rc-post small { position:absolute; left:6px; top:4px; font:400 13px "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; color:var(--bl); }
 .rc-post b { position:absolute; right:6px; bottom:3px; font:900 11px "Noto Sans Bengali",sans-serif; color:var(--or); }
 /* ── why গুড়, in a checkerboard frame with an outlined headline ── */
 .gf-ph2 { --or:#B5442A; position:relative; margin:44px 0 12px; }
 .gf-ph2 .hd { position:relative; padding:0 20px 4px; text-align:center; }
-.gf-ph2 h3 { margin:0; font:900 clamp(28px,8.4vw,44px)/1.12 "Noto Serif Bengali",serif; color:var(--or); text-shadow:3px 3px 0 #F6B73F; letter-spacing:.3px; }
+.gf-ph2 h3 { margin:0; font:900 clamp(28px,8.4vw,44px)/1.12 "Noto Sans Bengali",sans-serif; color:var(--or); text-shadow:3px 3px 0 #F6B73F; letter-spacing:.3px; }
 .gf-ph2 .hd p { margin:8px auto 0; max-width:30ch; font:800 12.5px/1.5 "Noto Sans Bengali",sans-serif; color:var(--or); }
 @media (prefers-reduced-motion:reduce) { .gf-rc *, .gf-ph2 * { animation:none!important; transition:none!important; } .rc-card, .rc-back, .rc-list li, .rc-post, .ph2-c { opacity:1; } }
 @media (prefers-reduced-motion:reduce) { .gf-ic .s, .gf-ic .bd, .gf-blob, .gf-wv path { animation:none!important; } }
@@ -423,7 +430,7 @@
 .vn-tx { opacity:0; transform:translateX(16px); transition:opacity .6s ease .55s, transform .8s var(--ease-out) .55s; }
 .vn-it.r .vn-tx { text-align:right; transform:translateX(-16px); }
 .vn-it.on .vn-tx { opacity:1; transform:none; }
-.vn-tx b { display:block; margin-top:0; font:900 clamp(19px,5.6vw,26px)/1.15 "Noto Serif Bengali",serif; color:var(--or); text-shadow:2px 2px 0 #F6B73F; }
+.vn-tx b { display:block; margin-top:0; font:900 clamp(19px,5.6vw,26px)/1.15 "Noto Sans Bengali",sans-serif; color:var(--or); text-shadow:2px 2px 0 #F6B73F; }
 .vn-tx span { display:block; margin-top:5px; font:700 12.5px/1.45 "Noto Sans Bengali",sans-serif; color:#5B2414; }
 @media (prefers-reduced-motion:reduce) { .vn * { transition:none!important; animation:none!important; } }
 /* ── আলপনা styling across the page ── */
@@ -496,31 +503,30 @@
   .kg *, .kg *::before, .kg *::after { animation-duration:1ms!important; animation-iteration-count:1!important; transition-duration:1ms!important; transition-delay:0ms!important; }
 }
 
-/* ── quote under the hero: মোহিনী-style কার্তুশ on the burgundy lotus pattern ── */
-.gf-q { position:relative; display:grid; place-items:center; padding:56px 22px; overflow:hidden; text-align:center; background:#5E0B37 var(--pat) center / cover; }
-.gf-q .q-strip { position:absolute; left:0; right:0; height:22px; display:flex; align-items:center; overflow:hidden; background:#E3127A; }
-.gf-q .q-strip.t { top:0; } .gf-q .q-strip.b { bottom:0; }
-.gf-q .q-strip svg { flex:none; height:16px; animation:rc-drift 40s linear infinite; }
-.gf-q .q-cart { position:relative; width:min(310px,84vw); aspect-ratio:300/380; display:grid; place-items:center; }
-.gf-q .q-frame { position:absolute; inset:0; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 10px 18px #2a001580); }
-.gf-q .q-lotus { position:absolute; width:24%; }
-.gf-q .q-lotus svg { display:block; width:100%; overflow:visible; }
-.gf-q .q-lotus.tl { left:-5%; top:5%; } .gf-q .q-lotus.tr { right:-5%; top:5%; transform:scaleX(-1); }
-.gf-q .q-lotus.bl { left:-5%; bottom:5%; transform:scaleY(-1); } .gf-q .q-lotus.br { right:-5%; bottom:5%; transform:scale(-1); }
-.gf-q blockquote { position:relative; margin:0; width:88%; }
-/* today's বঙ্গাব্দ date as a tiny wall-calendar page: month band, big day, year */
-.gf-q .q-cal { display:grid; justify-items:center; width:fit-content; min-width:44px; margin:0 auto 8px; border-radius:5px; overflow:hidden; background:#fff; box-shadow:0 0 0 1.2px #A63D24, 0 3px 6px -3px #5A1E0E66; font-family:"Anek Bangla","Noto Sans Bengali",sans-serif; }
-.gf-q .q-cal i { display:block; width:100%; padding:1px 7px; background:#A63D24; color:#FFF6E6; font-style:normal; font-weight:600; font-size:9px; line-height:1.45; text-align:center; }
-.gf-q .q-cal b { padding-top:1px; font-weight:700; font-size:16px; line-height:1.05; color:#3B1A0A; }
-.gf-q .q-cal small { padding-bottom:2px; font-weight:500; font-size:8px; line-height:1.3; color:#7a5a44; }
-.gf-q .q-lett { display:block; width:100%; height:auto; opacity:0; transform:translateY(14px) scale(.94); transition:opacity .7s ease .45s, transform 1s var(--spring) .45s; will-change:opacity, transform; }
-.gf-q.in[data-ready] .q-lett { opacity:1; transform:none; }
-@media (max-width:600px) { .gf-q { padding:38px 14px; } .gf-q .q-cart { width:min(320px,90vw); aspect-ratio:300/280; } .gf-q .q-cal { margin-bottom:5px; } .gf-q .q-lotus { width:19%; } .gf-q .q-lotus.tl, .gf-q .q-lotus.tr { top:2%; } .gf-q .q-lotus.bl, .gf-q .q-lotus.br { bottom:2%; } }
-@media (prefers-reduced-motion:reduce) { .gf-q *, .gf-q *::before { transition:none!important; animation:none!important; opacity:1!important; filter:none!important; } .gf-q .q-lett { transform:none!important; } }
+/* ── quote under the hero: রাজশাহীর ঐতিহ্য — a terracotta gateway (after the Bagha Mosque) with a Padma dawn through its
+   arches; the verse and today's date sit in the warm sky above it ──
+   The art is a still picture fetched with the page; nothing but the verse moves. The verse is one image shown as two
+   clipped copies, one per line; once it's decoded and scrolled to, each line fades and rises (opacity + transform only,
+   no scale on the raster), the second 90ms after the first. */
+.gf-q { position:relative; padding-top:34px; background:#FADFB8; }
+.gf-q .q-in { position:relative; max-width:760px; margin:0 auto; }
+.gf-q .q-art { display:block; width:100%; height:auto; aspect-ratio:3/2; }
+.gf-q blockquote { position:absolute; left:0; right:0; top:-20px; margin:0; display:grid; justify-items:center; gap:6px; }
+.gf-q .q-verse { position:relative; width:74%; aspect-ratio:1200/442; }
+.gf-q .q-verse img { position:absolute; inset:0; display:block; width:100%; height:100%; opacity:0; transform:translateY(14px); transition:opacity 500ms ease, transform 700ms var(--ease-out); }
+.gf-q .q-verse .l1 { clip-path:inset(0 0 47% 0); }
+.gf-q .q-verse .l2 { clip-path:inset(53% 0 0 0); transition-delay:90ms; }
+.gf-q.in[data-ready] .q-verse img { opacity:1; transform:none; }
+.gf-q .q-date { display:flex; align-items:center; gap:8px; font:400 14px/1 "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; letter-spacing:.02em; color:#9A3A22; }
+.gf-q .q-date::before, .gf-q .q-date::after { content:""; width:18px; height:1px; background:currentColor; opacity:.6; }
+@media (min-width:601px) { .gf-q { padding-top:48px; } .gf-q blockquote { top:-28px; gap:8px; } .gf-q .q-verse { width:68%; } .gf-q .q-date { font-size:16px; } }
+@media (prefers-reduced-motion:reduce) { .gf-q .q-verse img { transform:none; transition:opacity 200ms ease; } }
 
 /* one face for the whole খেজুরের গুড় page, checkout and footer included: Noto Sans Bengali (it also carries the Latin
    glyphs for "Designed & Engineered by"). !important because the shared am-sotto checkout styles set their own faces. */
 .kg, .kg * { font-family:"Noto Sans Bengali",sans-serif !important; }
+/* …except the small rust accents, which take the secondary face (kicker, recipe ticket script, ধন্যবাদ, postcard note, quote date) */
+.kg .gf-intro h2, .kg .gf-mark-sub, .kg .rc-card .sc, .kg .rc-foot em, .kg .rc-post small, .kg .gf-q .q-date { font-family:"Alinur Smaroklipi","Noto Sans Bengali",sans-serif !important; }
 
 /* a block that's off screen pauses its decorative loops (the page toggles .kg-sleep with an IntersectionObserver) */
 .kg .kg-sleep, .kg .kg-sleep * { animation-play-state:paused !important; }

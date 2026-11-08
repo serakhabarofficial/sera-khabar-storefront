@@ -97,7 +97,7 @@ export default function KhejurerGurPage() {
     // decorative CSS loops (drifting borders, lotuses, stickers, steam) keep running off screen and many animate inside SVGs,
     // which costs layout + paint every frame; pause each block's animations while it's out of view
     const sleepy = new IntersectionObserver((entries) => entries.forEach(({ target, isIntersecting }) => target.classList.toggle("kg-sleep", !isIntersecting)), { rootMargin: "100px 0px" });
-    el.querySelectorAll(".gf-hero, .gf-q, .al-bd, .gr, .gf-dial, .gf-rc, .gf-ph2, #gur-order, .ftw, .bar").forEach((node) => sleepy.observe(node));
+    el.querySelectorAll(".gf-hero, .al-bd, .gr, .gf-dial, .gf-rc, .gf-ph2, #gur-order, .ftw, .bar").forEach((node) => sleepy.observe(node));
     const bar = el.querySelector<HTMLElement>(".bar")!;
     let heroGone = false, orderIn = false, footerIn = false;
     const io = new IntersectionObserver((entries) => entries.forEach((entry) => {

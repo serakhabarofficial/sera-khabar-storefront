@@ -38,8 +38,9 @@ export const GUR_IMAGES = {
   illJhola: `${IMG}/ill-jhola-v1.webp`,
   illBij: `${IMG}/ill-bij-v1.webp`,
   illPatali: `${IMG}/ill-patali-v1.webp`,
-  lotusPattern: `${IMG}/lotus-arabesque-v1.webp`,
   quoteLettering: `${IMG}/quote-lettering-v1.webp`,
+  quoteGateway: `${IMG}/quote-gateway-800-v1.webp`,
+  quoteGatewayLarge: `${IMG}/quote-gateway-1200-v1.webp`,
 } as const;
 
 /**

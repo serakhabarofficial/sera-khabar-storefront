@@ -28,20 +28,6 @@ export const JHALOR = (() => {
   return `<svg viewBox="0 0 ${w} 56" width="${w}" aria-hidden="true"><rect width="${w}" height="32" fill="${AT}"/><path d="M0 4 H${w} M0 29 H${w}" stroke="${AW}" stroke-width="1" stroke-dasharray="2 4" stroke-linecap="round"/>${Array.from({ length: n }, (_, k) => tile(k)).join("")}</svg>`;
 })();
 
-/** Quote কার্তুশ: the stepped pink frame with a yellow double outline and a cream panel for the lettering (viewBox 0 0 300 380; strokes stay even when phones squash it). */
-const CART = "M10 72 H38 V44 H88 Q150 -6 212 44 H262 V72 H290 V308 H262 V336 H212 Q150 386 88 336 H38 V308 H10 Z";
-export const QUOTE_CARTOUCHE = `<path d="${CART}" fill="#E3127A" stroke="#F8D748" stroke-width="5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="${CART}" fill="#FFF6E6" stroke="#F8D748" stroke-width="1.6" vector-effect="non-scaling-stroke" transform="translate(150 190) scale(.93) translate(-150 -190)"/>`;
-
-/** Quote কার্তুশ: a fanned pink lotus for the frame's corners (viewBox -50 -50 100 70). */
-export const QUOTE_CORNER_LOTUS = [-62, -31, 0, 31, 62].map((a, i) => `<path d="M0 10 Q${a ? -12 : -14} -14 0 ${a ? -38 : -46} Q${a ? 12 : 14} -14 0 10Z" fill="${i % 2 ? "#F7CFC6" : "#F3A6A0"}" stroke="#E0807C" stroke-width="1" transform="rotate(${a})"/>`).join("") + `<path d="M-20 10 Q0 18 20 10" fill="none" stroke="#E0807C" stroke-width="2"/>`;
-
-/** Quote কার্তুশ: pink band of tiny yellow lotuses and dashes, two copies wide so it can drift. */
-export const QUOTE_STRIP = (() => {
-  const n = 60, w = 40 * n;
-  const tile = (k: number) => `<g transform="translate(${k * 40 + 20} 12)">${[-50, -25, 0, 25, 50].map((a) => `<path d="M0 0 Q-3 -4 0 -9 Q3 -4 0 0Z" fill="#F8D748" transform="rotate(${a})"/>`).join("")}</g><circle cx="${k * 40}" cy="8" r="1.6" fill="#F8D748"/><path d="M${k * 40 + 5} 8 h6 M${k * 40 + 29} 8 h6" stroke="#F8D748" stroke-width="1.2" stroke-linecap="round"/>`;
-  return `<svg viewBox="0 0 ${w} 16" width="${w}" aria-hidden="true">${Array.from({ length: n }, (_, k) => tile(k)).join("")}</svg>`;
-})();
-
 /** Terracotta আলপনা tiles behind the recipe ticket. */
 export const RECIPE_FLOOR = `<defs><pattern id="kgAlFloor" width="128" height="128" patternUnits="userSpaceOnUse"><g transform="translate(64 64) scale(.5)">${AL.lotus(AW)}</g>${[[0, 0], [128, 0], [0, 128], [128, 128]].map(([x, y]) => `<g transform="translate(${x} ${y}) scale(.2)">${AL.wheel(AW)}</g>`).join("")}</pattern></defs><rect x="-10%" y="-10%" width="120%" height="120%" fill="url(#kgAlFloor)" opacity=".9"/>`;
 
