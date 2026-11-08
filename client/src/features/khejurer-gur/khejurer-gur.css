@@ -114,13 +114,12 @@
 .gf-drop { display:block; width:22px; height:30px; }
 .gf-hero { position:relative; display:flex; flex-direction:column; align-items:center; padding:28px 20px 12px; text-align:center; overflow:clip; }
 .gf-hero::before { content:""; position:absolute; inset:4% -30% auto; height:56%; background:radial-gradient(closest-side,#f8d9a6 0%,#fbf4e800 70%); pointer-events:none; }
-.gf .gf-logo { position:relative; height:24px; width:auto; }
+.gf .gf-logo { position:relative; height:30px; width:auto; }
 /* রেখার মাঝে: a hairline under the logo, a quiet kicker, then খেজুরের between two short dashes */
-.gf-kick { position:relative; width:220px; margin:12px 0 0; padding-top:12px; border-top:1px solid #B4531B55; font:500 12.5px/1.4 "Noto Sans Bengali",sans-serif; color:var(--sub); }
 /* lettering, falling drop and bowl share one geometry so the drop leaves the big drip and lands on the gur */
 .gf-hero { --ww:min(340px,86vw); --lw:var(--ww); --bw:min(330px,58vw); }
 @media (max-width:600px) { .gf-hero { --lw:calc(var(--ww) * .84); } }
-.gf-word { position:relative; width:var(--ww); margin:22px 0 0; font:inherit; }
+.gf-word { position:relative; width:var(--ww); margin:16px 0 0; font:inherit; }
 .gf-hero > .gf-word:not(.al-mand):not(.al-kl):not(.al-bd) { z-index:3; }
 .gf-lw { position:relative; display:block; width:var(--lw); margin:4px auto 0; animation:gf-float 6s ease-in-out infinite; }
 .gf-pre { display:flex; align-items:center; justify-content:center; gap:12px; font-size:26px; font-weight:700; line-height:1; color:var(--deep); }
@@ -197,8 +196,10 @@
 .gr-stop figcaption span { font:700 11.5px "Noto Sans Bengali",sans-serif; letter-spacing:.06em; color:#A63D24; }
 .gr-stop figcaption b { font:800 19px/1.2 "Noto Sans Bengali",sans-serif; color:var(--ink2); text-shadow:0 0 10px #F8F2E7, 0 0 4px #F8F2E7; }
 .gr-end { padding-top:6px; text-align:center; }
-.gr-end h2 { margin:0; font-family:Galada,cursive; font-weight:400; font-size:28px; letter-spacing:.02em; }
+.gr-end h2 { margin:0; font-weight:800; font-size:28px; line-height:1.25; letter-spacing:0; }
 .gr-end p { margin:4px auto 0; max-width:30ch; font:500 14px/1.6 "Noto Sans Bengali",sans-serif; }
+/* phones: centre the heading over the dial's product column (it starts right of the arc at min(27vw,130px) + 22px, see GurDial) */
+@media (max-width:759px) { .gr-end { padding-left:calc(min(27vw,130px) + 6px); } }
 .gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; height:auto; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
 .gr-walker.go { animation:gr-step .7s ease-in-out infinite alternate; }
 @keyframes gr-step { from { rotate:-1deg; } to { rotate:1deg; } }
@@ -243,7 +244,7 @@
 .gf-seg button span { display:block; font-weight:800; font-size:13px; }
 .gf-seg button.on { background:#A63D24; color:#FFF6E6; }
 .gf-seg button:focus-visible { outline:2px solid #A63D24; outline-offset:2px; }
-.gf-pill.gf-add { display:flex; justify-content:space-between; width:100%; margin-top:10px; }
+.gf-pill.gf-add { display:flex; justify-content:space-between; align-self:center; width:auto; gap:14px; margin-top:12px; }
 /* the number, name, line and price sit centred under the photo */
 .gf-swap { text-align:center; }
 .gf-shot { align-self:center; margin-left:0; }
@@ -254,7 +255,7 @@
   .gf-num { font-size:34px; }
   .gf-shot { width:min(100%,44svh,380px); }
   .gf-big { font-size:76px; } .gf-info h3 { font-size:28px; } .gf-info p { font-size:15px; } .gf-price b { font-size:44px; }
-  .gf-pill.gf-add { align-self:center; width:auto; min-width:260px; }
+  .gf-pill.gf-add { gap:18px; }
 }
 @media (prefers-reduced-motion:reduce) { .gf-swap { animation:none; } .gf-tick { transition:none; } }
 @keyframes gf-turn { to { transform:rotate(360deg); } }
@@ -502,3 +503,7 @@
 .gf-q.in .q-lett { opacity:1; transform:none; filter:none; }
 @media (max-width:600px) { .gf-q { padding:38px 14px; } .gf-q .q-cart { width:min(320px,90vw); aspect-ratio:300/280; } .gf-q .q-cal { margin-bottom:5px; } .gf-q .q-lotus { width:19%; } .gf-q .q-lotus.tl, .gf-q .q-lotus.tr { top:2%; } .gf-q .q-lotus.bl, .gf-q .q-lotus.br { bottom:2%; } }
 @media (prefers-reduced-motion:reduce) { .gf-q *, .gf-q *::before { transition:none!important; animation:none!important; opacity:1!important; filter:none!important; } .gf-q .q-frame, .gf-q .q-lett { transform:none!important; } }
+
+/* one face for the whole খেজুরের গুড় page, checkout and footer included: Noto Sans Bengali (it also carries the Latin
+   glyphs for "Designed & Engineered by"). !important because the shared am-sotto checkout styles set their own faces. */
+.kg, .kg * { font-family:"Noto Sans Bengali",sans-serif !important; }
