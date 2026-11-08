@@ -204,6 +204,10 @@
 /* phones: centre the heading over the dial's product column (it starts right of the arc at min(27vw,130px) + 22px, see GurDial) */
 @media (max-width:759px) { .gr-end { padding-left:calc(min(27vw,130px) + 6px); } }
 .gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; height:auto; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
+.gr-walker { animation:gr-step .7s ease-in-out infinite alternate paused; }
+.gr-walker.go { animation-play-state:running; }
+@keyframes gr-step { from { rotate:-1deg; } to { rotate:1deg; } }
+@media (prefers-reduced-motion:reduce) { .gr-walker { animation:none; } }
 @media (min-width:760px) {
   .gr { --road:72px; max-width:760px; margin:24px auto 0; column-gap:56px; row-gap:22px; }
   .gr-stop .gr-pic { aspect-ratio:16/10; }
