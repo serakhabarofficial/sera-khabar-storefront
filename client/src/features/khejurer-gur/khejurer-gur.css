@@ -183,9 +183,10 @@
 .gf-intro p { margin:8px 0 0; font:500 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:38ch; }
 /* রসের পথ: a straight dirt road on the left, the three stops on the right; a small গাছি walks the road as you scroll */
 /* রসের পথ as a stacked lettering mark (Hasan Meghaloy, Lipighor): rust over dark brown, upright, with a thin dark outline
-   and a small gap around the whole mark (the #gfRing SVG filter in GurStory). Static, so the filter paints once. */
+   and a small gap, drawn with text shadows (a cream ring, then a thin dark one). Not an SVG filter: iOS Safari renders
+   SVG filters on HTML badly and blanked the section while scrolling. */
 @font-face { font-family:"Hasan Meghaloy"; src:url("/fonts/hasan-meghaloy-unicode.ttf") format("truetype"); font-weight:400; font-display:swap; }
-.gf-mark-sub { align-self:flex-end; position:relative; display:inline-grid; justify-items:center; margin:0 6px 10px 0; padding:6px 8px; line-height:.86; filter:url(#gfRing); }
+.gf-mark-sub { align-self:flex-end; position:relative; display:inline-grid; justify-items:center; margin:0 6px 10px 0; padding:6px 8px; line-height:.86; text-shadow:1.60px 0.00px 0 #F8F2E7, 1.48px 0.61px 0 #F8F2E7, 1.13px 1.13px 0 #F8F2E7, 0.61px 1.48px 0 #F8F2E7, 0.00px 1.60px 0 #F8F2E7, -0.61px 1.48px 0 #F8F2E7, -1.13px 1.13px 0 #F8F2E7, -1.48px 0.61px 0 #F8F2E7, -1.60px 0.00px 0 #F8F2E7, -1.48px -0.61px 0 #F8F2E7, -1.13px -1.13px 0 #F8F2E7, -0.61px -1.48px 0 #F8F2E7, -0.00px -1.60px 0 #F8F2E7, 0.61px -1.48px 0 #F8F2E7, 1.13px -1.13px 0 #F8F2E7, 1.48px -0.61px 0 #F8F2E7, 2.60px 0.00px 0 #F8F2E7, 2.40px 0.99px 0 #F8F2E7, 1.84px 1.84px 0 #F8F2E7, 0.99px 2.40px 0 #F8F2E7, 0.00px 2.60px 0 #F8F2E7, -0.99px 2.40px 0 #F8F2E7, -1.84px 1.84px 0 #F8F2E7, -2.40px 0.99px 0 #F8F2E7, -2.60px 0.00px 0 #F8F2E7, -2.40px -0.99px 0 #F8F2E7, -1.84px -1.84px 0 #F8F2E7, -0.99px -2.40px 0 #F8F2E7, -0.00px -2.60px 0 #F8F2E7, 0.99px -2.40px 0 #F8F2E7, 1.84px -1.84px 0 #F8F2E7, 2.40px -0.99px 0 #F8F2E7, 3.60px 0.00px 0 #3B1A0A, 3.42px 1.11px 0 #3B1A0A, 2.91px 2.12px 0 #3B1A0A, 2.12px 2.91px 0 #3B1A0A, 1.11px 3.42px 0 #3B1A0A, 0.00px 3.60px 0 #3B1A0A, -1.11px 3.42px 0 #3B1A0A, -2.12px 2.91px 0 #3B1A0A, -2.91px 2.12px 0 #3B1A0A, -3.42px 1.11px 0 #3B1A0A, -3.60px 0.00px 0 #3B1A0A, -3.42px -1.11px 0 #3B1A0A, -2.91px -2.12px 0 #3B1A0A, -2.12px -2.91px 0 #3B1A0A, -1.11px -3.42px 0 #3B1A0A, -0.00px -3.60px 0 #3B1A0A, 1.11px -3.42px 0 #3B1A0A, 2.12px -2.91px 0 #3B1A0A, 2.91px -2.12px 0 #3B1A0A, 3.42px -1.11px 0 #3B1A0A; }
 .gf-mark-sub > span:first-child { font-size:34px; color:#A63D24; }
 .gf-mark-sub > span:nth-child(2) { font-size:40px; color:#3B1A0A; margin:-4px 0 0 12px; }
 /* রসের পথ (আঁকাবাঁকা পথ): clips alternate sides as soft round vignettes; the road (drawn by GurRoad) winds through the
@@ -223,7 +224,7 @@
 /* phones: centre the heading over the dial's product column (it starts right of the arc at min(27vw,130px) + 22px, see GurDial) */
 @media (max-width:759px) { .gr-end { padding-left:calc(min(27vw,130px) + 6px); } }
 /* the গাছি: a 5-frame walk-cycle sprite (stand, left step, passing, right step, passing); GurRoad picks the frame */
-.gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; aspect-ratio:159/210; background:0 0 / 500% 100% no-repeat; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
+.gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; aspect-ratio:159/210; background:0 0 / 500% 100% no-repeat; pointer-events:none; will-change:transform; }
 @media (min-width:760px) {
   .gr { max-width:760px; margin:24px auto 0; }
   .gr-stop { width:46%; margin-bottom:10px; }
