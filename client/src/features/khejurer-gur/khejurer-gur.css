@@ -125,6 +125,9 @@
 .gf-lw { position:relative; display:block; width:var(--lw); margin:4px auto 0; animation:gf-float 6s ease-in-out infinite; }
 .gf-pre { display:flex; align-items:center; justify-content:center; gap:12px; font-size:26px; font-weight:700; line-height:1; color:var(--deep); }
 .gf-pre::before, .gf-pre::after { content:""; width:34px; height:2px; border-radius:2px; background:#A63D24; }
+/* hand-painted খেজুরের with date palm leaves; the leaves replace the side rules, multiply melts its white ground into the hero */
+.gf-pre:has(.gf-pre-lett)::before, .gf-pre:has(.gf-pre-lett)::after { display:none; }
+.gf-pre-lett { display:block; width:min(220px,56vw); height:auto; margin:-6px auto -12px; }
 .gf-lett { position:relative; z-index:1; display:block; width:100%; filter:drop-shadow(0 18px 18px rgba(120,40,0,.25)); }
 @keyframes gf-float { 50% { transform:translateY(-3px); } }
 /* the big drip's tip is at 48.2% across and 95% down the lettering; the gur in the bowl is centred 45% down the bowl */
@@ -139,17 +142,19 @@
 }
 .gf-trio { position:relative; width:min(660px,100vw); margin-top:14px; display:flex; justify-content:center; }
 .gf-bowl { position:relative; z-index:2; width:min(330px,58vw); mix-blend-mode:multiply; }
-.gf-side { position:absolute; z-index:1; top:13%; width:min(280px,44vw); mix-blend-mode:multiply; opacity:0; transition:transform 1100ms var(--spring) 500ms, opacity .5s ease 500ms; }
-.gf-side img { width:100%; -webkit-mask-image:radial-gradient(closest-side,#000 74%,transparent 100%); mask-image:radial-gradient(closest-side,#000 74%,transparent 100%); }
-.gf-side.l { left:0; transform:translateX(38%) rotate(0deg) scale(.8); }
-.gf-side.r { right:0; transform:translateX(-38%) rotate(0deg) scale(.8); }
-.gf-hero.in .gf-side { opacity:1; }
-.gf-hero.in .gf-side.l { transform:rotate(-9deg); }
-.gf-hero.in .gf-side.r { transform:rotate(8deg); }
 .gf-bowl img { width:100%; -webkit-mask-image:radial-gradient(closest-side,#000 74%,transparent 100%); mask-image:radial-gradient(closest-side,#000 74%,transparent 100%); }
-.gf-ring { position:absolute; left:calc(50% - var(--lw) * .018); top:45%; width:46%; aspect-ratio:2.2; translate:-50% -50%; border:2px solid #7b2a0c; border-radius:50%; opacity:0; animation:gf-ring 3.4s var(--ease-out) infinite; }
-@keyframes gf-ring { 0%,62% { transform:scale(.3); opacity:0; } 64% { opacity:.7; } 100% { transform:scale(1.5); opacity:0; } }
+/* the pouring video replaces the jhola bowl: landscape, its cream ground melts into the hero via multiply */
+.gf-bowl.gf-pour { width:min(560px,100vw); mix-blend-mode:normal; }
+.gf-pour video { display:block; width:100%; height:auto; background:#FAF4E7;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 8%,#000 92%,transparent); -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 8%,#000 92%,transparent); mask-composite:intersect; }
 .gf-sub { position:relative; margin:6px 0 20px; font-size:15px; font-weight:600; color:var(--sub); }
+/* the গুড় names take turns in a small box: the new one slides up in, the old one slides up and out */
+.gf-tk { display:inline-grid; vertical-align:middle; overflow:hidden; margin-top:-3px; padding:3px 10px; border-radius:8px; background:#A63D2412; box-shadow:inset 0 0 0 1px #A63D2433; color:#8A2E19; font-weight:800; text-align:center; }
+.gf-tk span { grid-area:1/1; white-space:nowrap; opacity:0; transform:translateY(70%); filter:blur(3px); transition:opacity .45s var(--ease-out), transform .55s var(--ease-out), filter .45s var(--ease-out); }
+.gf-tk span.on { opacity:1; transform:none; filter:none; }
+.gf-tk span.out { transform:translateY(-70%); }
+@media (prefers-reduced-motion:reduce) { .gf-tk span { transition:none; } }
 .gf-hero small { margin-top:12px; font-size:12.5px; color:var(--sub); font-family:"Noto Sans Bengali",sans-serif; }
 
 .gf .kick { margin:0 0 6px; font:800 13px "Noto Sans Bengali",sans-serif; color:var(--car); }
@@ -157,46 +162,102 @@
 /* এক ফোঁটার গল্প — a minimal clock; scrolling moves the hands from ভোর ৪টা to ১০টা */
 
 /* products, shown like a café poster: numbered top-down photos, then about + menu */
-.gf-show { --ink2:#8A2E19; background:#F8F2E7; color:var(--ink2); padding:56px 20px 46px; }
+.gf-show { --ink2:#8A2E19; background:#F8F2E7; color:var(--ink2); padding:56px 20px 46px;; overflow-x:clip; }
 .gf-show > div { max-width:1040px; margin:0 auto; }
 .gf-shh { display:grid; gap:16px; }
+/* the big গুড় with the gachi climbing his palm beside it; multiply drops the illustration's cream into the section's */
+.gf-mark { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
 .gf-mark b { display:block; font:800 clamp(72px,21vw,120px)/.95 "Baloo Da 2","Noto Sans Bengali",sans-serif; letter-spacing:-.01em; color:var(--ink2); }
 .gf-intro h2 { margin:0; font-family:Galada,cursive; font-weight:400; font-size:24px; letter-spacing:.02em; }
 .gf-intro p { margin:8px 0 0; font:500 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:38ch; }
-/* three গুড়, zig-zag down a winding blue line that draws itself */
-.gf-tl { position:relative; margin-top:34px; padding:10px 0 140px; }
-.gf-path { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:0; }
-.gf-path > path { fill:none; stroke:#A63D24; stroke-width:7; stroke-linecap:round; }
-.gf-path #gfArrow { fill:#A63D24; stroke:none; }
-/* the line lands on a flat আলপনা strip that opens sideways and keeps drifting */
-.gf-endbd { position:absolute; left:50%; width:100vw; margin-left:-50vw; bottom:30px; height:52px; overflow:hidden; background:#A63D24; clip-path:inset(0 50% 0 50%); transition:clip-path 1.1s var(--ease-out); }
-.gf-tl.end .gf-endbd { clip-path:inset(0 0 0 0); }
-.gf-endbd svg { display:block; height:100%; animation:rc-drift 30s linear infinite; }
-@media (prefers-reduced-motion:reduce) { .gf-endbd svg { animation:none; } }
-.gf-ti { position:relative; z-index:1; display:grid; grid-template-columns:50% 1fr; align-items:center; gap:22px; margin-top:120px; }
-.gf-ti:first-of-type { margin-top:70px; }
-.gf-ti.r { grid-template-columns:1fr 50%; }
-.gf-ti.r .gf-orb { order:2; }
-.gf-ti.r .gf-tx { text-align:right; }
-.gf-orb { position:relative; aspect-ratio:1; }
-.gf-burst { position:absolute; inset:-9%; display:block; transform:scale(.4) rotate(-40deg); opacity:0; transition:transform 900ms var(--spring), opacity .4s ease; }
-.gf-burst svg { width:100%; height:100%; overflow:visible; animation:gf-turn 30s linear infinite; }
-.gf-ti.on .gf-burst { transform:none; opacity:1; }
+/* রসের পথ: a straight dirt road on the left, the three stops on the right; a small গাছি walks the road as you scroll */
+.gf-mark-sub { align-self:flex-end; margin:0 0 14px; font:400 24px/1 Galada,cursive; color:#A63D24; }
+.gr { --road:58px; position:relative; contain:inline-size; display:grid; grid-template-columns:var(--road) minmax(0,1fr); column-gap:30px; row-gap:18px; margin-top:14px; padding:22px 0 26px; }
+.gr-road { grid-column:1; grid-row:1 / span 3; }
+.gr-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.gr-svg path { fill:none; stroke-linecap:butt; }
+.gr-svg .grass { stroke:#B9B98F; stroke-width:58; opacity:.45; }
+.gr-svg .dirt { stroke:#DDBB92; stroke-width:38; }
+.gr-svg .rut { stroke:#ECD3B0; stroke-width:10; opacity:.85; }
+.gr-svg .gr-trail { stroke:#A9714A; stroke-width:2; stroke-dasharray:0 99999; opacity:.6; }
+.gr-stone { fill:#F8F2E7; stroke:#B98D62; stroke-width:2; transition:fill .35s, stroke .35s; }
+.gr-stone.on { fill:#A63D24; stroke:#A63D24; }
+.gr-stop { grid-column:2; position:relative; margin:0; }
+.gr-stop video { display:block; width:100%; height:auto; aspect-ratio:5/4; object-fit:cover; mix-blend-mode:multiply;
+  -webkit-mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); }
+/* the arrow is a little travel route (like a flight path): dashed, out from the milestone, one loop, into the video,
+   with a গুড় drop flying it and landing at the video; it plays when the walker arrives (SMIL, started from GurRoad) */
+.gr-arrow { position:absolute; z-index:1; top:50%; left:calc(-1 * var(--arm,88px) + 6px); width:calc(var(--arm,88px) + 12px); height:auto; aspect-ratio:120/48; translate:0 -64.6%; overflow:visible; pointer-events:none; opacity:0; transition:opacity .2s; }
+.gr-stop.on .gr-arrow { opacity:1; }
+.gr-arrow .dash { fill:none; stroke:#8A2E19; stroke-width:1.6; stroke-linecap:round; stroke-dasharray:3.2 3.4; }
+.gr-arrow .hd { filter:drop-shadow(0 1.5px 1.5px #6a220740); }
+/* the line shows once the walker arrives */
+.gr-stop figcaption { position:absolute; left:6%; bottom:4%; display:grid; gap:1px; opacity:0; transform:translateY(8px); filter:blur(4px); transition:opacity .5s var(--ease-out), transform .6s var(--ease-out), filter .5s; }
+.gr-stop.on figcaption { opacity:1; transform:none; filter:none; }
+.gr-stop figcaption span { font:700 11.5px "Noto Sans Bengali",sans-serif; letter-spacing:.06em; color:#A63D24; }
+.gr-stop figcaption b { font:800 19px/1.2 "Noto Sans Bengali",sans-serif; color:var(--ink2); text-shadow:0 0 10px #F8F2E7, 0 0 4px #F8F2E7; }
+.gr-end { padding-top:6px; text-align:center; }
+.gr-end h2 { margin:0; font-family:Galada,cursive; font-weight:400; font-size:28px; letter-spacing:.02em; }
+.gr-end p { margin:4px auto 0; max-width:30ch; font:500 14px/1.6 "Noto Sans Bengali",sans-serif; }
+.gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; height:auto; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
+.gr-walker.go { animation:gr-step .7s ease-in-out infinite alternate; }
+@keyframes gr-step { from { rotate:-1deg; } to { rotate:1deg; } }
+@media (min-width:760px) {
+  .gr { --road:72px; max-width:760px; margin:24px auto 0; column-gap:56px; row-gap:22px; }
+  .gr-stop video { aspect-ratio:16/10; }
+  .gr-svg .grass { stroke-width:72; } .gr-svg .dirt { stroke-width:48; } .gr-svg .rut { stroke-width:12; }
+  .gr-walker { width:52px; }
+  .gr-stop figcaption b { font-size:24px; }
+}
+@media (prefers-reduced-motion:reduce) { .gr-walker.go { animation:none; } .gr-stop figcaption, .gr-arrow { transition:none; } }
+/* কাঁটা: numbers ride a thin arc, the গুড় at the pointer shows on the right. Normal flow (no pinning): a stroke
+   fills along the arc toward the next গুড়, then the dial turns */
+.gf-dial { position:relative; margin:4px -20px 0; }
+/* the stage carries the section's cream itself, and the photos multiply against it */
+.gf-stage { position:relative; height:clamp(500px,72svh,560px); overflow:hidden; background:#F8F2E7; }
+.gf-arc { position:absolute; border:1.5px solid #D9C3AD; border-radius:50%; pointer-events:none; }
+.gf-prog { position:absolute; overflow:visible; pointer-events:none; }
+.gf-prog circle { fill:none; stroke:#3B1A0A; stroke-width:2.5; stroke-linecap:round; stroke-dasharray:0 9999; }
+.gf-tick { position:absolute; left:0; top:0; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:#D9C3AD; transition:background .3s, scale .4s var(--spring); }
+.gf-tick.on { background:#3B1A0A; scale:1.5; }
+.gf-num { all:unset; position:absolute; left:0; top:0; box-sizing:border-box; min-width:44px; min-height:44px; display:grid; place-items:center; cursor:pointer; font:800 24px/1 "Noto Sans Bengali",sans-serif; color:#8A2E1938; white-space:nowrap; will-change:transform; -webkit-tap-highlight-color:transparent; }
+.gf-num[aria-current="true"] { pointer-events:none; }
+.gf-num:focus-visible { outline:2px solid #A63D24; outline-offset:-4px; border-radius:50%; }
+@media (hover:hover) and (pointer:fine) { .gf-num:hover { color:#8A2E19aa; } }
+.gf-info { position:absolute; left:var(--info-x,150px); right:16px; top:0; bottom:0; max-width:440px; display:flex; flex-direction:column; justify-content:center; }
+/* photos sit straight on the section's cream: multiply drops their white ground, a soft mask hides the square */
+.gf-shot { position:relative; width:min(100%,36svh,300px); aspect-ratio:1; margin:0 0 2px -8px; }
+.gf-shot img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; transform-origin:50% 60%; mix-blend-mode:multiply;
+  -webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent 100%); mask-image:radial-gradient(closest-side,#000 72%,transparent 100%); }
+.gf-swap { animation:gf-swap .45s var(--ease-out) both; }
+@keyframes gf-swap { from { opacity:0; transform:translateY(10px); } }
+.gf-big { display:block; font:800 52px/1 "Noto Sans Bengali",sans-serif; letter-spacing:-.02em; color:var(--ink2); }
+.gf-info h3 { margin:6px 0 0; font:800 21px/1.2 "Noto Sans Bengali",sans-serif; color:var(--ink2); }
+.gf-info p { margin:3px 0 0; font:500 13px/1.5 "Noto Sans Bengali",sans-serif; color:#8A2E19cc; }
+.gf-price { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; margin-top:8px; }
+.gf-price b { font:800 34px/1 "Noto Sans Bengali",sans-serif; letter-spacing:-.5px; color:#1F2A44; }
+.gf-price s { font:600 13px "Noto Sans Bengali",sans-serif; color:#1F2A4480; }
+.gf-price small { font:600 12px "Noto Sans Bengali",sans-serif; color:#8A2E19cc; }
+.gf-seg { display:flex; gap:4px; margin-top:10px; padding:4px; border-radius:999px; background:#A63D2414; }
+.gf-seg button { all:unset; box-sizing:border-box; flex:1; cursor:pointer; padding:6px 4px; border-radius:999px; text-align:center; font:700 12px/1.25 "Noto Sans Bengali",sans-serif; color:var(--ink2); transition:background .25s, color .25s; -webkit-tap-highlight-color:transparent; }
+.gf-seg button span { display:block; font-weight:800; font-size:13px; }
+.gf-seg button.on { background:#A63D24; color:#FFF6E6; }
+.gf-seg button:focus-visible { outline:2px solid #A63D24; outline-offset:2px; }
+.gf-pill.gf-add { display:flex; justify-content:space-between; width:100%; margin-top:10px; }
+/* the number, name, line and price sit centred under the photo */
+.gf-swap { text-align:center; }
+.gf-shot { align-self:center; margin-left:0; }
+.gf-price { justify-content:center; }
+@media (min-width:760px) {
+  .gf-dial { width:100vw; margin:8px 0 0 calc(50% - 50vw); }
+  .gf-stage { height:clamp(560px,76svh,640px); }
+  .gf-num { font-size:34px; }
+  .gf-shot { width:min(100%,44svh,380px); }
+  .gf-big { font-size:76px; } .gf-info h3 { font-size:28px; } .gf-info p { font-size:15px; } .gf-price b { font-size:44px; }
+  .gf-pill.gf-add { align-self:center; width:auto; min-width:260px; }
+}
+@media (prefers-reduced-motion:reduce) { .gf-swap { animation:none; } .gf-tick { transition:none; } }
 @keyframes gf-turn { to { transform:rotate(360deg); } }
-.gf-lbl { position:absolute; inset:-21%; pointer-events:none; opacity:0; transform:rotate(-30deg); transition:opacity .5s ease .2s, transform 1.1s var(--ease-out) .2s; }
-.gf-ti.on .gf-lbl { opacity:1; transform:none; }
-.gf-lbl svg { width:100%; height:100%; overflow:visible; }
-.gf-lbl text { font:800 12px "Noto Sans Bengali",sans-serif; fill:#A63D24; letter-spacing:.06em; }
-.gf-ph { position:absolute; inset:6%; border-radius:50%; overflow:hidden; background:#FFF8EC; transform:scale(.6); opacity:0; transition:transform 800ms var(--spring), opacity .4s ease; box-shadow:0 18px 30px -20px #1a235040, inset 0 0 0 1px #2346D614; }
-.gf-ti.on .gf-ph { transform:none; opacity:1; }
-.gf-ph img { width:100%; height:100%; object-fit:contain; transform:scale(var(--z,1.15)); mix-blend-mode:multiply; }
-.gf-tx { opacity:0; transform:translateY(14px); transition:opacity .6s ease .15s, transform .8s var(--ease-out) .15s; }
-.gf-ti.on .gf-tx { opacity:1; transform:none; }
-.gf-tx > b { display:block; font:800 clamp(34px,10vw,52px)/1 "Noto Sans Bengali",sans-serif; letter-spacing:-.5px; color:#1F2A44; }
-.gf-tx > i { display:block; margin-top:6px; font:italic 500 14px/1.45 "Noto Sans Bengali",sans-serif; color:#1F2A44; }
-.gf-tx > i b { font-style:normal; font-weight:800; }
-.gf-tx .szs { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-.gf-ti.r .gf-tx .szs { justify-content:flex-end; }
 /* size buttons (পদ্ম-চাকতি): terracotta pill, price over size, a lotus in a cream disc that turns when added */
 .gf-pill { all:unset; box-sizing:border-box; cursor:pointer; display:inline-flex; align-items:center; gap:10px; min-height:52px; padding:5px 5px 5px 16px; border-radius:999px; background:#A63D24; color:#FFF6E6; font:800 15px/1.2 "Noto Sans Bengali",sans-serif; -webkit-tap-highlight-color:transparent; transition:transform .16s var(--ease-out), background .2s; }
 .gf-pill .pt { display:grid; text-align:left; }
@@ -209,9 +270,8 @@
 .gf-pill.added .ds { background:#F6C453; }
 .gf-pill.added .ds svg { transform:rotate(144deg); }
 .gf-pill:focus-visible { outline:2px solid #A63D24; outline-offset:3px; }
-@media (min-width:760px) { .gf-ti { grid-template-columns:44% 1fr; gap:30px; } .gf-ti.r { grid-template-columns:1fr 44%; } }
 /* about + menu, Harvest-Kitchen style: huge serif, blue line icons on mustard blobs, leader rows */
-.gf-low { --bl:#8A2E19; --mu:#F3C344; margin-top:56px; color:var(--bl); }
+.gf-low { --bl:#8A2E19; --mu:#F3C344; margin-top:20px; color:var(--bl); }
 .gf-ic { display:block; overflow:visible; }
 .gf-ic .s { fill:var(--bl); } .gf-ic .o { fill:#F8F2E7; stroke:var(--bl); stroke-width:3.6; stroke-linecap:round; stroke-linejoin:round; }
 .gf-ic .l { fill:none; stroke:var(--bl); stroke-width:3.6; stroke-linecap:round; stroke-linejoin:round; } .gf-ic .fl { fill:var(--bl); }
@@ -225,7 +285,7 @@
 .gf-wv path { fill:none; stroke:var(--bl); stroke-width:12; animation:gf-wv 2.6s linear infinite; }
 @keyframes gf-wv { to { transform:translateX(-44px); } }
 
-.gf-about { position:relative; }
+.gf-about { position:relative; display:flow-root; }
 .gf-about h3 { margin:0; font:900 clamp(26px,7.4vw,38px)/1.1 "Noto Serif Bengali",serif; letter-spacing:-.3px; }
 .gf-about p { margin:8px 0 0; font:600 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:42ch; color:#1F2A44; }
 .gf-about small { display:block; margin-top:6px; font:800 12px "Noto Sans Bengali",sans-serif; letter-spacing:.04em; }
@@ -320,7 +380,7 @@
 .gf-ic .kg { transform-box:fill-box; transform-origin:0% 100%; animation:gf-sp 1.8s ease-in-out infinite; }
 @keyframes gf-sp { 50% { transform:rotate(-14deg); } }
 @media (min-width:760px) { .gf-shh { grid-template-columns:1fr 1fr; align-items:start; } }
-@media (prefers-reduced-motion:reduce) { .gf-fall, .gf-ring, .gf-lw { animation:none; } .gf-fall { opacity:0; } .gf-side { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .gf-fall, .gf-lw { animation:none; } .gf-fall { opacity:0; } }
 /* why গুড়: an আলপনা vine grows down the frame; a lotus blooms at each reason */
 .vn { position:relative; max-width:620px; margin:0 auto; padding:8px 18px 34px; }
 .vn-svg { position:absolute; left:0; top:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:0; }
@@ -328,8 +388,9 @@
 .vn-svg .dots { fill:none; stroke:var(--or); stroke-width:3; stroke-linecap:round; stroke-dasharray:0 9; opacity:.55; }
 .vn-svg .bud { fill:var(--or); }
 /* section foot: a slim running নকশি border — triangles and dots, drifting without end */
-.vn-bd { position:relative; left:50%; width:100vw; margin:6px 0 0 -50vw; height:30px; overflow:hidden; color:var(--or); }
-.vn-bd svg { display:block; height:100%; animation:rc-drift 36s linear infinite; }
+/* section foot: the ঝালর band turned up (dots, then scallops, then the flower band), drifting without end, flush with the section's bottom */
+.vn-bd { position:relative; left:50%; width:100vw; margin:10px 0 -46px -50vw; height:56px; overflow:hidden; }
+.vn-bd svg { display:block; height:100%; scale:1 -1; animation:rc-drift 60s linear infinite; }
 @media (prefers-reduced-motion:reduce) { .vn-bd svg { animation:none; } }
 .vn-it { position:relative; z-index:1; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; margin-top:30px; }
 .vn-it:first-of-type { margin-top:14px; }
