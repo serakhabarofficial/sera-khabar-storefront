@@ -47,12 +47,12 @@ export const GUR_IMAGES = {
  * the one-line description and the photo. Every price, size and stock figure comes from the catalog.
  */
 export const GUR_PRODUCTS = [
-  { slug: "foil-wrapped-patali-jaggery", name: "ফয়েল পাটালি", line: "ফয়েলের ছোট ট্রেতে জমানো — ভাগ করে খাওয়া সহজ।", uses: "উপহার · টিফিন · ভেঙে খান", image: GUR_IMAGES.foilPatali, zoom: 1.05 },
-  { slug: "round-patali-jaggery", name: "গোল পাটালি", line: "গোল চাকতি, ভাঙলে ভেতরে নরম দানা।", uses: "ভেঙে খান · পিঠা · মিষ্টান্ন", image: GUR_IMAGES.roundPatali, zoom: 1.05 },
-  { slug: "date-palm-patali", name: "লম্বা পাটালি", line: "লম্বা জমাট পাটালি, কেটে কেটে খাওয়ার মতো।", uses: "ভেঙে খান · মিষ্টান্ন · উপহার", image: GUR_IMAGES.patali, zoom: 0.94 },
-  { slug: "liquid-date-jaggery", name: "ঝোলা গুড়", line: "ঘন, চকচকে — চামচ থেকে ধীরে গড়িয়ে পড়ে।", uses: "পিঠা · রুটি · মুড়ি", image: GUR_IMAGES.jhola, zoom: 1.15 },
-  { slug: "granulated-jaggery", name: "দানাদার গুড়", line: "ঝুরঝুরে দানা — চা আর পায়েসে সহজে মেশে।", uses: "চা · পায়েস · মিষ্টান্ন", image: GUR_IMAGES.danadar, zoom: 1.05 },
-  { slug: "chocolate-seed-jaggery", name: "বীজ গুড়", line: "নরম আর দানা দানা — জিভে দিলেই গলে যায়।", uses: "পায়েস · চা · চামচে", image: GUR_IMAGES.bij, zoom: 1.15 },
+  { slug: "foil-wrapped-patali-jaggery", name: "ফয়েল পাটালি", line: "ফয়েলের ছোট ট্রেতে জমানো — ভাগ করে খাওয়া সহজ।", image: GUR_IMAGES.foilPatali, zoom: 1.05 },
+  { slug: "round-patali-jaggery", name: "গোল পাটালি", line: "গোল চাকতি, ভাঙলে ভেতরে নরম দানা।", image: GUR_IMAGES.roundPatali, zoom: 1.05 },
+  { slug: "date-palm-patali", name: "লম্বা পাটালি", line: "লম্বা জমাট পাটালি, কেটে কেটে খাওয়ার মতো।", image: GUR_IMAGES.patali, zoom: 0.94 },
+  { slug: "liquid-date-jaggery", name: "ঝোলা গুড়", line: "ঘন, চকচকে — চামচ থেকে ধীরে গড়িয়ে পড়ে।", image: GUR_IMAGES.jhola, zoom: 1.15 },
+  { slug: "granulated-jaggery", name: "দানাদার গুড়", line: "ঝুরঝুরে দানা — চা আর পায়েসে সহজে মেশে।", image: GUR_IMAGES.danadar, zoom: 1.05 },
+  { slug: "chocolate-seed-jaggery", name: "বীজ গুড়", line: "নরম আর দানা দানা — জিভে দিলেই গলে যায়।", image: GUR_IMAGES.bij, zoom: 1.15 },
 ] as const;
 export type GurProductMeta = (typeof GUR_PRODUCTS)[number];
 

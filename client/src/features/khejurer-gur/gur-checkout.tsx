@@ -286,7 +286,8 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
               return <div key={row.pack.variantId} className="v1-memo-pack" data-checked={checked}>
                 <label>
                   <input className="sr-only" type="checkbox" checked={checked} disabled={pending} onChange={(e) => { beginCheckout(); toggle(row, e.target.checked); }} />
-                  <span className="dot" aria-hidden="true" /><span className="lbl"><b>{row.offer.meta.name}</b> · {row.pack.label}{cut ? <em className="off">{bn(Math.round((1 - row.pack.unitPrice / cut) * 100))}% ছাড়</em> : null}<small>{row.offer.meta.uses}</small></span>
+                  <span className="ph" aria-hidden="true"><img src={row.offer.meta.image} alt="" width={68} height={68} loading="lazy" decoding="async" /><span className="dot" /></span>
+                  <span className="lbl"><b>{row.offer.meta.name}</b><span className="meta"><span className="sz">{row.pack.label}</span>{cut ? <em className="off">{bn(Math.round((1 - row.pack.unitPrice / cut) * 100))}% ছাড়</em> : null}</span></span>
                 </label>
                 <div className="end">
                   <span className="pr">{taka(row.pack.unitPrice)}{cut ? <s>{taka(cut)}</s> : null}</span>

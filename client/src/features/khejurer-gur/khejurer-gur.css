@@ -472,10 +472,24 @@
 .kg .ftw .ft-panel::before { content:""; position:absolute; left:0; right:0; top:-7px; height:8px; background:radial-gradient(circle at 50% 100%,#FBF1DF 4px,transparent 4.5px) 0 0 / 12px 8px repeat-x; }
 @media (prefers-reduced-motion:reduce) { .ft-edge svg, .ft-mand svg, .sg-al svg { animation:none!important; } }
 /* memo pick: পদ্ম-টিক — a terracotta lotus with a cream tick blooms when a row is chosen */
-.kg .amsotto .v1-memo-pack label { grid-template-columns:30px 1fr; }
 .kg .amsotto .v1-memo-pack .dot { width:30px; height:30px; border-radius:0; box-shadow:none; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'%3E%3Ccircle r='10' fill='none' stroke='%235b2d1766' stroke-width='1.5'/%3E%3C/svg%3E") center / contain no-repeat; }
 .kg .amsotto .v1-memo-pack .dot::after { display:none; }
 .kg .amsotto .v1-memo-pack[data-checked="true"] .dot { background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(0)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(45)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(90)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(135)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(180)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(225)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(270)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(315)'/%3E%3Ccircle r='10' fill='%23A63D24'/%3E%3Cpath d='M-4.5 0.5 L-1.2 3.8 L5 -3' fill='none' stroke='%23FFF6E6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; box-shadow:none; animation:al-tick 520ms var(--spring); }
+/* memo photo-pick: the product photo is the checkbox; the lotus tick sits on its corner and a rust ring marks the pick */
+.kg .amsotto .v1-memo-pack label { grid-template-columns:68px 1fr; gap:12px; }
+.kg .amsotto .v1-memo-pack .ph { position:relative; width:68px; height:68px; }
+.kg .amsotto .v1-memo-pack .ph img { display:block; width:100%; height:100%; border-radius:10px; object-fit:cover; background:#f6ead4; filter:saturate(.75); transition:transform 160ms var(--ease-out), filter 200ms ease; }
+.kg .amsotto .v1-memo-pack[data-checked="true"] .ph img { filter:none; }
+.kg .amsotto .v1-memo-pack label:active .ph img { transform:scale(.96); }
+.kg .amsotto .v1-memo-pack .ph::after { content:""; position:absolute; inset:0; border-radius:10px; box-shadow:inset 0 0 0 1px #3f1a0b10; transition:box-shadow 200ms ease; }
+.kg .amsotto .v1-memo-pack[data-checked="true"] .ph::after { box-shadow:inset 0 0 0 2px #A63D24; }
+.kg .amsotto .v1-memo-pack .ph .dot { position:absolute; z-index:1; right:-6px; top:-6px; width:24px; height:24px; border-radius:50%; background-color:#fff; box-shadow:0 1px 3px #3f1a0b33; }
+.kg .amsotto .v1-memo-pack[data-checked="true"] .ph .dot { background-color:transparent; box-shadow:none; }
+.kg .amsotto .v1-memo-pack .lbl b { display:block; }
+.kg .amsotto .v1-memo-pack .meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:2px; }
+.kg .amsotto .v1-memo-pack .sz { font-family:var(--body); font-size:13px; font-weight:600; color:var(--sub); white-space:nowrap; }
+.kg .amsotto .v1-memo-pack .lbl .off { margin-left:0; padding:2px 10px; font-size:13px; }
+@media (prefers-reduced-motion:reduce) { .kg .amsotto .v1-memo-pack .ph img { transition:none; } }
 @keyframes al-tick { 0% { transform:scale(.4) rotate(-60deg); } 100% { transform:none; } }
 @media (prefers-reduced-motion:reduce) { .kg .amsotto .v1-memo-pack .dot { animation:none!important; } }
 @media (prefers-reduced-motion:reduce) {
@@ -488,25 +502,22 @@
 .gf-q .q-strip.t { top:0; } .gf-q .q-strip.b { bottom:0; }
 .gf-q .q-strip svg { flex:none; height:16px; animation:rc-drift 40s linear infinite; }
 .gf-q .q-cart { position:relative; width:min(310px,84vw); aspect-ratio:300/380; display:grid; place-items:center; }
-.gf-q .q-frame { position:absolute; inset:0; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 10px 18px #2a001580); transform:scale(.9); opacity:0; transition:transform .9s var(--spring), opacity .4s ease; will-change:transform, opacity; }
-.gf-q.in .q-frame { transform:none; opacity:1; }
-.gf-q .q-lotus { position:absolute; width:24%; opacity:0; transition:opacity .6s ease .5s; }
-.gf-q.in .q-lotus { opacity:1; }
+.gf-q .q-frame { position:absolute; inset:0; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 10px 18px #2a001580); }
+.gf-q .q-lotus { position:absolute; width:24%; }
 .gf-q .q-lotus svg { display:block; width:100%; overflow:visible; animation:q-sway 5s ease-in-out infinite; }
 .gf-q .q-lotus.tl { left:-5%; top:5%; } .gf-q .q-lotus.tr { right:-5%; top:5%; transform:scaleX(-1); }
 .gf-q .q-lotus.bl { left:-5%; bottom:5%; transform:scaleY(-1); } .gf-q .q-lotus.br { right:-5%; bottom:5%; transform:scale(-1); }
 @keyframes q-sway { 50% { transform:rotate(6deg) scale(1.04); } }
 .gf-q blockquote { position:relative; margin:0; width:88%; }
 /* today's বঙ্গাব্দ date as a tiny wall-calendar page: month band, big day, year */
-.gf-q .q-cal { display:grid; justify-items:center; width:fit-content; min-width:44px; margin:0 auto 8px; border-radius:5px; overflow:hidden; background:#fff; box-shadow:0 0 0 1.2px #A63D24, 0 3px 6px -3px #5A1E0E66; font-family:"Anek Bangla","Noto Sans Bengali",sans-serif; opacity:0; transition:opacity .6s ease .35s; }
+.gf-q .q-cal { display:grid; justify-items:center; width:fit-content; min-width:44px; margin:0 auto 8px; border-radius:5px; overflow:hidden; background:#fff; box-shadow:0 0 0 1.2px #A63D24, 0 3px 6px -3px #5A1E0E66; font-family:"Anek Bangla","Noto Sans Bengali",sans-serif; }
 .gf-q .q-cal i { display:block; width:100%; padding:1px 7px; background:#A63D24; color:#FFF6E6; font-style:normal; font-weight:600; font-size:9px; line-height:1.45; text-align:center; }
 .gf-q .q-cal b { padding-top:1px; font-weight:700; font-size:16px; line-height:1.05; color:#3B1A0A; }
 .gf-q .q-cal small { padding-bottom:2px; font-weight:500; font-size:8px; line-height:1.3; color:#7a5a44; }
 .gf-q .q-lett { display:block; width:100%; height:auto; opacity:0; transform:translateY(14px) scale(.94); transition:opacity .7s ease .45s, transform 1s var(--spring) .45s; will-change:opacity, transform; }
-.gf-q.in .q-cal { opacity:1; }
 .gf-q.in .q-lett { opacity:1; transform:none; }
 @media (max-width:600px) { .gf-q { padding:38px 14px; } .gf-q .q-cart { width:min(320px,90vw); aspect-ratio:300/280; } .gf-q .q-cal { margin-bottom:5px; } .gf-q .q-lotus { width:19%; } .gf-q .q-lotus.tl, .gf-q .q-lotus.tr { top:2%; } .gf-q .q-lotus.bl, .gf-q .q-lotus.br { bottom:2%; } }
-@media (prefers-reduced-motion:reduce) { .gf-q *, .gf-q *::before { transition:none!important; animation:none!important; opacity:1!important; filter:none!important; } .gf-q .q-frame, .gf-q .q-lett { transform:none!important; } }
+@media (prefers-reduced-motion:reduce) { .gf-q *, .gf-q *::before { transition:none!important; animation:none!important; opacity:1!important; filter:none!important; } .gf-q .q-lett { transform:none!important; } }
 
 /* one face for the whole খেজুরের গুড় page, checkout and footer included: Noto Sans Bengali (it also carries the Latin
    glyphs for "Designed & Engineered by"). !important because the shared am-sotto checkout styles set their own faces. */
