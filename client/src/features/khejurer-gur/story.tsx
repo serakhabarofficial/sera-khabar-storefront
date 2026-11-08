@@ -251,64 +251,89 @@ export function GurQuote() {
   </section>;
 }
 
-/** রসের পথ: a straight village road down the left; the three stops sit on the right. A small গাছি walks the road as
- *  you scroll (nothing pins); when he reaches a stop its milestone lights, an arrow runs out to the video and the line shows. */
+/** রসের পথ (আঁকাবাঁকা পথ): the clips alternate sides as soft round vignettes, captions beneath; a dirt road winds down
+ *  through the open space beside each one. A small গাছি walks the road as you scroll (nothing pins), stepping through a
+ *  drawn walk cycle as he goes and standing still when you stop; when he reaches a
+ *  stop its milestone lights and the line shows. */
 const ROAD_STOPS = [
   { time: "ভোর ৪টা", line: "গাছে ওঠা", src: GUR_IMAGES.gachiFog, poster: GUR_IMAGES.gachiFogPoster, w: 640, h: 806, pos: "50% 38%", label: "কুয়াশার ভোরে খেজুর গাছে উঠছেন গাছি" },
   { time: "ভোর ৬টা", line: "রস নিয়ে পথে", src: GUR_IMAGES.roadWalk, poster: GUR_IMAGES.roadWalkPoster, w: 640, h: 640, pos: "50% 60%", label: "বাঁকে রসের হাঁড়ি নিয়ে কুয়াশার পথে হাঁটছেন গাছি" },
   { time: "সকাল ৮টা", line: "উঠোনের চুলায় জ্বাল", src: GUR_IMAGES.roadCook, poster: GUR_IMAGES.roadCookPoster, w: 640, h: 800, pos: "50% 55%", label: "চুলায় জ্বাল দেওয়া গুড় হাতা দিয়ে ঢালা হচ্ছে" },
 ] as const;
 
-// The arrow is a little travel route: out from the milestone, one loop, then into the video, with a গুড় drop flying it.
-const ROUTE = "M3 31 C16 45 34 44 47 35 C60 26 67 8 57 6 C46 4 48 27 66 27 C82 27 96 19 111 13";
-const ROUTE_S = 1.3;
-
 function GurRoad() {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = box.current!;
-    const svg = el.querySelector<SVGSVGElement>(".gr-svg")!, walker = el.querySelector<HTMLElement>(".gr-walker")!, trail = el.querySelector<HTMLElement>(".gr-trail")!;
+    const svg = el.querySelector<SVGSVGElement>(".gr-svg")!, walker = el.querySelector<HTMLElement>(".gr-walker")!;
     const strips = Array.from(svg.querySelectorAll<SVGPathElement>(".gr-p"));
     const stones = Array.from(svg.querySelectorAll<SVGCircleElement>(".gr-stone"));
     const stops = Array.from(el.querySelectorAll<HTMLElement>(".gr-stop"));
     const RM = reducedMotion();
-    // layout is measured once (and on resize), never during scroll; the walker eases toward the scroll target
-    let H = 0, X = 0, top = 0, vh = innerHeight, vw = innerWidth, at: number[] = [], frame = 0, cur = -1, goal = 0, moving = false;
+    // Layout is measured once (and on resize), never during scroll. The road runs through the free side of each stop and
+    // swings across between them; the walker follows it by looking up precomputed points, so scrolling never measures.
+    let H = 0, top = 0, vh = innerHeight, vw = innerWidth, at: number[] = [], frame = 0, cur = -1, goal = 0;
+    let px: number[] = [], py: number[] = [];
+    // walk cycle: one frame per STRIDE px of road travelled (frames 1–4), the standing frame (0) once he stops
+    const STRIDE = 13;
+    let travelled = 0, lastX = 0, lastY = 0, frameShown = -1;
+    const show = (f: number) => { if (f !== frameShown) { frameShown = f; walker.style.backgroundPosition = `${f * 25}% 0`; } };
     const build = () => {
-      const br = el.getBoundingClientRect(), road = el.querySelector<HTMLElement>(".gr-road")!.getBoundingClientRect();
-      H = br.height; X = road.left - br.left + road.width / 2; top = br.top + scrollY;
-      svg.setAttribute("viewBox", `0 0 ${br.width} ${H}`);
-      // the rough-edge filter only needs the road strip, not the whole width; a smaller filter region is far cheaper to paint
-      const rough = svg.querySelector<SVGFilterElement>("#grRough")!;
-      rough.setAttribute("x", `${Math.max(0, X - 48)}`); rough.setAttribute("width", "96");
-      strips.forEach((p) => p.setAttribute("d", `M${X} 0 V${H}`));
-      at = stops.map((st) => { const r = st.getBoundingClientRect(); return r.top - br.top + r.height / 2; });
-      stones.forEach((c, i) => { c.setAttribute("cx", `${X}`); c.setAttribute("cy", `${at[i]}`); });
-      stops.forEach((st) => st.style.setProperty("--arm", `${Math.round(st.getBoundingClientRect().left - br.left - X)}px`));
-      trail.style.left = `${X - 1}px`; trail.style.height = `${H}px`;
+      const br = el.getBoundingClientRect(), W = br.width;
+      H = br.height; top = br.top + scrollY;
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      const pts = stops.map((st) => {
+        const pic = st.querySelector<HTMLElement>(".gr-pic")!.getBoundingClientRect(), left = st.classList.contains("l");
+        const near = left ? pic.right - br.left : pic.left - br.left;
+        return { x: left ? (near + W) / 2 : near / 2, y: pic.top - br.top + pic.height / 2 };
+      });
+      let d = `M${pts[0].x.toFixed(1)} 0`, prev = { x: pts[0].x, y: 0 };
+      for (const p of [...pts, { x: pts[pts.length - 1].x, y: H }]) {
+        const k = (p.y - prev.y) * 0.55;
+        d += ` C${prev.x.toFixed(1)} ${(prev.y + k).toFixed(1)} ${p.x.toFixed(1)} ${(p.y - k).toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+        prev = p;
+      }
+      strips.forEach((s) => s.setAttribute("d", d));
+      const len = strips[0].getTotalLength(), N = 180;
+      px = []; py = [];
+      for (let i = 0; i <= N; i++) { const q = strips[0].getPointAtLength((len * i) / N); px.push(q.x); py.push(q.y); }
+      at = pts.map((p) => p.y);
+      stones.forEach((c, i) => { c.setAttribute("cx", `${pts[i].x}`); c.setAttribute("cy", `${pts[i].y}`); });
     };
     // a stop lights once and stays lit, so scrolling back up never flickers or replays it
     const light = (y: number) => stops.forEach((st, i) => {
       if (st.classList.contains("on") || y < at[i] - 4) return;
       st.classList.add("on"); stones[i].classList.add("on");
-      st.querySelectorAll<SVGAnimationElement>("animate, animateMotion").forEach((an) => { if (RM) an.setAttribute("dur", "0.001s"); an.beginElement(); });
     });
-    const draw = (y: number) => {
-      walker.style.transform = `translate3d(${X.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -86%)`;
-      trail.style.transform = `scaleY(${H ? (y / H).toFixed(4) : 0})`;
+    // the road only ever runs downward, so the point at height y is found by search + interpolation over the samples
+    const xAt = (y: number) => {
+      if (!py.length) return 0;
+      let lo = 0, hi = py.length - 1;
+      if (y <= py[0]) return px[0];
+      if (y >= py[hi]) return px[hi];
+      while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (py[mid] <= y) lo = mid; else hi = mid; }
+      const t = (y - py[lo]) / Math.max(py[hi] - py[lo], 0.001);
+      return px[lo] + (px[hi] - px[lo]) * t;
+    };
+    const draw = (y: number, moving: boolean) => {
+      const x = xAt(y);
+      travelled += Math.hypot(x - lastX, y - lastY); lastX = x; lastY = y;
+      const f = moving && !RM ? 1 + (Math.floor(travelled / STRIDE) % 4) : 0;
+      show(f);
+      const bob = f === 2 || f === 4 ? -1.5 : 0; // the passing steps ride a touch higher, like a real gait
+      walker.style.transform = `translate3d(${x.toFixed(1)}px, ${(y + bob).toFixed(1)}px, 0) translate(-50%, -86%)`;
     };
     const target = () => RM ? H : Math.max(0, Math.min(H, scrollY + vh * 0.6 - top));
     const step = () => {
       frame = 0;
       const d = goal - cur;
       cur = Math.abs(d) < 0.4 ? goal : cur + d * 0.22;
-      draw(cur); light(cur);
       const still = cur === goal;
-      if (still === moving) { moving = !still; walker.classList.toggle("go", moving); }
+      draw(cur, !still); light(cur);
       if (!still) frame = requestAnimationFrame(step);
     };
     const onScroll = () => { goal = target(); if (!frame) frame = requestAnimationFrame(step); };
-    const relayout = () => { build(); goal = target(); if (cur < 0) cur = goal; onScroll(); };
+    const relayout = () => { build(); goal = target(); if (cur < 0) { cur = goal; lastX = xAt(cur); lastY = cur; } draw(cur, false); onScroll(); };
     // the phone's address bar changes innerHeight while scrolling; only a real resize (width change) remeasures the viewport
     const onResize = () => { if (innerWidth !== vw) { vw = innerWidth; vh = innerHeight; } relayout(); };
     const ro = new ResizeObserver(relayout);
@@ -318,36 +343,29 @@ function GurRoad() {
     return () => { ro.disconnect(); removeEventListener("scroll", onScroll); removeEventListener("resize", onResize); cancelAnimationFrame(frame); };
   }, []);
   return <div className="gr" ref={box}>
-    <span className="gr-road" aria-hidden="true" />
     <svg className="gr-svg" aria-hidden="true">
       <defs>
-        <filter id="grRough" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".09 .03" numOctaves="2" seed="7" /><feDisplacementMap in="SourceGraphic" scale="8" /></filter>
-        <radialGradient id="grDrop" cx="40%" cy="38%" r="70%"><stop offset="0" stopColor="#f08a3a" /><stop offset=".55" stopColor="#b4531b" /><stop offset="1" stopColor="#6a2207" /></radialGradient>
-        <linearGradient id="grFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset=".06" stopColor="#fff" /><stop offset=".94" stopColor="#fff" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></linearGradient>
+        <linearGradient id="grFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset=".05" stopColor="#fff" /><stop offset=".95" stopColor="#fff" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></linearGradient>
         <mask id="grMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><rect width="100%" height="100%" fill="url(#grFade)" /></mask>
       </defs>
       <g mask="url(#grMask)">
-        <path className="gr-p grass" filter="url(#grRough)" />
-        <path className="gr-p dirt" filter="url(#grRough)" />
+        <path className="gr-p grass" />
+        <path className="gr-p dirt" />
         <path className="gr-p rut" />
       </g>
       {ROAD_STOPS.map((st) => <circle key={st.time} className="gr-stone" r="7" />)}
     </svg>
-    {ROAD_STOPS.map((st, i) => <figure key={st.time} className="gr-stop">
-      <svg className="gr-arrow" viewBox="0 0 120 48" aria-hidden="true">
-        <mask id={`grm${i}`} maskUnits="userSpaceOnUse" x="-10" y="-10" width="140" height="70"><path d={ROUTE} fill="none" stroke="#fff" strokeWidth="5" pathLength={1} strokeDasharray="1 1" strokeDashoffset="1"><animate attributeName="stroke-dashoffset" from="1" to="0" dur={`${ROUTE_S}s`} begin="indefinite" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".45 .05 .3 1" /></path></mask>
-        <path className="dash" d={ROUTE} mask={`url(#grm${i})`} />
-        <g className="hd"><path d="M10 0 C10 0 -1 -7.5 -5.5 -7.5 A7.5 7.5 0 0 0 -5.5 7.5 C-1 7.5 10 0 10 0Z" fill="url(#grDrop)" /><ellipse cx="-6" cy="-3.2" rx="2.6" ry="1.5" fill="#fff" opacity=".55" /><animateMotion path={ROUTE} dur={`${ROUTE_S}s`} begin="indefinite" fill="freeze" rotate="auto" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".45 .05 .3 1" /></g>
-      </svg>
-      <video src={st.src} poster={st.poster} width={st.w} height={st.h} muted loop playsInline preload="none" aria-label={st.label} style={{ objectPosition: st.pos }}
-        onPlaying={(e) => e.currentTarget.parentElement?.setAttribute("data-live", "")} />
-      {/* the poster as a real image over the clip until the clip is actually playing: iOS Safari blanks a video's own poster the
-          moment play() is called, before any frame is ready, which flashed the stop empty while scrolling. Frame 0 is the poster. */}
-      <img className="gr-cover" src={st.poster} width={st.w} height={st.h} alt="" decoding="async" style={{ objectPosition: st.pos }} />
+    {ROAD_STOPS.map((st, i) => <figure key={st.time} className={`gr-stop ${i % 2 ? "r" : "l"}`}>
+      <div className="gr-pic">
+        <video src={st.src} poster={st.poster} width={st.w} height={st.h} muted loop playsInline preload="none" aria-label={st.label} style={{ objectPosition: st.pos }}
+          onPlaying={(e) => e.currentTarget.parentElement?.closest(".gr-stop")?.setAttribute("data-live", "")} />
+        {/* the poster as a real image over the clip until the clip is actually playing: iOS Safari blanks a video's own poster the
+            moment play() is called, before any frame is ready, which flashed the stop empty while scrolling. Frame 0 is the poster. */}
+        <img className="gr-cover" src={st.poster} width={st.w} height={st.h} alt="" decoding="async" style={{ objectPosition: st.pos }} />
+      </div>
       <figcaption><span>{st.time}</span><b>{st.line}</b></figcaption>
     </figure>)}
-    <span className="gr-trail" aria-hidden="true" />
-    <img className="gr-walker" src={GUR_IMAGES.roadWalker} alt="" width={345} height={520} loading="lazy" decoding="async" />
+    <span className="gr-walker" aria-hidden="true" style={{ backgroundImage: `url(${GUR_IMAGES.roadWalkerCycle})` }} />
   </div>;
 }
 
@@ -365,7 +383,7 @@ export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) 
   }, []);
   return <section ref={show} className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" style={{ backgroundImage: JHALOR_BG }} /><div>
     <div className="gf-shh">
-      <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub">রসের পথ</span></div>
+      <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub" aria-label="রসের পথ"><span aria-hidden="true">রসের</span><span aria-hidden="true">পথ</span><svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }}><filter id="gfRing" x="-20%" y="-20%" width="140%" height="140%"><feMorphology in="SourceAlpha" operator="dilate" radius="3.4" result="o" /><feMorphology in="SourceAlpha" operator="dilate" radius="2.3" result="i" /><feComposite in="o" in2="i" operator="out" result="r" /><feFlood floodColor="#3B1A0A" /><feComposite in2="r" operator="in" result="rc" /><feMerge><feMergeNode in="rc" /><feMergeNode in="SourceGraphic" /></feMerge></filter></svg></span></div>
     </div>
     <GurRoad />
     <div className="gr-end"><h2 id="gf-sh-h">শীতের ছয় গুড়</h2><p>চিনি নেই, ভেজাল নেই। পছন্দেরটা কার্টে যোগ করুন।</p></div>
