@@ -83,6 +83,16 @@ export default function KhejurerGurPage() {
     const el = root.current!;
     const reveal = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add("in"); }), { threshold: 0.2 });
     el.querySelectorAll("[data-io]").forEach((node) => reveal.observe(node));
+    // only clips on screen keep decoding; the rest pause, so the phone isn't playing four videos while you scroll
+    const clips = new IntersectionObserver((entries) => entries.forEach(({ target, isIntersecting }) => {
+      const video = target as HTMLVideoElement;
+      if (isIntersecting) void video.play().catch(() => {}); else video.pause();
+    }), { rootMargin: "120px 0px" });
+    el.querySelectorAll("video").forEach((video) => clips.observe(video));
+    // decorative CSS loops (drifting borders, lotuses, stickers, steam) keep running off screen and many animate inside SVGs,
+    // which costs layout + paint every frame; pause each block's animations while it's out of view
+    const sleepy = new IntersectionObserver((entries) => entries.forEach(({ target, isIntersecting }) => target.classList.toggle("kg-sleep", !isIntersecting)), { rootMargin: "100px 0px" });
+    el.querySelectorAll(".gf-hero, .gf-q, .al-bd, .gr, .gf-dial, .gf-rc, .gf-ph2, #gur-order, .ftw, .bar").forEach((node) => sleepy.observe(node));
     const bar = el.querySelector<HTMLElement>(".bar")!;
     let heroGone = false, orderIn = false, footerIn = false;
     const io = new IntersectionObserver((entries) => entries.forEach((entry) => {
@@ -94,7 +104,7 @@ export default function KhejurerGurPage() {
     io.observe(el.querySelector("[data-hero]")!);
     io.observe(el.querySelector("#gur-order")!);
     io.observe(el.querySelector("footer")!);
-    return () => { reveal.disconnect(); io.disconnect(); clearTimeout(focusTimer.current); clearTimeout(toastTimer.current); };
+    return () => { reveal.disconnect(); clips.disconnect(); sleepy.disconnect(); io.disconnect(); clearTimeout(focusTimer.current); clearTimeout(toastTimer.current); };
   }, [shelf.length]);
 
   return <div ref={root} className="kg gf">

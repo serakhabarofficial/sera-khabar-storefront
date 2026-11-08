@@ -178,7 +178,8 @@
 .gr-svg .grass { stroke:#B9B98F; stroke-width:58; opacity:.45; }
 .gr-svg .dirt { stroke:#DDBB92; stroke-width:38; }
 .gr-svg .rut { stroke:#ECD3B0; stroke-width:10; opacity:.85; }
-.gr-svg .gr-trail { stroke:#A9714A; stroke-width:2; stroke-dasharray:0 99999; opacity:.6; }
+/* the footprint line is its own layer (not in the filtered road SVG) and only stretches with a transform */
+.gr-trail { position:absolute; top:0; z-index:1; width:2px; border-radius:1px; background:#A9714A; opacity:.6; transform-origin:50% 0; transform:scaleY(0); will-change:transform; pointer-events:none; }
 .gr-stone { fill:#F8F2E7; stroke:#B98D62; stroke-width:2; transition:fill .35s, stroke .35s; }
 .gr-stone.on { fill:#A63D24; stroke:#A63D24; }
 .gr-stop { grid-column:2; position:relative; margin:0; }
@@ -201,7 +202,8 @@
 /* phones: centre the heading over the dial's product column (it starts right of the arc at min(27vw,130px) + 22px, see GurDial) */
 @media (max-width:759px) { .gr-end { padding-left:calc(min(27vw,130px) + 6px); } }
 .gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; height:auto; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
-.gr-walker.go { animation:gr-step .7s ease-in-out infinite alternate; }
+.gr-walker { animation:gr-step .7s ease-in-out infinite alternate paused; }
+.gr-walker.go { animation-play-state:running; }
 @keyframes gr-step { from { rotate:-1deg; } to { rotate:1deg; } }
 @media (min-width:760px) {
   .gr { --road:72px; max-width:760px; margin:24px auto 0; column-gap:56px; row-gap:22px; }
@@ -210,7 +212,7 @@
   .gr-walker { width:52px; }
   .gr-stop figcaption b { font-size:24px; }
 }
-@media (prefers-reduced-motion:reduce) { .gr-walker.go { animation:none; } .gr-stop figcaption, .gr-arrow { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .gr-walker { animation:none; } .gr-stop figcaption, .gr-arrow { transition:none; } }
 /* কাঁটা: numbers ride a thin arc, the গুড় at the pointer shows on the right. Normal flow (no pinning): a stroke
    fills along the arc toward the next গুড়, then the dial turns */
 .gf-dial { position:relative; margin:4px -20px 0; }
@@ -507,3 +509,6 @@
 /* one face for the whole খেজুরের গুড় page, checkout and footer included: Noto Sans Bengali (it also carries the Latin
    glyphs for "Designed & Engineered by"). !important because the shared am-sotto checkout styles set their own faces. */
 .kg, .kg * { font-family:"Noto Sans Bengali",sans-serif !important; }
+
+/* a block that's off screen pauses its decorative loops (the page toggles .kg-sleep with an IntersectionObserver) */
+.kg .kg-sleep, .kg .kg-sleep * { animation-play-state:paused !important; }
