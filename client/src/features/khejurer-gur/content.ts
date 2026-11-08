@@ -32,7 +32,8 @@ export const GUR_IMAGES = {
   roadWalkPoster: `${IMG}/road-walk-poster-v2.webp`,
   roadCook: `${IMG}/road-cook-v3.mp4`,
   roadCookPoster: `${IMG}/road-cook-poster-v2.webp`,
-  roadWalker: `${IMG}/road-walker-v1.webp`,
+  // the গাছি's walk cycle: 5 frames side by side (stand, left step, passing, right step, passing), 159×210 each
+  roadWalkerCycle: `${IMG}/road-walker-cycle-v1.webp`,
   harvest: `${IMG}/pa-harvest-v1.webp`,
   cook: `${IMG}/pa-cook-v1.webp`,
   illJhola: `${IMG}/ill-jhola-v1.webp`,

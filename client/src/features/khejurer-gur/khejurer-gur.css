@@ -186,34 +186,33 @@
 /* a hand-drawn rust loop around রসের পথ: an imperfect ellipse whose ends overshoot and cross, tilted a touch */
 .gf-mark-sub::after { content:""; position:absolute; inset:-9px -16px -8px -14px; rotate:-3deg; pointer-events:none;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80' preserveAspectRatio='none'%3E%3Cpath d='M146 9 C184 13 197 33 188 51 C175 73 104 79 54 73 C19 69 3 54 7 37 C11 18 47 8 103 6 C141 5 170 10 186 22' fill='none' stroke='%23A63D24' stroke-width='2.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
-.gr { --road:58px; position:relative; contain:inline-size; display:grid; grid-template-columns:var(--road) minmax(0,1fr); column-gap:30px; row-gap:18px; margin-top:14px; padding:22px 0 26px; }
-.gr-road { grid-column:1; grid-row:1 / span 3; }
+/* রসের পথ (আঁকাবাঁকা পথ): clips alternate sides as soft round vignettes; the road (drawn by GurRoad) winds through the
+   open space beside each one */
+.gr { position:relative; contain:inline-size; margin-top:14px; padding:22px 0 26px; }
 .gr-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
-.gr-svg path { fill:none; stroke-linecap:butt; }
-.gr-svg .grass { stroke:#B9B98F; stroke-width:58; opacity:.45; }
-.gr-svg .dirt { stroke:#DDBB92; stroke-width:38; }
-.gr-svg .rut { stroke:#ECD3B0; stroke-width:10; opacity:.85; }
-/* the footprint line is its own layer (not in the filtered road SVG) and only stretches with a transform */
-.gr-trail { position:absolute; top:0; z-index:1; width:2px; border-radius:1px; background:#A9714A; opacity:.6; transform-origin:50% 0; transform:scaleY(0); will-change:transform; pointer-events:none; }
+.gr-svg path { fill:none; stroke-linecap:round; }
+.gr-svg .grass { stroke:#B9B98F; stroke-width:46; opacity:.45; }
+.gr-svg .dirt { stroke:#DDBB92; stroke-width:30; }
+.gr-svg .rut { stroke:#ECD3B0; stroke-width:7; stroke-dasharray:1 13; }
 .gr-stone { fill:#F8F2E7; stroke:#B98D62; stroke-width:2; transition:fill .35s, stroke .35s; }
 .gr-stone.on { fill:#A63D24; stroke:#A63D24; }
-.gr-stop { grid-column:2; position:relative; margin:0; }
+.gr-stop { position:relative; width:62%; margin:0 0 30px; }
+.gr-stop.r { margin-left:auto; }
+.gr-stop:last-of-type { margin-bottom:0; }
+.gr-pic { position:relative; }
 /* the clips and posters carry the page cream already (multiplied in when encoded), so no mix-blend-mode: blending a video
    made iOS Safari paint the whole section into an offscreen group first, which left it blank for a moment on scroll */
-.gr-stop video, .gr-stop .gr-cover { display:block; width:100%; height:auto; aspect-ratio:5/4; object-fit:cover;
-  -webkit-mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); mask-image:radial-gradient(75% 70% at 50% 46%,#000 62%,transparent); }
+.gr-stop video, .gr-stop .gr-cover { display:block; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover;
+  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 60%,transparent); mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 60%,transparent); }
 .gr-stop .gr-cover { position:absolute; left:0; top:0; pointer-events:none; }
 /* exactly one of the two shows: the poster cover until the clip is playing, then the clip */
 .gr-stop:not([data-live]) video, .gr-stop[data-live] .gr-cover { visibility:hidden; }
-/* the arrow is a little travel route (like a flight path): dashed, out from the milestone, one loop, into the video,
-   with a গুড় drop flying it and landing at the video; it plays when the walker arrives (SMIL, started from GurRoad) */
-.gr-arrow { position:absolute; z-index:1; top:50%; left:calc(-1 * var(--arm,88px) + 6px); width:calc(var(--arm,88px) + 12px); height:auto; aspect-ratio:120/48; translate:0 -64.6%; overflow:visible; pointer-events:none; opacity:0; transition:opacity .2s; }
-.gr-stop.on .gr-arrow { opacity:1; }
-.gr-arrow .dash { fill:none; stroke:#8A2E19; stroke-width:1.6; stroke-linecap:round; stroke-dasharray:3.2 3.4; }
-.gr-arrow .hd { filter:drop-shadow(0 1.5px 1.5px #6a220740); }
-/* the line shows once the walker arrives */
-.gr-stop figcaption { position:absolute; left:6%; bottom:4%; display:grid; gap:1px; opacity:0; transform:translateY(8px); filter:blur(4px); transition:opacity .5s var(--ease-out), transform .6s var(--ease-out), filter .5s; }
+/* the line, under the clip, shows once the walker arrives */
+.gr-stop figcaption { position:relative; z-index:1; display:grid; justify-items:center; gap:1px; margin-top:-16px; text-align:center; opacity:0; transform:translateY(8px); filter:blur(4px); transition:opacity .5s var(--ease-out), transform .6s var(--ease-out), filter .5s; }
 .gr-stop.on figcaption { opacity:1; transform:none; filter:none; }
+/* captions lean to the clip's outer side, away from where the road swings across under it */
+.gr-stop.l figcaption { justify-items:start; text-align:left; padding-left:6%; }
+.gr-stop.r figcaption { justify-items:end; text-align:right; padding-right:6%; }
 .gr-stop figcaption span { font:700 11.5px "Noto Sans Bengali",sans-serif; letter-spacing:.06em; color:#A63D24; }
 .gr-stop figcaption b { font:800 19px/1.2 "Noto Sans Bengali",sans-serif; color:var(--ink2); text-shadow:0 0 10px #F8F2E7, 0 0 4px #F8F2E7; }
 .gr-end { padding-top:6px; text-align:center; }
@@ -221,18 +220,16 @@
 .gr-end p { margin:4px auto 0; max-width:30ch; font:500 14px/1.6 "Noto Sans Bengali",sans-serif; }
 /* phones: centre the heading over the dial's product column (it starts right of the arc at min(27vw,130px) + 22px, see GurDial) */
 @media (max-width:759px) { .gr-end { padding-left:calc(min(27vw,130px) + 6px); } }
-.gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; height:auto; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
-.gr-walker { animation:gr-step .7s ease-in-out infinite alternate paused; }
-.gr-walker.go { animation-play-state:running; }
-@keyframes gr-step { from { rotate:-1deg; } to { rotate:1deg; } }
+/* the গাছি: a 5-frame walk-cycle sprite (stand, left step, passing, right step, passing); GurRoad picks the frame */
+.gr-walker { position:absolute; left:0; top:0; z-index:2; width:40px; aspect-ratio:159/210; background:0 0 / 500% 100% no-repeat; pointer-events:none; will-change:transform; filter:drop-shadow(0 5px 3px #5a3a1a33); }
 @media (min-width:760px) {
-  .gr { --road:72px; max-width:760px; margin:24px auto 0; column-gap:56px; row-gap:22px; }
-  .gr-stop video, .gr-stop .gr-cover { aspect-ratio:16/10; }
-  .gr-svg .grass { stroke-width:72; } .gr-svg .dirt { stroke-width:48; } .gr-svg .rut { stroke-width:12; }
+  .gr { max-width:760px; margin:24px auto 0; }
+  .gr-stop { width:46%; margin-bottom:10px; }
+  .gr-svg .grass { stroke-width:58; } .gr-svg .dirt { stroke-width:38; } .gr-svg .rut { stroke-width:9; }
   .gr-walker { width:52px; }
   .gr-stop figcaption b { font-size:24px; }
 }
-@media (prefers-reduced-motion:reduce) { .gr-walker { animation:none; } .gr-stop figcaption, .gr-arrow { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .gr-stop figcaption { transition:none; } }
 /* কাঁটা: numbers ride a thin arc, the গুড় at the pointer shows on the right. Normal flow (no pinning): a stroke
    fills along the arc toward the next গুড়, then the dial turns */
 .gf-dial { position:relative; margin:4px -20px 0; }
