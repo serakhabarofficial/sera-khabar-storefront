@@ -19,8 +19,8 @@ export const GUR_IMAGES = {
   lettering: `${IMG}/gur-lettering-v1.webp`,
   khejurerLettering: `${IMG}/khejurer-lettering-v2.webp`,
   jhola: `${IMG}/bowl-jhola-v1.webp`,
-  heroPour: `${IMG}/hero-pour-v2.mp4`,
-  heroPourPoster: `${IMG}/hero-pour-poster-v1.webp`,
+  heroPour: `${IMG}/hero-pour-v3.mp4`,
+  heroPourPoster: `${IMG}/hero-pour-poster-v2.webp`,
   bij: `${IMG}/bowl-bij-v1.webp`,
   patali: `${IMG}/slab-patali-v1.webp`,
   foilPatali: `${IMG}/foil-patali-v1.webp`,
@@ -55,6 +55,10 @@ export const GUR_PRODUCTS = [
   { slug: "chocolate-seed-jaggery", name: "বীজ গুড়", line: "নরম আর দানা দানা — জিভে দিলেই গলে যায়।", image: GUR_IMAGES.bij, zoom: 1.15 },
 ] as const;
 export type GurProductMeta = (typeof GUR_PRODUCTS)[number];
+
+/** The memo opens with these গুড় ticked at their ১ কেজি pack (or their first pack if the catalog has no ১ কেজি); the rest start unticked. */
+export const GUR_PRESELECTED: readonly string[] = ["round-patali-jaggery", "date-palm-patali", "liquid-date-jaggery"];
+export const GUR_PRESELECTED_PACK = "১ কেজি";
 
 export const GUR_USES = [
   { icon: "tea", title: "গুড়ের চা", gur: "বীজ গুড়" },
