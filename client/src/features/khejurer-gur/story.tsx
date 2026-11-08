@@ -383,7 +383,7 @@ export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) 
   }, []);
   return <section ref={show} className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" style={{ backgroundImage: JHALOR_BG }} /><div>
     <div className="gf-shh">
-      <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub">রসের পথ</span></div>
+      <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub" aria-label="রসের পথ"><span aria-hidden="true">রসের</span><span aria-hidden="true">পথ</span><svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }}><filter id="gfRing" x="-20%" y="-20%" width="140%" height="140%"><feMorphology in="SourceAlpha" operator="dilate" radius="3.4" result="o" /><feMorphology in="SourceAlpha" operator="dilate" radius="2.3" result="i" /><feComposite in="o" in2="i" operator="out" result="r" /><feFlood floodColor="#3B1A0A" /><feComposite in2="r" operator="in" result="rc" /><feMerge><feMergeNode in="rc" /><feMergeNode in="SourceGraphic" /></feMerge></filter></svg></span></div>
     </div>
     <GurRoad />
     <div className="gr-end"><h2 id="gf-sh-h">শীতের ছয় গুড়</h2><p>চিনি নেই, ভেজাল নেই। পছন্দেরটা কার্টে যোগ করুন।</p></div>

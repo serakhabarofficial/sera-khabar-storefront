@@ -182,10 +182,12 @@
 .gf-intro h2 { margin:0; font-family:"Alinur Smaroklipi","Noto Sans Bengali",sans-serif; font-weight:400; font-size:24px; letter-spacing:.02em; }
 .gf-intro p { margin:8px 0 0; font:500 15px/1.6 "Noto Sans Bengali",sans-serif; max-width:38ch; }
 /* রসের পথ: a straight dirt road on the left, the three stops on the right; a small গাছি walks the road as you scroll */
-.gf-mark-sub { align-self:flex-end; position:relative; margin:0 12px 18px 0; padding:6px 4px; font:700 24px/1 "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; color:#A63D24; }
-/* a hand-drawn rust loop around রসের পথ: an imperfect ellipse whose ends overshoot and cross, tilted a touch */
-.gf-mark-sub::after { content:""; position:absolute; inset:-9px -16px -8px -14px; rotate:-3deg; pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80' preserveAspectRatio='none'%3E%3Cpath d='M146 9 C184 13 197 33 188 51 C175 73 104 79 54 73 C19 69 3 54 7 37 C11 18 47 8 103 6 C141 5 170 10 186 22' fill='none' stroke='%23A63D24' stroke-width='2.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+/* রসের পথ as a stacked lettering mark (Hasan Meghaloy, Lipighor): rust over dark brown, upright, with a thin dark outline
+   and a small gap around the whole mark (the #gfRing SVG filter in GurStory). Static, so the filter paints once. */
+@font-face { font-family:"Hasan Meghaloy"; src:url("/fonts/hasan-meghaloy-unicode.ttf") format("truetype"); font-weight:400; font-display:swap; }
+.gf-mark-sub { align-self:flex-end; position:relative; display:inline-grid; justify-items:center; margin:0 6px 10px 0; padding:6px 8px; line-height:.86; filter:url(#gfRing); }
+.gf-mark-sub > span:first-child { font-size:34px; color:#A63D24; }
+.gf-mark-sub > span:nth-child(2) { font-size:40px; color:#3B1A0A; margin:-4px 0 0 12px; }
 /* রসের পথ (আঁকাবাঁকা পথ): clips alternate sides as soft round vignettes; the road (drawn by GurRoad) winds through the
    open space beside each one */
 .gr { position:relative; contain:inline-size; margin-top:14px; padding:22px 0 26px; }
@@ -531,7 +533,8 @@
    glyphs for "Designed & Engineered by"). !important because the shared am-sotto checkout styles set their own faces. */
 .kg, .kg * { font-family:"Noto Sans Bengali",sans-serif !important; }
 /* …except the small rust accents, which take the secondary face (kicker, recipe ticket script, ধন্যবাদ, postcard note, quote date) */
-.kg .gf-intro h2, .kg .gf-mark-sub, .kg .rc-card .sc, .kg .rc-foot em, .kg .rc-post small, .kg .gf-q .q-date { font-family:"Alinur Smaroklipi","Noto Sans Bengali",sans-serif !important; }
+.kg .gf-intro h2, .kg .rc-card .sc, .kg .rc-foot em, .kg .rc-post small, .kg .gf-q .q-date { font-family:"Alinur Smaroklipi","Noto Sans Bengali",sans-serif !important; }
+.kg .gf-mark-sub, .kg .gf-mark-sub * { font-family:"Hasan Meghaloy","Noto Sans Bengali",sans-serif !important; font-weight:400; }
 
 /* a block that's off screen pauses its decorative loops (the page toggles .kg-sleep with an IntersectionObserver) */
 .kg .kg-sleep, .kg .kg-sleep * { animation-play-state:paused !important; }
