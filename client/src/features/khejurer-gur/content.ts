@@ -17,9 +17,22 @@ export const GUR_CREDIT_HREF = "https://www.arc-bangladesh.com/";
 const IMG = "/step/khejurer-gur";
 export const GUR_IMAGES = {
   lettering: `${IMG}/gur-lettering-v1.webp`,
+  khejurerLettering: `${IMG}/khejurer-lettering-v2.webp`,
   jhola: `${IMG}/bowl-jhola-v1.webp`,
+  heroPour: `${IMG}/hero-pour-v1.mp4`,
+  heroPourPoster: `${IMG}/hero-pour-poster-v1.webp`,
   bij: `${IMG}/bowl-bij-v1.webp`,
   patali: `${IMG}/slab-patali-v1.webp`,
+  foilPatali: `${IMG}/foil-patali-v1.webp`,
+  roundPatali: `${IMG}/round-patali-v1.webp`,
+  danadar: `${IMG}/danadar-v1.webp`,
+  gachiFog: `${IMG}/gachi-fog-v1.mp4`,
+  gachiFogPoster: `${IMG}/gachi-fog-poster-v1.webp`,
+  roadWalk: `${IMG}/road-walk-v1.mp4`,
+  roadWalkPoster: `${IMG}/road-walk-poster-v1.webp`,
+  roadCook: `${IMG}/road-cook-v1.mp4`,
+  roadCookPoster: `${IMG}/road-cook-poster-v1.webp`,
+  roadWalker: `${IMG}/road-walker-v1.webp`,
   harvest: `${IMG}/pa-harvest-v1.webp`,
   cook: `${IMG}/pa-cook-v1.webp`,
   illJhola: `${IMG}/ill-jhola-v1.webp`,
@@ -30,13 +43,16 @@ export const GUR_IMAGES = {
 } as const;
 
 /**
- * The three গুড় and the catalog product each one sells. Editorial copy only: names on the page,
+ * The six গুড় and the catalog product each one sells. Editorial copy only: names on the page,
  * the one-line description and the photo. Every price, size and stock figure comes from the catalog.
  */
 export const GUR_PRODUCTS = [
-  { slug: "liquid-date-jaggery", name: "ঝোলা গুড়", line: "ঘন, চকচকে — চামচ থেকে ধীরে গড়িয়ে পড়ে।", uses: "পিঠা · রুটি · মুড়ি", image: GUR_IMAGES.jhola, zoom: 1.15, labelOffset: 17 },
-  { slug: "chocolate-seed-jaggery", name: "বীজ গুড়", line: "নরম আর দানা দানা — জিভে দিলেই গলে যায়।", uses: "পায়েস · চা · চামচে", image: GUR_IMAGES.bij, zoom: 1.15, labelOffset: 22 },
-  { slug: "date-palm-patali", name: "পাটালি গুড়", line: "জমাট পাটালি, ভাঙলে ভেতরে নরম দানা।", uses: "ভেঙে খান · মিষ্টান্ন · উপহার", image: GUR_IMAGES.patali, zoom: 0.94, labelOffset: 17 },
+  { slug: "foil-wrapped-patali-jaggery", name: "ফয়েল পাটালি", line: "ফয়েলের ছোট ট্রেতে জমানো — ভাগ করে খাওয়া সহজ।", uses: "উপহার · টিফিন · ভেঙে খান", image: GUR_IMAGES.foilPatali, zoom: 1.05 },
+  { slug: "round-patali-jaggery", name: "গোল পাটালি", line: "গোল চাকতি, ভাঙলে ভেতরে নরম দানা।", uses: "ভেঙে খান · পিঠা · মিষ্টান্ন", image: GUR_IMAGES.roundPatali, zoom: 1.05 },
+  { slug: "date-palm-patali", name: "লম্বা পাটালি", line: "লম্বা জমাট পাটালি, কেটে কেটে খাওয়ার মতো।", uses: "ভেঙে খান · মিষ্টান্ন · উপহার", image: GUR_IMAGES.patali, zoom: 0.94 },
+  { slug: "liquid-date-jaggery", name: "ঝোলা গুড়", line: "ঘন, চকচকে — চামচ থেকে ধীরে গড়িয়ে পড়ে।", uses: "পিঠা · রুটি · মুড়ি", image: GUR_IMAGES.jhola, zoom: 1.15 },
+  { slug: "granulated-jaggery", name: "দানাদার গুড়", line: "ঝুরঝুরে দানা — চা আর পায়েসে সহজে মেশে।", uses: "চা · পায়েস · মিষ্টান্ন", image: GUR_IMAGES.danadar, zoom: 1.05 },
+  { slug: "chocolate-seed-jaggery", name: "বীজ গুড়", line: "নরম আর দানা দানা — জিভে দিলেই গলে যায়।", uses: "পায়েস · চা · চামচে", image: GUR_IMAGES.bij, zoom: 1.15 },
 ] as const;
 export type GurProductMeta = (typeof GUR_PRODUCTS)[number];
 

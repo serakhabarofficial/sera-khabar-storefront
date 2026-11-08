@@ -8,7 +8,7 @@ import { GurHero, GurQuote, GurStory, type GurShelfItem } from "@/features/kheju
 import { GurCheckout, type GurLines, type GurOffer } from "@/features/khejurer-gur/gur-checkout";
 import { GurFooter } from "@/features/khejurer-gur/footer";
 import { PILL_LOTUS } from "@/features/khejurer-gur/alpona";
-import { GUR_CANVAS, GUR_PRODUCTS, reducedMotion, taka } from "@/features/khejurer-gur/content";
+import { GUR_CANVAS, GUR_PRODUCTS, bn, reducedMotion, taka } from "@/features/khejurer-gur/content";
 import "@/features/am-sotto-achar/am-sotto-achar.css";
 import "@/features/khejurer-gur/khejurer-gur.css";
 
@@ -39,7 +39,7 @@ export default function KhejurerGurPage() {
   const [lines, setLinesState] = useState<GurLines>({});
   const seeded = useRef(false);
   useEffect(() => {
-    const first = stableOffers[0]?.packs[0];
+    const first = stableOffers.find((o) => o.meta.slug === "liquid-date-jaggery")?.packs[0];
     if (seeded.current || !first) return;
     seeded.current = true;
     setLinesState((current) => Object.keys(current).length ? current : { [first.variantId]: 1 });
@@ -54,7 +54,7 @@ export default function KhejurerGurPage() {
   };
   const addToMemo = (slug: string, pack: LandingPackOption) => {
     setLines((current) => ({ ...current, [pack.variantId]: Math.max(1, current[pack.variantId] ?? 0) }));
-    showToast(`${GUR_PRODUCTS.find((p) => p.slug === slug)?.name ?? ""} · ${pack.label} মেমোতে যোগ হয়েছে`);
+    showToast(`${GUR_PRODUCTS.find((p) => p.slug === slug)?.name ?? ""} · ${pack.label} কার্টে যোগ হয়েছে`);
   };
   const scrollToOrder = useCallback((event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -107,7 +107,7 @@ export default function KhejurerGurPage() {
       </section></div>
     </main>
     <GurFooter />
-    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>খেজুরের গুড় · ৩ রকম</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)} <small>থেকে</small></> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
+    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>খেজুরের গুড় · {bn(GUR_PRODUCTS.length)}&nbsp;রকম</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)} <small>থেকে</small></> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
     <div className={`toast${toast ? " show" : ""}`} role="status">{toast}</div>
   </div>;
 }

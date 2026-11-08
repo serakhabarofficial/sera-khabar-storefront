@@ -18,20 +18,8 @@ export const AL = {
   paisley: (c = AW, bg = "none") => `${disc(bg)}<circle r="10" fill="${c}"/>${ring(18, c, 2.4)}${rot(6, (a) => `<g transform="rotate(${a}) translate(0 -40)">${kalka(c, 1.15)}</g>`)}${ring(78, c, 2.4)}${dots(30, 86, 2.4, c)}`,
 };
 
-/** The three timeline mandalas: lotus, wheel, paisley — white rice paste on terracotta. */
-export const BURSTS = [AL.lotus(AW, AT), AL.wheel(AW, AT), AL.paisley(AW, AT)];
-
-/** The full lotus that rides the tip of the timeline line. */
-export const LINE_TIP = `<g transform="scale(1.5) translate(16 0)">${rot(8, (a) => `<path d="M0 0 Q-7 -10 0 -20 Q7 -10 0 0Z" transform="rotate(${a + 22.5})"/>`)}${rot(8, (a) => `<path d="M0 0 Q-4 -6 0 -12 Q4 -6 0 0Z" fill="#F7F0E3" transform="rotate(${a})"/>`)}<circle r="4.5"/><circle r="1.8" fill="#F6B73F"/></g>`;
-
 /** Size buttons' lotus (পদ্ম-চাকতি). */
 export const PILL_LOTUS = `<svg viewBox="-12 -12 24 24">${rot(5, (a) => `<path d="M0 0 Q-3.5 -5 0 -11 Q3.5 -5 0 0Z" fill="currentColor" transform="rotate(${a})"/>`)}<circle r="2" fill="#FFF6E6"/></svg>`;
-
-/** Flat strip the timeline lands on: small lotuses and dots, two copies wide so it can drift. */
-export const END_STRIP = (() => {
-  const tile = (k: number) => `<g transform="translate(${k * 64 + 32} 26)">${petals(8, 5, 15, 4.2, "none", AW, 1.3)}${petals(8, 6, 12, 1.6, AW)}${dots(8, 18, 1.4, AW)}<circle r="3" fill="${AW}"/><circle cx="32" r="2.2" fill="${AW}"/><path d="M18 0 h8 M38 0 h8" stroke="${AW}" stroke-width="1.4" stroke-linecap="round"/></g>`;
-  return `<svg viewBox="0 0 ${64 * 40} 52" width="${64 * 40}" aria-hidden="true"><path d="M0 5.5 H${64 * 40} M0 46.5 H${64 * 40}" stroke="${AW}" stroke-width="1.4" stroke-dasharray="2 5" stroke-linecap="round"/>${Array.from({ length: 40 }, (_, k) => tile(k)).join("")}</svg>`;
-})();
 
 /** ঝালর পাড়: a terracotta band of white rice-paste flowers with a scalloped fringe, two copies wide so it can drift. */
 export const JHALOR = (() => {

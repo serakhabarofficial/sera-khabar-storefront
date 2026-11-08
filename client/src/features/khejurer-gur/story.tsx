@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import brandLogo from "@assets/sera-khabar-logo.webp";
 import type { LandingPackOption } from "@/features/landing/order";
-import { AL, BURSTS, END_STRIP, JHALOR, LINE_TIP, NAKSHI_STRIP, PILL_LOTUS, QUOTE_CARTOUCHE, QUOTE_CORNER_LOTUS, QUOTE_STRIP, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
+import { AL, JHALOR, PILL_LOTUS, QUOTE_CARTOUCHE, QUOTE_CORNER_LOTUS, QUOTE_STRIP, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
 import { banglaDateParts } from "./bangla-date";
-import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_USES, GUR_WHY, taka, reducedMotion, type GurProductMeta } from "./content";
+import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_PRODUCTS, GUR_USES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
 
 export type GurShelfItem = { meta: GurProductMeta; packs: LandingPackOption[]; compareAt: number };
 type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string, pack: LandingPackOption) => void; onOrderClick: (event: MouseEvent<HTMLAnchorElement>) => void };
@@ -11,50 +11,136 @@ type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string,
 const html = (markup: string) => ({ dangerouslySetInnerHTML: { __html: markup } });
 const HERO_MANDALA = `<svg viewBox="-100 -100 200 200">${AL.lotus("#D98A6E")}</svg>`;
 
-/** Scroll-drawn line through the three গুড়, with the lotus riding its tip. */
-function useTimeline(box: React.RefObject<HTMLDivElement | null>, deps: unknown) {
+/** Counts a price up from ৳০ the first time it shows, then rolls between products and sizes. */
+function CountUp({ value }: { value: number }) {
+  const [shown, setShown] = useState(0);
+  const from = useRef(0);
   useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const svg = el.querySelector<SVGSVGElement>(".gf-path")!, line = el.querySelector<SVGPathElement>("#gfLine")!, tip = el.querySelector<SVGGElement>("#gfArrow")!;
-    const items = Array.from(el.querySelectorAll<HTMLElement>(".gf-ti"));
-    if (!items.length) return;
-    let L = 0, S: [number, number][] = [], at: number[] = [], frame = 0;
-    const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-    const build = () => {
-      const br = el.getBoundingClientRect(), W = br.width, H = br.height;
-      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-      const C = items.map((it) => { const r = it.querySelector(".gf-orb")!.getBoundingClientRect(); return [r.left - br.left + r.width / 2, r.top - br.top + r.height / 2]; });
-      const pts = [[W * 0.7, -20], ...C];
-      let d = `M${pts[0][0]} ${pts[0][1]}`;
-      for (let k = 1; k < pts.length; k++) {
-        const a = pts[k - 1], b = pts[k], dy = b[1] - a[1], sa = a[0] < W / 2 ? -1 : 1, sb = b[0] < W / 2 ? -1 : 1, sw = W * 0.1;
-        d += ` C${clamp(a[0] + sa * sw, 8, W - 8)} ${a[1] + dy * 0.55} ${clamp(b[0] + sb * sw, 8, W - 8)} ${b[1] - dy * 0.55} ${b[0]} ${b[1]}`;
+    if (reducedMotion()) { from.current = value; setShown(value); return; }
+    const start = from.current, t0 = performance.now();
+    let frame = 0;
+    const step = (t: number) => {
+      const k = Math.min(1, (t - t0) / 650), v = Math.round(start + (value - start) * (1 - (1 - k) ** 3));
+      from.current = v; setShown(v);
+      if (k < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+  return <>{taka(shown)}</>;
+}
+
+const DIAL_STEP = 24; // degrees between two গুড় on the arc
+const DIAL_MS = 2000; // how long each গুড় rests while the arc fills to the next one
+const two = (i: number) => bn(String(i + 1).padStart(2, "0"));
+
+/**
+ * কাঁটা: numbers ride a thin arc on the left; the গুড় at the pointer shows on the right with its photo, big
+ * number, price and the cart button. The section scrolls normally (no pinning): a stroke fills along the arc from
+ * the current গুড় to the next, then the dial turns. Tapping a number jumps to it; tapping a number, a size or the
+ * cart stops the autoplay. It pauses off screen and while touched or hovered, and never autoplays for reduced motion.
+ */
+function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
+  const deck = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [chosen, setChosen] = useState<Record<string, string>>({});
+  const [stopped, setStopped] = useState(false);
+  const jump = useRef<(i: number) => void>(() => {});
+  const play = useRef({ visible: false, held: false, stopped: false });
+  const n = shelf.length;
+  const stop = () => { play.current.stopped = true; setStopped(true); };
+  useEffect(() => {
+    const el = deck.current;
+    if (!el || !n) return;
+    if (reducedMotion()) stop();
+    const stage = el.querySelector<HTMLElement>(".gf-stage")!, ring = stage.querySelector<HTMLElement>(".gf-arc")!;
+    const prog = stage.querySelector<SVGSVGElement>(".gf-prog")!, bar = prog.querySelector<SVGCircleElement>("circle")!;
+    const ticks = Array.from(stage.querySelectorAll<HTMLElement>(".gf-tick")), nums = Array.from(stage.querySelectorAll<HTMLElement>(".gf-num"));
+    const shots = Array.from(stage.querySelectorAll<HTMLElement>(".gf-shot img"));
+    let R = 0, CX = 0, CY = 0, pos = 0, target = 0, frame = 0, last = -1, held = 0, prev = 0;
+    const layout = () => {
+      const W = stage.clientWidth, H = stage.clientHeight, wide = W >= 760;
+      R = Math.min(H * 0.42, wide ? 420 : 330);
+      CX = -R + (wide ? Math.min(W * 0.34, 460) : Math.min(W * 0.27, 130));
+      CY = H * 0.47;
+      const box = { left: `${CX - R}px`, top: `${CY - R}px`, width: `${R * 2}px`, height: `${R * 2}px` };
+      Object.assign(ring.style, box); Object.assign(prog.style, box);
+      prog.setAttribute("viewBox", `0 0 ${R * 2} ${R * 2}`);
+      bar.setAttribute("cx", `${R}`); bar.setAttribute("cy", `${R}`); bar.setAttribute("r", `${R}`);
+      stage.style.setProperty("--info-x", `${Math.round(CX + R + (wide ? 64 : 22))}px`);
+    };
+    const paint = () => {
+      for (let i = 0; i < n; i++) {
+        const d = i - pos, a = (d * DIAL_STEP * Math.PI) / 180, nr = R - 50;
+        ticks[i].style.left = `${CX + R * Math.cos(a)}px`; ticks[i].style.top = `${CY + R * Math.sin(a)}px`;
+        ticks[i].classList.toggle("on", Math.abs(d) < 0.5);
+        nums[i].style.transform = `translate(${CX + nr * Math.cos(a)}px, ${CY + nr * Math.sin(a)}px) translate(-50%, -50%) rotate(${d * DIAL_STEP}deg)`;
+        nums[i].style.opacity = Math.abs(d) > 3.2 ? "0" : Math.min(1, Math.abs(d)).toFixed(3);
+        const vis = Math.max(0, 1 - Math.abs(d) * 1.8);
+        shots[i].style.opacity = vis.toFixed(3);
+        shots[i].style.transform = `translateY(${d * 40}px) rotate(${d * 18}deg) scale(${0.9 + vis * 0.1})`;
       }
-      line.setAttribute("d", d);
-      L = line.getTotalLength();
-      S = Array.from({ length: 241 }, (_, k) => [(L * k) / 240, line.getPointAtLength((L * k) / 240).y]);
-      at = C.map((c) => (S.find((s) => s[1] >= c[1] - 4) ?? S[S.length - 1])[0]);
-      line.style.strokeDasharray = `${L} ${L}`;
+      // the progress stroke runs clockwise from the pointer (3 o'clock) down to the next গুড়'s dot
+      const seg = (2 * Math.PI * R * DIAL_STEP) / 360, k = play.current.stopped || target !== pos ? 0 : held / DIAL_MS;
+      bar.style.strokeDasharray = `${(seg * k).toFixed(2)} ${(2 * Math.PI * R).toFixed(2)}`;
+      const now = Math.round(pos);
+      if (now !== last) { last = now; setActive(now); }
     };
-    const scroll = () => {
-      if (!L) return;
-      const RM = reducedMotion(), y = innerHeight * 0.62 - el.getBoundingClientRect().top;
-      let len = RM ? L : 0;
-      if (!RM) for (const [l, sy] of S) { if (sy > y) break; len = l; }
-      line.style.strokeDashoffset = String(L - len);
-      const q = line.getPointAtLength(len), q0 = line.getPointAtLength(Math.max(0, len - 3));
-      tip.setAttribute("transform", `translate(${q.x} ${q.y}) rotate(${(Math.atan2(q.y - q0.y, q.x - q0.x) * 180) / Math.PI})`);
-      tip.style.opacity = len > 4 && len < L - 4 ? "1" : "0";
-      el.classList.toggle("end", len >= L - 4);
-      items.forEach((it, i) => it.classList.toggle("on", len >= at[i] - 30));
+    const tick = (t: number) => {
+      const dt = prev ? Math.min(100, t - prev) : 0;
+      prev = t;
+      const p = play.current;
+      if (target !== pos) {
+        pos += (target - pos) * (reducedMotion() ? 1 : 0.12);
+        if (Math.abs(target - pos) < 0.001) pos = target;
+      } else if (!p.stopped && p.visible && !p.held) {
+        held += dt;
+        if (held >= DIAL_MS) { held = 0; target = (target + 1) % n; }
+      }
+      paint();
+      frame = requestAnimationFrame(tick);
     };
-    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(scroll); };
-    const ro = new ResizeObserver(() => { build(); scroll(); });
-    ro.observe(el);
-    addEventListener("scroll", onScroll, { passive: true });
-    return () => { ro.disconnect(); removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); };
-  }, [box, deps]);
+    jump.current = (i: number) => { held = 0; target = i; };
+    const io = new IntersectionObserver(([e]) => { play.current.visible = e.isIntersecting; }, { threshold: 0.35 });
+    io.observe(stage);
+    const ro = new ResizeObserver(() => { layout(); paint(); });
+    ro.observe(stage);
+    frame = requestAnimationFrame(tick);
+    return () => { io.disconnect(); ro.disconnect(); cancelAnimationFrame(frame); };
+  }, [n]);
+  const item = shelf[Math.min(active, n - 1)];
+  if (!item) return null;
+  const { meta, packs, compareAt } = item;
+  const pack = packs.find((p) => p.variantId === chosen[meta.slug]) ?? packs[0];
+  const cut = pack && compareAt > pack.unitPrice && pack.unitPrice === packs[0].unitPrice ? compareAt : 0;
+  const added = pack ? inMemo.has(pack.variantId) : false;
+  const hold = (on: boolean) => () => { play.current.held = on; };
+  return <div ref={deck} className={`gf-dial${stopped ? " stopped" : ""}`} role="region" aria-roledescription="carousel" aria-label="শীতের ছয় গুড়">
+    <div className="gf-stage" onPointerEnter={(e) => { if (e.pointerType === "mouse") play.current.held = true; }} onPointerLeave={hold(false)}
+      onTouchStart={hold(true)} onTouchEnd={hold(false)} onTouchCancel={hold(false)} onFocus={hold(true)} onBlur={hold(false)}>
+      <span className="gf-arc" aria-hidden="true" />
+      <svg className="gf-prog" aria-hidden="true"><circle /></svg>
+      {shelf.map(({ meta: m }) => <span key={m.slug} className="gf-tick" aria-hidden="true" />)}
+      {shelf.map(({ meta: m }, i) => <button key={m.slug} type="button" className="gf-num num" aria-label={m.name} aria-current={i === active} onClick={() => { stop(); jump.current(i); }}>{two(i)}</button>)}
+      <div className="gf-info">
+        <div className="gf-shot" aria-hidden="true">{shelf.map(({ meta: m }) => <img key={m.slug} src={m.image} alt="" width={800} height={800} loading="lazy" decoding="async" style={{ "--z": m.zoom } as React.CSSProperties} />)}</div>
+        <div key={meta.slug} className="gf-swap" aria-live={stopped ? "polite" : "off"}>
+          <span className="gf-big num" aria-hidden="true">{two(active)}</span>
+          <h3>{meta.name}</h3>
+          <p>{meta.line}</p>
+        </div>
+        {pack && <>
+          <div className="gf-price"><b className="num"><CountUp value={pack.unitPrice} /></b>{cut ? <s className="num">{taka(cut)}</s> : null}<small>{pack.label}</small></div>
+          {packs.length > 1 && <div className="gf-seg" role="radiogroup" aria-label={`${meta.name}-এর মাপ`}>
+            {packs.map((p) => <button key={p.variantId} type="button" role="radio" aria-checked={p.variantId === pack.variantId} className={p.variantId === pack.variantId ? "on" : ""} onClick={() => { stop(); setChosen((c) => ({ ...c, [meta.slug]: p.variantId })); }}>{p.label}<span className="num">{taka(p.unitPrice)}</span></button>)}
+          </div>}
+          <button type="button" className={`gf-pill gf-add${added ? " added" : ""}`} aria-pressed={added} aria-label={`${meta.name} ${pack.label} ${taka(pack.unitPrice)} কার্টে যোগ করুন`} onClick={() => { stop(); onAdd(meta.slug, pack); }}>
+            <span className="pt">{added ? "কার্টে আছে" : "কার্টে যোগ করুন"}</span><span className="ds" aria-hidden="true" {...html(PILL_LOTUS)} />
+          </button>
+        </>}
+      </div>
+    </div>
+  </div>;
 }
 
 /** Why-গুড়: a straight stem grows down the centre; each reason opens as it passes. */
@@ -92,12 +178,25 @@ function useVine(box: React.RefObject<HTMLDivElement | null>) {
   }, [box]);
 }
 
+/** The hero's sub line: a small box that cycles through every গুড় by name; the box keeps the widest name's width so the line never shifts. */
+const GUR_NAMES = GUR_PRODUCTS.map((p) => p.name);
+function GurNameTicker() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (reducedMotion()) return;
+    const t = window.setInterval(() => setI((n) => (n + 1) % GUR_NAMES.length), 1900);
+    return () => window.clearInterval(t);
+  }, []);
+  const prev = (i + GUR_NAMES.length - 1) % GUR_NAMES.length;
+  return <><span className="gf-tk" aria-hidden="true">{GUR_NAMES.map((name, k) => <span key={name} className={k === i ? "on" : k === prev ? "out" : ""}>{name}</span>)}</span><span className="sr-only">{GUR_NAMES.join(", ")}</span></>;
+}
+
 export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
   return <section className="gf-hero" data-hero data-io>
     <img className="gf-logo" src={brandLogo} alt="সেরা খাবার" width={700} height={128} />
     <p className="gf-kick rv">রাজশাহীর গাছির হাতে · শীতের ভোরে</p>
     <h1 className="gf-word">
-      <span className="gf-pre rv" style={{ "--d": "80ms" } as React.CSSProperties}>খেজুরের</span>
+      <span className="gf-pre rv" style={{ "--d": "80ms" } as React.CSSProperties}><img className="gf-pre-lett" src={GUR_IMAGES.khejurerLettering} alt="খেজুরের" width={720} height={348} fetchPriority="high" /></span>
       <span className="gf-lw">
       <img className="gf-lett" src={GUR_IMAGES.lettering} alt="গুড়" width={1200} height={859} fetchPriority="high" />
       <svg className="gf-drop gf-fall" viewBox="0 0 22 30" aria-hidden="true">
@@ -108,11 +207,9 @@ export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
     </h1>
     <div className="gf-trio">
       <div className="al-mand" aria-hidden="true" {...html(HERO_MANDALA)} />
-      <div className="gf-side l"><img src={GUR_IMAGES.bij} alt="কাচের বাটিতে বীজ গুড়" width={800} height={800} /></div>
-      <div className="gf-bowl"><img src={GUR_IMAGES.jhola} alt="বাটিতে ঝোলা গুড়" width={800} height={800} /><i className="gf-ring" aria-hidden="true" /></div>
-      <div className="gf-side r"><img src={GUR_IMAGES.patali} alt="পাটালি গুড়ের টুকরো" width={800} height={800} /></div>
+      <div className="gf-bowl gf-pour"><video src={GUR_IMAGES.heroPour} poster={GUR_IMAGES.heroPourPoster} width={960} height={640} autoPlay muted loop playsInline preload="auto" aria-label="পিঠার উপর ঝোলা গুড় ঢালা হচ্ছে" /></div>
     </div>
-    <p className="gf-sub rv" style={{ "--d": "200ms" } as React.CSSProperties}>ঝোলা · বীজ · পাটালি — চিনি নেই, ভেজাল নেই</p>
+    <p className="gf-sub rv" style={{ "--d": "200ms" } as React.CSSProperties}><GurNameTicker /> — চিনি নেই, ভেজাল নেই</p>
     <a className="btn rv" style={{ "--d": "260ms" } as React.CSSProperties} href="#gur-order" onClick={onOrderClick}>এখনই অর্ডার করুন</a>
     <small>ক্যাশ অন ডেলিভারি · সারা দেশে ৳১০০</small>
   </section>;
@@ -144,38 +241,97 @@ export function GurQuote() {
   </section>;
 }
 
+/** রসের পথ: a straight village road down the left; the three stops sit on the right. A small গাছি walks the road as
+ *  you scroll (nothing pins); when he reaches a stop its milestone lights, an arrow runs out to the video and the line shows. */
+const ROAD_STOPS = [
+  { time: "ভোর ৪টা", line: "গাছে ওঠা", src: GUR_IMAGES.gachiFog, poster: GUR_IMAGES.gachiFogPoster, w: 640, h: 806, pos: "50% 38%", label: "কুয়াশার ভোরে খেজুর গাছে উঠছেন গাছি" },
+  { time: "ভোর ৬টা", line: "রস নিয়ে পথে", src: GUR_IMAGES.roadWalk, poster: GUR_IMAGES.roadWalkPoster, w: 640, h: 640, pos: "50% 60%", label: "বাঁকে রসের হাঁড়ি নিয়ে কুয়াশার পথে হাঁটছেন গাছি" },
+  { time: "সকাল ৮টা", line: "উঠোনের চুলায় জ্বাল", src: GUR_IMAGES.roadCook, poster: GUR_IMAGES.roadCookPoster, w: 640, h: 800, pos: "50% 55%", label: "চুলায় জ্বাল দেওয়া গুড় হাতা দিয়ে ঢালা হচ্ছে" },
+] as const;
+
+// The arrow is a little travel route: out from the milestone, one loop, then into the video, with a গুড় drop flying it.
+const ROUTE = "M3 31 C16 45 34 44 47 35 C60 26 67 8 57 6 C46 4 48 27 66 27 C82 27 96 19 111 13";
+const ROUTE_S = 1.3;
+
+function GurRoad() {
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = box.current!;
+    const svg = el.querySelector<SVGSVGElement>(".gr-svg")!, walker = el.querySelector<HTMLElement>(".gr-walker")!;
+    const strips = Array.from(svg.querySelectorAll<SVGPathElement>(".gr-p")), trail = svg.querySelector<SVGPathElement>(".gr-trail")!;
+    const stones = Array.from(svg.querySelectorAll<SVGCircleElement>(".gr-stone"));
+    const stops = Array.from(el.querySelectorAll<HTMLElement>(".gr-stop"));
+    let H = 0, X = 0, at: number[] = [], frame = 0, idle = 0, lastY = -1;
+    const build = () => {
+      const br = el.getBoundingClientRect(), road = el.querySelector<HTMLElement>(".gr-road")!.getBoundingClientRect();
+      H = br.height; X = road.left - br.left + road.width / 2;
+      svg.setAttribute("viewBox", `0 0 ${br.width} ${H}`);
+      strips.forEach((p) => p.setAttribute("d", `M${X} 0 V${H}`));
+      trail.style.strokeDasharray = `${H} ${H}`;
+      at = stops.map((st) => { const r = st.getBoundingClientRect(); return r.top - br.top + r.height / 2; });
+      stones.forEach((c, i) => { c.setAttribute("cx", `${X}`); c.setAttribute("cy", `${at[i]}`); });
+      stops.forEach((st, i) => st.style.setProperty("--arm", `${Math.round(st.getBoundingClientRect().left - br.left - X)}px`));
+    };
+    const place = () => {
+      if (!H) return;
+      const RM = reducedMotion(), raw = innerHeight * 0.6 - el.getBoundingClientRect().top;
+      const y = RM ? H : Math.max(0, Math.min(H, raw));
+      trail.style.strokeDashoffset = String(H - y);
+      walker.style.transform = `translate(${X}px, ${y}px) translate(-50%, -86%)`;
+      stops.forEach((st, i) => {
+        const on = y >= at[i] - 4, was = st.classList.contains("on");
+        st.classList.toggle("on", on); stones[i].classList.toggle("on", on);
+        if (on && !was) st.querySelectorAll<SVGAnimationElement>("animate, animateMotion").forEach((an) => { if (RM) an.setAttribute("dur", "0.001s"); an.beginElement(); });
+      });
+      if (!RM && Math.abs(raw - lastY) > 0.5 && raw > 0 && raw < H) { walker.classList.add("go"); clearTimeout(idle); idle = window.setTimeout(() => walker.classList.remove("go"), 180); }
+      lastY = raw;
+    };
+    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(place); };
+    const ro = new ResizeObserver(() => { build(); place(); });
+    ro.observe(el);
+    addEventListener("scroll", onScroll, { passive: true });
+    return () => { ro.disconnect(); removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); clearTimeout(idle); };
+  }, []);
+  return <div className="gr" ref={box}>
+    <span className="gr-road" aria-hidden="true" />
+    <svg className="gr-svg" aria-hidden="true">
+      <defs>
+        <filter id="grRough" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".09 .03" numOctaves="2" seed="7" /><feDisplacementMap in="SourceGraphic" scale="8" /></filter>
+        <radialGradient id="grDrop" cx="40%" cy="38%" r="70%"><stop offset="0" stopColor="#f08a3a" /><stop offset=".55" stopColor="#b4531b" /><stop offset="1" stopColor="#6a2207" /></radialGradient>
+        <linearGradient id="grFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset=".06" stopColor="#fff" /><stop offset=".94" stopColor="#fff" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></linearGradient>
+        <mask id="grMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><rect width="100%" height="100%" fill="url(#grFade)" /></mask>
+      </defs>
+      <g mask="url(#grMask)">
+        <path className="gr-p grass" filter="url(#grRough)" />
+        <path className="gr-p dirt" filter="url(#grRough)" />
+        <path className="gr-p rut" />
+        <path className="gr-p gr-trail" />
+      </g>
+      {ROAD_STOPS.map((st) => <circle key={st.time} className="gr-stone" r="7" />)}
+    </svg>
+    {ROAD_STOPS.map((st, i) => <figure key={st.time} className="gr-stop">
+      <svg className="gr-arrow" viewBox="0 0 120 48" aria-hidden="true">
+        <mask id={`grm${i}`} maskUnits="userSpaceOnUse" x="-10" y="-10" width="140" height="70"><path d={ROUTE} fill="none" stroke="#fff" strokeWidth="5" pathLength={1} strokeDasharray="1 1" strokeDashoffset="1"><animate attributeName="stroke-dashoffset" from="1" to="0" dur={`${ROUTE_S}s`} begin="indefinite" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".45 .05 .3 1" /></path></mask>
+        <path className="dash" d={ROUTE} mask={`url(#grm${i})`} />
+        <g className="hd"><path d="M10 0 C10 0 -1 -7.5 -5.5 -7.5 A7.5 7.5 0 0 0 -5.5 7.5 C-1 7.5 10 0 10 0Z" fill="url(#grDrop)" /><ellipse cx="-6" cy="-3.2" rx="2.6" ry="1.5" fill="#fff" opacity=".55" /><animateMotion path={ROUTE} dur={`${ROUTE_S}s`} begin="indefinite" fill="freeze" rotate="auto" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".45 .05 .3 1" /></g>
+      </svg>
+      <video src={st.src} poster={st.poster} width={st.w} height={st.h} autoPlay muted loop playsInline preload="metadata" aria-label={st.label} style={{ objectPosition: st.pos }} />
+      <figcaption><span>{st.time}</span><b>{st.line}</b></figcaption>
+    </figure>)}
+    <img className="gr-walker" src={GUR_IMAGES.roadWalker} alt="" width={345} height={520} loading="lazy" decoding="async" />
+  </div>;
+}
+
 export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
-  const timeline = useRef<HTMLDivElement>(null);
   const vine = useRef<HTMLDivElement>(null);
-  useTimeline(timeline, shelf.map((s) => s.packs.length).join());
   useVine(vine);
   return <section className="gf-show" data-io aria-labelledby="gf-sh-h"><div className="al-bd top" aria-hidden="true" {...html(JHALOR)} /><div>
     <div className="gf-shh">
-      <div className="gf-mark"><b>গুড়</b></div>
-      <div className="gf-intro"><h2 id="gf-sh-h">শীতের তিন গুড়</h2><p>রাজশাহীর গাছির হাতে বানানো খেজুরের গুড়। এই শীতে আমাদের প্রিয় তিনটি: ঝোলা, বীজ আর পাটালি। যেকোনো দাম ছুঁলেই মেমোতে উঠবে।</p></div>
+      <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub">রসের পথ</span></div>
     </div>
-    <div className="gf-tl" ref={timeline}>
-      <svg className="gf-path" aria-hidden="true"><path id="gfLine" /><g id="gfArrow" {...html(LINE_TIP)} /></svg>
-      <div className="gf-endbd" aria-hidden="true" {...html(END_STRIP)} />
-      {shelf.map(({ meta, packs, compareAt }, i) => {
-        const first = [...packs].sort((a, b) => a.unitPrice - b.unitPrice)[0];
-        return <article key={meta.slug} className={`gf-ti${i % 2 ? " r" : ""}`}>
-          <div className="gf-orb"><span className="gf-burst" aria-hidden="true"><svg viewBox="-100 -100 200 200" {...html(BURSTS[i])} /></span>
-            <span className="gf-lbl" aria-hidden="true"><svg viewBox="0 0 200 200"><path id={`gfRp${i}`} d="M100 100 m-92 0 a92 92 0 1 1 184 0 a92 92 0 1 1 -184 0" fill="none" /><text><textPath href={`#gfRp${i}`} startOffset={`${meta.labelOffset}%`}>{meta.name} •</textPath></text></svg></span>
-            <div className="gf-ph"><img src={meta.image} alt={meta.name} width={800} height={800} loading="lazy" style={{ "--z": meta.zoom } as React.CSSProperties} /></div></div>
-          <div className="gf-tx">
-            <h3 className="sr-only">{meta.name}</h3>
-            <b className="num">{first ? taka(first.unitPrice) : "—"}</b><i>{first ? <b>{first.label} থেকে</b> : null}{first ? " · " : ""}{meta.line}</i>
-            <div className="szs">{packs.map((pack) => {
-              const cut = compareAt > pack.unitPrice && pack.unitPrice === first?.unitPrice ? compareAt : 0;
-              return <button key={pack.variantId} type="button" className={`gf-pill${inMemo.has(pack.variantId) ? " added" : ""}`} aria-pressed={inMemo.has(pack.variantId)} aria-label={`${meta.name} ${pack.label} ${taka(pack.unitPrice)} মেমোতে যোগ করুন`} onClick={() => onAdd(meta.slug, pack)}>
-                <span className="pt"><span><span className="num">{taka(pack.unitPrice)}</span>{cut ? <s className="num">{taka(cut)}</s> : null}</span><small>{pack.label}</small></span><span className="ds" aria-hidden="true" {...html(PILL_LOTUS)} />
-              </button>;
-            })}</div>
-          </div>
-        </article>;
-      })}
-    </div>
+    <GurRoad />
+    <div className="gr-end"><h2 id="gf-sh-h">শীতের ছয় গুড়</h2><p>চিনি নেই, ভেজাল নেই। পছন্দেরটা কার্টে যোগ করুন।</p></div>
+    <GurDial shelf={shelf} inMemo={inMemo} onAdd={onAdd} />
     <div className="gf-low">
       <div className="gf-about" data-io><h3>আমাদের কথা</h3><p>শীতের ভোরে গাছ থেকে নামানো রস, উঠোনের চুলায় ঘণ্টার পর ঘণ্টা জ্বাল। চিনি নেই, ভেজাল নেই। হাট থেকে সরাসরি আপনার রান্নাঘরে।</p><small>নওহাটা, রাজশাহী</small></div>
       <section className="gf-rc" data-io aria-labelledby="gf-rc-h">
@@ -204,7 +360,7 @@ export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) 
             <div className="vn-tx"><b>{why.title}</b><span>{why.line}</span></div>
           </div>)}
         </div>
-        <div className="vn-bd" aria-hidden="true" {...html(NAKSHI_STRIP)} />
+        <div className="vn-bd" aria-hidden="true" {...html(JHALOR)} />
       </section>
     </div>
   </div></section>;
