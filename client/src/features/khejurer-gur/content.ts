@@ -39,8 +39,8 @@ export const GUR_IMAGES = {
   illBij: `${IMG}/ill-bij-v1.webp`,
   illPatali: `${IMG}/ill-patali-v1.webp`,
   quoteLettering: `${IMG}/quote-lettering-v1.webp`,
-  quoteGateway: `${IMG}/quote-gateway-800-v1.webp`,
-  quoteGatewayLarge: `${IMG}/quote-gateway-1200-v1.webp`,
+  quoteFrieze: `${IMG}/quote-frieze-800-v1.webp`,
+  quoteFriezeLarge: `${IMG}/quote-frieze-1200-v1.webp`,
 } as const;
 
 /**

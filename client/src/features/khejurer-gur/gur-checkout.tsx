@@ -85,9 +85,9 @@ function MemoGallery({ offers }: { offers: GurOffer[] }) {
   if (!photos.length) return null;
   return <div className="v1-gal">
     <div ref={rail} className="v1-gal-rail" role="region" aria-label="খেজুরের গুড়ের ছবি" tabIndex={0} onScroll={(e) => setActive(Math.round(e.currentTarget.scrollLeft / Math.max(e.currentTarget.clientWidth, 1)))}>
-      {photos.map((photo, i) => <div key={photo.src} className="v1-gal-slide"><img src={photo.src} srcSet={photo.srcSet} sizes="(min-width: 860px) 480px, 90vw" alt={photo.alt} width={960} height={960} loading={i ? "lazy" : "eager"} decoding="async" draggable={false} /></div>)}
+      {photos.map((photo, i) => <div key={photo.src} className="v1-gal-slide"><img src={photo.src} srcSet={photo.srcSet} sizes="(min-width: 860px) 480px, 90vw" alt={photo.alt} width={960} height={960} loading="lazy" decoding="async" draggable={false} /></div>)}
     </div>
-    {photos.length > 1 && <div className="v1-gal-capsule">{photos.map((photo, i) => <button key={photo.src} type="button" onClick={() => goTo(i)} aria-label={`${photo.alt}-এর ছবি`} aria-current={active === i}><img src={photo.src} srcSet={photo.srcSet} sizes="38px" alt="" width={38} height={38} draggable={false} decoding="async" /></button>)}</div>}
+    {photos.length > 1 && <div className="v1-gal-capsule">{photos.map((photo, i) => <button key={photo.src} type="button" onClick={() => goTo(i)} aria-label={`${photo.alt}-এর ছবি`} aria-current={active === i}><img src={photo.src} srcSet={photo.srcSet} sizes="38px" alt="" width={38} height={38} loading="lazy" draggable={false} decoding="async" /></button>)}</div>}
   </div>;
 }
 
