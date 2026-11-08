@@ -35,14 +35,15 @@ export default function KhejurerGurPage() {
   const shelf: GurShelfItem[] = stableOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs, compareAt: Number(o.product?.compare_at_price) || 0 }));
   const cheapest = Math.min(...stableOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
 
-  // The memo opens with ঝোলা গুড়'s first pack chosen, as in the approved design.
+  // The memo opens with every গুড়'s first pack chosen. Seeded per variant, not per product: the build snapshot can
+  // carry older variant ids than the live catalog, and a pack that arrives with a new id must be ticked too.
   const [lines, setLinesState] = useState<GurLines>({});
-  const seeded = useRef(false);
+  const seeded = useRef(new Set<string>());
   useEffect(() => {
-    const first = stableOffers.find((o) => o.meta.slug === "liquid-date-jaggery")?.packs[0];
-    if (seeded.current || !first) return;
-    seeded.current = true;
-    setLinesState((current) => Object.keys(current).length ? current : { [first.variantId]: 1 });
+    const firsts = stableOffers.flatMap((o) => o.status === "ready" && o.packs[0] && !seeded.current.has(o.packs[0].variantId) ? [o.packs[0].variantId] : []);
+    if (!firsts.length) return;
+    firsts.forEach((id) => seeded.current.add(id));
+    setLinesState((current) => ({ ...current, ...Object.fromEntries(firsts.filter((id) => current[id] === undefined).map((id) => [id, 1])) }));
   }, [stableOffers]);
   const setLines = useCallback((update: (current: GurLines) => GurLines) => setLinesState(update), []);
   const inMemo = new Set(Object.entries(lines).filter(([, q]) => q > 0).map(([id]) => id));

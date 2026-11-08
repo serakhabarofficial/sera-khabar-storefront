@@ -229,7 +229,7 @@ const WHY_ICONS = { minerals: WHY_MINERALS, sweet: WHY_SWEET };
 const QUOTE = "কুয়াশার কোলে শিশিরের গান, খেজুরের গুড়ে বাংলার প্রাণ";
 
 // The verse under the hero, as a মোহিনী-style কার্তুশ on the burgundy lotus pattern: pink stepped frame,
-// lotuses in the corners, today's বঙ্গাব্দ date, and the hand-lettered verse on a cream panel that rises in.
+// lotuses in the corners and today's বঙ্গাব্দ date are already in place; only the hand-lettered verse rises in on scroll.
 export function GurQuote() {
   // Today's বঙ্গাব্দ date; rechecked every minute so an open page turns over at midnight in Dhaka.
   const [today, setToday] = useState(() => banglaDateParts());
