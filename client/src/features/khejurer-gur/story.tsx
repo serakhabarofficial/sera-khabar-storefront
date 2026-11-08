@@ -237,28 +237,14 @@ export function GurQuote() {
     const timer = window.setInterval(() => setToday(banglaDateParts()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
-  // The verse only rises once the frieze the browser actually picked from srcset (800 or 1200, by screen) and the verse
-  // lettering are decoded; if someone scrolls here first, art and verse fade in together instead of the art popping in late.
-  const art = useRef<HTMLImageElement>(null);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    let live = true;
-    const verse = new Image();
-    verse.src = GUR_IMAGES.quoteLettering;
-    void Promise.all([art.current?.decode().catch(() => {}), verse.decode().catch(() => {})]).then(() => { if (live) setReady(true); });
-    return () => { live = false; };
-  }, []);
   // রাজশাহীর ঐতিহ্য: a Puthia-temple terracotta frieze (গাছি, a woman with a রসের হাঁড়ি, a boat on the Padma, lotus, mangoes);
-  // the verse (shown twice, clipped to one line each) and today's date sit on the cream above it.
-  return <section className="gf-q" data-io data-ready={ready || undefined}>
+  // the verse and today's date sit on the cream above it. Fully static: no scroll reveal, nothing moves.
+  return <section className="gf-q">
     <div className="q-in">
-      <img ref={art} className="q-art" src={GUR_IMAGES.quoteFrieze} srcSet={`${GUR_IMAGES.quoteFrieze} 800w, ${GUR_IMAGES.quoteFriezeLarge} 1200w`} sizes="(min-width: 601px) 760px, 100vw"
-        alt="পুঠিয়ার মন্দিরের ধাঁচে পোড়ামাটির ফলক: খেজুর গাছে গাছি, মাথায় রসের হাঁড়ি নিয়ে নারী, পদ্মায় নৌকা, পদ্ম আর আম" width={1200} height={600} fetchPriority="high" decoding="async" />
+      <img className="q-art" src={GUR_IMAGES.quoteFrieze} srcSet={`${GUR_IMAGES.quoteFrieze} 800w, ${GUR_IMAGES.quoteFriezeLarge} 1200w`} sizes="(min-width: 601px) 760px, 100vw"
+        alt="পুঠিয়ার মন্দিরের ধাঁচে পোড়ামাটির ফলক: খেজুর গাছে গাছি, মাথায় রসের হাঁড়ি নিয়ে নারী, পদ্মায় নৌকা, পদ্ম আর আম" width={1200} height={600} fetchPriority="high" />
       <blockquote>
-        <div className="q-verse" role="img" aria-label={QUOTE}>
-          <img className="l1" src={GUR_IMAGES.quoteLettering} alt="" width={1200} height={442} decoding="async" />
-          <img className="l2" src={GUR_IMAGES.quoteLettering} alt="" width={1200} height={442} decoding="async" />
-        </div>
+        <img className="q-verse" src={GUR_IMAGES.quoteLettering} alt={QUOTE} width={1200} height={442} fetchPriority="high" />
         <span className="q-date">{today.month} {today.day} · {today.year}</span>
       </blockquote>
     </div>
