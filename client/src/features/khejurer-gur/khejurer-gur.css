@@ -507,25 +507,17 @@
 
 /* ── quote under the hero: রাজশাহীর ঐতিহ্য — a Puthia-temple terracotta frieze (গাছি, রসের হাঁড়ি, a Padma boat, lotus,
    mangoes); the verse and today's date sit on the cream above it ──
-   The art is a still picture fetched with the page; nothing but the verse moves. The verse is one image shown as two
-   clipped copies, one per line; once it's decoded and scrolled to, each line fades and rises (opacity + transform only,
-   no scale on the raster), the second 90ms after the first. */
+   Fully static: frieze, verse and date are simply there; no scroll reveal, nothing moves. */
 .gf-q { position:relative; padding-top:44px; background:#FBEFD8; }
 .gf-q .q-in { position:relative; max-width:760px; margin:0 auto; }
-.gf-q .q-art { display:block; width:100%; height:auto; aspect-ratio:2/1; opacity:0; transition:opacity 300ms ease; }
-.gf-q[data-ready] .q-art { opacity:1; }
+.gf-q .q-art { display:block; width:100%; height:auto; aspect-ratio:2/1; }
 .gf-q blockquote { position:absolute; left:0; right:0; top:-30px; margin:0; display:grid; justify-items:center; gap:6px; }
-.gf-q .q-verse { position:relative; width:64%; aspect-ratio:1200/442; }
-.gf-q .q-verse img { position:absolute; inset:0; display:block; width:100%; height:100%; opacity:0; transform:translateY(14px); transition:opacity 500ms ease, transform 700ms var(--ease-out); }
-.gf-q .q-verse .l1 { clip-path:inset(0 0 47% 0); }
-.gf-q .q-verse .l2 { clip-path:inset(53% 0 0 0); transition-delay:90ms; }
-.gf-q.in[data-ready] .q-verse img { opacity:1; transform:none; }
+.gf-q .q-verse { display:block; width:64%; height:auto; aspect-ratio:1200/442; }
 .gf-q .q-date { display:flex; align-items:center; gap:8px; font:400 14px/1 "Alinur Smaroklipi","Noto Sans Bengali",sans-serif; letter-spacing:.02em; color:#A0461F; }
 .gf-q .q-date::before, .gf-q .q-date::after { content:""; width:18px; height:1px; background:currentColor; opacity:.6; }
 /* wider than the art: its ends fade into the cream instead of stopping in a hard edge */
 @media (min-width:761px) { .gf-q .q-art { -webkit-mask-image:linear-gradient(90deg,#0000,#000 9%,#000 91%,#0000); mask-image:linear-gradient(90deg,#0000,#000 9%,#000 91%,#0000); } }
 @media (min-width:601px) { .gf-q { padding-top:48px; } .gf-q blockquote { top:-28px; gap:8px; } .gf-q .q-verse { width:56%; } .gf-q .q-date { font-size:16px; } }
-@media (prefers-reduced-motion:reduce) { .gf-q .q-verse img { transform:none; transition:opacity 200ms ease; } }
 
 /* one face for the whole খেজুরের গুড় page, checkout and footer included: Noto Sans Bengali (it also carries the Latin
    glyphs for "Designed & Engineered by"). !important because the shared am-sotto checkout styles set their own faces. */
