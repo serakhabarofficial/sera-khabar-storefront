@@ -46,9 +46,10 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
   const [chosen, setChosen] = useState<Record<string, string>>({});
   const [stopped, setStopped] = useState(false);
   const jump = useRef<(i: number) => void>(() => {});
+  const wake = useRef<() => void>(() => {});
   const play = useRef({ visible: false, held: false, stopped: false });
   const n = shelf.length;
-  const stop = () => { play.current.stopped = true; setStopped(true); };
+  const stop = () => { play.current.stopped = true; setStopped(true); wake.current(); };
   useEffect(() => {
     const el = deck.current;
     if (!el || !n) return;
@@ -57,7 +58,7 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
     const prog = stage.querySelector<SVGSVGElement>(".gf-prog")!, bar = prog.querySelector<SVGCircleElement>("circle")!;
     const ticks = Array.from(stage.querySelectorAll<HTMLElement>(".gf-tick")), nums = Array.from(stage.querySelectorAll<HTMLElement>(".gf-num"));
     const shots = Array.from(stage.querySelectorAll<HTMLElement>(".gf-shot img"));
-    let R = 0, CX = 0, CY = 0, pos = 0, target = 0, frame = 0, last = -1, held = 0, prev = 0;
+    let R = 0, CX = 0, CY = 0, pos = 0, target = 0, frame = 0, last = -1, held = 0, prev = 0, shownK = -1;
     const layout = () => {
       const W = stage.clientWidth, H = stage.clientHeight, wide = W >= 760;
       R = Math.min(H * 0.42, wide ? 420 : 330);
@@ -69,44 +70,54 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
       bar.setAttribute("cx", `${R}`); bar.setAttribute("cy", `${R}`); bar.setAttribute("r", `${R}`);
       stage.style.setProperty("--info-x", `${Math.round(CX + R + (wide ? 64 : 22))}px`);
     };
-    const paint = () => {
+    // positions only change while the dial turns, and only through transform/opacity (no layout work)
+    const paintDial = () => {
       for (let i = 0; i < n; i++) {
         const d = i - pos, a = (d * DIAL_STEP * Math.PI) / 180, nr = R - 50;
-        ticks[i].style.left = `${CX + R * Math.cos(a)}px`; ticks[i].style.top = `${CY + R * Math.sin(a)}px`;
+        ticks[i].style.transform = `translate(${(CX + R * Math.cos(a)).toFixed(1)}px, ${(CY + R * Math.sin(a)).toFixed(1)}px)`;
         ticks[i].classList.toggle("on", Math.abs(d) < 0.5);
-        nums[i].style.transform = `translate(${CX + nr * Math.cos(a)}px, ${CY + nr * Math.sin(a)}px) translate(-50%, -50%) rotate(${d * DIAL_STEP}deg)`;
+        nums[i].style.transform = `translate(${(CX + nr * Math.cos(a)).toFixed(1)}px, ${(CY + nr * Math.sin(a)).toFixed(1)}px) translate(-50%, -50%) rotate(${(d * DIAL_STEP).toFixed(2)}deg)`;
         nums[i].style.opacity = Math.abs(d) > 3.2 ? "0" : Math.min(1, Math.abs(d)).toFixed(3);
         const vis = Math.max(0, 1 - Math.abs(d) * 1.8);
         shots[i].style.opacity = vis.toFixed(3);
-        shots[i].style.transform = `translateY(${d * 40}px) rotate(${d * 18}deg) scale(${0.9 + vis * 0.1})`;
+        shots[i].style.transform = `translateY(${(d * 40).toFixed(1)}px) rotate(${(d * 18).toFixed(2)}deg) scale(${(0.9 + vis * 0.1).toFixed(3)})`;
       }
-      // the progress stroke runs clockwise from the pointer (3 o'clock) down to the next গুড়'s dot
-      const seg = (2 * Math.PI * R * DIAL_STEP) / 360, k = play.current.stopped || target !== pos ? 0 : held / DIAL_MS;
-      bar.style.strokeDasharray = `${(seg * k).toFixed(2)} ${(2 * Math.PI * R).toFixed(2)}`;
       const now = Math.round(pos);
       if (now !== last) { last = now; setActive(now); }
     };
+    // the progress stroke runs clockwise from the pointer (3 o'clock) down to the next গুড়'s dot
+    const paintBar = () => {
+      const k = play.current.stopped || target !== pos ? 0 : Math.min(1, held / DIAL_MS);
+      if (Math.abs(k - shownK) < 0.002) return;
+      shownK = k;
+      const seg = (2 * Math.PI * R * DIAL_STEP) / 360;
+      bar.style.strokeDasharray = `${(seg * k).toFixed(2)} ${(2 * Math.PI * R).toFixed(2)}`;
+    };
+    const autoplaying = () => { const p = play.current; return !p.stopped && p.visible && !p.held; };
     const tick = (t: number) => {
+      frame = 0;
       const dt = prev ? Math.min(100, t - prev) : 0;
       prev = t;
-      const p = play.current;
       if (target !== pos) {
         pos += (target - pos) * (reducedMotion() ? 1 : 0.12);
         if (Math.abs(target - pos) < 0.001) pos = target;
-      } else if (!p.stopped && p.visible && !p.held) {
+        paintDial();
+      } else if (autoplaying()) {
         held += dt;
         if (held >= DIAL_MS) { held = 0; target = (target + 1) % n; }
       }
-      paint();
-      frame = requestAnimationFrame(tick);
+      paintBar();
+      // keep the loop alive only while something is moving; otherwise it sleeps until woken
+      if (target !== pos || autoplaying()) frame = requestAnimationFrame(tick);
+      else prev = 0;
     };
-    jump.current = (i: number) => { held = 0; target = i; };
-    const io = new IntersectionObserver(([e]) => { play.current.visible = e.isIntersecting; }, { threshold: 0.35 });
+    wake.current = () => { if (!frame) { prev = 0; frame = requestAnimationFrame(tick); } };
+    jump.current = (i: number) => { held = 0; target = i; wake.current(); };
+    const io = new IntersectionObserver(([e]) => { play.current.visible = e.isIntersecting; if (e.isIntersecting) wake.current(); }, { threshold: 0.35 });
     io.observe(stage);
-    const ro = new ResizeObserver(() => { layout(); paint(); });
+    const ro = new ResizeObserver(() => { layout(); paintDial(); shownK = -1; paintBar(); });
     ro.observe(stage);
-    frame = requestAnimationFrame(tick);
-    return () => { io.disconnect(); ro.disconnect(); cancelAnimationFrame(frame); };
+    return () => { io.disconnect(); ro.disconnect(); cancelAnimationFrame(frame); wake.current = () => {}; };
   }, [n]);
   const item = shelf[Math.min(active, n - 1)];
   if (!item) return null;
@@ -114,7 +125,7 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
   const pack = packs.find((p) => p.variantId === chosen[meta.slug]) ?? packs[0];
   const cut = pack && compareAt > pack.unitPrice && pack.unitPrice === packs[0].unitPrice ? compareAt : 0;
   const added = pack ? inMemo.has(pack.variantId) : false;
-  const hold = (on: boolean) => () => { play.current.held = on; };
+  const hold = (on: boolean) => () => { play.current.held = on; if (!on) wake.current(); };
   return <div ref={deck} className={`gf-dial${stopped ? " stopped" : ""}`} role="region" aria-roledescription="carousel" aria-label="শীতের ছয় গুড়">
     <div className="gf-stage" onPointerEnter={(e) => { if (e.pointerType === "mouse") play.current.held = true; }} onPointerLeave={hold(false)}
       onTouchStart={hold(true)} onTouchEnd={hold(false)} onTouchCancel={hold(false)} onFocus={hold(true)} onBlur={hold(false)}>
@@ -256,40 +267,52 @@ function GurRoad() {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = box.current!;
-    const svg = el.querySelector<SVGSVGElement>(".gr-svg")!, walker = el.querySelector<HTMLElement>(".gr-walker")!;
-    const strips = Array.from(svg.querySelectorAll<SVGPathElement>(".gr-p")), trail = svg.querySelector<SVGPathElement>(".gr-trail")!;
+    const svg = el.querySelector<SVGSVGElement>(".gr-svg")!, walker = el.querySelector<HTMLElement>(".gr-walker")!, trail = el.querySelector<HTMLElement>(".gr-trail")!;
+    const strips = Array.from(svg.querySelectorAll<SVGPathElement>(".gr-p"));
     const stones = Array.from(svg.querySelectorAll<SVGCircleElement>(".gr-stone"));
     const stops = Array.from(el.querySelectorAll<HTMLElement>(".gr-stop"));
-    let H = 0, X = 0, at: number[] = [], frame = 0, idle = 0, lastY = -1;
+    const RM = reducedMotion();
+    // layout is measured once (and on resize), never during scroll; the walker eases toward the scroll target
+    let H = 0, X = 0, top = 0, vh = innerHeight, vw = innerWidth, at: number[] = [], frame = 0, cur = -1, goal = 0, moving = false;
     const build = () => {
       const br = el.getBoundingClientRect(), road = el.querySelector<HTMLElement>(".gr-road")!.getBoundingClientRect();
-      H = br.height; X = road.left - br.left + road.width / 2;
+      H = br.height; X = road.left - br.left + road.width / 2; top = br.top + scrollY;
       svg.setAttribute("viewBox", `0 0 ${br.width} ${H}`);
       strips.forEach((p) => p.setAttribute("d", `M${X} 0 V${H}`));
-      trail.style.strokeDasharray = `${H} ${H}`;
       at = stops.map((st) => { const r = st.getBoundingClientRect(); return r.top - br.top + r.height / 2; });
       stones.forEach((c, i) => { c.setAttribute("cx", `${X}`); c.setAttribute("cy", `${at[i]}`); });
-      stops.forEach((st, i) => st.style.setProperty("--arm", `${Math.round(st.getBoundingClientRect().left - br.left - X)}px`));
+      stops.forEach((st) => st.style.setProperty("--arm", `${Math.round(st.getBoundingClientRect().left - br.left - X)}px`));
+      trail.style.left = `${X - 1}px`; trail.style.height = `${H}px`;
     };
-    const place = () => {
-      if (!H) return;
-      const RM = reducedMotion(), raw = innerHeight * 0.6 - el.getBoundingClientRect().top;
-      const y = RM ? H : Math.max(0, Math.min(H, raw));
-      trail.style.strokeDashoffset = String(H - y);
-      walker.style.transform = `translate(${X}px, ${y}px) translate(-50%, -86%)`;
-      stops.forEach((st, i) => {
-        const on = y >= at[i] - 4, was = st.classList.contains("on");
-        st.classList.toggle("on", on); stones[i].classList.toggle("on", on);
-        if (on && !was) st.querySelectorAll<SVGAnimationElement>("animate, animateMotion").forEach((an) => { if (RM) an.setAttribute("dur", "0.001s"); an.beginElement(); });
-      });
-      if (!RM && Math.abs(raw - lastY) > 0.5 && raw > 0 && raw < H) { walker.classList.add("go"); clearTimeout(idle); idle = window.setTimeout(() => walker.classList.remove("go"), 180); }
-      lastY = raw;
+    // a stop lights once and stays lit, so scrolling back up never flickers or replays it
+    const light = (y: number) => stops.forEach((st, i) => {
+      if (st.classList.contains("on") || y < at[i] - 4) return;
+      st.classList.add("on"); stones[i].classList.add("on");
+      st.querySelectorAll<SVGAnimationElement>("animate, animateMotion").forEach((an) => { if (RM) an.setAttribute("dur", "0.001s"); an.beginElement(); });
+    });
+    const draw = (y: number) => {
+      walker.style.transform = `translate3d(${X.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -86%)`;
+      trail.style.transform = `scaleY(${H ? (y / H).toFixed(4) : 0})`;
     };
-    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(place); };
-    const ro = new ResizeObserver(() => { build(); place(); });
-    ro.observe(el);
+    const target = () => RM ? H : Math.max(0, Math.min(H, scrollY + vh * 0.6 - top));
+    const step = () => {
+      frame = 0;
+      const d = goal - cur;
+      cur = Math.abs(d) < 0.4 ? goal : cur + d * 0.22;
+      draw(cur); light(cur);
+      const still = cur === goal;
+      if (still === moving) { moving = !still; walker.classList.toggle("go", moving); }
+      if (!still) frame = requestAnimationFrame(step);
+    };
+    const onScroll = () => { goal = target(); if (!frame) frame = requestAnimationFrame(step); };
+    const relayout = () => { build(); goal = target(); if (cur < 0) cur = goal; onScroll(); };
+    // the phone's address bar changes innerHeight while scrolling; only a real resize (width change) remeasures the viewport
+    const onResize = () => { if (innerWidth !== vw) { vw = innerWidth; vh = innerHeight; } relayout(); };
+    const ro = new ResizeObserver(relayout);
+    ro.observe(el); ro.observe(document.body);
     addEventListener("scroll", onScroll, { passive: true });
-    return () => { ro.disconnect(); removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); clearTimeout(idle); };
+    addEventListener("resize", onResize);
+    return () => { ro.disconnect(); removeEventListener("scroll", onScroll); removeEventListener("resize", onResize); cancelAnimationFrame(frame); };
   }, []);
   return <div className="gr" ref={box}>
     <span className="gr-road" aria-hidden="true" />
@@ -304,7 +327,6 @@ function GurRoad() {
         <path className="gr-p grass" filter="url(#grRough)" />
         <path className="gr-p dirt" filter="url(#grRough)" />
         <path className="gr-p rut" />
-        <path className="gr-p gr-trail" />
       </g>
       {ROAD_STOPS.map((st) => <circle key={st.time} className="gr-stone" r="7" />)}
     </svg>
@@ -317,6 +339,7 @@ function GurRoad() {
       <video src={st.src} poster={st.poster} width={st.w} height={st.h} autoPlay muted loop playsInline preload="metadata" aria-label={st.label} style={{ objectPosition: st.pos }} />
       <figcaption><span>{st.time}</span><b>{st.line}</b></figcaption>
     </figure>)}
+    <span className="gr-trail" aria-hidden="true" />
     <img className="gr-walker" src={GUR_IMAGES.roadWalker} alt="" width={345} height={520} loading="lazy" decoding="async" />
   </div>;
 }
