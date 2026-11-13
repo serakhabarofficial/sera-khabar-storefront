@@ -301,17 +301,15 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
           <div className="v1-memo-packs" id="gur-packs" role="group" aria-labelledby="gur-packs-label" tabIndex={-1} aria-describedby={errors.pack ? "gur-pack-error" : undefined}>
             {rows.map((row) => {
               const quantity = lines[row.pack.variantId] ?? 0, checked = quantity > 0;
-              const cheapest = Math.min(...row.offer.packs.map((p) => p.unitPrice)), compareAt = Number(row.product.compare_at_price);
-              const cut = compareAt > row.pack.unitPrice && row.pack.unitPrice === cheapest ? compareAt : 0;
               const combo = GUR_COMBO_CONTENTS[row.offer.meta.slug];
               return <div key={row.pack.variantId} className="v1-memo-pack" data-checked={checked}>
                 <label>
                   <input className="sr-only" type="checkbox" checked={checked} disabled={pending} onChange={(e) => { beginCheckout(); toggle(row, e.target.checked); }} />
                   <span className="ph" aria-hidden="true"><img src={row.offer.meta.image || getProductGallery(row.product)[0]} alt="" width={68} height={68} loading="lazy" decoding="async" data-fit={row.offer.meta.image ? undefined : "contain"} /><span className="dot" /></span>
-                  <span className="lbl"><b>{row.offer.meta.name}</b>{combo && <ComboContents combo={combo} />}<span className="meta"><span className="sz">{row.pack.label}</span>{combo && <span className="combo-sum" aria-hidden="true">{combo.summary}</span>}{cut ? <em className="off">{bn(Math.round((1 - row.pack.unitPrice / cut) * 100))}% ছাড়</em> : null}</span></span>
+                  <span className="lbl"><b>{row.offer.meta.name}</b>{combo && <ComboContents combo={combo} />}<span className="meta"><span className="sz">{row.pack.label}</span>{combo && <span className="combo-sum" aria-hidden="true">{combo.summary}</span>}</span></span>
                 </label>
                 <div className="end">
-                  <span className="pr">{taka(row.pack.unitPrice)}{cut ? <s>{taka(cut)}</s> : null}</span>
+                  <span className="pr">{taka(row.pack.unitPrice)}</span>
                   {checked && <div className="skx-qty" role="group" aria-label={`${row.offer.meta.name} ${row.pack.label} পরিমাণ`}><button type="button" aria-label="কমান" disabled={pending} onClick={() => step(row, -1)}>−</button><output aria-live="polite">{bn(quantity)}</output><button type="button" aria-label="বাড়ান" disabled={quantity >= MAX_LINE_QUANTITY || pending} onClick={() => step(row, 1)}>+</button></div>}
                 </div>
                 {combo && <ComboTray combo={combo} open={checked} total={row.pack.label} />}
