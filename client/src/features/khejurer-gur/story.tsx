@@ -5,7 +5,7 @@ import { AL, JHALOR, JHALOR_BG, PILL_LOTUS, RECIPE_FLOOR, RECIPE_STICKERS, WHY_B
 import { banglaDateParts } from "./bangla-date";
 import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_USES, GUR_VARIETIES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
 
-export type GurShelfItem = { meta: GurProductMeta; packs: LandingPackOption[]; compareAt: number };
+export type GurShelfItem = { meta: GurProductMeta; packs: LandingPackOption[] };
 type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string, pack: LandingPackOption) => void; onOrderClick: (event: MouseEvent<HTMLAnchorElement>) => void };
 
 const html = (markup: string) => ({ dangerouslySetInnerHTML: { __html: markup } });
@@ -121,9 +121,8 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
   }, [n]);
   const item = shelf[Math.min(active, n - 1)];
   if (!item) return null;
-  const { meta, packs, compareAt } = item;
+  const { meta, packs } = item;
   const pack = packs.find((p) => p.variantId === chosen[meta.slug]) ?? packs[0];
-  const cut = pack && compareAt > pack.unitPrice && pack.unitPrice === packs[0].unitPrice ? compareAt : 0;
   const added = pack ? inMemo.has(pack.variantId) : false;
   const hold = (on: boolean) => () => { play.current.held = on; if (!on) wake.current(); };
   return <div ref={deck} className={`gf-dial${stopped ? " stopped" : ""}`} role="region" aria-roledescription="carousel" aria-label="শীতের ছয় গুড়">
@@ -141,7 +140,7 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
           <p>{meta.line}</p>
         </div>
         {pack && <>
-          <div className="gf-price"><b className="num"><CountUp value={pack.unitPrice} /></b>{cut ? <s className="num">{taka(cut)}</s> : null}<small>{pack.label}</small></div>
+          <div className="gf-price"><b className="num"><CountUp value={pack.unitPrice} /></b><small>{pack.label}</small></div>
           {packs.length > 1 && <div className="gf-seg" role="radiogroup" aria-label={`${meta.name}-এর মাপ`}>
             {packs.map((p) => <button key={p.variantId} type="button" role="radio" aria-checked={p.variantId === pack.variantId} className={p.variantId === pack.variantId ? "on" : ""} onClick={() => { stop(); setChosen((c) => ({ ...c, [meta.slug]: p.variantId })); }}>{p.label}<span className="num">{taka(p.unitPrice)}</span></button>)}
           </div>}

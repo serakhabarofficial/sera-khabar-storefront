@@ -33,7 +33,7 @@ export default function KhejurerGurPage() {
   const offerKey = offers.map((o) => `${o.status}:${o.packs.map((p) => `${p.variantId}=${p.unitPrice}`).join(",")}`).join("|");
   const stableOffers = useMemo(() => offers, [offerKey]);
   const varietyOffers = stableOffers.filter((o) => !GUR_CHECKOUT_ONLY.includes(o.meta.slug));
-  const shelf: GurShelfItem[] = varietyOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs, compareAt: Number(o.product?.compare_at_price) || 0 }));
+  const shelf: GurShelfItem[] = varietyOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs }));
   const cheapest = Math.min(...varietyOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
 
   // The memo opens with only the preselected গুড় ticked, at their ১ কেজি pack. Seeded per variant, not per product: the
