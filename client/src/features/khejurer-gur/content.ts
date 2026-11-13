@@ -49,6 +49,8 @@ export const GUR_IMAGES = {
  * the one-line description and the photo. Every price, size and stock figure comes from the catalog.
  */
 export const GUR_PRODUCTS = [
+  // Checkout only (see GUR_CHECKOUT_ONLY): first, so it tops the order memo. Its photo is the catalog's.
+  { slug: "five-varieties-of-date-palm-jaggery", name: "খেজুরের গুড় কম্বো", line: "পাঁচ রকম খেজুরের গুড় একসাথে।", image: "", zoom: 1 },
   { slug: "foil-wrapped-patali-jaggery", name: "ফয়েল পাটালি", line: "ফয়েলের ছোট ট্রেতে জমানো — ভাগ করে খাওয়া সহজ।", image: GUR_IMAGES.foilPatali, zoom: 1.05 },
   { slug: "round-patali-jaggery", name: "গোল পাটালি", line: "গোল চাকতি, ভাঙলে ভেতরে নরম দানা।", image: GUR_IMAGES.roundPatali, zoom: 1.05 },
   { slug: "date-palm-patali", name: "লম্বা পাটালি", line: "লম্বা জমাট পাটালি, কেটে কেটে খাওয়ার মতো।", image: GUR_IMAGES.patali, zoom: 0.94 },
@@ -57,6 +59,27 @@ export const GUR_PRODUCTS = [
   { slug: "chocolate-seed-jaggery", name: "বীজ গুড়", line: "নরম আর দানা দানা — জিভে দিলেই গলে যায়।", image: GUR_IMAGES.bij, zoom: 1.15 },
 ] as const;
 export type GurProductMeta = (typeof GUR_PRODUCTS)[number];
+
+/** Sold in the order memo but not one of the গুড় themselves: left out of the dial, the name ticker and the "৬ রকম" count. */
+export const GUR_CHECKOUT_ONLY: readonly string[] = ["five-varieties-of-date-palm-jaggery"];
+/**
+ * What a combo holds. In the order memo: a stack of small photos and a short summary; once ticked, the row opens
+ * into a tray of every গুড় with its weight, so the customer sees exactly what comes in the box.
+ */
+export const GUR_COMBO_CONTENTS: Readonly<Record<string, { summary: string; items: readonly { name: string; lines: readonly [string, string]; weight: string; image: string }[] }>> = {
+  "five-varieties-of-date-palm-jaggery": {
+    summary: "(৫ × ৫০০ গ্রাম)",
+    items: [
+      { name: "ফয়েল পাটালি", lines: ["ফয়েল", "পাটালি"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.foilPatali },
+      { name: "গোল পাটালি", lines: ["গোল", "পাটালি"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.roundPatali },
+      { name: "ঝোলা/লিকুইড", lines: ["ঝোলা/", "লিকুইড"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.jhola },
+      { name: "দানাদার গুড়", lines: ["দানাদার", "গুড়"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.danadar },
+      { name: "বীজ গুড়", lines: ["বীজ", "গুড়"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.bij },
+    ],
+  },
+};
+/** The গুড় themselves, as the story and the bar present them. */
+export const GUR_VARIETIES = GUR_PRODUCTS.filter((p) => !GUR_CHECKOUT_ONLY.includes(p.slug));
 
 /** The memo opens with these গুড় ticked at their ১ কেজি pack (or their first pack if the catalog has no ১ কেজি); the rest start unticked. */
 export const GUR_PRESELECTED: readonly string[] = ["round-patali-jaggery", "date-palm-patali", "liquid-date-jaggery"];

@@ -500,6 +500,34 @@
 .kg .amsotto .v1-memo-pack .ph { position:relative; width:68px; height:68px; }
 .kg .amsotto .v1-memo-pack .ph img { display:block; width:100%; height:100%; border-radius:10px; object-fit:cover; background:#f6ead4; filter:saturate(.75); transition:transform 160ms var(--ease-out), filter 200ms ease; }
 .kg .amsotto .v1-memo-pack[data-checked="true"] .ph img { filter:none; }
+/* A catalog photo (the combo's poster) is shown whole, not cropped to the square. */
+.kg .amsotto .v1-memo-pack .ph img[data-fit="contain"] { object-fit:contain; background:#fff; }
+/* A combo's contents: a stack of round গুড় photos under its name; the summary sits beside the pack size. */
+.kg .amsotto .v1-memo-pack .combo { display:flex; margin-top:5px; }
+.kg .amsotto .v1-memo-pack .combo-stack { display:flex; flex:none; }
+.kg .amsotto .v1-memo-pack .combo-stack img { width:24px; height:24px; border-radius:50%; object-fit:cover; background:#FFF8EC; box-shadow:0 0 0 2px #fff; }
+.kg .amsotto .v1-memo-pack .combo-stack img + img { margin-left:-7px; }
+.kg .amsotto .v1-memo-pack .combo-sum { font-family:var(--body); font-size:13px; font-weight:600; color:var(--sub); white-space:nowrap; }
+/* The tray a ticked combo opens into: grid-rows 0fr → 1fr so it grows to its own height. */
+.kg .amsotto .v1-memo-pack:has(.combo-tray) { row-gap:0; }
+.kg .amsotto .v1-memo-pack .combo-tray { grid-column:1 / -1; display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows 320ms var(--ease-out), opacity 220ms ease; }
+.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] { grid-template-rows:1fr; opacity:1; }
+.kg .amsotto .v1-memo-pack .combo-tray-in { min-height:0; overflow:hidden; }
+.kg .amsotto .v1-memo-pack .combo-tray-head { display:flex; justify-content:space-between; margin:12px 0 8px; font-family:var(--body); font-size:12.5px; font-weight:700; color:#A63D24; }
+.kg .amsotto .v1-memo-pack .combo-tray-head span + span { color:var(--sub); font-weight:600; }
+.kg .amsotto .v1-memo-pack .combo-tray ul { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:6px; margin:0; padding:10px 6px; list-style:none; border-radius:12px; background:#fff; box-shadow:inset 0 0 0 1px #A63D2422; }
+.kg .amsotto .v1-memo-pack .combo-tray li { display:grid; grid-template-rows:auto 1fr auto; justify-items:center; align-items:center; gap:2px; text-align:center; transform:translateY(6px); opacity:0; transition:transform 300ms var(--ease-out), opacity 240ms ease; }
+.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li { transform:none; opacity:1; }
+.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(2) { transition-delay:30ms; }
+.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(3) { transition-delay:60ms; }
+.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(4) { transition-delay:90ms; }
+.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(5) { transition-delay:120ms; }
+.kg .amsotto .v1-memo-pack .combo-tray li img { width:44px; height:44px; margin-bottom:3px; border-radius:50%; object-fit:cover; background:#FFF8EC; }
+.kg .amsotto .v1-memo-pack .combo-tray li b { font-family:var(--body); font-size:11.5px; line-height:1.25; font-weight:700; color:var(--ink, #2a1508); overflow-wrap:anywhere; }
+.kg .amsotto .v1-memo-pack .combo-tray li > span { font-family:var(--body); font-size:11px; font-weight:600; color:var(--sub); white-space:nowrap; }
+/* Every name sits on exactly two lines, so the five weights line up. */
+.kg .amsotto .v1-memo-pack .combo-tray li b span { display:block; white-space:nowrap; }
+@media (prefers-reduced-motion:reduce) { .kg .amsotto .v1-memo-pack .combo-tray, .kg .amsotto .v1-memo-pack .combo-tray li { transition:none; } }
 .kg .amsotto .v1-memo-pack label:active .ph img { transform:scale(.96); }
 .kg .amsotto .v1-memo-pack .ph::after { content:""; position:absolute; inset:0; border-radius:10px; box-shadow:inset 0 0 0 1px #3f1a0b10; transition:box-shadow 200ms ease; }
 .kg .amsotto .v1-memo-pack[data-checked="true"] .ph::after { box-shadow:inset 0 0 0 2px #A63D24; }

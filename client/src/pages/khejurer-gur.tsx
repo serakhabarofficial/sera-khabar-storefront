@@ -8,7 +8,7 @@ import { GurHero, GurQuote, GurStory, type GurShelfItem } from "@/features/kheju
 import { GurCheckout, type GurLines, type GurOffer } from "@/features/khejurer-gur/gur-checkout";
 import { GurFooter } from "@/features/khejurer-gur/footer";
 import { PILL_LOTUS } from "@/features/khejurer-gur/alpona";
-import { GUR_CANVAS, GUR_PRESELECTED, GUR_PRESELECTED_PACK, GUR_PRODUCTS, bn, reducedMotion, taka } from "@/features/khejurer-gur/content";
+import { GUR_CANVAS, GUR_CHECKOUT_ONLY, GUR_PRESELECTED, GUR_PRESELECTED_PACK, GUR_PRODUCTS, GUR_VARIETIES, bn, reducedMotion, taka } from "@/features/khejurer-gur/content";
 import "@/features/am-sotto-achar/am-sotto-achar.css";
 import "@/features/khejurer-gur/khejurer-gur.css";
 
@@ -32,8 +32,9 @@ export default function KhejurerGurPage() {
   });
   const offerKey = offers.map((o) => `${o.status}:${o.packs.map((p) => `${p.variantId}=${p.unitPrice}`).join(",")}`).join("|");
   const stableOffers = useMemo(() => offers, [offerKey]);
-  const shelf: GurShelfItem[] = stableOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs, compareAt: Number(o.product?.compare_at_price) || 0 }));
-  const cheapest = Math.min(...stableOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
+  const varietyOffers = stableOffers.filter((o) => !GUR_CHECKOUT_ONLY.includes(o.meta.slug));
+  const shelf: GurShelfItem[] = varietyOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs, compareAt: Number(o.product?.compare_at_price) || 0 }));
+  const cheapest = Math.min(...varietyOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
 
   // The memo opens with only the preselected গুড় ticked, at their ১ কেজি pack. Seeded per variant, not per product: the
   // build snapshot can carry older variant ids than the live catalog, and a pack that arrives with a new id must be ticked too.
@@ -127,7 +128,7 @@ export default function KhejurerGurPage() {
       </section></div>
     </main>
     <GurFooter />
-    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>খেজুরের গুড় · {bn(GUR_PRODUCTS.length)}&nbsp;রকম</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)} <small>থেকে</small></> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
+    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>খেজুরের গুড় · {bn(GUR_VARIETIES.length)}&nbsp;রকম</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)} <small>থেকে</small></> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
     <div className={`toast${toast ? " show" : ""}`} role="status">{toast}</div>
   </div>;
 }
