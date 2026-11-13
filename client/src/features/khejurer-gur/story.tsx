@@ -3,7 +3,7 @@ import brandLogo from "@assets/sera-khabar-logo.webp";
 import type { LandingPackOption } from "@/features/landing/order";
 import { AL, JHALOR, JHALOR_BG, PILL_LOTUS, RECIPE_FLOOR, RECIPE_STICKERS, WHY_BLOOM, WHY_MINERALS, WHY_SWEET, WHY_TIP } from "./alpona";
 import { banglaDateParts } from "./bangla-date";
-import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_PRODUCTS, GUR_USES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
+import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_USES, GUR_VARIETIES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
 
 export type GurShelfItem = { meta: GurProductMeta; packs: LandingPackOption[]; compareAt: number };
 type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string, pack: LandingPackOption) => void; onOrderClick: (event: MouseEvent<HTMLAnchorElement>) => void };
@@ -190,7 +190,7 @@ function useVine(box: React.RefObject<HTMLDivElement | null>) {
 }
 
 /** The hero's sub line: a small box that cycles through every গুড় by name; the box keeps the widest name's width so the line never shifts. */
-const GUR_NAMES = GUR_PRODUCTS.map((p) => p.name);
+const GUR_NAMES = GUR_VARIETIES.map((p) => p.name);
 function GurNameTicker() {
   const [i, setI] = useState(0);
   useEffect(() => {
