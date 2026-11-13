@@ -82,7 +82,7 @@ export const GUR_COMBO_CONTENTS: Readonly<Record<string, { summary: string; item
 export const GUR_VARIETIES = GUR_PRODUCTS.filter((p) => !GUR_CHECKOUT_ONLY.includes(p.slug));
 
 /** The memo opens with these গুড় ticked at their ১ কেজি pack (or their first pack if the catalog has no ১ কেজি); the rest start unticked. */
-export const GUR_PRESELECTED: readonly string[] = ["round-patali-jaggery", "date-palm-patali", "liquid-date-jaggery"];
+export const GUR_PRESELECTED: readonly string[] = ["five-varieties-of-date-palm-jaggery", "round-patali-jaggery", "date-palm-patali", "liquid-date-jaggery"];
 export const GUR_PRESELECTED_PACK = "১ কেজি";
 
 export const GUR_USES = [
