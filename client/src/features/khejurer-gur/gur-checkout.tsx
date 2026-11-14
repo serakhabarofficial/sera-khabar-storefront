@@ -23,7 +23,7 @@ import { WhatsAppBrandIcon } from "@/features/landing/campaign-layout";
 import { normalizeBdMobile } from "../../../../shared/bd-phone";
 import { MAX_LINE_QUANTITY } from "../../../../shared/order-limits";
 import { saveGurConfirmation, type GurOrderLine } from "./confirmation";
-import { GUR_DELIVERY_CHARGE, GUR_PATH, GUR_PHONE_HREF, GUR_PHONE_LABEL, GUR_THANK_YOU_PATH, GUR_WHATSAPP_HREF, bn, reducedMotion, taka, type GurProductMeta, GUR_COMBO_CONTENTS } from "./content";
+import { GUR_DELIVERY_CHARGE, gurDeliveryCharge, GUR_PHONE_HREF, GUR_PHONE_LABEL, GUR_WHATSAPP_HREF, bn, reducedMotion, taka, type GurLanding, type GurProductMeta, GUR_COMBO_CONTENTS } from "./content";
 
 const AVAILABILITY_ERROR = "বেছে নেওয়া গুড়ের কোনোটি এখন অর্ডারের জন্য পাওয়া যাচ্ছে না। অন্যটি বেছে নিন বা আমাদের কল করুন।";
 const PICK_ERROR = "অন্তত একটি গুড় ও পরিমাণ বেছে নিন।";
@@ -43,7 +43,7 @@ export type GurOffer = {
 /** variantId → quantity for every pack on the memo. */
 export type GurLines = Record<string, number>;
 type Row = { offer: GurOffer; product: StorefrontProduct; pack: LandingPackOption };
-type Props = { offers: GurOffer[]; lines: GurLines; setLines: (update: (current: GurLines) => GurLines) => void; onRetry: () => void };
+type Props = { landing: GurLanding; photo: StorefrontProduct | null; offers: GurOffer[]; lines: GurLines; setLines: (update: (current: GurLines) => GurLines) => void; onRetry: () => void };
 
 function SupportActions() {
   return <><a href={GUR_PHONE_HREF}><Phone aria-hidden="true" />{GUR_PHONE_LABEL}</a><a href={GUR_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer"><WhatsAppBrandIcon />হোয়াটসঅ্যাপ</a></>;
@@ -111,9 +111,18 @@ function MemoGallery({ offers }: { offers: GurOffer[] }) {
   </div>;
 }
 
-export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
+/**
+ * A single-product landing's catalog photo above the memo. Its edges fade into the page's cream, so the photo's own
+ * background melts away. The box keeps the 4:5 shape while the photo loads, and stays empty if the product has none.
+ */
+function IntroPhoto({ product }: { product: StorefrontProduct | null }) {
+  const src = product ? getProductGallery(product)[0] : undefined;
+  return <div className="kg-photo">{src && product && <img src={src} srcSet={buildProductSrcSetIndex(product)[src]} sizes="(min-width: 640px) 560px, 100vw" alt={product.name} width={960} height={1200} decoding="async" />}</div>;
+}
+
+export function GurCheckout({ landing, photo, offers, lines, setLines, onRetry }: Props) {
   const [, setLocation] = useLocation();
-  const capture = useAbandonedCartCapture("landing", "khejurer_gur", (currentLandingPagePath() ?? GUR_PATH).toLowerCase(), { partialContact: true });
+  const capture = useAbandonedCartCapture("landing", "khejurer_gur", (currentLandingPagePath() ?? landing.path).toLowerCase(), { partialContact: true });
   const rows = useMemo<Row[]>(() => offers.flatMap((offer) => offer.product && offer.status === "ready" ? offer.packs.map((pack) => ({ offer, product: offer.product!, pack })) : []), [offers]);
   const loading = !rows.length && offers.some((o) => o.status === "loading");
   const chosen = rows.filter((row) => (lines[row.pack.variantId] ?? 0) > 0);
@@ -129,7 +138,9 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
   const { formHandlers, trackPhoneCandidate, buildProtectionPayload, resetTurnstileSignal, resetTurnstile, setTurnstileToken } = useCheckoutProtectionSignals();
   const refs = { name: useRef<HTMLInputElement>(null), phone: useRef<HTMLInputElement>(null), address: useRef<HTMLTextAreaElement>(null) };
   const subtotal = chosen.length ? chosen.reduce((sum, row) => sum + row.pack.unitPrice * lines[row.pack.variantId], 0) : null;
-  const total = subtotal === null ? null : subtotal + GUR_DELIVERY_CHARGE;
+  // Free when the memo holds only the combo; the normal charge with any other গুড়.
+  const deliveryCharge = gurDeliveryCharge(chosen.map((row) => row.offer.meta.slug));
+  const total = subtotal === null ? null : subtotal + deliveryCharge;
   // No জেলা on this form, so the window spans Dhaka (1–2 days) and outside Dhaka (2–3 days).
   const eta = useMemo(() => formatDeliveryWindow(1, 3), []);
   const item = (row: Row, quantity: number) => toGoogleAnalyticsItem({ id: row.product.id, name: row.product.name, variant: row.pack.label, price: row.pack.unitPrice, quantity });
@@ -137,7 +148,7 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
   const snapshot = (current = valuesRef.current) => !chosen.length || subtotal === null || total === null ? null : ({
     customerName: current.name, phone: toLatinDigits(current.phone), address: current.address.trim(),
     items: chosen.map((row) => ({ productName: row.product.name, variantName: row.pack.label, quantity: lines[row.pack.variantId], unitPrice: row.pack.unitPrice })),
-    subtotal, deliveryRate: GUR_DELIVERY_CHARGE, total, campaign: readAbandonedCartCampaign(window.location.search),
+    subtotal, deliveryRate: deliveryCharge, total, campaign: readAbandonedCartCampaign(window.location.search),
   });
   const updateCapture = (current?: Values) => { const value = snapshot(current); return value ? capture.capture(value) : null; };
   const flushCapture = () => { const value = snapshot(); if (value) void capture.flush(value); };
@@ -256,10 +267,11 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
         confirmed.push({ row: { ...row, product: result.product, pack: freshPack }, quantity });
       }
       const productTotal = confirmed.reduce((sum, { row, quantity }) => sum + row.pack.unitPrice * quantity, 0);
+      const confirmedDelivery = gurDeliveryCharge(confirmed.map(({ row }) => row.offer.meta.slug));
       const landingPagePath = currentLandingPagePath();
       const payload = {
         bundleTitle: "খেজুরের গুড়", bundleDetails: confirmed.map(({ row, quantity }) => `${row.offer.meta.name} ${row.pack.label} × ${bn(quantity)}`).join(", ").slice(0, 300),
-        bundlePrice: productTotal, quantity: confirmed.reduce((sum, { quantity }) => sum + quantity, 0), deliveryCharge: GUR_DELIVERY_CHARGE,
+        bundlePrice: productTotal, quantity: confirmed.reduce((sum, { quantity }) => sum + quantity, 0), deliveryCharge: confirmedDelivery,
         customerName: current.name.trim(), phone: normalizeBdMobile(toLatinDigits(current.phone))!, address: current.address.trim(),
         paymentMethod: "cash_on_delivery" as const,
         items: confirmed.map(({ row, quantity }) => ({ productId: String(row.product.id), variantId: row.pack.variantId, quantity })),
@@ -273,8 +285,8 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
       if (response.status !== 201) throw new Error("unexpected-order-response");
       if (typeof result.orderRef !== "string" || !result.orderRef.trim()) throw new Error("missing-order-reference");
       const items: GurOrderLine[] = confirmed.map(({ row, quantity }) => ({ productId: String(row.product.id), productName: row.product.name, variantLabel: row.pack.label, quantity, unitPrice: row.pack.unitPrice }));
-      saveGurConfirmation({ orderRef: result.orderRef.trim(), items, subtotal: productTotal, deliveryCharge: GUR_DELIVERY_CHARGE, total: productTotal + GUR_DELIVERY_CHARGE, customerName: payload.customerName, phone: payload.phone, address: payload.address });
-      capture.clear(); trackMerchantSuiteEvent("purchased"); setLocation(GUR_THANK_YOU_PATH);
+      saveGurConfirmation({ orderRef: result.orderRef.trim(), items, subtotal: productTotal, deliveryCharge: confirmedDelivery, total: productTotal + confirmedDelivery, customerName: payload.customerName, phone: payload.phone, address: payload.address });
+      capture.clear(); trackMerchantSuiteEvent("purchased"); setLocation(landing.thankYouPath);
     } catch (error) {
       if (error instanceof OrderProtectionError) { setDecision("block"); setRetryable(error.retryable); setAnnouncement(error.message); return; }
       setRequestError(true); setAnnouncement("অর্ডারটি পাঠানো যায়নি। আপনার তথ্য ঠিক আছে—আবার চেষ্টা করুন বা আমাদের সঙ্গে যোগাযোগ করুন।");
@@ -291,13 +303,14 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
 
   return <div className="skx v1-memo"><div className="skx-main">
     {decision === "review" ? <div className="skx-done skx-hold"><OrderHoldConfirmation /></div> : <>
-      <div className="skx-intro"><span className="skx-script">শীতের স্বাদ, ঘরে পৌঁছে দিই</span><p>আপনার পছন্দের খেজুরের গুড় এবার আপনার ঠিকানায়।</p></div>
+      {landing.photoSlug && <IntroPhoto product={photo} />}
+      <div className="skx-intro"><span className="skx-script">শীতের স্বাদ, ঘরে পৌঁছে দিই</span><p>{landing.intro}</p></div>
       <div className="skx-paper-wrap"><PaperClip layer="back" /><article className="skx-paper">
         <div className="skx-paper-head"><img src="/home/leaf-mark.webp" alt="" width={48} height={48} /><div><h2 id="gur-checkout-heading" tabIndex={-1}>অর্ডার মেমো</h2><p>সেরা খাবার · রাজশাহী</p></div><span className="skx-serial" aria-hidden="true">খাতা নং<br /><b>০১</b></span></div>
         <div className="skx-order" onFocusCapture={beginCheckout}>
-          <MemoGallery offers={offers} />
-          <p className="v1-memo-pick" id="gur-packs-label"><span>গুড় ও পরিমাণ বেছে নিন</span></p>
-          <p className="km-note">একাধিক বেছে নিতে পারেন</p>
+          {!landing.photoSlug && <MemoGallery offers={offers} />}
+          <p className="v1-memo-pick" id="gur-packs-label"><span>{landing.pick}</span></p>
+          <p className="km-note">{landing.pickNote}</p>
           <div className="v1-memo-packs" id="gur-packs" role="group" aria-labelledby="gur-packs-label" tabIndex={-1} aria-describedby={errors.pack ? "gur-pack-error" : undefined}>
             {rows.map((row) => {
               const quantity = lines[row.pack.variantId] ?? 0, checked = quantity > 0;
@@ -326,7 +339,7 @@ export function GurCheckout({ offers, lines, setLines, onRetry }: Props) {
             <div className="skx-field"><label htmlFor="gur-address">সম্পূর্ণ ঠিকানা<small>Delivery address</small></label><textarea ref={refs.address} id="gur-address" name="address" rows={3} maxLength={300} autoComplete="street-address" placeholder="বাড়ি / হোল্ডিং, রাস্তা, এলাকা" value={values.address} aria-invalid={Boolean(errors.address)} aria-describedby={errors.address ? "gur-address-error" : undefined} onChange={(e) => setField("address", e.target.value)} />{errors.address && <span className="skx-field-error" id="gur-address-error" role="alert">{errors.address}</span>}</div>
           </section>
           <section className="skx-payment" aria-label="পেমেন্ট ও ডেলিভারি"><div className="skx-stamp" aria-hidden="true">আগে অর্ডার<br /><b>পরে পেমেন্ট</b><small>ক্যাশ অন ডেলিভারি</small></div></section>
-          <div className="skx-amounts"><div><span>পণ্যের দাম</span><strong>{money(subtotal)}</strong></div><div><span>ডেলিভারি চার্জ<small className="v1-eta">সম্ভাব্য ডেলিভারি <b>{eta}</b></small></span><strong>{taka(GUR_DELIVERY_CHARGE)}</strong></div><div className="skx-grand"><span>সর্বমোট<small>হাতে পেয়ে পরিশোধ করবেন</small></span><strong><RollingTotal total={total} /></strong></div></div>
+          <div className="skx-amounts"><div><span>পণ্যের দাম</span><strong>{money(subtotal)}</strong></div><div><span>ডেলিভারি চার্জ<small className="v1-eta">সম্ভাব্য ডেলিভারি <b>{eta}</b></small></span><strong>{deliveryCharge === 0 && chosen.length ? <span className="kg-free"><s>{taka(GUR_DELIVERY_CHARGE)}</s> ফ্রি</span> : taka(deliveryCharge)}</strong></div><div className="skx-grand"><span>সর্বমোট<small>হাতে পেয়ে পরিশোধ করবেন</small></span><strong><RollingTotal total={total} /></strong></div></div>
           <div aria-live="polite" aria-atomic="true">{announcement ? <p className={requestError ? "skx-error" : "skx-field-hint"}>{announcement}</p> : null}</div>
           {decision === "block" && <OrderProtectionMessage decision="block" retryable={retryable} />}
           {requestError && <div className="v1-recovery"><SupportActions /></div>}

@@ -8,17 +8,19 @@ import { GurHero, GurQuote, GurStory, type GurShelfItem } from "@/features/kheju
 import { GurCheckout, type GurLines, type GurOffer } from "@/features/khejurer-gur/gur-checkout";
 import { GurFooter } from "@/features/khejurer-gur/footer";
 import { PILL_LOTUS } from "@/features/khejurer-gur/alpona";
-import { GUR_CANVAS, GUR_CHECKOUT_ONLY, GUR_PRESELECTED, GUR_PRESELECTED_PACK, GUR_PRODUCTS, GUR_VARIETIES, bn, reducedMotion, taka } from "@/features/khejurer-gur/content";
+import { GUR_CANVAS, GUR_LANDINGS, GUR_PRESELECTED_PACK, GUR_PRODUCTS, reducedMotion, taka, type GurLanding } from "@/features/khejurer-gur/content";
 import "@/features/am-sotto-achar/am-sotto-achar.css";
 import "@/features/khejurer-gur/khejurer-gur.css";
 
-export default function KhejurerGurPage() {
+export default function KhejurerGurPage({ landing = GUR_LANDINGS.main }: { landing?: GurLanding }) {
+  // The memo's products, in the order the landing lists them.
+  const products = useMemo(() => landing.checkout.flatMap((slug) => GUR_PRODUCTS.filter((p) => p.slug === slug)), [landing]);
   const root = useRef<HTMLDivElement>(null);
   const focusTimer = useRef(0), toastTimer = useRef(0);
   const [toast, setToast] = useState("");
-  const productQueries = useQueries({ queries: GUR_PRODUCTS.map(({ slug }) => ({ ...STOREFRONT_CATALOG_QUERY_OPTIONS, queryKey: ["merchant-suite-product", slug], queryFn: () => fetchStorefrontProduct(slug), initialData: findGeneratedStorefrontProduct(generatedStorefrontProducts, slug) ?? undefined, refetchInterval: STOREFRONT_POLL_INTERVAL_MS })) });
-  const inventoryQueries = useQueries({ queries: GUR_PRODUCTS.map(({ slug }) => ({ queryKey: ["merchant-suite-inventory", slug], queryFn: () => fetchStorefrontProductInventory(slug), refetchInterval: STOREFRONT_POLL_INTERVAL_MS })) });
-  const offers = GUR_PRODUCTS.map((meta, i): GurOffer => {
+  const productQueries = useQueries({ queries: products.map(({ slug }) => ({ ...STOREFRONT_CATALOG_QUERY_OPTIONS, queryKey: ["merchant-suite-product", slug], queryFn: () => fetchStorefrontProduct(slug), initialData: findGeneratedStorefrontProduct(generatedStorefrontProducts, slug) ?? undefined, refetchInterval: STOREFRONT_POLL_INTERVAL_MS })) });
+  const inventoryQueries = useQueries({ queries: products.map(({ slug }) => ({ queryKey: ["merchant-suite-inventory", slug], queryFn: () => fetchStorefrontProductInventory(slug), refetchInterval: STOREFRONT_POLL_INTERVAL_MS })) });
+  const offers = products.map((meta, i): GurOffer => {
     const productQuery = productQueries[i], inventoryQuery = inventoryQueries[i];
     const product = mergeInventory(productQuery.data, inventoryQuery.data?.inventory);
     // Smallest pack first (৫০০ গ্রাম before ১ কেজি), whatever order the catalog lists variants in.
@@ -32,9 +34,14 @@ export default function KhejurerGurPage() {
   });
   const offerKey = offers.map((o) => `${o.status}:${o.packs.map((p) => `${p.variantId}=${p.unitPrice}`).join(",")}`).join("|");
   const stableOffers = useMemo(() => offers, [offerKey]);
-  const varietyOffers = stableOffers.filter((o) => !GUR_CHECKOUT_ONLY.includes(o.meta.slug));
-  const shelf: GurShelfItem[] = varietyOffers.filter((o) => o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs }));
-  const cheapest = Math.min(...varietyOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
+  const shelf: GurShelfItem[] = landing.dialSells
+    ? stableOffers.filter((o) => landing.dial.includes(o.meta.slug) && o.status === "ready").map((o) => ({ meta: o.meta, packs: o.packs }))
+    // Story only: the গুড় in the box, no prices or add buttons.
+    : landing.dial.flatMap((slug) => GUR_PRODUCTS.filter((p) => p.slug === slug).map((meta) => ({ meta, packs: [] })));
+  // The bar's price: the cheapest গুড় on the main landing, the combo itself on the combo landing.
+  const barOffers = stableOffers.filter((o) => (landing.dialSells ? landing.dial : landing.checkout).includes(o.meta.slug));
+  const cheapest = Math.min(...barOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
+  const photoOffer = landing.photoSlug ? stableOffers.find((o) => o.meta.slug === landing.photoSlug) : undefined;
 
   // The memo opens with only the preselected গুড় ticked, at their ১ কেজি pack. Seeded per variant, not per product: the
   // build snapshot can carry older variant ids than the live catalog, and a pack that arrives with a new id must be ticked too.
@@ -42,14 +49,14 @@ export default function KhejurerGurPage() {
   const seeded = useRef(new Set<string>());
   useEffect(() => {
     const firsts = stableOffers.flatMap((o) => {
-      if (o.status !== "ready" || !GUR_PRESELECTED.includes(o.meta.slug)) return [];
+      if (o.status !== "ready" || !landing.preselected.includes(o.meta.slug)) return [];
       const pack = o.packs.find((p) => p.label.trim() === GUR_PRESELECTED_PACK) ?? o.packs[0];
       return pack && !seeded.current.has(pack.variantId) ? [pack.variantId] : [];
     });
     if (!firsts.length) return;
     firsts.forEach((id) => seeded.current.add(id));
     setLinesState((current) => ({ ...current, ...Object.fromEntries(firsts.filter((id) => current[id] === undefined).map((id) => [id, 1])) }));
-  }, [stableOffers]);
+  }, [stableOffers, landing]);
   const setLines = useCallback((update: (current: GurLines) => GurLines) => setLinesState(update), []);
   const inMemo = new Set(Object.entries(lines).filter(([, q]) => q > 0).map(([id]) => id));
 
@@ -120,15 +127,15 @@ export default function KhejurerGurPage() {
 
   return <div ref={root} className="kg gf">
     <main>
-      <GurHero onOrderClick={scrollToOrder} />
+      <GurHero onOrderClick={scrollToOrder} note={landing.heroNote} />
       <GurQuote />
-      <GurStory shelf={shelf} inMemo={inMemo} onAdd={addToMemo} />
+      <GurStory shelf={shelf} inMemo={inMemo} onAdd={addToMemo} title={landing.dialTitle} line={landing.dialLine} />
       <div className="amsotto am-k"><section className="v1-order" id="gur-order" aria-labelledby="gur-checkout-heading">
-        <GurCheckout offers={stableOffers} lines={lines} setLines={setLines} onRetry={() => void Promise.all(stableOffers.map((o) => o.refresh()))} />
+        <GurCheckout landing={landing} photo={photoOffer?.product ?? null} offers={stableOffers} lines={lines} setLines={setLines} onRetry={() => void Promise.all(stableOffers.map((o) => o.refresh()))} />
       </section></div>
     </main>
     <GurFooter />
-    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>খেজুরের গুড় · {bn(GUR_VARIETIES.length)}&nbsp;রকম</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)} <small>থেকে</small></> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
+    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>{landing.barLabel}</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)}{landing.dialSells && <> <small>থেকে</small></>}</> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
     <div className={`toast${toast ? " show" : ""}`} role="status">{toast}</div>
   </div>;
 }
