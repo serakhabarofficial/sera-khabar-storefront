@@ -2,6 +2,8 @@
 // winding আলপনা line, recipe ticket, why-গুড় vine, multi-pack memo, দুই রঙ আলপনা footer.
 export const GUR_PATH = "/step/khejurer-gur";
 export const GUR_THANK_YOU_PATH = "/step/khejurer-gur/thank-you";
+export const GUR_COMBO_PATH = "/step/khejurer-gur-combo";
+export const GUR_COMBO_THANK_YOU_PATH = "/step/khejurer-gur-combo/thank-you";
 export const GUR_CONFIRMATION_KEY = "khejurer-gur-order-confirmation-v1";
 export const GUR_DELIVERY_CHARGE = 100;
 /** The hero's cream, also used for the page canvas and the mobile browser bars. */
@@ -107,3 +109,62 @@ export const taka = (value: number) => `৳${bn(value)}`;
 
 export const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * The two খেজুরের গুড় landings share one page. `main` sells every গুড় (and the combo); `combo` sells only the
+ * কম্বো: its memo holds that one row, its photo melts into the page above the memo, and the dial shows the five
+ * গুড় in the box without prices or add buttons.
+ */
+export type GurLanding = {
+  path: string;
+  thankYouPath: string;
+  /** Products the order memo sells, in memo order. */
+  checkout: readonly string[];
+  /** Ticked when the memo opens. */
+  preselected: readonly string[];
+  /** The dial's গুড়. When `dialSells` is false they are shown for the story only, with no price or add button. */
+  dial: readonly string[];
+  dialSells: boolean;
+  dialTitle: string;
+  dialLine: string;
+  /** Set on a single-product landing: its catalog photo sits above the memo, faded into the page. */
+  photoSlug?: string;
+  intro: string;
+  pick: string;
+  pickNote: string;
+  barLabel: string;
+  /** Under the hero's order button. */
+  heroNote: string;
+};
+const varietySlugs = GUR_VARIETIES.map((p) => p.slug);
+export const GUR_COMBO_SLUG = "five-varieties-of-date-palm-jaggery";
+export const GUR_LANDINGS = {
+  main: {
+    path: GUR_PATH, thankYouPath: GUR_THANK_YOU_PATH,
+    checkout: GUR_PRODUCTS.map((p) => p.slug), preselected: GUR_PRESELECTED,
+    dial: varietySlugs, dialSells: true, dialTitle: "শীতের ছয় গুড়", dialLine: "চিনি নেই, ভেজাল নেই। পছন্দেরটা কার্টে যোগ করুন।",
+    intro: "আপনার পছন্দের খেজুরের গুড় এবার আপনার ঠিকানায়।",
+    pick: "গুড় ও পরিমাণ বেছে নিন", pickNote: "একাধিক বেছে নিতে পারেন",
+    barLabel: `খেজুরের গুড় · ${bn(varietySlugs.length)}\u00a0রকম`,
+    heroNote: "ক্যাশ অন ডেলিভারি · সারা দেশে ৳১০০",
+  },
+  combo: {
+    path: GUR_COMBO_PATH, thankYouPath: GUR_COMBO_THANK_YOU_PATH,
+    checkout: [GUR_COMBO_SLUG], preselected: [GUR_COMBO_SLUG],
+    dial: ["foil-wrapped-patali-jaggery", "round-patali-jaggery", "liquid-date-jaggery", "granulated-jaggery", "chocolate-seed-jaggery"],
+    dialSells: false, dialTitle: "কম্বোর পাঁচ গুড়", dialLine: "প্রতিটা ৫০০ গ্রাম, সব মিলিয়ে ২.৫ কেজি। চিনি নেই, ভেজাল নেই।",
+    photoSlug: GUR_COMBO_SLUG,
+    intro: "পাঁচ রকম খেজুরের গুড় একসাথে, আপনার ঠিকানায়।",
+    pick: "আপনার কম্বো", pickNote: "পরিমাণ বাড়াতে + চাপুন",
+    barLabel: "গুড় কম্বো · ৫\u00a0রকম",
+    heroNote: "ক্যাশ অন ডেলিভারি · সারা দেশে ডেলিভারি ফ্রি",
+  },
+} satisfies Record<string, GurLanding>;
+
+/**
+ * Delivery for a memo, given the slug of every product on it. The combo ships free when it is the whole order
+ * (any quantity), on either landing; with any other গুড় the normal charge applies. Merchant Suite applies the same
+ * rule when it prices the order (server/shippingCalculation.js), so the page and the dashboard agree.
+ */
+export const gurDeliveryCharge = (slugs: readonly string[]) =>
+  slugs.length > 0 && slugs.every((slug) => slug === GUR_COMBO_SLUG) ? 0 : GUR_DELIVERY_CHARGE;

@@ -6,7 +6,7 @@ import { banglaDateParts } from "./bangla-date";
 import { GUR_IMAGES, GUR_PHONE_LABEL, GUR_USES, GUR_VARIETIES, GUR_WHY, bn, taka, reducedMotion, type GurProductMeta } from "./content";
 
 export type GurShelfItem = { meta: GurProductMeta; packs: LandingPackOption[] };
-type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string, pack: LandingPackOption) => void; onOrderClick: (event: MouseEvent<HTMLAnchorElement>) => void };
+type Props = { shelf: GurShelfItem[]; inMemo: Set<string>; onAdd: (slug: string, pack: LandingPackOption) => void; onOrderClick: (event: MouseEvent<HTMLAnchorElement>) => void; title: string; line: string };
 
 const html = (markup: string) => ({ dangerouslySetInnerHTML: { __html: markup } });
 const HERO_MANDALA = `<svg viewBox="-100 -100 200 200">${AL.lotus("#D98A6E")}</svg>`;
@@ -40,7 +40,7 @@ const two = (i: number) => bn(String(i + 1).padStart(2, "0"));
  * the current গুড় to the next, then the dial turns. Tapping a number jumps to it; tapping a number, a size or the
  * cart stops the autoplay. It pauses off screen and while touched or hovered, and never autoplays for reduced motion.
  */
-function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
+function GurDial({ shelf, inMemo, onAdd, title }: Omit<Props, "onOrderClick" | "line">) {
   const deck = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [chosen, setChosen] = useState<Record<string, string>>({});
@@ -125,7 +125,7 @@ function GurDial({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
   const pack = packs.find((p) => p.variantId === chosen[meta.slug]) ?? packs[0];
   const added = pack ? inMemo.has(pack.variantId) : false;
   const hold = (on: boolean) => () => { play.current.held = on; if (!on) wake.current(); };
-  return <div ref={deck} className={`gf-dial${stopped ? " stopped" : ""}`} role="region" aria-roledescription="carousel" aria-label="শীতের ছয় গুড়">
+  return <div ref={deck} className={`gf-dial${stopped ? " stopped" : ""}`} role="region" aria-roledescription="carousel" aria-label={title}>
     <div className="gf-stage" onPointerEnter={(e) => { if (e.pointerType === "mouse") play.current.held = true; }} onPointerLeave={hold(false)}
       onTouchStart={hold(true)} onTouchEnd={hold(false)} onTouchCancel={hold(false)} onFocus={hold(true)} onBlur={hold(false)}>
       <span className="gf-arc" aria-hidden="true" />
@@ -201,7 +201,7 @@ function GurNameTicker() {
   return <><span className="gf-tk" aria-hidden="true">{GUR_NAMES.map((name, k) => <span key={name} className={k === i ? "on" : k === prev ? "out" : ""}>{name}</span>)}</span><span className="sr-only">{GUR_NAMES.join(", ")}</span></>;
 }
 
-export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
+export function GurHero({ onOrderClick, note }: Pick<Props, "onOrderClick"> & { note: string }) {
   return <section className="gf-hero" data-hero data-io>
     <img className="gf-logo" src={brandLogo} alt="সেরা খাবার" width={700} height={128} />
     <h1 className="gf-word">
@@ -220,7 +220,7 @@ export function GurHero({ onOrderClick }: Pick<Props, "onOrderClick">) {
     </div>
     <p className="gf-sub rv" style={{ "--d": "200ms" } as React.CSSProperties}><GurNameTicker /> — চিনি নেই, ভেজাল নেই</p>
     <a className="btn rv" style={{ "--d": "260ms" } as React.CSSProperties} href="#gur-order" onClick={onOrderClick}>এখনই অর্ডার করুন</a>
-    <small>ক্যাশ অন ডেলিভারি · সারা দেশে ৳১০০</small>
+    <small>{note}</small>
   </section>;
 }
 
@@ -368,7 +368,7 @@ function GurRoad() {
   </div>;
 }
 
-export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) {
+export function GurStory({ shelf, inMemo, onAdd, title, line }: Omit<Props, "onOrderClick">) {
   const vine = useRef<HTMLDivElement>(null);
   useVine(vine);
   // The band, header and road ease in once as the section's top reaches the screen, instead of popping in when iPhone
@@ -385,8 +385,8 @@ export function GurStory({ shelf, inMemo, onAdd }: Omit<Props, "onOrderClick">) 
       <div className="gf-mark"><b>গুড়</b><span className="gf-mark-sub" aria-label="রসের পথ"><span aria-hidden="true">রসের</span><span aria-hidden="true">পথ</span></span></div>
     </div>
     <GurRoad />
-    <div className="gr-end"><h2 id="gf-sh-h">শীতের ছয় গুড়</h2><p>চিনি নেই, ভেজাল নেই। পছন্দেরটা কার্টে যোগ করুন।</p></div>
-    <GurDial shelf={shelf} inMemo={inMemo} onAdd={onAdd} />
+    <div className="gr-end"><h2 id="gf-sh-h">{title}</h2><p>{line}</p></div>
+    <GurDial shelf={shelf} inMemo={inMemo} onAdd={onAdd} title={title} />
     <div className="gf-low">
       <div className="gf-about" data-io><h3>আমাদের কথা</h3><p>শীতের ভোরে গাছ থেকে নামানো রস, উঠোনের চুলায় ঘণ্টার পর ঘণ্টা জ্বাল। চিনি নেই, ভেজাল নেই। হাট থেকে সরাসরি আপনার রান্নাঘরে।</p><small>নওহাটা, রাজশাহী</small></div>
       <section className="gf-rc" data-io aria-labelledby="gf-rc-h">

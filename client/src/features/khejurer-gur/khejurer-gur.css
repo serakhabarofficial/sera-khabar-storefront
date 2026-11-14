@@ -567,3 +567,13 @@
 
 /* a block that's off screen pauses its decorative loops (the page toggles .kg-sleep with an IntersectionObserver) */
 .kg .kg-sleep, .kg .kg-sleep * { animation-play-state:paused !important; }
+
+/* combo landing: the catalog photo above the memo, edge to edge on a phone, its edges fading into the page cream
+   (approved 2026-11-14, mockup A "কুয়াশার মতো মিলিয়ে যাওয়া") */
+.kg .kg-photo { aspect-ratio:4/5; max-width:560px; margin:-28px auto 4px; }
+.kg .kg-photo img { display:block; width:100%; height:100%; object-fit:cover; -webkit-mask-image:radial-gradient(120% 92% at 50% 40%,#000 58%,transparent 100%); mask-image:radial-gradient(120% 92% at 50% 40%,#000 58%,transparent 100%); }
+.kg .kg-photo + .skx-intro { margin-top:0; }
+@media (max-width:599px) { .kg .kg-photo { max-width:none; margin:-24px -14px 4px; } }
+/* delivery line when the memo holds only the combo: the usual charge struck through, then ফ্রি */
+.kg .kg-free { color:#2F6B3A; }
+.kg .kg-free s { color:var(--muted,#7A6050); font-weight:500; margin-right:6px; text-decoration-thickness:1.5px; }
