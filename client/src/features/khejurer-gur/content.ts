@@ -67,18 +67,17 @@ export type GurProductMeta = (typeof GUR_PRODUCTS)[number];
 /** Sold in the order memo but not one of the গুড় themselves: left out of the dial, the name ticker and the "৬ রকম" count. */
 export const GUR_CHECKOUT_ONLY: readonly string[] = ["five-varieties-of-date-palm-jaggery", "liquid-date-jaggery-combo"];
 /**
- * What a combo holds. In the order memo: a stack of small photos and a short summary; once ticked, the row opens
- * into a tray of every গুড় with its weight, so the customer sees exactly what comes in the box.
+ * What a combo holds. Once ticked in the order memo, the row opens into a tray with a photo of every গুড়,
+ * so the customer sees exactly what comes in the box.
  */
-export const GUR_COMBO_CONTENTS: Readonly<Record<string, { summary: string; items: readonly { name: string; lines: readonly [string, string]; weight: string; image: string }[] }>> = {
+export const GUR_COMBO_CONTENTS: Readonly<Record<string, { items: readonly { name: string; weight: string; image: string }[] }>> = {
   "five-varieties-of-date-palm-jaggery": {
-    summary: "(৫ × ৫০০ গ্রাম)",
     items: [
-      { name: "ফয়েল পাটালি", lines: ["ফয়েল", "পাটালি"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.foilPatali },
-      { name: "গোল পাটালি", lines: ["গোল", "পাটালি"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.roundPatali },
-      { name: "ঝোলা/লিকুইড", lines: ["ঝোলা/", "লিকুইড"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.jhola },
-      { name: "দানাদার গুড়", lines: ["দানাদার", "গুড়"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.danadar },
-      { name: "বীজ গুড়", lines: ["বীজ", "গুড়"], weight: "৫০০ গ্রাম", image: GUR_IMAGES.bij },
+      { name: "ফয়েল পাটালি", weight: "৫০০ গ্রাম", image: GUR_IMAGES.foilPatali },
+      { name: "গোল পাটালি", weight: "৫০০ গ্রাম", image: GUR_IMAGES.roundPatali },
+      { name: "ঝোলা/লিকুইড", weight: "৫০০ গ্রাম", image: GUR_IMAGES.jhola },
+      { name: "দানাদার গুড়", weight: "৫০০ গ্রাম", image: GUR_IMAGES.danadar },
+      { name: "বীজ গুড়", weight: "৫০০ গ্রাম", image: GUR_IMAGES.bij },
     ],
   },
 };
