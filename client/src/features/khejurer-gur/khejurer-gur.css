@@ -496,6 +496,9 @@
 .kg .amsotto .v1-memo-pack .dot::after { display:none; }
 .kg .amsotto .v1-memo-pack[data-checked="true"] .dot { background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(0)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(45)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(90)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(135)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(180)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(225)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(270)'/%3E%3Cpath d='M0 -9 Q-3 -12 0 -15.5 Q3 -12 0 -9Z' fill='%23A63D24' transform='rotate(315)'/%3E%3Ccircle r='10' fill='%23A63D24'/%3E%3Cpath d='M-4.5 0.5 L-1.2 3.8 L5 -3' fill='none' stroke='%23FFF6E6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; box-shadow:none; animation:al-tick 520ms var(--spring); }
 /* memo photo-pick: the product photo is the checkbox; the lotus tick sits on its corner and a rust ring marks the pick */
+/* The combo photo is 4:5 and the single গুড় are square on white: a 4:5 box with contain shows the combo whole, and the squares' white margins melt into the gallery's white. */
+.kg .amsotto .v1-gal-slide { aspect-ratio:4/5; }
+.kg .amsotto .v1-gal-slide img { object-fit:contain; }
 .kg .amsotto .v1-memo-pack label { grid-template-columns:68px 1fr; gap:12px; }
 .kg .amsotto .v1-memo-pack .ph { position:relative; width:68px; height:68px; }
 .kg .amsotto .v1-memo-pack .ph img { display:block; width:100%; height:100%; border-radius:10px; object-fit:cover; background:#f6ead4; filter:saturate(.75); transition:transform 160ms var(--ease-out), filter 200ms ease; }
@@ -504,21 +507,6 @@
 .kg .amsotto .v1-memo-pack .ph img[data-fit="contain"] { object-fit:contain; background:#fff; }
 /* A combo's total weight sits on a bright pill. */
 .kg .amsotto .v1-memo-pack:has(.combo) .sz { padding:1px 9px; border-radius:999px; background:var(--yellow); color:var(--ink); font-weight:700; }
-/* The tray a ticked combo opens into: grid-rows 0fr → 1fr so it grows to its own height. */
-.kg .amsotto .v1-memo-pack:has(.combo-tray) { row-gap:0; }
-.kg .amsotto .v1-memo-pack .combo-tray { grid-column:1 / -1; display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows 320ms var(--ease-out), opacity 220ms ease; }
-.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] { grid-template-rows:1fr; opacity:1; }
-.kg .amsotto .v1-memo-pack .combo-tray-in { min-height:0; overflow:hidden; }
-.kg .amsotto .v1-memo-pack .combo-tray-head { display:flex; justify-content:space-between; margin:12px 0 8px; font-family:var(--body); font-size:12.5px; font-weight:700; color:#A63D24; }
-.kg .amsotto .v1-memo-pack .combo-tray ul { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:6px; margin:0; padding:10px 6px; list-style:none; border-radius:12px; background:#fff; box-shadow:inset 0 0 0 1px #A63D2422; }
-.kg .amsotto .v1-memo-pack .combo-tray li { display:grid; justify-items:center; transform:translateY(6px); opacity:0; transition:transform 300ms var(--ease-out), opacity 240ms ease; }
-.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li { transform:none; opacity:1; }
-.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(2) { transition-delay:30ms; }
-.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(3) { transition-delay:60ms; }
-.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(4) { transition-delay:90ms; }
-.kg .amsotto .v1-memo-pack .combo-tray[data-open="true"] li:nth-child(5) { transition-delay:120ms; }
-.kg .amsotto .v1-memo-pack .combo-tray li img { width:44px; height:44px; border-radius:50%; object-fit:cover; background:#FFF8EC; }
-@media (prefers-reduced-motion:reduce) { .kg .amsotto .v1-memo-pack .combo-tray, .kg .amsotto .v1-memo-pack .combo-tray li { transition:none; } }
 .kg .amsotto .v1-memo-pack label:active .ph img { transform:scale(.96); }
 .kg .amsotto .v1-memo-pack .ph::after { content:""; position:absolute; inset:0; border-radius:10px; box-shadow:inset 0 0 0 1px #3f1a0b10; transition:box-shadow 200ms ease; }
 .kg .amsotto .v1-memo-pack[data-checked="true"] .ph::after { box-shadow:inset 0 0 0 2px #A63D24; }
