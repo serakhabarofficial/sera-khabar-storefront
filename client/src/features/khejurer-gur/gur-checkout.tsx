@@ -74,20 +74,17 @@ function RollingTotal({ total }: { total: number | null }) {
 
 type GurCombo = (typeof GUR_COMBO_CONTENTS)[string];
 
-/** A combo's contents as overlapping round photos of each গুড়; the full list is for screen readers. */
+/** A combo's contents for screen readers; sighted customers see them in the tray. */
 function ComboContents({ combo }: { combo: GurCombo }) {
-  return <span className="combo">
-    <span className="combo-stack" aria-hidden="true">{combo.items.map((item) => <img key={item.name} src={item.image} alt="" width={24} height={24} loading="lazy" decoding="async" />)}</span>
-    <span className="sr-only">{combo.items.map((item) => `${item.name} ${item.weight}`).join(", ")}</span>
-  </span>;
+  return <span className="combo sr-only">{combo.items.map((item) => `${item.name} ${item.weight}`).join(", ")}</span>;
 }
 
-/** Opens under a ticked combo: every গুড় in the box with its weight. Hidden from readers while closed (ComboContents reads the list). */
-function ComboTray({ combo, open, total }: { combo: GurCombo; open: boolean; total: string }) {
+/** Opens under a ticked combo: a photo of every গুড় in the box. Hidden from readers while closed (ComboContents reads the list). */
+function ComboTray({ combo, open }: { combo: GurCombo; open: boolean }) {
   return <div className="combo-tray" data-open={open} aria-hidden={!open} inert={!open || undefined}>
     <div className="combo-tray-in">
-      <p className="combo-tray-head"><span>কম্বোতে যা পাবেন</span><span>মোট {total}</span></p>
-      <ul>{combo.items.map((item) => <li key={item.name}><img src={item.image} alt="" width={44} height={44} loading="lazy" decoding="async" /><b>{item.lines.map((line) => <span key={line}>{line}</span>)}</b><span>{item.weight}</span></li>)}</ul>
+      <p className="combo-tray-head"><span>কম্বোতে যা পাবেন</span></p>
+      <ul>{combo.items.map((item) => <li key={item.name}><img src={item.image} alt="" width={44} height={44} loading="lazy" decoding="async" /></li>)}</ul>
     </div>
   </div>;
 }
@@ -319,13 +316,13 @@ export function GurCheckout({ landing, photo, offers, lines, setLines, onRetry }
                 <label>
                   <input className="sr-only" type="checkbox" checked={checked} disabled={pending} onChange={(e) => { beginCheckout(); toggle(row, e.target.checked); }} />
                   <span className="ph" aria-hidden="true"><img src={row.offer.meta.image || getProductGallery(row.product)[0]} alt="" width={68} height={68} loading="lazy" decoding="async" data-fit={row.offer.meta.image ? undefined : "contain"} /><span className="dot" /></span>
-                  <span className="lbl"><b>{row.offer.meta.name}</b>{combo && <ComboContents combo={combo} />}<span className="meta"><span className="sz">{row.pack.label}</span>{combo && <span className="combo-sum" aria-hidden="true">{combo.summary}</span>}</span></span>
+                  <span className="lbl"><b>{row.offer.meta.name}</b>{combo && <ComboContents combo={combo} />}<span className="meta"><span className="sz">{row.pack.label}</span></span></span>
                 </label>
                 <div className="end">
                   <span className="pr">{taka(row.pack.unitPrice)}</span>
                   {checked && <div className="skx-qty" role="group" aria-label={`${row.offer.meta.name} ${row.pack.label} পরিমাণ`}><button type="button" aria-label="কমান" disabled={pending} onClick={() => step(row, -1)}>−</button><output aria-live="polite">{bn(quantity)}</output><button type="button" aria-label="বাড়ান" disabled={quantity >= MAX_LINE_QUANTITY || pending} onClick={() => step(row, 1)}>+</button></div>}
                 </div>
-                {combo && <ComboTray combo={combo} open={checked} total={row.pack.label} />}
+                {combo && <ComboTray combo={combo} open={checked} />}
               </div>;
             })}
           </div>
