@@ -40,7 +40,10 @@ export default function KhejurerGurPage({ landing = GUR_LANDINGS.main }: { landi
     : landing.dial.flatMap((slug) => GUR_PRODUCTS.filter((p) => p.slug === slug).map((meta) => ({ meta, packs: [] })));
   // The bar's price: the cheapest গুড় on the main landing, the combo itself on the combo landing.
   const barOffers = stableOffers.filter((o) => (landing.dialSells ? landing.dial : landing.checkout).includes(o.meta.slug));
-  const cheapest = Math.min(...barOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []));
+  const barPrices = barOffers.flatMap((o) => o.status === "ready" ? o.packs.map((p) => p.unitPrice) : []);
+  const cheapest = Math.min(...barPrices);
+  // "থেকে" only when the bar's price is the lowest of several.
+  const fromPrice = new Set(barPrices).size > 1;
   const photoOffer = landing.photoSlug ? stableOffers.find((o) => o.meta.slug === landing.photoSlug) : undefined;
 
   // The memo opens with only the preselected গুড় ticked, at their ১ কেজি pack. Seeded per variant, not per product: the
@@ -135,7 +138,7 @@ export default function KhejurerGurPage({ landing = GUR_LANDINGS.main }: { landi
       </section></div>
     </main>
     <GurFooter />
-    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>{landing.barLabel}</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)}{landing.dialSells && <> <small>থেকে</small></>}</> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
+    <div className="bar" aria-hidden="true"><span className="bar-lotus" dangerouslySetInnerHTML={{ __html: PILL_LOTUS }} /><p><span>{landing.barLabel}</span><b className="num">{Number.isFinite(cheapest) ? <>{taka(cheapest)}{fromPrice && <> <small>থেকে</small></>}</> : "ক্যাশ অন ডেলিভারি"}</b></p><a className="btn sm y" href="#gur-order" onClick={scrollToOrder} tabIndex={-1}>অর্ডার করুন</a></div>
     <div className={`toast${toast ? " show" : ""}`} role="status">{toast}</div>
   </div>;
 }

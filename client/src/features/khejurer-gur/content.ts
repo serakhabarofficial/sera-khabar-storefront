@@ -53,6 +53,8 @@ export const GUR_IMAGES = {
 export const GUR_PRODUCTS = [
   // Checkout only (see GUR_CHECKOUT_ONLY): first, so it tops the order memo. Its photo is the catalog's.
   { slug: "five-varieties-of-date-palm-jaggery", name: "খেজুরের গুড় কম্বো", line: "পাঁচ রকম খেজুরের গুড় একসাথে।", image: "", zoom: 1 },
+  // Combo landing only (not on the main landing's memo), under the পাঁচ রূপ combo. Its photo is the catalog's.
+  { slug: "liquid-date-jaggery-combo", name: "ঝোলা গুড় কম্বো", line: "ঘন ঝোলা গুড়, ৩ কেজি একসাথে।", image: "", zoom: 1 },
   { slug: "foil-wrapped-patali-jaggery", name: "ফয়েল পাটালি", line: "ফয়েলের ছোট ট্রেতে জমানো — ভাগ করে খাওয়া সহজ।", image: GUR_IMAGES.foilPatali, zoom: 1.05 },
   { slug: "round-patali-jaggery", name: "গোল পাটালি", line: "গোল চাকতি, ভাঙলে ভেতরে নরম দানা।", image: GUR_IMAGES.roundPatali, zoom: 1.05 },
   { slug: "date-palm-patali", name: "লম্বা পাটালি", line: "লম্বা জমাট পাটালি, কেটে কেটে খাওয়ার মতো।", image: GUR_IMAGES.patali, zoom: 0.94 },
@@ -63,7 +65,7 @@ export const GUR_PRODUCTS = [
 export type GurProductMeta = (typeof GUR_PRODUCTS)[number];
 
 /** Sold in the order memo but not one of the গুড় themselves: left out of the dial, the name ticker and the "৬ রকম" count. */
-export const GUR_CHECKOUT_ONLY: readonly string[] = ["five-varieties-of-date-palm-jaggery"];
+export const GUR_CHECKOUT_ONLY: readonly string[] = ["five-varieties-of-date-palm-jaggery", "liquid-date-jaggery-combo"];
 /**
  * What a combo holds. In the order memo: a stack of small photos and a short summary; once ticked, the row opens
  * into a tray of every গুড় with its weight, so the customer sees exactly what comes in the box.
@@ -138,10 +140,13 @@ export type GurLanding = {
 };
 const varietySlugs = GUR_VARIETIES.map((p) => p.slug);
 export const GUR_COMBO_SLUG = "five-varieties-of-date-palm-jaggery";
+export const GUR_JHOLA_COMBO_SLUG = "liquid-date-jaggery-combo";
+/** Orders made up only of these ship free (Merchant Suite: FREE_DELIVERY_SOLO_PRODUCT_IDS). */
+export const GUR_FREE_DELIVERY_COMBOS: readonly string[] = [GUR_COMBO_SLUG, GUR_JHOLA_COMBO_SLUG];
 export const GUR_LANDINGS = {
   main: {
     path: GUR_PATH, thankYouPath: GUR_THANK_YOU_PATH,
-    checkout: GUR_PRODUCTS.map((p) => p.slug), preselected: GUR_PRESELECTED,
+    checkout: GUR_PRODUCTS.map((p) => p.slug).filter((slug) => slug !== GUR_JHOLA_COMBO_SLUG), preselected: GUR_PRESELECTED,
     dial: varietySlugs, dialSells: true, dialTitle: "শীতের ছয় গুড়", dialLine: "চিনি নেই, ভেজাল নেই। পছন্দেরটা কার্টে যোগ করুন।",
     intro: "আপনার পছন্দের খেজুরের গুড় এবার আপনার ঠিকানায়।",
     pick: "গুড় ও পরিমাণ বেছে নিন", pickNote: "একাধিক বেছে নিতে পারেন",
@@ -150,21 +155,21 @@ export const GUR_LANDINGS = {
   },
   combo: {
     path: GUR_COMBO_PATH, thankYouPath: GUR_COMBO_THANK_YOU_PATH,
-    checkout: [GUR_COMBO_SLUG], preselected: [GUR_COMBO_SLUG],
+    checkout: [GUR_COMBO_SLUG, GUR_JHOLA_COMBO_SLUG], preselected: [GUR_COMBO_SLUG],
     dial: ["foil-wrapped-patali-jaggery", "round-patali-jaggery", "liquid-date-jaggery", "granulated-jaggery", "chocolate-seed-jaggery"],
     dialSells: false, dialTitle: "কম্বোর পাঁচ গুড়", dialLine: "প্রতিটা ৫০০ গ্রাম, সব মিলিয়ে ২.৫ কেজি। চিনি নেই, ভেজাল নেই।",
     photoSlug: GUR_COMBO_SLUG,
     intro: "পাঁচ রকম খেজুরের গুড় একসাথে, আপনার ঠিকানায়।",
-    pick: "আপনার কম্বো", pickNote: "পরিমাণ বাড়াতে + চাপুন",
-    barLabel: "গুড় কম্বো · ৫\u00a0রকম",
+    pick: "কম্বো বেছে নিন", pickNote: "একটি বা দুটোই নিতে পারেন",
+    barLabel: "গুড়ের কম্বো অফার",
     heroNote: "ক্যাশ অন ডেলিভারি · সারা দেশে ডেলিভারি ফ্রি",
   },
 } satisfies Record<string, GurLanding>;
 
 /**
- * Delivery for a memo, given the slug of every product on it. The combo ships free when it is the whole order
- * (any quantity), on either landing; with any other গুড় the normal charge applies. Merchant Suite applies the same
+ * Delivery for a memo, given the slug of every product on it. Combos ship free when they are the whole order
+ * (either combo or both, any quantity), on either landing; with any other গুড় the normal charge applies. Merchant Suite applies the same
  * rule when it prices the order (server/shippingCalculation.js), so the page and the dashboard agree.
  */
 export const gurDeliveryCharge = (slugs: readonly string[]) =>
-  slugs.length > 0 && slugs.every((slug) => slug === GUR_COMBO_SLUG) ? 0 : GUR_DELIVERY_CHARGE;
+  slugs.length > 0 && slugs.every((slug) => GUR_FREE_DELIVERY_COMBOS.includes(slug)) ? 0 : GUR_DELIVERY_CHARGE;
