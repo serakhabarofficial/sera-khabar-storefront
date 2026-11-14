@@ -74,19 +74,9 @@ function RollingTotal({ total }: { total: number | null }) {
 
 type GurCombo = (typeof GUR_COMBO_CONTENTS)[string];
 
-/** A combo's contents for screen readers; sighted customers see them in the tray. */
+/** A combo's contents for screen readers. */
 function ComboContents({ combo }: { combo: GurCombo }) {
   return <span className="combo sr-only">{combo.items.map((item) => `${item.name} ${item.weight}`).join(", ")}</span>;
-}
-
-/** Opens under a ticked combo: a photo of every গুড় in the box. Hidden from readers while closed (ComboContents reads the list). */
-function ComboTray({ combo, open }: { combo: GurCombo; open: boolean }) {
-  return <div className="combo-tray" data-open={open} aria-hidden={!open} inert={!open || undefined}>
-    <div className="combo-tray-in">
-      <p className="combo-tray-head"><span>কম্বোতে যা পাবেন</span></p>
-      <ul>{combo.items.map((item) => <li key={item.name}><img src={item.image} alt="" width={44} height={44} loading="lazy" decoding="async" /></li>)}</ul>
-    </div>
-  </div>;
 }
 
 /** Snap strip of the three গুড়' catalog photos (each product's first image) with round thumbnails. */
@@ -322,7 +312,6 @@ export function GurCheckout({ landing, photo, offers, lines, setLines, onRetry }
                   <span className="pr">{taka(row.pack.unitPrice)}</span>
                   {checked && <div className="skx-qty" role="group" aria-label={`${row.offer.meta.name} ${row.pack.label} পরিমাণ`}><button type="button" aria-label="কমান" disabled={pending} onClick={() => step(row, -1)}>−</button><output aria-live="polite">{bn(quantity)}</output><button type="button" aria-label="বাড়ান" disabled={quantity >= MAX_LINE_QUANTITY || pending} onClick={() => step(row, 1)}>+</button></div>}
                 </div>
-                {combo && <ComboTray combo={combo} open={checked} />}
               </div>;
             })}
           </div>
